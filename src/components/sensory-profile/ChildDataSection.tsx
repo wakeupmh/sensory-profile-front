@@ -57,6 +57,7 @@ const ChildDataSection: React.FC<ChildDataSectionProps> = memo(({ formData, upda
             initialValue={formData.child?.name}
             onValueChange={handleValueChange}
             disabled={disabled}
+            required={true}
           />
         </Box>
         <Box style={{ flex: 1 }}>
@@ -67,6 +68,7 @@ const ChildDataSection: React.FC<ChildDataSectionProps> = memo(({ formData, upda
             initialValue={formData.child?.birthDate}
             onValueChange={handleValueChange}
             disabled={disabled}
+            required={true}
           />
         </Box>
       </Flex>
@@ -91,6 +93,7 @@ const ChildDataSection: React.FC<ChildDataSectionProps> = memo(({ formData, upda
             initialValue={formData.child?.gender}
             onValueChange={handleValueChange}
             disabled={disabled}
+            required={true}
           />
         </Box>
       </Flex>
@@ -102,6 +105,7 @@ const ChildDataSection: React.FC<ChildDataSectionProps> = memo(({ formData, upda
           initialValue={formData.child?.otherInfo}
           onValueChange={handleValueChange}
           disabled={disabled}
+          required={false}
         />
       </Box>
     </Box>

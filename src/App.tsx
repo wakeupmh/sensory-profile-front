@@ -3,6 +3,7 @@ import { SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import SensoryProfileForm from './pages/SensoryProfile';
+import ReportPage from './pages/ReportPage';
 
 function App() {
   return (
@@ -60,7 +61,7 @@ function App() {
               element={
                 <>
                   <SignedIn>
-                    <SensoryProfileForm />
+                    <ReportPage />
                   </SignedIn>
                   <SignedOut>
                     <RedirectToSignIn />

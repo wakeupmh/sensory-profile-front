@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { assessmentApi } from '../services/api';
 import { 
@@ -24,6 +24,7 @@ import {
   ExclamationTriangleIcon
 } from '@radix-ui/react-icons';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useAuth } from '@clerk/clerk-react';
 
 interface Assessment {
   id: string;
@@ -37,14 +38,22 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { getToken } = useAuth();
+  const fetchedRef = useRef(false);
 
   useEffect(() => {
     const fetchAssessments = async () => {
+      // Skip if we've already fetched in this session
+      if (fetchedRef.current) return;
+      
       try {
         setLoading(true);
-        const data = await assessmentApi.getAllAssessments();
+        const token = await getToken();
+        const data = await assessmentApi.getAllAssessments(token);
         setAssessments(data);
         setError(null);
+        // Mark as fetched
+        fetchedRef.current = true;
       } catch (err) {
         setError('Erro ao carregar avaliações. Por favor, tente novamente.');
         console.error(err);
@@ -54,12 +63,13 @@ const Home = () => {
     };
 
     fetchAssessments();
-  }, []);
+  }, [getToken]);
 
   const handleDeleteAssessment = async (id: string) => {
     try {
       setDeleteLoading(id);
-      await assessmentApi.deleteAssessment(id);
+      const token = await getToken();
+      await assessmentApi.deleteAssessment(id, token);
       setAssessments(assessments.filter(assessment => assessment.id !== id));
     } catch (err) {
       setError('Erro ao excluir avaliação. Por favor, tente novamente.');
@@ -104,7 +114,7 @@ const Home = () => {
           <Flex direction="column" align="center" gap="4">
             <InfoCircledIcon width={32} height={32} color="var(--gray-8)" />
             <Box>
-              <Text size="4" weight="medium" mb="1">Nenhuma avaliação encontrada</Text>
+              <Text size="4" weight="medium" mb="1">Nenhuma avaliação encontrada</Text><br></br>
               <Text size="2" color="gray">Clique em "Nova Avaliação" para começar a criar perfis sensoriais</Text>
             </Box>
             <Button size="2" color="violet" mt="4" asChild>

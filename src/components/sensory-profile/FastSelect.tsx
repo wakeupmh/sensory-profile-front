@@ -12,6 +12,7 @@ interface FastSelectProps {
   options: SelectOption[];
   initialValue?: string;
   disabled?: boolean;
+  required?: boolean;
   onValueChange?: (name: string, value: string) => void;
 }
 
@@ -25,6 +26,7 @@ const FastSelect = memo(({
   options, 
   initialValue = '', 
   disabled = false,
+  required = false,
   onValueChange 
 }: FastSelectProps) => {
   // Estado local para o valor do campo
@@ -46,7 +48,7 @@ const FastSelect = memo(({
   return (
     <Box>
       <Text as="label" size="2" weight="bold" mb="1">
-        {label}
+        {label} {required && <span style={{ color: 'red' }}>*</span>}
       </Text>
       <br />
       <Select.Root 
@@ -54,6 +56,7 @@ const FastSelect = memo(({
         value={value} 
         onValueChange={handleValueChange}
         disabled={disabled}
+        required={required}
       >
         <Select.Trigger />
         <Select.Content>

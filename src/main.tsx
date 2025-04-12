@@ -13,11 +13,9 @@ if (!PUBLISHABLE_KEY) {
 }
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <Theme grayColor="slate" radius="medium" scaling="100%">
-      <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
-        <App />
-      </ClerkProvider>
-    </Theme>
-  </React.StrictMode>
+  <Theme grayColor="slate" radius="medium" scaling="100%">
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+      <App />
+    </ClerkProvider>
+  </Theme>
 );

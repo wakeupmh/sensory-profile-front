@@ -11,6 +11,7 @@ interface FastTextFieldProps {
   initialValue?: string;
   disabled?: boolean;
   type?: InputType;
+  required?: boolean;
   onValueChange?: (name: string, value: string) => void;
 }
 
@@ -25,6 +26,7 @@ const FastTextField = memo(({
   initialValue = '', 
   disabled = false,
   type = 'text',
+  required = false,
   onValueChange 
 }: FastTextFieldProps) => {
   // Estado local para o valor do campo
@@ -52,7 +54,7 @@ const FastTextField = memo(({
     <Box>
       {label && (
         <Text as="label" size="2" weight="bold" mb="1">
-          {label}
+          {label} {required && <span style={{ color: 'red' }}>*</span>}
         </Text>
       )}
       <RadixTextField.Root 
@@ -63,6 +65,7 @@ const FastTextField = memo(({
         onChange={handleChange}
         onBlur={handleBlur}
         disabled={disabled}
+        required={required}
       />
     </Box>
   );

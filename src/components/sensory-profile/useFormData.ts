@@ -116,15 +116,14 @@ const useFormData = () => {
     });
   }, []);
 
-  // Calcule a pontuação bruta com base nas respostas dos itens
   const calculateRawScore = useCallback((items: SensoryItem[]) => {
     const responseValues = {
       'almost_always': 5,
       'frequently': 4,
-      'occasionally': 3,
-      'rarely': 2,
+      'half_time': 3,
+      'occasionally': 2,
       'almost_never': 1,
-      '': 0
+      'not_applied': 0
     };
 
     return items.reduce((total, item) => {

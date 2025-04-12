@@ -1,7 +1,6 @@
-// Definição dos tipos de resposta
-export type FrequencyResponse = 'almost_always' | 'frequently' | 'occasionally' | 'rarely' | 'almost_never' | '';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export type FrequencyResponse = 'almost_always' | 'frequently' | 'half_time' | 'occasionally' | 'almost_never' | 'not_applied' | '';
 
-// Definição dos tipos de dados do formulário
 export interface ChildData {
   name: string;
   birthDate: string;
@@ -24,16 +23,27 @@ export interface CaregiverData {
 
 export interface SensoryItem {
   id: number;
-  quadrant: string;
+  quadrant?: string;
   description: string;
   response: FrequencyResponse;
+  responseId?: string;
 }
 
 export interface SensorySection {
   items: SensoryItem[];
-  comments: string;
-  rawScore: number;
+  comments?: string;
+  rawScore?: number;
 }
+
+export type SensorySectionKey = 
+  | 'auditoryProcessing'
+  | 'visualProcessing'
+  | 'tactileProcessing'
+  | 'movementProcessing'
+  | 'bodyPositionProcessing'
+  | 'oralSensitivityProcessing'
+  | 'socialEmotionalResponses'
+  | 'attentionResponses';
 
 export interface FormData {
   child: ChildData;
@@ -47,4 +57,5 @@ export interface FormData {
   oralSensitivityProcessing: SensorySection;
   socialEmotionalResponses: SensorySection;
   attentionResponses: SensorySection;
+  [key: string]: any;
 }

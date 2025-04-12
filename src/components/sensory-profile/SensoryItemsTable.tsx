@@ -11,8 +11,9 @@ interface SensoryItemsTableProps {
 
 const SensoryItemsTable: React.FC<SensoryItemsTableProps> = memo(({ items, onResponseChange, disabled }) => {
   const frequencyOptions = [
-    { value: "rarely", label: "Raramente" },
+    { value: "not_applied", label: "Não se aplica" },
     { value: "almost_never", label: "Quase Nunca" },
+    { value: "half_time", label: "Metade do Tempo" },
     { value: "occasionally", label: "Ocasionalmente" },
     { value: "almost_always", label: "Quase Sempre" },
     { value: "frequently", label: "Frequentemente" }
@@ -24,7 +25,7 @@ const SensoryItemsTable: React.FC<SensoryItemsTableProps> = memo(({ items, onRes
         <Table.Row>
           <Table.ColumnHeaderCell width="5%">Item</Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell width="35%">Descrição</Table.ColumnHeaderCell>
-          <Table.ColumnHeaderCell width="60%" align="center">Frequência</Table.ColumnHeaderCell>
+          <Table.ColumnHeaderCell width="60%" align="center">Frequência <span style={{ color: 'red' }}>*</span></Table.ColumnHeaderCell>
         </Table.Row>
       </Table.Header>
       <Table.Body>
@@ -40,8 +41,8 @@ const SensoryItemsTable: React.FC<SensoryItemsTableProps> = memo(({ items, onRes
                   initialValue={item.response || ""}
                   onValueChange={(_, value) => onResponseChange(item.id, value as FrequencyResponse)}
                   disabled={disabled}
+                  required={true}
                   color="violet"
-                  columns={{ initial: "1", xs: "1", sm: "3", md: "5" }}
                 />
               </Box>
             </Table.Cell>

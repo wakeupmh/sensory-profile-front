@@ -27,6 +27,7 @@ const ExaminerDataSection: React.FC<ExaminerDataSectionProps> = memo(({ formData
             initialValue={formData.examiner?.name}
             onValueChange={handleValueChange}
             disabled={disabled}
+            required={true}
           />
         </Box>
         <Box style={{ flex: 1 }}>
@@ -37,6 +38,7 @@ const ExaminerDataSection: React.FC<ExaminerDataSectionProps> = memo(({ formData
             initialValue={formData.examiner?.profession}
             onValueChange={handleValueChange}
             disabled={disabled}
+            required={true}
           />
         </Box>
       </Flex>
@@ -48,6 +50,7 @@ const ExaminerDataSection: React.FC<ExaminerDataSectionProps> = memo(({ formData
           initialValue={formData.examiner?.contact}
           onValueChange={handleValueChange}
           disabled={disabled}
+          required={true}
         />
       </Box>
     </Box>

@@ -36,6 +36,7 @@ const CaregiverDataSection: React.FC<CaregiverDataSectionProps> = memo(({ formDa
             initialValue={formData.caregiver?.name}
             onValueChange={handleValueChange}
             disabled={disabled}
+            required={true}
           />
         </Box>
         <Box style={{ flex: 1 }}>
@@ -46,6 +47,7 @@ const CaregiverDataSection: React.FC<CaregiverDataSectionProps> = memo(({ formDa
             initialValue={formData.caregiver?.relationship}
             onValueChange={handleValueChange}
             disabled={disabled}
+            required={true}
           />
         </Box>
       </Flex>
@@ -57,6 +59,7 @@ const CaregiverDataSection: React.FC<CaregiverDataSectionProps> = memo(({ formDa
           initialValue={formData.caregiver?.contact}
           onValueChange={handleValueChange}
           disabled={disabled}
+          required={true}
         />
       </Box>
     </Box>

@@ -12,6 +12,7 @@ interface FastRadioCardsProps {
   options: RadioOption[];
   initialValue?: string;
   disabled?: boolean;
+  required?: boolean;
   columns?: { initial: string; xs?: string; sm?: string; md?: string; lg?: string };
   color?: string;
   onValueChange?: (name: string, value: string) => void;
@@ -26,19 +27,16 @@ const FastRadioCards = memo(({
   options, 
   initialValue = '', 
   disabled = false,
-  columns = { initial: '1', md: '5' },
+  required = false,
   color = 'violet',
   onValueChange 
 }: FastRadioCardsProps) => {
-  // Estado local para o valor selecionado
   const [value, setValue] = useState(initialValue);
   
-  // Atualizar o valor inicial se ele mudar
   useEffect(() => {
     setValue(initialValue);
   }, [initialValue]);
 
-  // Manipulador de alteração que atualiza o estado local e notifica o componente pai
   const handleValueChange = (newValue: string) => {
     setValue(newValue);
     if (onValueChange) {
@@ -48,14 +46,36 @@ const FastRadioCards = memo(({
 
   return (
     <Box>
+      <style>
+        {`
+          @media (max-width: 767px) {
+            .radio-grid {
+              grid-template-columns: 1fr !important;
+              grid-template-rows: repeat(6, auto) !important;
+            }
+          }
+          
+          @media (min-width: 768px) {
+            .radio-grid {
+              grid-template-columns: repeat(3, 1fr) !important;
+              grid-template-rows: repeat(2, auto) !important;
+            }
+          }
+        `}
+      </style>
       <RadioCards.Root 
         value={value}
         onValueChange={handleValueChange}
         disabled={disabled}
         color={color as any}
         variant="classic"
-        columns={columns}
         size="2"
+        required={required}
+        className="radio-grid"
+        style={{ 
+          display: 'grid',
+          gap: '8px'
+        }}
       >
         {options.map(option => (
           <RadioCards.Item key={option.value} value={option.value}>

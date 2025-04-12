@@ -1,5 +1,6 @@
- import * as React from 'react';
-import { useState, FormEvent, useEffect } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import * as React from 'react';
+import { useState, FormEvent, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { assessmentApi } from '../services/api';
 
@@ -9,9 +10,11 @@ import CaregiverDataSection from '../components/sensory-profile/CaregiverDataSec
 import InstructionsSection from '../components/sensory-profile/InstructionsSection';
 import SensoryProcessingSection from '../components/sensory-profile/SensoryProcessingSection';
 import useFormData from '../components/sensory-profile/useFormData';
+import { SensorySection } from '../components/sensory-profile/types';
 import { Button, Flex, Text, Box, Card, Heading } from '@radix-ui/themes';
 import LoadingSpinner from '../components/LoadingSpinner';
 import NotFound from '../components/NotFound';
+import { useAuth } from '@clerk/clerk-react';
 
 const SensoryProfileForm: React.FC = () => {
   const { formData, updateFormData, updateItemResponse, setFormData } = useFormData();
@@ -19,9 +22,13 @@ const SensoryProfileForm: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { getToken } = useAuth();
+  const fetchedAssessmentRef = useRef(false);
+  const fetchedReportRef = useRef(false);
   
   const isViewMode = !!id && !location.pathname.includes('/edit') && !location.pathname.includes('/report');
   const isEditMode = !!id && location.pathname.includes('/edit');
@@ -29,15 +36,81 @@ const SensoryProfileForm: React.FC = () => {
   const isNewMode = !id;
 
   useEffect(() => {
-    // If we have an ID and we're not in new mode, fetch the assessment data
     if (id && !isNewMode) {
       const fetchAssessment = async () => {
+        if (fetchedAssessmentRef.current) return;
+        
         try {
           setLoading(true);
           setNotFound(false);
-          const data = await assessmentApi.getAssessmentById(id);
-          setFormData(data);
+          const token = await getToken();
+          const response = await assessmentApi.getAssessmentById(id, token);
+          
+          // Verificar se a resposta está no formato novo (com assessment e responses)
+          if (response.assessment && response.responses) {
+            // Formato novo - transformar para o formato do formData
+            const { assessment, responses } = response;
+            
+            // Create a new formData object based on the response
+            const newFormData = {
+              ...formData,
+              child: {
+                name: assessment.childName,
+                birthDate: assessment.childBirthDate ? new Date(assessment.childBirthDate).toISOString().split('T')[0] : '',
+                gender: assessment.childGender,
+                otherInfo: assessment.childOtherInfo || '',
+                age: assessment.childAge,
+              },
+              examiner: {
+                name: assessment.examinerName,
+                profession: assessment.examinerProfession,
+                contact: assessment.examinerContact,
+              },
+              caregiver: {
+                name: assessment.caregiverName,
+                relationship: assessment.caregiverRelationship,
+                contact: assessment.caregiverContact,
+              },
+            };
+            
+            // Process sensory item responses
+            if (responses && responses.length > 0) {
+              // Map responses to their respective sections
+              const sections = [
+                'auditoryProcessing', 'visualProcessing', 'tactileProcessing', 
+                'movementProcessing', 'bodyPositionProcessing', 'oralSensitivityProcessing', 
+                'socialEmotionalResponses', 'attentionResponses'
+              ] as const;
+              
+              // Update each section with the responses
+              sections.forEach(section => {
+                const sectionItems = [...newFormData[section].items];
+                
+                // Update each item with its response from the backend
+                sectionItems.forEach(item => {
+                  const responseData = responses.find((r: { itemId: number; }) => r.itemId === item.id);
+                  if (responseData) {
+                    item.response = responseData.response;
+                    item.responseId = responseData.id;
+                  }
+                });
+                
+                // Update the section in the form data
+                newFormData[section] = {
+                  ...newFormData[section],
+                  items: sectionItems,
+                  rawScore: assessment[`${section}RawScore`] || 0
+                };
+              });
+            }
+            
+            setFormData(newFormData);
+          } else {
+            setFormData(response);
+          }
+          
           setError(null);
+          fetchedAssessmentRef.current = true;
         } catch (err: any) {
           if (err.response && err.response.status === 404) {
             setNotFound(true);
@@ -52,17 +125,19 @@ const SensoryProfileForm: React.FC = () => {
 
       fetchAssessment();
     }
-  }, [id, isNewMode, setFormData]);
+  }, [id, isNewMode, setFormData, getToken, formData]);
 
   useEffect(() => {
-    // If we're in report mode, fetch the report
     if (id && isReportMode) {
       const fetchReport = async () => {
+        if (fetchedReportRef.current) return;
+        
         try {
           setLoading(true);
-          await assessmentApi.generateReport(id);
-          // Handle report data as needed
+          const token = await getToken();
+          await assessmentApi.generateReport(id, token);
           setError(null);
+          fetchedReportRef.current = true;
         } catch (err: any) {
           if (err.response && err.response.status === 404) {
             setNotFound(true);
@@ -77,17 +152,132 @@ const SensoryProfileForm: React.FC = () => {
 
       fetchReport();
     }
-  }, [id, isReportMode]);
+  }, [id, isReportMode, getToken]);
+
+  const validateForm = () => {
+    setValidationError(null);
+    
+    if (!formData.child?.name) {
+      setValidationError('Nome da criança é obrigatório');
+      return false;
+    }
+    if (!formData.child?.birthDate) {
+      setValidationError('Data de nascimento da criança é obrigatória');
+      return false;
+    }
+    if (!formData.child?.gender) {
+      setValidationError('Gênero da criança é obrigatório');
+      return false;
+    }
+    if (!formData.child?.age) {
+      setValidationError('Idade da criança é obrigatória');
+      return false;
+    }
+    
+    // Check examiner data
+    if (!formData.examiner?.name) {
+      setValidationError('Nome do examinador é obrigatório');
+      return false;
+    }
+    if (!formData.examiner?.profession) {
+      setValidationError('Cargo/Função do examinador é obrigatório');
+      return false;
+    }
+    if (!formData.examiner?.contact) {
+      setValidationError('Contato do examinador é obrigatório');
+      return false;
+    }
+    
+    // Check caregiver data
+    if (!formData.caregiver?.name) {
+      setValidationError('Nome do cuidador é obrigatório');
+      return false;
+    }
+    if (!formData.caregiver?.relationship) {
+      setValidationError('Relação do cuidador com a criança é obrigatória');
+      return false;
+    }
+    if (!formData.caregiver?.contact) {
+      setValidationError('Contato do cuidador é obrigatório');
+      return false;
+    }
+    
+    // Check sensory processing items
+    const sections = [
+      'auditoryProcessing', 'visualProcessing', 'tactileProcessing', 
+      'movementProcessing', 'oralSensitivityProcessing', 'bodyPositionProcessing', 
+      'socialEmotionalResponses', 'attentionResponses'
+    ] as const;
+    
+    for (const section of sections) {
+      const items = formData[section as keyof typeof formData];
+      if (items) {
+        for (const item of (items as SensorySection).items) {
+          if (!item.response) {
+            setValidationError(`Todos os itens de processamento sensorial são obrigatórios`);
+            return false;
+          }
+        }
+      }
+    }
+    
+    return true;
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    
+    // Validate form
+    if (!validateForm()) {
+      return;
+    }
+    
     try {
       setSubmitting(true);
+      const token = await getToken();
       
+      // Enviar os dados no formato original do formData
       if (isNewMode) {
-        await assessmentApi.createAssessment(formData);
+        // Extrair os comentários de cada seção
+        const comments = [
+          { section: 'auditoryProcessing', comments: formData.auditoryProcessing.comments },
+          { section: 'visualProcessing', comments: formData.visualProcessing.comments },
+          { section: 'tactileProcessing', comments: formData.tactileProcessing.comments },
+          { section: 'movementProcessing', comments: formData.movementProcessing.comments },
+          { section: 'bodyPositionProcessing', comments: formData.bodyPositionProcessing.comments },
+          { section: 'oralSensitivityProcessing', comments: formData.oralSensitivityProcessing.comments },
+          { section: 'socialEmotionalResponses', comments: formData.socialEmotionalResponses.comments },
+          { section: 'attentionResponses', comments: formData.attentionResponses.comments }
+        ];
+        
+        // Incluir os comentários no payload
+        const dataToCreate = {
+          ...formData,
+          comments
+        };
+        
+        await assessmentApi.createAssessment(dataToCreate, token);
       } else if (isEditMode && id) {
-        await assessmentApi.updateAssessment(id, formData);
+        // Extrair os comentários de cada seção
+        const comments = [
+          { section: 'auditoryProcessing', comments: formData.auditoryProcessing.comments },
+          { section: 'visualProcessing', comments: formData.visualProcessing.comments },
+          { section: 'tactileProcessing', comments: formData.tactileProcessing.comments },
+          { section: 'movementProcessing', comments: formData.movementProcessing.comments },
+          { section: 'bodyPositionProcessing', comments: formData.bodyPositionProcessing.comments },
+          { section: 'oralSensitivityProcessing', comments: formData.oralSensitivityProcessing.comments },
+          { section: 'socialEmotionalResponses', comments: formData.socialEmotionalResponses.comments },
+          { section: 'attentionResponses', comments: formData.attentionResponses.comments }
+        ];
+        
+        // Para edição, vamos garantir que o ID esteja incluído
+        const dataToUpdate = {
+          ...formData,
+          id: id,
+          comments
+        };
+        
+        await assessmentApi.updateAssessment(id, dataToUpdate, token);
       }
       
       navigate('/');
@@ -146,9 +336,19 @@ const SensoryProfileForm: React.FC = () => {
               {(isEditMode) && (
                 <Button type="submit" color='violet'>Salvar</Button>
               )}
+              {(isNewMode) && (
+                <Button type="submit" color='violet'>Nova Avaliação</Button>
+              )}
               <Button onClick={() => navigate('/')} variant="outline" color='gray'>Voltar</Button>
             </Flex>
           </Flex>
+
+          {validationError && (
+            <Box mb="4" p="3" style={{ backgroundColor: '#FFEBEE', borderRadius: '4px' }}>
+              <Text color="crimson" weight="bold">Erros de validação:</Text>
+              <Text color="crimson">{validationError}</Text>
+            </Box>
+          )}
 
           <ChildDataSection 
             formData={formData} 
@@ -173,6 +373,7 @@ const SensoryProfileForm: React.FC = () => {
           <SensoryProcessingSection 
             formData={formData} 
             updateItemResponse={updateItemResponse} 
+            updateFormData={updateFormData}
             disabled={isViewMode || isReportMode}
           />
 
@@ -186,7 +387,6 @@ const SensoryProfileForm: React.FC = () => {
                   type="submit" 
                   color="violet" 
                   disabled={submitting}
-                  onClick={handleSubmit}
                 >
                   {submitting ? (
                     <Flex gap="2" align="center">
@@ -199,7 +399,6 @@ const SensoryProfileForm: React.FC = () => {
                 </Button>
               </>
             )}
-
             {(isViewMode || isReportMode) && (
               <>
                 <Button variant="soft" color="gray" onClick={handleClose}>
