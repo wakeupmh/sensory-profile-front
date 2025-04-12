@@ -7,6 +7,7 @@ export interface ChildData {
   birthDate: string;
   gender: string;
   otherInfo: string;
+  age: number;
 }
 
 export interface ExaminerData {

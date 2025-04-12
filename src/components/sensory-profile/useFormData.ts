@@ -22,98 +22,103 @@ const useFormData = () => {
       name: '',
       birthDate: '',
       gender: '',
-      otherInfo: ''
+      otherInfo: '',
+      age: 0,
     },
     examiner: {
       name: '',
       profession: '',
-      contact: ''
+      contact: '',
     },
     caregiver: {
       name: '',
       relationship: '',
-      contact: ''
+      contact: '',
     },
     auditoryProcessing: {
       items: auditoryProcessingItems,
+      rawScore: 0,
       comments: '',
-      rawScore: 0
     },
     visualProcessing: {
       items: visualProcessingItems,
+      rawScore: 0,
       comments: '',
-      rawScore: 0
     },
     tactileProcessing: {
       items: tactileProcessingItems,
+      rawScore: 0,
       comments: '',
-      rawScore: 0
     },
     movementProcessing: {
       items: movementProcessingItems,
+      rawScore: 0,
       comments: '',
-      rawScore: 0
     },
     bodyPositionProcessing: {
       items: bodyPositionProcessingItems,
+      rawScore: 0,
       comments: '',
-      rawScore: 0
     },
     oralSensitivityProcessing: {
       items: oralSensitivityProcessingItems,
+      rawScore: 0,
       comments: '',
-      rawScore: 0
     },
     socialEmotionalResponses: {
       items: socialEmotionalResponsesItems,
+      rawScore: 0,
       comments: '',
-      rawScore: 0
     },
     attentionResponses: {
       items: attentionResponsesItems,
+      rawScore: 0,
       comments: '',
-      rawScore: 0
-    }
+    },
   });
 
-  // Função para atualizar os dados do formulário
+  // Function to update form data at a specific path
   const updateFormData = (path: string, value: any) => {
-    const pathArray = path.split('.');
+    const keys = path.split('.');
     setFormData((prevData) => {
       const newData = { ...prevData };
       let current: any = newData;
       
-      // Navega através do caminho até o penúltimo elemento
-      for (let i = 0; i < pathArray.length - 1; i++) {
-        current = current[pathArray[i]];
+      // Navigate to the nested property
+      for (let i = 0; i < keys.length - 1; i++) {
+        current = current[keys[i]];
       }
       
-      // Atualiza o valor final
-      current[pathArray[pathArray.length - 1]] = value;
+      // Update the value
+      current[keys[keys.length - 1]] = value;
       
       return newData;
     });
   };
 
+  // Function to update item response and recalculate raw score
   const updateItemResponse = (section: string, itemId: number, response: FrequencyResponse) => {
     setFormData((prevData) => {
       const newData = { ...prevData };
-      const sectionItems = [...(newData as any)[section].items] as SensoryItem[];
+      const sectionData = (newData as any)[section];
       
-      const itemIndex = sectionItems.findIndex(item => item.id === itemId);
+      // Find the item and update its response
+      const itemIndex = sectionData.items.findIndex((item: SensoryItem) => item.id === itemId);
       if (itemIndex !== -1) {
-        sectionItems[itemIndex] = { ...sectionItems[itemIndex], response };
-        (newData as any)[section].items = sectionItems;
-        
-        // Recalcular a pontuação bruta
-        (newData as any)[section].rawScore = calculateRawScore(sectionItems);
+        sectionData.items[itemIndex] = {
+          ...sectionData.items[itemIndex],
+          response
+        };
       }
+      
+      // Recalculate raw score
+      sectionData.rawScore = calculateRawScore(sectionData.items);
       
       return newData;
     });
   };
 
-  // Função para calcular a pontuação bruta
+  // Calculate raw score based on item responses
   const calculateRawScore = (items: SensoryItem[]) => {
     const responseValues = {
       'always': 5,
@@ -129,7 +134,7 @@ const useFormData = () => {
     }, 0);
   };
 
-  return { formData, updateFormData, updateItemResponse, calculateRawScore };
+  return { formData, setFormData, updateFormData, updateItemResponse, calculateRawScore };
 };
 
 export default useFormData;

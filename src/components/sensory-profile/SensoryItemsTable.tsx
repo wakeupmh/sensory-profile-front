@@ -1,108 +1,59 @@
 import React from 'react';
-import * as RadioGroup from '@radix-ui/react-radio-group';
-import { CheckIcon } from '@radix-ui/react-icons';
+import { Table, Text, Box, RadioCards } from '@radix-ui/themes';
 import { SensoryItem, FrequencyResponse } from './types';
 
 interface SensoryItemsTableProps {
   items: SensoryItem[];
-  updateItemResponse: (itemId: number, response: FrequencyResponse) => void;
+  onResponseChange: (itemId: number, response: FrequencyResponse) => void;
+  disabled?: boolean;
 }
 
-const SensoryItemsTable: React.FC<SensoryItemsTableProps> = ({ items, updateItemResponse }) => {
+const SensoryItemsTable: React.FC<SensoryItemsTableProps> = ({ items, onResponseChange, disabled }) => {
+  const frequencyOptions = [
+    { value: "almost_never", label: "Quase Nunca" },
+    { value: "rarely", label: "Raramente" },
+    { value: "occasionally", label: "Ocasionalmente" },
+    { value: "frequently", label: "Frequentemente" },
+    { value: "almost_always", label: "Quase Sempre" }
+  ];
+
   return (
-    <table className="sensory-table">
-      <thead>
-        <tr>
-          <th className="quadrant-column">Quadrante</th>
-          <th className="item-column">Item</th>
-          <th className="description-column">Descrição</th>
-          <th className="response-column">Sempre (5)</th>
-          <th className="response-column">Frequentemente (4)</th>
-          <th className="response-column">Ocasionalmente (3)</th>
-          <th className="response-column">Raramente (2)</th>
-          <th className="response-column">Nunca (1)</th>
-        </tr>
-      </thead>
-      <tbody>
+    <Table.Root variant="surface">
+      <Table.Header>
+        <Table.Row>
+          <Table.ColumnHeaderCell width="5%">Item</Table.ColumnHeaderCell>
+          <Table.ColumnHeaderCell width="35%">Descrição</Table.ColumnHeaderCell>
+          <Table.ColumnHeaderCell width="60%" align="center">Frequência</Table.ColumnHeaderCell>
+        </Table.Row>
+      </Table.Header>
+      <Table.Body>
         {items.map((item) => (
-          <tr key={item.id}>
-            <td className="quadrant-column">{item.quadrant}</td>
-            <td className="item-column">{item.id}</td>
-            <td className="description-column">{item.description}</td>
-            <td className="response-column">
-              <RadioGroup.Root
-                value={item.response || ''}
-                onValueChange={(value) => updateItemResponse(item.id, value as FrequencyResponse)}
-              >
-                <div className="radio-option">
-                  <RadioGroup.Item className="radio-item" value="always" id={`always-${item.id}`}>
-                    <RadioGroup.Indicator className="radio-indicator">
-                      <CheckIcon />
-                    </RadioGroup.Indicator>
-                  </RadioGroup.Item>
-                </div>
-              </RadioGroup.Root>
-            </td>
-            <td className="response-column">
-              <RadioGroup.Root
-                value={item.response || ''}
-                onValueChange={(value) => updateItemResponse(item.id, value as FrequencyResponse)}
-              >
-                <div className="radio-option">
-                  <RadioGroup.Item className="radio-item" value="frequently" id={`frequently-${item.id}`}>
-                    <RadioGroup.Indicator className="radio-indicator">
-                      <CheckIcon />
-                    </RadioGroup.Indicator>
-                  </RadioGroup.Item>
-                </div>
-              </RadioGroup.Root>
-            </td>
-            <td className="response-column">
-              <RadioGroup.Root
-                value={item.response || ''}
-                onValueChange={(value) => updateItemResponse(item.id, value as FrequencyResponse)}
-              >
-                <div className="radio-option">
-                  <RadioGroup.Item className="radio-item" value="occasionally" id={`occasionally-${item.id}`}>
-                    <RadioGroup.Indicator className="radio-indicator">
-                      <CheckIcon />
-                    </RadioGroup.Indicator>
-                  </RadioGroup.Item>
-                </div>
-              </RadioGroup.Root>
-            </td>
-            <td className="response-column">
-              <RadioGroup.Root
-                value={item.response || ''}
-                onValueChange={(value) => updateItemResponse(item.id, value as FrequencyResponse)}
-              >
-                <div className="radio-option">
-                  <RadioGroup.Item className="radio-item" value="rarely" id={`rarely-${item.id}`}>
-                    <RadioGroup.Indicator className="radio-indicator">
-                      <CheckIcon />
-                    </RadioGroup.Indicator>
-                  </RadioGroup.Item>
-                </div>
-              </RadioGroup.Root>
-            </td>
-            <td className="response-column">
-              <RadioGroup.Root
-                value={item.response || ''}
-                onValueChange={(value) => updateItemResponse(item.id, value as FrequencyResponse)}
-              >
-                <div className="radio-option">
-                  <RadioGroup.Item className="radio-item" value="never" id={`never-${item.id}`}>
-                    <RadioGroup.Indicator className="radio-indicator">
-                      <CheckIcon />
-                    </RadioGroup.Indicator>
-                  </RadioGroup.Item>
-                </div>
-              </RadioGroup.Root>
-            </td>
-          </tr>
+          <Table.Row key={item.id}>
+            <Table.Cell>{item.id}</Table.Cell>
+            <Table.Cell>{item.description}</Table.Cell>
+            <Table.Cell>
+              <Box>
+                <RadioCards.Root 
+                  value={item.response || ""}
+                  onValueChange={(value) => onResponseChange(item.id, value as FrequencyResponse)}
+                  disabled={disabled}
+                  color="purple"
+                  variant="classic"
+                  columns={{ initial: "1", xs: "1", sm: "3", md: "5" }}
+                  size="2"
+                >
+                  {frequencyOptions.map(option => (
+                    <RadioCards.Item key={option.value} value={option.value}>
+                      <Text size="1" weight="medium">{option.label}</Text>
+                    </RadioCards.Item>
+                  ))}
+                </RadioCards.Root>
+              </Box>
+            </Table.Cell>
+          </Table.Row>
         ))}
-      </tbody>
-    </table>
+      </Table.Body>
+    </Table.Root>
   );
 };
 
