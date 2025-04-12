@@ -71,7 +71,7 @@ const Home = () => {
           <Heading size="6" mb="1">Avaliações de Perfil Sensorial</Heading>
           <Text size="2" color="gray">Gerencie todas as avaliações de perfil sensorial em um só lugar</Text>
         </Box>
-       <Button size="2" color="purple" asChild>
+       <Button size="2" color="violet" asChild>
           <Link to="/assessment/new" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <PlusIcon />
             Nova Avaliação
@@ -100,7 +100,7 @@ const Home = () => {
               <Text size="4" weight="medium" mb="1">Nenhuma avaliação encontrada</Text>
               <Text size="2" color="gray">Clique em "Nova Avaliação" para começar a criar perfis sensoriais</Text>
             </Box>
-            <Button size="2" color="purple" mt="4" asChild>
+            <Button size="2" color="violet" mt="4" asChild>
               <Link to="/assessment/new" style={{ textDecoration: 'none' }}>
                 Criar primeira avaliação
               </Link>
@@ -133,7 +133,7 @@ const Home = () => {
                           <EyeOpenIcon />
                         </Link>
                       </IconButton>
-                      <IconButton variant="soft" color="purple" size="1" asChild title="Editar">
+                      <IconButton variant="soft" color="violet" size="1" asChild title="Editar">
                         <Link to={`/assessment/${assessment.id}/edit`}>
                           <Pencil1Icon />
                         </Link>

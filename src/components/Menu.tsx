@@ -32,7 +32,7 @@ const Menu: React.FC = () => {
       >
         <Flex align="center" gap="6">
           <Link to="/" style={{ textDecoration: 'none' }}>
-            <Heading size="5" weight="medium" style={{ color: 'var(--purple-9)' }}>
+            <Heading size="5" weight="medium" style={{ color: 'var(--violet-9)' }}>
               Perfil Sensorial
             </Heading>
           </Link>
@@ -42,7 +42,7 @@ const Menu: React.FC = () => {
               to="/" 
               style={{ 
                 textDecoration: 'none',
-                color: location.pathname === '/' ? 'var(--purple-9)' : 'var(--gray-11)'
+                color: location.pathname === '/' ? 'var(--violet-9)' : 'var(--gray-11)'
               }}
             >
               <Flex gap="2" align="center">

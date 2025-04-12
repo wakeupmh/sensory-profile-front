@@ -37,7 +37,7 @@ const SensoryItemsTable: React.FC<SensoryItemsTableProps> = ({ items, onResponse
                   value={item.response || ""}
                   onValueChange={(value) => onResponseChange(item.id, value as FrequencyResponse)}
                   disabled={disabled}
-                  color="purple"
+                  color="violet"
                   variant="classic"
                   columns={{ initial: "1", xs: "1", sm: "3", md: "5" }}
                   size="2"
