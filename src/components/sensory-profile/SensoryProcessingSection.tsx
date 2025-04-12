@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { memo } from 'react';
 import SensoryItemsTable from './SensoryItemsTable';
 import { FormData, FrequencyResponse, SensoryItem } from './types';
 import { Text, Box } from '@radix-ui/themes';
@@ -9,7 +10,35 @@ interface SensoryProcessingSectionProps {
   disabled?: boolean;
 }
 
-const SensoryProcessingSection: React.FC<SensoryProcessingSectionProps> = ({
+// Componente de seção individual para melhorar a performance
+const SensorySection = memo(({ 
+  title, 
+  sectionKey, 
+  items, 
+  updateItemResponse, 
+  disabled 
+}: { 
+  title: string; 
+  sectionKey: string; 
+  items: SensoryItem[]; 
+  updateItemResponse: (section: string, itemId: number, response: FrequencyResponse) => void; 
+  disabled?: boolean;
+}) => {
+  return (
+    <Box mb="6">
+      <Text size="5" weight="bold" mb="3">{title}</Text>
+      <SensoryItemsTable
+        items={items}
+        onResponseChange={(itemId, response) => 
+          updateItemResponse(sectionKey, itemId, response)
+        }
+        disabled={disabled}
+      />
+    </Box>
+  );
+});
+
+const SensoryProcessingSection: React.FC<SensoryProcessingSectionProps> = memo(({
   formData,
   updateItemResponse,
   disabled
@@ -33,20 +62,18 @@ const SensoryProcessingSection: React.FC<SensoryProcessingSectionProps> = ({
         const items: SensoryItem[] = sectionData?.items || [];
 
         return (
-          <Box key={section.key} mb="6">
-            <Text size="5" weight="bold" mb="3">{section.title}</Text>
-            <SensoryItemsTable
-              items={items}
-              onResponseChange={(itemId, response) => 
-                updateItemResponse(section.key, itemId, response)
-              }
-              disabled={disabled}
-            />
-          </Box>
+          <SensorySection
+            key={section.key}
+            title={section.title}
+            sectionKey={section.key}
+            items={items}
+            updateItemResponse={updateItemResponse}
+            disabled={disabled}
+          />
         );
       })}
     </>
   );
-};
+});
 
 export default SensoryProcessingSection;

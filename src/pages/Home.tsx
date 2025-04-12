@@ -23,6 +23,7 @@ import {
   InfoCircledIcon,
   ExclamationTriangleIcon
 } from '@radix-ui/react-icons';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 interface Assessment {
   id: string;
@@ -34,6 +35,7 @@ interface Assessment {
 const Home = () => {
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -56,11 +58,14 @@ const Home = () => {
 
   const handleDeleteAssessment = async (id: string) => {
     try {
+      setDeleteLoading(id);
       await assessmentApi.deleteAssessment(id);
       setAssessments(assessments.filter(assessment => assessment.id !== id));
     } catch (err) {
       setError('Erro ao excluir avaliação. Por favor, tente novamente.');
       console.error(err);
+    } finally {
+      setDeleteLoading(null);
     }
   };
 
@@ -83,7 +88,9 @@ const Home = () => {
 
       {loading ? (
         <Card variant="surface" size="2" style={{ textAlign: 'center', padding: '40px 0' }}>
-          <Text size="2">Carregando avaliações...</Text>
+          <Flex direction="column" align="center" gap="4">
+            <LoadingSpinner size="large" text="Carregando avaliações..." />
+          </Flex>
         </Card>
       ) : error ? (
         <Callout.Root color="crimson" size="2" mb="4">
@@ -164,9 +171,15 @@ const Home = () => {
                               <Button 
                                 variant="solid" 
                                 color="crimson"
+                                disabled={deleteLoading === assessment.id}
                                 onClick={() => handleDeleteAssessment(assessment.id)}
                               >
-                                Excluir
+                                {deleteLoading === assessment.id ? (
+                                  <Flex gap="2" align="center">
+                                    <LoadingSpinner size="small" />
+                                    <Text>Excluindo...</Text>
+                                  </Flex>
+                                ) : 'Excluir'}
                               </Button>
                             </AlertDialog.Action>
                           </Flex>

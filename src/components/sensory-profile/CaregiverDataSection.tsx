@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FormData } from './types';
-import { Text, TextField, Select, Flex, Box } from '@radix-ui/themes';
+import { memo } from 'react';
+import { Text, Flex, Box } from '@radix-ui/themes';
+import FastTextField from './FastTextField';
+import FastSelect from './FastSelect';
 
 interface CaregiverDataSectionProps {
   formData: FormData;
@@ -8,61 +11,56 @@ interface CaregiverDataSectionProps {
   disabled?: boolean;
 }
 
-const CaregiverDataSection: React.FC<CaregiverDataSectionProps> = ({ formData, updateFormData, disabled }) => {
+const CaregiverDataSection: React.FC<CaregiverDataSectionProps> = memo(({ formData, updateFormData, disabled }) => {
+  const handleValueChange = (path: string, value: any) => {
+    updateFormData(`caregiver.${path}`, value);
+  };
+
+  const relationshipOptions = [
+    { value: 'mother', label: 'Mãe' },
+    { value: 'father', label: 'Pai' },
+    { value: 'grandparent', label: 'Avó/Avô' },
+    { value: 'sibling', label: 'Irmã/Irmão' },
+    { value: 'other', label: 'Outro' }
+  ];
+
   return (
     <Box mb="6">
       <Text size="5" weight="bold" mb="3">Dados do Cuidador</Text>
       <Flex gap="4" direction={{ initial: 'column', sm: 'row' }} mb="3" mt="3">
         <Box style={{ flex: 1 }}>
-          <Text as="label" size="2" weight="bold" mb="1">
-            Nome do Cuidador:
-          </Text>
-          <TextField.Root 
-            size="2"
+          <FastTextField
+            name="name"
+            label="Nome do Cuidador:"
             placeholder="Nome do cuidador"
-            value={formData.caregiver.name}
-            onChange={(e) => updateFormData('caregiver.name', e.target.value)}
+            initialValue={formData.caregiver?.name}
+            onValueChange={handleValueChange}
             disabled={disabled}
           />
         </Box>
         <Box style={{ flex: 1 }}>
-          <Text as="label" size="2" weight="bold" mb="1">
-            Relação com a Criança:
-          </Text><br></br>
-          <Select.Root 
-            size="2"
-            value={formData.caregiver.relationship || "placeholder"} 
-            onValueChange={(value) => updateFormData('caregiver.relationship', value === "placeholder" ? "" : value)}
+          <FastSelect
+            name="relationship"
+            label="Relação com a Criança:"
+            options={relationshipOptions}
+            initialValue={formData.caregiver?.relationship}
+            onValueChange={handleValueChange}
             disabled={disabled}
-          >
-            <Select.Trigger />
-            <Select.Content>
-              <Select.Group>
-                <Select.Item value="placeholder">Selecione</Select.Item>
-                <Select.Item value="mother">Mãe</Select.Item>
-                <Select.Item value="father">Pai</Select.Item>
-                <Select.Item value="grandparent">Avó/Avô</Select.Item>
-                <Select.Item value="sibling">Irmã/Irmão</Select.Item>
-                <Select.Item value="other">Outro</Select.Item>
-              </Select.Group>
-            </Select.Content>
-          </Select.Root>
+          />
         </Box>
       </Flex>
       <Box>
-        <Text as="label" size="2" weight="bold" mb="1">
-          Contato:
-        </Text>
-        <TextField.Root 
-          size="2"
-          placeholder="Telefone ou email"
-          value={formData.caregiver.contact}
-          onChange={(e) => updateFormData('caregiver.contact', e.target.value)}
+        <FastTextField
+          name="contact"
+          label="Contato:"
+          placeholder="Telefone ou e-mail"
+          initialValue={formData.caregiver?.contact}
+          onValueChange={handleValueChange}
           disabled={disabled}
         />
       </Box>
     </Box>
   );
-};
+});
 
 export default CaregiverDataSection;

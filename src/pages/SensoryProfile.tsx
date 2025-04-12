@@ -10,11 +10,15 @@ import InstructionsSection from '../components/sensory-profile/InstructionsSecti
 import SensoryProcessingSection from '../components/sensory-profile/SensoryProcessingSection';
 import useFormData from '../components/sensory-profile/useFormData';
 import { Button, Flex, Text, Box, Card, Heading } from '@radix-ui/themes';
+import LoadingSpinner from '../components/LoadingSpinner';
+import NotFound from '../components/NotFound';
 
 const SensoryProfileForm: React.FC = () => {
   const { formData, updateFormData, updateItemResponse, setFormData } = useFormData();
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notFound, setNotFound] = useState(false);
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -30,11 +34,16 @@ const SensoryProfileForm: React.FC = () => {
       const fetchAssessment = async () => {
         try {
           setLoading(true);
+          setNotFound(false);
           const data = await assessmentApi.getAssessmentById(id);
           setFormData(data);
           setError(null);
-        } catch (err) {
-          setError('Erro ao carregar avaliação. Por favor, tente novamente.');
+        } catch (err: any) {
+          if (err.response && err.response.status === 404) {
+            setNotFound(true);
+          } else {
+            setError('Erro ao carregar avaliação. Por favor, tente novamente.');
+          }
           console.error(err);
         } finally {
           setLoading(false);
@@ -54,8 +63,12 @@ const SensoryProfileForm: React.FC = () => {
           await assessmentApi.generateReport(id);
           // Handle report data as needed
           setError(null);
-        } catch (err) {
-          setError('Erro ao gerar relatório. Por favor, tente novamente.');
+        } catch (err: any) {
+          if (err.response && err.response.status === 404) {
+            setNotFound(true);
+          } else {
+            setError('Erro ao gerar relatório. Por favor, tente novamente.');
+          }
           console.error(err);
         } finally {
           setLoading(false);
@@ -69,14 +82,12 @@ const SensoryProfileForm: React.FC = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      setLoading(true);
+      setSubmitting(true);
       
       if (isNewMode) {
         await assessmentApi.createAssessment(formData);
-        alert('Avaliação criada com sucesso!');
       } else if (isEditMode && id) {
         await assessmentApi.updateAssessment(id, formData);
-        alert('Avaliação atualizada com sucesso!');
       }
       
       navigate('/');
@@ -84,7 +95,7 @@ const SensoryProfileForm: React.FC = () => {
       setError('Erro ao salvar avaliação. Por favor, tente novamente.');
       console.error(err);
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -100,91 +111,110 @@ const SensoryProfileForm: React.FC = () => {
   };
 
   return (
-    <Box style={{ 
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      marginTop: '-24px', 
-      paddingTop: '0',
-      zIndex: 0 
-    }}>
-      <Card size="2" style={{ 
-        width: '100%',
-        flex: 1,
-        margin: 0,
-        borderRadius: '0',
-        border: 'none'
-      }}>
-        <Box pt="2" p="4" onSubmit={handleSubmit}>
-          <Heading size="6" mb="4">{getTitle()}</Heading>
+    <Box p="4" width="100%">
+      {loading ? (
+        <Card>
+          <Flex align="center" justify="center" direction="column" gap="3" py="9">
+            <LoadingSpinner size="large" text="Carregando dados..." />
+          </Flex>
+        </Card>
+      ) : notFound ? (
+        <NotFound 
+          title="Avaliação não encontrada" 
+          message="A avaliação que você está procurando não existe ou foi removida."
+        />
+      ) : error ? (
+        <Card>
+          <Flex align="center" justify="center" direction="column" gap="3" py="9">
+            <Text color="red">{error}</Text>
+            <Button onClick={() => navigate('/')} color='gray'>Voltar</Button>
+          </Flex>
+        </Card>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <Flex justify="between" align="center" mb="6">
+            <Heading size="7" color='violet'>
+              {getTitle()}
+            </Heading>
+            <Flex gap="3">
+              {!isNewMode && !isEditMode && !isReportMode && (
+                <Button onClick={() => navigate(`/assessment/${id}/edit`)}>Editar</Button>
+              )}
+              {!isNewMode && !isReportMode && (
+                <Button onClick={() => navigate(`/assessment/${id}/report`)}>Ver Relatório</Button>
+              )}
+              {(isEditMode) && (
+                <Button type="submit" color='violet'>Salvar</Button>
+              )}
+              <Button onClick={() => navigate('/')} variant="outline" color='gray'>Voltar</Button>
+            </Flex>
+          </Flex>
+
+          <ChildDataSection 
+            formData={formData} 
+            updateFormData={updateFormData} 
+            disabled={isViewMode || isReportMode} 
+          />
           
-          {loading ? (
-            <Text size="2" mb="4">Carregando...</Text>
-          ) : error ? (
-            <Text size="2" mb="4" color="crimson">{error}</Text>
-          ) : (
-            <Box style={{ width: '100%' }}>
-              <Flex direction="column" gap="3" mb="4" justify="between">
-                <Text size="5" weight="bold">Questionário para Cuidadores</Text>
-                <Text size="2">Crianças de 3 a 14 anos de idade</Text>
-                <Text size="2">Perfil Sensorial 2</Text>
-              </Flex>
+          <ExaminerDataSection 
+            formData={formData} 
+            updateFormData={updateFormData} 
+            disabled={isViewMode || isReportMode} 
+          />
+          
+          <CaregiverDataSection 
+            formData={formData} 
+            updateFormData={updateFormData} 
+            disabled={isViewMode || isReportMode} 
+          />
+          
+          <InstructionsSection />
+          
+          <SensoryProcessingSection 
+            formData={formData} 
+            updateItemResponse={updateItemResponse} 
+            disabled={isViewMode || isReportMode}
+          />
 
-              <ChildDataSection 
-                formData={formData} 
-                updateFormData={updateFormData} 
-                disabled={isViewMode || isReportMode}
-              />
-              
-              <ExaminerDataSection 
-                formData={formData} 
-                updateFormData={updateFormData} 
-                disabled={isViewMode || isReportMode}
-              />
-              
-              <CaregiverDataSection 
-                formData={formData} 
-                updateFormData={updateFormData} 
-                disabled={isViewMode || isReportMode}
-              />
-              
-              <InstructionsSection />
-              
-              <SensoryProcessingSection 
-                formData={formData} 
-                updateItemResponse={updateItemResponse} 
-                disabled={isViewMode || isReportMode}
-              />
+          <Flex gap="3" mt="4" justify="end">
+            {!isViewMode && !isReportMode && (
+              <>
+                <Button variant="soft" color="gray" onClick={handleClose}>
+                  Cancelar
+                </Button>
+                <Button 
+                  type="submit" 
+                  color="violet" 
+                  disabled={submitting}
+                  onClick={handleSubmit}
+                >
+                  {submitting ? (
+                    <Flex gap="2" align="center">
+                      <LoadingSpinner size="small" />
+                      <Text>{isNewMode ? 'Criando...' : 'Salvando...'}</Text>
+                    </Flex>
+                  ) : (
+                    isNewMode ? 'Criar Avaliação' : 'Salvar Alterações'
+                  )}
+                </Button>
+              </>
+            )}
 
-              <Flex gap="3" mt="4" justify="end">
-                {!isViewMode && !isReportMode && (
-                  <>
-                    <Button variant="soft" color="gray" onClick={handleClose}>
-                      Cancelar
-                    </Button>
-                    <Button type="submit" disabled={loading}>
-                      {isNewMode ? 'Criar Avaliação' : 'Salvar Alterações'}
-                    </Button>
-                  </>
+            {(isViewMode || isReportMode) && (
+              <>
+                <Button variant="soft" color="gray" onClick={handleClose}>
+                  Voltar
+                </Button>
+                {isViewMode && (
+                  <Button onClick={() => navigate(`/assessment/${id}/edit`)}>
+                    Editar
+                  </Button>
                 )}
-
-                {(isViewMode || isReportMode) && (
-                  <>
-                    <Button variant="soft" color="gray" onClick={handleClose}>
-                      Voltar
-                    </Button>
-                    {isViewMode && (
-                      <Button onClick={() => navigate(`/assessment/${id}/edit`)}>
-                        Editar
-                      </Button>
-                    )}
-                  </>
-                )}
-              </Flex>
-            </Box>
-          )}
-        </Box>
-      </Card>
+              </>
+            )}
+          </Flex>
+        </form>
+      )}
     </Box>
   );
 };

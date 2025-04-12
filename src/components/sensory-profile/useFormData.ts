@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { 
   FormData, 
   FrequencyResponse, 
@@ -77,32 +77,30 @@ const useFormData = () => {
     },
   });
 
-  // Function to update form data at a specific path
-  const updateFormData = (path: string, value: any) => {
-    const keys = path.split('.');
+  // Função para atualizar formData
+  const updateFormData = useCallback((path: string, value: any) => {
     setFormData((prevData) => {
       const newData = { ...prevData };
+      const keys = path.split('.');
       let current: any = newData;
       
-      // Navigate to the nested property
       for (let i = 0; i < keys.length - 1; i++) {
         current = current[keys[i]];
       }
       
-      // Update the value
       current[keys[keys.length - 1]] = value;
       
       return newData;
     });
-  };
+  }, []);
 
-  // Function to update item response and recalculate raw score
-  const updateItemResponse = (section: string, itemId: number, response: FrequencyResponse) => {
+  // Função para atualizar resposta de item e recalcular pontuação
+  const updateItemResponse = useCallback((section: string, itemId: number, response: FrequencyResponse) => {
     setFormData((prevData) => {
       const newData = { ...prevData };
       const sectionData = (newData as any)[section];
       
-      // Find the item and update its response
+      // Encontre o item e atualize sua resposta
       const itemIndex = sectionData.items.findIndex((item: SensoryItem) => item.id === itemId);
       if (itemIndex !== -1) {
         sectionData.items[itemIndex] = {
@@ -111,30 +109,36 @@ const useFormData = () => {
         };
       }
       
-      // Recalculate raw score
+      // Recalcule a pontuação bruta
       sectionData.rawScore = calculateRawScore(sectionData.items);
       
       return newData;
     });
-  };
+  }, []);
 
-  // Calculate raw score based on item responses
-  const calculateRawScore = (items: SensoryItem[]) => {
+  // Calcule a pontuação bruta com base nas respostas dos itens
+  const calculateRawScore = useCallback((items: SensoryItem[]) => {
     const responseValues = {
-      'always': 5,
+      'almost_always': 5,
       'frequently': 4,
       'occasionally': 3,
       'rarely': 2,
-      'never': 1,
-      null: 0
+      'almost_never': 1,
+      '': 0
     };
 
     return items.reduce((total, item) => {
       return total + (responseValues[item.response as keyof typeof responseValues] || 0);
     }, 0);
-  };
+  }, []);
 
-  return { formData, setFormData, updateFormData, updateItemResponse, calculateRawScore };
+  return { 
+    formData, 
+    setFormData, 
+    updateFormData, 
+    updateItemResponse, 
+    calculateRawScore
+  };
 };
 
 export default useFormData;

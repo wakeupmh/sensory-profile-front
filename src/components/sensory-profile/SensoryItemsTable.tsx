@@ -1,6 +1,7 @@
-import React from 'react';
-import { Table, Text, Box, RadioCards } from '@radix-ui/themes';
+import React, { memo } from 'react';
+import { Table, Box } from '@radix-ui/themes';
 import { SensoryItem, FrequencyResponse } from './types';
+import FastRadioCards from './FastRadioCards';
 
 interface SensoryItemsTableProps {
   items: SensoryItem[];
@@ -8,13 +9,13 @@ interface SensoryItemsTableProps {
   disabled?: boolean;
 }
 
-const SensoryItemsTable: React.FC<SensoryItemsTableProps> = ({ items, onResponseChange, disabled }) => {
+const SensoryItemsTable: React.FC<SensoryItemsTableProps> = memo(({ items, onResponseChange, disabled }) => {
   const frequencyOptions = [
-    { value: "almost_never", label: "Quase Nunca" },
     { value: "rarely", label: "Raramente" },
+    { value: "almost_never", label: "Quase Nunca" },
     { value: "occasionally", label: "Ocasionalmente" },
-    { value: "frequently", label: "Frequentemente" },
-    { value: "almost_always", label: "Quase Sempre" }
+    { value: "almost_always", label: "Quase Sempre" },
+    { value: "frequently", label: "Frequentemente" }
   ];
 
   return (
@@ -33,21 +34,15 @@ const SensoryItemsTable: React.FC<SensoryItemsTableProps> = ({ items, onResponse
             <Table.Cell>{item.description}</Table.Cell>
             <Table.Cell>
               <Box>
-                <RadioCards.Root 
-                  value={item.response || ""}
-                  onValueChange={(value) => onResponseChange(item.id, value as FrequencyResponse)}
+                <FastRadioCards
+                  name={`item-${item.id}`}
+                  options={frequencyOptions}
+                  initialValue={item.response || ""}
+                  onValueChange={(_, value) => onResponseChange(item.id, value as FrequencyResponse)}
                   disabled={disabled}
                   color="violet"
-                  variant="classic"
                   columns={{ initial: "1", xs: "1", sm: "3", md: "5" }}
-                  size="2"
-                >
-                  {frequencyOptions.map(option => (
-                    <RadioCards.Item key={option.value} value={option.value}>
-                      <Text size="1" weight="medium">{option.label}</Text>
-                    </RadioCards.Item>
-                  ))}
-                </RadioCards.Root>
+                />
               </Box>
             </Table.Cell>
           </Table.Row>
@@ -55,6 +50,6 @@ const SensoryItemsTable: React.FC<SensoryItemsTableProps> = ({ items, onResponse
       </Table.Body>
     </Table.Root>
   );
-};
+});
 
 export default SensoryItemsTable;

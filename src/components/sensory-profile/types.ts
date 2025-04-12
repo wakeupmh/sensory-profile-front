@@ -1,5 +1,5 @@
 // Definição dos tipos de resposta
-export type FrequencyResponse = 'always' | 'frequently' | 'occasionally' | 'rarely' | 'never' | null;
+export type FrequencyResponse = 'almost_always' | 'frequently' | 'occasionally' | 'rarely' | 'almost_never' | '';
 
 // Definição dos tipos de dados do formulário
 export interface ChildData {

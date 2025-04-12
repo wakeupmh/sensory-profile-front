@@ -6,71 +6,71 @@ import SensoryProfileForm from './pages/SensoryProfile';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          {/* Public routes */}
-          <Route index element={<Home />} />
-          
-          {/* Protected routes */}
-          <Route
-            path="/assessment/new"
-            element={
-              <>
-                <SignedIn>
-                  <SensoryProfileForm />
-                </SignedIn>
-                <SignedOut>
-                  <RedirectToSignIn />
-                </SignedOut>
-              </>
-            }
-          />
-          
-          <Route
-            path="/assessment/:id"
-            element={
-              <>
-                <SignedIn>
-                  <SensoryProfileForm />
-                </SignedIn>
-                <SignedOut>
-                  <RedirectToSignIn />
-                </SignedOut>
-              </>
-            }
-          />
-          
-          <Route
-            path="/assessment/:id/edit"
-            element={
-              <>
-                <SignedIn>
-                  <SensoryProfileForm />
-                </SignedIn>
-                <SignedOut>
-                  <RedirectToSignIn />
-                </SignedOut>
-              </>
-            }
-          />
-          
-          <Route
-            path="/assessment/:id/report"
-            element={
-              <>
-                <SignedIn>
-                  <SensoryProfileForm />
-                </SignedIn>
-                <SignedOut>
-                  <RedirectToSignIn />
-                </SignedOut>
-              </>
-            }
-          />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            {/* Public routes */}
+            <Route index element={<Home />} />
+            
+            {/* Protected routes */}
+            <Route
+              path="/assessment/new"
+              element={
+                <>
+                  <SignedIn>
+                    <SensoryProfileForm />
+                  </SignedIn>
+                  <SignedOut>
+                    <RedirectToSignIn />
+                  </SignedOut>
+                </>
+              }
+            />
+            
+            <Route
+              path="/assessment/:id"
+              element={
+                <>
+                  <SignedIn>
+                    <SensoryProfileForm />
+                  </SignedIn>
+                  <SignedOut>
+                    <RedirectToSignIn />
+                  </SignedOut>
+                </>
+              }
+            />
+            
+            <Route
+              path="/assessment/:id/edit"
+              element={
+                <>
+                  <SignedIn>
+                    <SensoryProfileForm />
+                  </SignedIn>
+                  <SignedOut>
+                    <RedirectToSignIn />
+                  </SignedOut>
+                </>
+              }
+            />
+            
+            <Route
+              path="/assessment/:id/report"
+              element={
+                <>
+                  <SignedIn>
+                    <SensoryProfileForm />
+                  </SignedIn>
+                  <SignedOut>
+                    <RedirectToSignIn />
+                  </SignedOut>
+                </>
+              }
+            />
+          </Route>
+        </Routes>
+      </BrowserRouter>
   );
 }
 
