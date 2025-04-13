@@ -30,19 +30,44 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData }) => {
   const calculateSectionScore = (items: SensoryItem[]): number => {
     if (!items || items.length === 0) return 0;
     
+    // Map response to numeric value for scoring
+    const responseValueMap: Record<string, number> = {
+      "not_applied": 0,
+      "almost_never": 1,
+      "occasionally": 2,
+      "half_time": 3,
+      "frequently": 4,
+      "almost_always": 5
+    };
+    
     return items.reduce((total, item) => {
-      const score = item.value || 0;
+      const score = item.response ? responseValueMap[item.response] || 0 : 0;
       return total + score;
     }, 0);
   };
 
   // Função para classificar a pontuação
   const classifyScore = (score: number, section: SensorySectionKey): string => {
-    // Classificações padrão
-    if (score <= 5) return "Muito menos que outros(as)";
-    if (score <= 10) return "Menos que outros(as)";
-    if (score <= 15) return "Exatamente como a maioria dos(as) outros(as)";
-    if (score <= 20) return "Mais que outros(as)";
+    // Define score ranges for each section based on the assessment guidelines
+    const scoreRanges: Record<SensorySectionKey, { veryLow: number, low: number, average: number, high: number }> = {
+      auditoryProcessing: { veryLow: 8, low: 16, average: 24, high: 32 },
+      visualProcessing: { veryLow: 11, low: 22, average: 33, high: 44 },
+      tactileProcessing: { veryLow: 18, low: 36, average: 54, high: 72 },
+      movementProcessing: { veryLow: 16, low: 32, average: 48, high: 64 },
+      bodyPositionProcessing: { veryLow: 12, low: 24, average: 36, high: 48 },
+      oralSensitivityProcessing: { veryLow: 12, low: 24, average: 36, high: 48 },
+      socialEmotionalResponses: { veryLow: 8, low: 16, average: 24, high: 32 },
+      attentionResponses: { veryLow: 7, low: 14, average: 21, high: 28 }
+    };
+    
+    const ranges = scoreRanges[section];
+    
+    if (!ranges) return "Sem dados suficientes";
+    
+    if (score <= ranges.veryLow) return "Muito menos que outros(as)";
+    if (score <= ranges.low) return "Menos que outros(as)";
+    if (score <= ranges.average) return "Exatamente como a maioria dos(as) outros(as)";
+    if (score <= ranges.high) return "Mais que outros(as)";
     return "Muito mais que outros(as)";
   };
 
@@ -62,7 +87,12 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData }) => {
   const scoreData = sections.map((section) => {
     const sectionData = formData[section.key] || { items: [] };
     const items = sectionData.items || [];
-    const score = calculateSectionScore(items);
+    
+    // Use the rawScore from the API if available, otherwise calculate it
+    const score = sectionData.rawScore !== undefined && sectionData.rawScore !== null
+      ? sectionData.rawScore
+      : calculateSectionScore(items);
+      
     const classification = classifyScore(score, section.key);
     
     return {
@@ -108,6 +138,10 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData }) => {
     border: "1px solid #ddd",
     borderRadius: "4px",
     backgroundColor: "#fff",
+    pageBreakInside: "avoid" as const,
+  };
+
+  const sectionContentStyle = {
     pageBreakInside: "avoid" as const,
   };
 
@@ -166,39 +200,84 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData }) => {
       
       <div style={{ borderTop: "1px solid #6a994e", marginBottom: "20px" }}></div>
 
-      <div style={sectionStyle}>
+      <div style={sectionStyle} className="avoid-break first-section">
         <h3 style={subHeaderStyle}>Dados da Criança</h3>
-        <div>
-          <div><span style={fieldLabelStyle}>Nome:</span> {formData.child?.name || ''}</div>
-          <div><span style={fieldLabelStyle}>Data de Nascimento:</span> {formData.child?.birthDate || ''}</div>
-          <div><span style={fieldLabelStyle}>Idade:</span> {formData.child?.age || ''} anos</div>
-          <div><span style={fieldLabelStyle}>Gênero:</span> {formData.child?.gender || ''}</div>
-          {formData.child?.otherInfo && (
-            <div><span style={fieldLabelStyle}>Outras Informações:</span> {formData.child.otherInfo}</div>
+        <div style={sectionContentStyle}>
+          <div style={{ display: "flex", flexDirection: "row", gap: "10px", marginBottom: "5px" }}>
+            <div style={{ flex: 1 }}>
+              <span style={fieldLabelStyle}>Nome:</span> {formData.child.name || 'Não informado'}
+            </div>
+            <div style={{ flex: 1 }}>
+              <span style={fieldLabelStyle}>Idade:</span> {formData.child.age || 0} anos
+            </div>
+          </div>
+          <div style={{ display: "flex", flexDirection: "row", gap: "10px", marginBottom: "5px" }}>
+            <div style={{ flex: 1 }}>
+              <span style={fieldLabelStyle}>Data de Nascimento:</span> {
+                formData.child.birthDate 
+                  ? new Intl.DateTimeFormat('pt-BR').format(new Date(formData.child.birthDate))
+                  : 'Não informada'
+              }
+            </div>
+            <div style={{ flex: 1 }}>
+              <span style={fieldLabelStyle}>Gênero:</span> {
+                formData.child.gender === 'male' 
+                  ? 'Masculino' 
+                  : formData.child.gender === 'female' 
+                    ? 'Feminino' 
+                    : formData.child.gender || 'Não informado'
+              }
+            </div>
+          </div>
+          {formData.child.otherInfo && (
+            <div style={{ marginTop: "5px" }}>
+              <span style={fieldLabelStyle}>Informações Adicionais:</span> {formData.child.otherInfo}
+            </div>
           )}
         </div>
       </div>
 
-      <div style={sectionStyle}>
+      <div style={sectionStyle} className="avoid-break">
         <h3 style={subHeaderStyle}>Dados do Examinador</h3>
-        <div>
-          <div><span style={fieldLabelStyle}>Nome:</span> {formData.examiner?.name || ''}</div>
-          <div><span style={fieldLabelStyle}>Profissão:</span> {formData.examiner?.profession || ''}</div>
-          {/* {formData.examiner?.professionalId && (
-            <div><span style={fieldLabelStyle}>Registro Profissional:</span> {formData.examiner.professionalId}</div>
-          )} */}
+        <div style={sectionContentStyle}>
+          <div style={{ display: "flex", flexDirection: "row", gap: "10px", marginBottom: "5px" }}>
+            <div style={{ flex: 1 }}>
+              <span style={fieldLabelStyle}>Nome:</span> {formData.examiner.name || 'Não informado'}
+            </div>
+            <div style={{ flex: 1 }}>
+              <span style={fieldLabelStyle}>Profissão:</span> {formData.examiner.profession || 'Não informada'}
+            </div>
+          </div>
+          <div>
+            <span style={fieldLabelStyle}>Contato:</span> {formData.examiner.contact || 'Não informado'}
+          </div>
         </div>
       </div>
 
-      <div style={sectionStyle}>
+      <div style={sectionStyle} className="avoid-break">
         <h3 style={subHeaderStyle}>Dados do Cuidador</h3>
-        <div>
-          <div><span style={fieldLabelStyle}>Nome:</span> {formData.caregiver?.name || ''}</div>
-          <div><span style={fieldLabelStyle}>Relação com a Criança:</span> {formData.caregiver?.relationship || ''}</div>
+        <div style={sectionContentStyle}>
+          <div style={{ display: "flex", flexDirection: "row", gap: "10px", marginBottom: "5px" }}>
+            <div style={{ flex: 1 }}>
+              <span style={fieldLabelStyle}>Nome:</span> {formData.caregiver.name || 'Não informado'}
+            </div>
+            <div style={{ flex: 1 }}>
+              <span style={fieldLabelStyle}>Relação:</span> {
+                formData.caregiver.relationship === 'father' ? 'Pai' :
+                formData.caregiver.relationship === 'mother' ? 'Mãe' :
+                formData.caregiver.relationship === 'grandparent' ? 'Avô/Avó' :
+                formData.caregiver.relationship === 'other_relative' ? 'Outro Familiar' :
+                formData.caregiver.relationship || 'Não informada'
+              }
+            </div>
+          </div>
+          <div>
+            <span style={fieldLabelStyle}>Contato:</span> {formData.caregiver.contact || 'Não informado'}
+          </div>
         </div>
       </div>
 
-      <div style={sectionStyle}>
+      <div style={sectionStyle} className="avoid-break section-container">
         <h3 style={subHeaderStyle}>Tipos de Perfil Sensorial</h3>
         <p style={{ fontStyle: "italic", marginBottom: "15px" }}>
           O Perfil Sensorial 2 identifica quatro tipos de perfis sensoriais que descrevem como a criança processa informações sensoriais.
@@ -235,7 +314,9 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData }) => {
         </div>
       </div>
 
-      <div style={sectionStyle}>
+      <div className="page-break"></div>
+
+      <div style={sectionStyle} className="avoid-break section-container">
         <h3 style={subHeaderStyle}>Resumo das Pontuações</h3>
         <p style={{ fontStyle: "italic", marginBottom: "15px" }}>
           As pontuações são classificadas de acordo com o Perfil Sensorial 2, comparando o desempenho da criança com outras da mesma faixa etária.
@@ -253,7 +334,9 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData }) => {
             {sections.map((section, index) => {
               const sectionData = formData[section.key] || { items: [] };
               const items = sectionData.items || [];
-              const score = calculateSectionScore(items);
+              const score = sectionData.rawScore !== undefined && sectionData.rawScore !== null
+                ? sectionData.rawScore
+                : calculateSectionScore(items);
               const classification = classifyScore(score, section.key);
               
               return (
@@ -268,13 +351,15 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData }) => {
         </table>
       </div>
 
-      <div style={sectionStyle}>
+      <div className="page-break"></div>
+
+      <div style={sectionStyle} className="avoid-break section-container">
         <h3 style={subHeaderStyle}>Curva Normal e Sistema de Classificação</h3>
         <p style={{ fontStyle: "italic", marginBottom: "15px" }}>
           O gráfico abaixo mostra a posição da criança em relação à curva normal de distribuição. Cada ponto colorido representa uma área de processamento sensorial.
         </p>
         
-        <div style={{ position: "relative", width: "100%", height: "200px", marginBottom: "100px", backgroundColor: "#ffffff" }}>
+        <div style={{ position: "relative", width: "100%", height: "180px", marginBottom: "80px", backgroundColor: "#ffffff" }}>
           {/* Curva normal simplificada */}
           <div style={{ 
             position: "absolute", 
@@ -304,19 +389,19 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData }) => {
               <div style={{ position: "absolute", left: "90%", top: "15px", transform: "translateX(-50%)", fontSize: "12px" }}>+2 DP</div>
               
               {/* Classificações */}
-              <div style={{ position: "absolute", left: "10%", top: "35px", transform: "translateX(-50%)", fontSize: "12px", width: "100px", textAlign: "center" }}>
+              <div style={{ position: "absolute", left: "10%", top: "35px", transform: "translateX(-50%)", fontSize: "10px", width: "80px", textAlign: "center" }}>
                 Muito menos que outros(as)
               </div>
-              <div style={{ position: "absolute", left: "30%", top: "35px", transform: "translateX(-50%)", fontSize: "12px", width: "100px", textAlign: "center" }}>
+              <div style={{ position: "absolute", left: "30%", top: "35px", transform: "translateX(-50%)", fontSize: "10px", width: "80px", textAlign: "center" }}>
                 Menos que outros(as)
               </div>
-              <div style={{ position: "absolute", left: "50%", top: "35px", transform: "translateX(-50%)", fontSize: "12px", width: "100px", textAlign: "center" }}>
+              <div style={{ position: "absolute", left: "50%", top: "35px", transform: "translateX(-50%)", fontSize: "10px", width: "80px", textAlign: "center" }}>
                 Exatamente como a maioria
               </div>
-              <div style={{ position: "absolute", left: "70%", top: "35px", transform: "translateX(-50%)", fontSize: "12px", width: "100px", textAlign: "center" }}>
+              <div style={{ position: "absolute", left: "70%", top: "35px", transform: "translateX(-50%)", fontSize: "10px", width: "80px", textAlign: "center" }}>
                 Mais que outros(as)
               </div>
-              <div style={{ position: "absolute", left: "90%", top: "35px", transform: "translateX(-50%)", fontSize: "12px", width: "100px", textAlign: "center" }}>
+              <div style={{ position: "absolute", left: "90%", top: "35px", transform: "translateX(-50%)", fontSize: "10px", width: "80px", textAlign: "center" }}>
                 Muito mais que outros(as)
               </div>
               
@@ -409,53 +494,145 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData }) => {
         </div>
       </div>
 
-      <div style={sectionStyle}>
+      <div className="page-break"></div>
+
+      <div style={sectionStyle} className="avoid-break section-container">
         <h3 style={subHeaderStyle}>Interpretação das Pontuações</h3>
         
-        <div style={{ marginBottom: "15px" }}>
-          <div style={{ fontWeight: "bold", marginBottom: "5px" }}>Muito menos que outros(as):</div>
-          <p style={{ margin: "0 0 10px 0" }}>
-            Indica que a criança demonstra comportamentos relacionados a esta seção com muito menos frequência que seus pares.
-          </p>
-        </div>
-        
-        <div style={{ marginBottom: "15px" }}>
-          <div style={{ fontWeight: "bold", marginBottom: "5px" }}>Menos que outros(as):</div>
-          <p style={{ margin: "0 0 10px 0" }}>
-            Indica que a criança demonstra comportamentos relacionados a esta seção com menos frequência que seus pares.
-          </p>
-        </div>
-        
-        <div style={{ marginBottom: "15px" }}>
-          <div style={{ fontWeight: "bold", marginBottom: "5px" }}>Exatamente como a maioria dos(as) outros(as):</div>
-          <p style={{ margin: "0 0 10px 0" }}>
-            Indica que a criança demonstra comportamentos relacionados a esta seção com a mesma frequência que seus pares.
-          </p>
-        </div>
-        
-        <div style={{ marginBottom: "15px" }}>
-          <div style={{ fontWeight: "bold", marginBottom: "5px" }}>Mais que outros(as):</div>
-          <p style={{ margin: "0 0 10px 0" }}>
-            Indica que a criança demonstra comportamentos relacionados a esta seção com mais frequência que seus pares.
-          </p>
-        </div>
-        
-        <div style={{ marginBottom: "15px" }}>
-          <div style={{ fontWeight: "bold", marginBottom: "5px" }}>Muito mais que outros(as):</div>
-          <p style={{ margin: "0 0 10px 0" }}>
-            Indica que a criança demonstra comportamentos relacionados a esta seção com muito mais frequência que seus pares.
-          </p>
+        <div style={sectionContentStyle}>
+          <div style={{ marginBottom: "15px" }}>
+            <div style={{ fontWeight: "bold", marginBottom: "5px" }}>Muito menos que outros(as):</div>
+            <p style={{ margin: "0 0 10px 0" }}>
+              Indica que a criança demonstra comportamentos relacionados a esta seção com muito menos frequência que seus pares.
+            </p>
+          </div>
+          
+          <div style={{ marginBottom: "15px" }}>
+            <div style={{ fontWeight: "bold", marginBottom: "5px" }}>Menos que outros(as):</div>
+            <p style={{ margin: "0 0 10px 0" }}>
+              Indica que a criança demonstra comportamentos relacionados a esta seção com menos frequência que seus pares.
+            </p>
+          </div>
+          
+          <div style={{ marginBottom: "15px" }}>
+            <div style={{ fontWeight: "bold", marginBottom: "5px" }}>Exatamente como a maioria dos(as) outros(as):</div>
+            <p style={{ margin: "0 0 10px 0" }}>
+              Indica que a criança demonstra comportamentos relacionados a esta seção com a mesma frequência que seus pares.
+            </p>
+          </div>
+          
+          <div style={{ marginBottom: "15px" }}>
+            <div style={{ fontWeight: "bold", marginBottom: "5px" }}>Mais que outros(as):</div>
+            <p style={{ margin: "0 0 10px 0" }}>
+              Indica que a criança demonstra comportamentos relacionados a esta seção com mais frequência que seus pares.
+            </p>
+          </div>
+          
+          <div style={{ marginBottom: "15px" }}>
+            <div style={{ fontWeight: "bold", marginBottom: "5px" }}>Muito mais que outros(as):</div>
+            <p style={{ margin: "0 0 10px 0" }}>
+              Indica que a criança demonstra comportamentos relacionados a esta seção com muito mais frequência que seus pares.
+            </p>
+          </div>
         </div>
       </div>
 
-      <div style={{ marginTop: "30px" }}>
+      <div className="page-break"></div>
+
+      <div style={sectionStyle} className="avoid-break section-container detailed-responses">
+        <h3 style={subHeaderStyle}>Detalhes das Respostas</h3>
+        
+        <div style={sectionContentStyle} className="detailed-responses">
+          {sections.map((section, sectionIndex) => {
+            const sectionData = formData[section.key] || { items: [] };
+            const items = sectionData.items || [];
+            
+            if (items.length === 0) return null;
+            
+            return (
+              <React.Fragment key={sectionIndex}>
+                {sectionIndex > 0 && <div className="page-break"></div>}
+                <div className="sensory-section" style={{ marginBottom: "30px", pageBreakInside: "avoid" as const }}>
+                  <h4 style={{ fontSize: "16px", marginBottom: "10px", color: "#444" }}>{section.title}</h4>
+                  
+                  <table style={tableStyle}>
+                    <thead>
+                      <tr>
+                        <th style={tableHeaderStyle}>Item</th>
+                        <th style={tableHeaderStyle}>Resposta</th>
+                        <th style={tableHeaderStyle}>Valor</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {items.map((item, itemIndex) => {
+                        const frequencyOptions = [
+                          { value: "not_applied", label: "Não se aplica" },
+                          { value: "almost_never", label: "Quase Nunca" },
+                          { value: "half_time", label: "Metade do Tempo" },
+                          { value: "occasionally", label: "Ocasionalmente" },
+                          { value: "almost_always", label: "Quase Sempre" },
+                          { value: "frequently", label: "Frequentemente" }
+                        ];
+
+                        const responseText = frequencyOptions.find(option => option.value === item.response)?.label || "Não respondido";
+                        
+                        // Map response to numeric value for scoring
+                        const responseValueMap: Record<string, number> = {
+                          "not_applied": 0,
+                          "almost_never": 1,
+                          "occasionally": 2,
+                          "half_time": 3,
+                          "frequently": 4,
+                          "almost_always": 5
+                        };
+                        
+                        const responseValue = item.response ? responseValueMap[item.response] || 0 : 0;
+                        
+                        // Ensure we have a description for the item
+                        const itemDescription = item.description || `Item ${item.id}`;
+                          
+                        return (
+                          <tr key={itemIndex} style={{ backgroundColor: itemIndex % 2 === 0 ? '#f9f9f9' : 'white' }}>
+                            <td style={tableCellStyle}>{itemDescription}</td>
+                            <td style={{...tableCellStyle, textAlign: 'center' as const}}>{responseText}</td>
+                            <td style={{...tableCellStyle, textAlign: 'center' as const}}>{responseValue}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </React.Fragment>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="page-break"></div>
+
+      <div style={{ marginTop: "30px", pageBreakBefore: "always" as const }}>
         <div style={{ marginBottom: "10px" }}>
-          <span style={fieldLabelStyle}>Data da Avaliação:</span> {new Intl.DateTimeFormat('pt-BR').format(new Date())}
+          <span style={fieldLabelStyle}>Data da Avaliação:</span> {
+            formData.createdAt 
+              ? new Intl.DateTimeFormat('pt-BR').format(new Date(formData.createdAt)) 
+              : new Intl.DateTimeFormat('pt-BR').format(new Date())
+          }
         </div>
         
         <div style={{ marginTop: "40px" }}>
           <div style={{ width: "60%", borderTop: "1px solid #000", marginTop: "40px" }}></div>
-          <div style={{ marginTop: "5px" }}>Assinatura do Examinador</div>
+          <div style={{ marginTop: "5px" }}>
+            {formData.examiner?.name ? (
+              <>
+                {formData.examiner.name}
+                {formData.examiner.profession && (
+                  <span> - {formData.examiner.profession}</span>
+                )}
+              </>
+            ) : (
+              "Assinatura do Examinador"
+            )}
+          </div>
         </div>
       </div>
     </div>

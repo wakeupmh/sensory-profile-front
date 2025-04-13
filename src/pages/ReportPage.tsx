@@ -31,45 +31,135 @@ const ReportPage: React.FC = () => {
         
         // Verificar se a resposta está no formato novo ou antigo
         if (response.assessment && response.responses) {
-          // Formato novo - transformar para o formato do formulário
-          const newFormData: FormData = {
-            ...response.assessment,
-            child: response.assessment.child || {},
-            examiner: response.assessment.examiner || {},
-            caregiver: response.assessment.caregiver || {},
-            // Inicializar todas as seções
-            auditoryProcessing: { items: [] },
-            visualProcessing: { items: [] },
-            tactileProcessing: { items: [] },
-            movementProcessing: { items: [] },
-            bodyPositionProcessing: { items: [] },
-            oralSensitivityProcessing: { items: [] },
-            socialEmotionalResponses: { items: [] },
-            attentionResponses: { items: [] }
-          };
-          
-          // Adicionar as respostas às seções correspondentes
-          response.responses.forEach((item: any) => {
-            const section = item.section as SensorySectionKey;
-            if (section) {
-              if (!newFormData[section].items) {
-                newFormData[section].items = [];
-              }
+          // Import item data to get descriptions
+          import('../components/sensory-profile/itemsData').then((itemsModule) => {
+            // Create a map of all items by ID for quick lookup
+            const allItems = [
+              ...itemsModule.auditoryProcessingItems,
+              ...itemsModule.visualProcessingItems,
+              ...itemsModule.tactileProcessingItems,
+              ...itemsModule.movementProcessingItems,
+              ...itemsModule.bodyPositionProcessingItems,
+              ...itemsModule.oralSensitivityProcessingItems,
+              ...itemsModule.socialEmotionalResponsesItems,
+              ...itemsModule.attentionResponsesItems
+            ];
+            
+            const itemsById = new Map();
+            allItems.forEach(item => {
+              itemsById.set(item.id, item);
+            });
+            
+            // Map responses to their respective sections
+            const responsesBySection: Record<string, any[]> = {
+              auditoryProcessing: [],
+              visualProcessing: [],
+              tactileProcessing: [],
+              movementProcessing: [],
+              bodyPositionProcessing: [],
+              oralSensitivityProcessing: [],
+              socialEmotionalResponses: [],
+              attentionResponses: []
+            };
+            
+            // Map item IDs to their sections
+            const sectionRanges = [
+              { start: 1, end: 8, section: 'auditoryProcessing' },
+              { start: 9, end: 19, section: 'visualProcessing' },
+              { start: 20, end: 37, section: 'tactileProcessing' },
+              { start: 38, end: 53, section: 'movementProcessing' },
+              { start: 54, end: 65, section: 'bodyPositionProcessing' },
+              { start: 66, end: 77, section: 'oralSensitivityProcessing' },
+              { start: 78, end: 85, section: 'socialEmotionalResponses' },
+              { start: 86, end: 92, section: 'attentionResponses' }
+            ];
+            
+            // Function to determine which section an item belongs to
+            const getSectionForItemId = (itemId: number) => {
+              const range = sectionRanges.find(r => itemId >= r.start && itemId <= r.end);
+              return range ? range.section : null;
+            };
+            
+            // Process each response and add it to the appropriate section
+            response.responses.forEach((responseItem: any) => {
+              const itemId = responseItem.itemId;
+              const section = getSectionForItemId(itemId);
               
-              newFormData[section].items.push({
-                id: item.itemId,
-                description: item.description,
-                response: item.response,
-                responseId: item.id
-              });
-            }
+              if (section && responsesBySection[section]) {
+                const originalItem = itemsById.get(itemId);
+                
+                responsesBySection[section].push({
+                  id: itemId,
+                  quadrant: originalItem?.quadrant || '',
+                  description: originalItem?.description || `Item ${itemId}`,
+                  response: responseItem.response,
+                  responseId: responseItem.id
+                });
+              }
+            });
+            
+            // Create the form data structure with the assessment data and responses
+            const newFormData: FormData = {
+              child: {
+                name: response.assessment.childName || '',
+                birthDate: response.assessment.childBirthDate || '',
+                gender: response.assessment.childGender || '',
+                otherInfo: response.assessment.childOtherInfo || '',
+                age: response.assessment.childAge || 0
+              },
+              examiner: {
+                name: response.assessment.examinerName || '',
+                profession: response.assessment.examinerProfession || '',
+                contact: response.assessment.examinerContact || ''
+              },
+              caregiver: {
+                name: response.assessment.caregiverName || '',
+                relationship: response.assessment.caregiverRelationship || '',
+                contact: response.assessment.caregiverContact || ''
+              },
+              auditoryProcessing: { 
+                items: responsesBySection.auditoryProcessing,
+                rawScore: response.assessment.auditoryProcessingRawScore || 0
+              },
+              visualProcessing: { 
+                items: responsesBySection.visualProcessing,
+                rawScore: response.assessment.visualProcessingRawScore || 0
+              },
+              tactileProcessing: { 
+                items: responsesBySection.tactileProcessing,
+                rawScore: response.assessment.tactileProcessingRawScore || 0
+              },
+              movementProcessing: { 
+                items: responsesBySection.movementProcessing,
+                rawScore: response.assessment.movementProcessingRawScore || 0
+              },
+              bodyPositionProcessing: { 
+                items: responsesBySection.bodyPositionProcessing,
+                rawScore: response.assessment.bodyPositionProcessingRawScore || 0
+              },
+              oralSensitivityProcessing: { 
+                items: responsesBySection.oralSensitivityProcessing,
+                rawScore: response.assessment.oralSensitivityProcessingRawScore || 0
+              },
+              socialEmotionalResponses: { 
+                items: responsesBySection.socialEmotionalResponses,
+                rawScore: response.assessment.socialEmotionalResponsesRawScore || 0
+              },
+              attentionResponses: { 
+                items: responsesBySection.attentionResponses,
+                rawScore: response.assessment.attentionResponsesRawScore || 0
+              },
+              createdAt: response.assessment.createdAt,
+              id: response.assessment.id
+            };
+            
+            setFormData(newFormData);
+            setLoading(false);
           });
-          
-          setFormData(newFormData);
         } else {
           setFormData(response);
+          setLoading(false);
         }
-        
       } catch (err: any) {
         console.error('Error fetching assessment:', err);
         if (err.response && err.response.status === 404) {
@@ -77,7 +167,6 @@ const ReportPage: React.FC = () => {
         } else {
           setError('Erro ao carregar a avaliação. Por favor, tente novamente.');
         }
-      } finally {
         setLoading(false);
       }
     };

@@ -57,5 +57,6 @@ export interface FormData {
   oralSensitivityProcessing: SensorySection;
   socialEmotionalResponses: SensorySection;
   attentionResponses: SensorySection;
+  createdAt?: string;
   [key: string]: any;
 }
