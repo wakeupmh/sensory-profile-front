@@ -12,6 +12,7 @@ import {
   movementProcessingItems, 
   bodyPositionProcessingItems, 
   oralSensitivityProcessingItems, 
+  conductProcessingItems, 
   socialEmotionalResponsesItems, 
   attentionResponsesItems 
 } from './itemsData';
@@ -62,6 +63,11 @@ const useFormData = () => {
     },
     oralSensitivityProcessing: {
       items: oralSensitivityProcessingItems,
+      rawScore: 0,
+      comments: '',
+    },
+    conductProcessing: {
+      items: conductProcessingItems,
       rawScore: 0,
       comments: '',
     },

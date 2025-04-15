@@ -1,0 +1,7 @@
+@media print {
+  .legend-color-dot {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    background-color: inherit !important;
+  }
+}

@@ -67,6 +67,7 @@ const SensoryProcessingSection: React.FC<SensoryProcessingSectionProps> = memo((
     { title: "Processamento de Movimento", key: "movementProcessing" },
     { title: "Processamento de Posição do Corpo", key: "bodyPositionProcessing" },
     { title: "Processamento de Sensibilidade Oral", key: "oralSensitivityProcessing" },
+    { title: "Conduta associada ao processamento sensorial", key: "conductProcessing" },
     { title: "Respostas Socioemocionais", key: "socialEmotionalResponses" },
     { title: "Respostas de Atenção", key: "attentionResponses" }
   ];

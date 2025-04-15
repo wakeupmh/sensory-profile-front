@@ -9,24 +9,34 @@ interface NormalCurveChartProps {
   }>;
 }
 
+// Define distinct colors for each section
+const sectionColors: Record<string, string> = {
+  "Processamento Auditivo": "#E6194B", // Red
+  "Processamento Visual": "#3CB44B", // Green
+  "Processamento Tátil": "#FFE119", // Yellow
+  "Processamento de Movimento": "#4363D8", // Blue
+  "Processamento de Posição do Corpo": "#F58231", // Orange
+  "Processamento de Sensibilidade Oral": "#911EB4", // Purple
+  "Respostas Socioemocionais": "#46F0F0", // Cyan
+  "Respostas de Atenção": "#FABEBE", // Pink
+};
+
+const getSectionColor = (section: string): string => {
+  return sectionColors[section] || "#808080";
+};
+
+// Map classification to X position in SVG coordinates
+const classificationToX: Record<string, number> = {
+  "Muito menos que outros(as)": 150,
+  "Menos que outros(as)": 300,
+  "Exatamente como a maioria dos(as) outros(as)": 400,
+  "Mais que outros(as)": 550,
+  "Muito mais que outros(as)": 650,
+};
+
 const NormalCurveChart: React.FC<NormalCurveChartProps> = ({ scores }) => {
-  // Função para obter a posição horizontal com base na classificação
-  const getPositionFromClassification = (classification: string): number => {
-    switch (classification) {
-      case "Muito menos que outros(as)":
-        return 10;
-      case "Menos que outros(as)":
-        return 30;
-      case "Exatamente como a maioria dos(as) outros(as)":
-        return 50;
-      case "Mais que outros(as)":
-        return 70;
-      case "Muito mais que outros(as)":
-        return 90;
-      default:
-        return 50;
-    }
-  };
+  // For vertical stacking, distribute points with small vertical offsets if they share the same classification
+  const classificationCounts: Record<string, number> = {};
 
   return (
     <Box p="4">
@@ -37,168 +47,86 @@ const NormalCurveChart: React.FC<NormalCurveChartProps> = ({ scores }) => {
         O gráfico abaixo mostra a posição da criança em relação à curva normal de distribuição.
         Cada ponto colorido representa uma área de processamento sensorial.
       </Text>
-      <Box style={{ position: "relative", width: "100%", height: "200px", marginBottom: "80px" }}>
-        {/* Imagem de fundo da curva normal */}
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundImage: "url('/normal-curve.svg')",
-            backgroundSize: "contain",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
-            backgroundColor: "#ffffff",
-          }}
-        />
-
-        {/* Classificações */}
-        <Text
-          size="2"
-          style={{
-            position: "absolute",
-            top: "105%",
-            left: "20%",
-            transform: "translateX(-50%)",
-            textAlign: "center",
-            width: "20%",
-            fontSize: "12px",
-          }}
+      <Box style={{ position: "relative", width: "100%", maxWidth: 800, height: 220, margin: "0 auto 80px auto" }}>
+        {/* Inline SVG for the normal curve */}
+        <svg
+          width="100%"
+          height="220"
+          viewBox="0 0 800 200"
+          style={{ display: "block" }}
+          xmlns="http://www.w3.org/2000/svg"
         >
-          Muito menos que outros(as)
-        </Text>
-        <Text
-          size="2"
-          style={{
-            position: "absolute",
-            top: "105%",
-            left: "40%",
-            transform: "translateX(-50%)",
-            textAlign: "center",
-            width: "20%",
-            fontSize: "12px",
-          }}
-        >
-          Menos que outros(as)
-        </Text>
-        <Text
-          size="2"
-          style={{
-            position: "absolute",
-            top: "105%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            textAlign: "center",
-            width: "20%",
-            fontSize: "12px",
-          }}
-        >
-          Exatamente como a maioria
-        </Text>
-        <Text
-          size="2"
-          style={{
-            position: "absolute",
-            top: "105%",
-            left: "70%",
-            transform: "translateX(-50%)",
-            textAlign: "center",
-            width: "20%",
-            fontSize: "12px",
-          }}
-        >
-          Mais que outros(as)
-        </Text>
-        <Text
-          size="2"
-          style={{
-            position: "absolute",
-            top: "105%",
-            left: "85%",
-            transform: "translateX(-50%)",
-            textAlign: "center",
-            width: "20%",
-            fontSize: "12px",
-          }}
-        >
-          Muito mais que outros(as)
-        </Text>
-
-        {/* Pontos representando os scores */}
-        {scores.map((score, index) => {
-          // Todos os pontos na mesma posição se todos tiverem a mesma classificação
-          const allSameClassification = scores.every(s => s.classification === scores[0].classification);
-          
-          // Posição horizontal baseada na classificação
-          const position = getPositionFromClassification(score.classification);
-          
-          // Posição vertical - empilhar os pontos se tiverem a mesma classificação
-          const verticalPosition = allSameClassification ? 
-                                  40 + (index * 5) : // Empilhar verticalmente
-                                  30 + (index * 5);  // Distribuir normalmente
-          
-          const color = 
-            score.classification === "Muito menos que outros(as)" ? "#ff6b6b" :
-            score.classification === "Menos que outros(as)" ? "#ffa94d" :
-            score.classification === "Exatamente como a maioria dos(as) outros(as)" ? "#51cf66" :
-            score.classification === "Mais que outros(as)" ? "#339af0" :
-            "#845ef7"; // Muito mais que outros(as)
-          
-          return (
-            <div
-              key={index}
-              style={{
-                position: "absolute",
-                top: `${verticalPosition}%`,
-                left: `${position}%`,
-                width: "12px",
-                height: "12px",
-                borderRadius: "50%",
-                backgroundColor: color,
-                border: "1px solid #333",
-                transform: "translate(-50%, -50%)",
-                zIndex: 10,
-              }}
-              title={`${score.section}: ${score.score} (${score.classification})`}
-            />
-          );
-        })}
+          <rect width="800" height="200" fill="white" />
+          {/* X axis */}
+          <line x1="50" y1="170" x2="750" y2="170" stroke="#333" strokeWidth="2" />
+          {/* X axis ticks */}
+          <line x1="150" y1="165" x2="150" y2="175" stroke="#333" strokeWidth="1" />
+          <line x1="300" y1="165" x2="300" y2="175" stroke="#333" strokeWidth="1" />
+          <line x1="400" y1="165" x2="400" y2="175" stroke="#333" strokeWidth="1" />
+          <line x1="550" y1="165" x2="550" y2="175" stroke="#333" strokeWidth="1" />
+          <line x1="650" y1="165" x2="650" y2="175" stroke="#333" strokeWidth="1" />
+          {/* X axis labels */}
+          <text x="150" y="190" fontFamily="Arial" fontSize="12" textAnchor="middle">-2 DP</text>
+          <text x="300" y="190" fontFamily="Arial" fontSize="12" textAnchor="middle">-1 DP</text>
+          <text x="400" y="190" fontFamily="Arial" fontSize="12" textAnchor="middle">X̄</text>
+          <text x="550" y="190" fontFamily="Arial" fontSize="12" textAnchor="middle">+1 DP</text>
+          <text x="650" y="190" fontFamily="Arial" fontSize="12" textAnchor="middle">+2 DP</text>
+          {/* Normal curve path */}
+          <path d="M 50 170 C 50 170, 100 170, 150 150 C 200 130, 250 70, 400 50 C 550 70, 600 130, 650 150 C 700 170, 750 170, 750 170" fill="none" stroke="#6a994e" strokeWidth="3" />
+          {/* Plot the points */}
+          {scores.map((score, idx) => {
+            const x = classificationToX[score.classification] || 400;
+            // Count how many times this classification has been used so far
+            classificationCounts[score.classification] = (classificationCounts[score.classification] || 0) + 1;
+            // Stack vertically if needed
+            const y = 170 - 18 - (classificationCounts[score.classification] - 1) * 18;
+            const color = getSectionColor(score.section);
+            return (
+              <circle
+                key={idx}
+                cx={x}
+                cy={y}
+                r={10}
+                fill={color}
+                stroke="#333"
+                strokeWidth={1}
+              >
+                <title>{`${score.section}: ${score.score} (${score.classification})`}</title>
+              </circle>
+            );
+          })}
+        </svg>
       </Box>
-
+      {/* Legend Section */}
       <Box mt="6">
         <Text size="3" weight="bold" mb="2">
           Legenda:
         </Text>
-        <Box style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
-          {scores.map((score, index) => {
-            const color = 
-              score.classification === "Muito menos que outros(as)" ? "#ff6b6b" :
-              score.classification === "Menos que outros(as)" ? "#ffa94d" :
-              score.classification === "Exatamente como a maioria dos(as) outros(as)" ? "#51cf66" :
-              score.classification === "Mais que outros(as)" ? "#339af0" :
-              "#845ef7"; // Muito mais que outros(as)
-            
-            // Abreviação da classificação
-            const shortClassification = 
-              score.classification === "Muito menos que outros(as)" ? "Muito" :
-              score.classification === "Menos que outros(as)" ? "Menos" :
-              score.classification === "Exatamente como a maioria dos(as) outros(as)" ? "Igual" :
-              score.classification === "Mais que outros(as)" ? "Mais" : "Muito mais";
-            
+        <Box style={{ display: "flex", flexWrap: "wrap", gap: "24px", alignItems: "center" }}>
+          {scores.map((scoreItem, index) => {
+            const color = getSectionColor(scoreItem.section);
+            const shortClassification =
+              scoreItem.classification === "Muito menos que outros(as)" ? "(Muito Menos)" :
+              scoreItem.classification === "Menos que outros(as)" ? "(Menos)" :
+              scoreItem.classification === "Exatamente como a maioria dos(as) outros(as)" ? "(Na Média)" :
+              scoreItem.classification === "Mais que outros(as)" ? "(Mais)" :
+              scoreItem.classification === "Muito mais que outros(as)" ? "(Muito Mais)" : "";
             return (
-              <Box key={index} style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "5px" }}>
+              <Box key={index} style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px" }}>
                 <div
+                  className="legend-color-dot"
                   style={{
-                    width: "12px",
-                    height: "12px",
+                    width: "16px",
+                    height: "16px",
                     borderRadius: "50%",
                     backgroundColor: color,
-                    border: "1px solid #333",
+                    border: "1.5px solid #333",
+                    display: "inline-block",
+                    printColorAdjust: "exact",
+                    WebkitPrintColorAdjust: "exact",
                   }}
                 />
-                <Text size="2">{score.section}: {score.score} ({shortClassification})</Text>
+                <Text size="2">{`${scoreItem.section}: ${scoreItem.score} ${shortClassification}`}</Text>
               </Box>
             );
           })}

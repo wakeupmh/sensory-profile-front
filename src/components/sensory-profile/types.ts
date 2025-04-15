@@ -25,7 +25,7 @@ export interface SensoryItem {
   id: number;
   quadrant?: string;
   description: string;
-  response: FrequencyResponse;
+  response: FrequencyResponse | null;
   responseId?: string;
 }
 
@@ -42,6 +42,7 @@ export type SensorySectionKey =
   | 'movementProcessing'
   | 'bodyPositionProcessing'
   | 'oralSensitivityProcessing'
+  | 'conductProcessing'
   | 'socialEmotionalResponses'
   | 'attentionResponses';
 
