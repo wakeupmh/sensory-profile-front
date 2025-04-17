@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Card, Flex, Text, Button, Heading } from '@radix-ui/themes';
 import PDFGenerator from '../components/sensory-profile/PDFGenerator';
 import ReportContent from '../components/sensory-profile/ReportContent';
-import { FormData, SensorySectionKey } from '../components/sensory-profile/types';
+import { FormData } from '../components/sensory-profile/types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import NotFound from '../components/NotFound';
 import { useAuth } from '@clerk/clerk-react';
