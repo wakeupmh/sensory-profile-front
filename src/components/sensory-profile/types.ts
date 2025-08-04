@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export type FrequencyResponse = 'almost_always' | 'frequently' | 'half_time' | 'occasionally' | 'almost_never' | 'not_applied' | '';
+export type FrequencyResponse = 'quase sempre' | 'frequentemente' | 'metade do tempo' | 'ocasionalmente' | 'quase nunca' | 'não se aplica' | '';
 
 export interface ChildData {
   name: string;
   birthDate: string;
-  gender: string;
-  otherInfo: string;
+  gender: 'male' | 'female' | 'other';
+  nationalIdentity?: string;
+  otherInfo?: string;
   age: number;
 }
 
@@ -42,7 +43,7 @@ export type SensorySectionKey =
   | 'movementProcessing'
   | 'bodyPositionProcessing'
   | 'oralSensitivityProcessing'
-  | 'conductProcessing'
+  | 'behavioralResponses'
   | 'socialEmotionalResponses'
   | 'attentionResponses';
 
@@ -56,6 +57,7 @@ export interface FormData {
   movementProcessing: SensorySection;
   bodyPositionProcessing: SensorySection;
   oralSensitivityProcessing: SensorySection;
+  behavioralResponses: SensorySection;
   socialEmotionalResponses: SensorySection;
   attentionResponses: SensorySection;
   createdAt?: string;

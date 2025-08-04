@@ -11,12 +11,12 @@ interface SensoryItemsTableProps {
 
 const SensoryItemsTable: React.FC<SensoryItemsTableProps> = memo(({ items, onResponseChange, disabled }) => {
   const frequencyOptions = [
-    { value: "not_applied", label: "Não se aplica" },
-    { value: "almost_never", label: "Quase Nunca" },
-    { value: "half_time", label: "Metade do Tempo" },
-    { value: "occasionally", label: "Ocasionalmente" },
-    { value: "almost_always", label: "Quase Sempre" },
-    { value: "frequently", label: "Frequentemente" }
+    { value: "não se aplica", label: "Não se aplica" },
+    { value: "quase nunca", label: "Quase Nunca" },
+    { value: "ocasionalmente", label: "Ocasionalmente" },
+    { value: "metade do tempo", label: "Metade do Tempo" },
+    { value: "frequentemente", label: "Frequentemente" },
+    { value: "quase sempre", label: "Quase Sempre" }
   ];
 
   return (

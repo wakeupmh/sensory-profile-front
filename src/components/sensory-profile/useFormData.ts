@@ -12,7 +12,7 @@ import {
   movementProcessingItems, 
   bodyPositionProcessingItems, 
   oralSensitivityProcessingItems, 
-  conductProcessingItems, 
+  behavioralResponsesItems, 
   socialEmotionalResponsesItems, 
   attentionResponsesItems 
 } from './itemsData';
@@ -22,7 +22,8 @@ const useFormData = () => {
     child: {
       name: '',
       birthDate: '',
-      gender: '',
+      gender: 'male',
+      nationalIdentity: '',
       otherInfo: '',
       age: 0,
     },
@@ -66,8 +67,8 @@ const useFormData = () => {
       rawScore: 0,
       comments: '',
     },
-    conductProcessing: {
-      items: conductProcessingItems,
+    behavioralResponses: {
+      items: behavioralResponsesItems,
       rawScore: 0,
       comments: '',
     },
@@ -124,12 +125,12 @@ const useFormData = () => {
 
   const calculateRawScore = useCallback((items: SensoryItem[]) => {
     const responseValues = {
-      'almost_always': 5,
-      'frequently': 4,
-      'half_time': 3,
-      'occasionally': 2,
-      'almost_never': 1,
-      'not_applied': 0
+      'quase sempre': 5,
+      'frequentemente': 4,
+      'metade do tempo': 3,
+      'ocasionalmente': 2,
+      'quase nunca': 1,
+      'não se aplica': 0
     };
 
     return items.reduce((total, item) => {

@@ -41,6 +41,7 @@ const ReportPage: React.FC = () => {
               ...itemsModule.movementProcessingItems,
               ...itemsModule.bodyPositionProcessingItems,
               ...itemsModule.oralSensitivityProcessingItems,
+              ...itemsModule.behavioralResponsesItems,
               ...itemsModule.socialEmotionalResponsesItems,
               ...itemsModule.attentionResponsesItems
             ];
@@ -58,20 +59,22 @@ const ReportPage: React.FC = () => {
               movementProcessing: [],
               bodyPositionProcessing: [],
               oralSensitivityProcessing: [],
+              behavioralResponses: [],
               socialEmotionalResponses: [],
               attentionResponses: []
             };
             
-            // Map item IDs to their sections
+            // Map item IDs to their sections (based on PDF structure)
             const sectionRanges = [
               { start: 1, end: 8, section: 'auditoryProcessing' },
-              { start: 9, end: 19, section: 'visualProcessing' },
-              { start: 20, end: 37, section: 'tactileProcessing' },
-              { start: 38, end: 53, section: 'movementProcessing' },
-              { start: 54, end: 65, section: 'bodyPositionProcessing' },
-              { start: 66, end: 77, section: 'oralSensitivityProcessing' },
-              { start: 78, end: 85, section: 'socialEmotionalResponses' },
-              { start: 86, end: 92, section: 'attentionResponses' }
+              { start: 9, end: 14, section: 'visualProcessing' }, // 15 excluded
+              { start: 16, end: 26, section: 'tactileProcessing' },
+              { start: 27, end: 34, section: 'movementProcessing' },
+              { start: 35, end: 42, section: 'bodyPositionProcessing' },
+              { start: 43, end: 52, section: 'oralSensitivityProcessing' },
+              { start: 53, end: 61, section: 'behavioralResponses' },
+              { start: 62, end: 75, section: 'socialEmotionalResponses' },
+              { start: 76, end: 85, section: 'attentionResponses' } // 86 excluded
             ];
             
             // Function to determine which section an item belongs to
@@ -103,7 +106,8 @@ const ReportPage: React.FC = () => {
               child: {
                 name: response.assessment.childName || '',
                 birthDate: response.assessment.childBirthDate || '',
-                gender: response.assessment.childGender || '',
+                gender: response.assessment.childGender || 'male',
+                nationalIdentity: response.assessment.childNationalIdentity || '',
                 otherInfo: response.assessment.childOtherInfo || '',
                 age: response.assessment.childAge || 0
               },
@@ -140,6 +144,10 @@ const ReportPage: React.FC = () => {
               oralSensitivityProcessing: { 
                 items: responsesBySection.oralSensitivityProcessing,
                 rawScore: response.assessment.oralSensitivityProcessingRawScore || 0
+              },
+              behavioralResponses: { 
+                items: responsesBySection.behavioralResponses,
+                rawScore: response.assessment.behavioralResponsesRawScore || 0
               },
               socialEmotionalResponses: { 
                 items: responsesBySection.socialEmotionalResponses,

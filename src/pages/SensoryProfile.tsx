@@ -58,6 +58,7 @@ const SensoryProfileForm: React.FC = () => {
                 name: assessment.childName,
                 birthDate: assessment.childBirthDate ? new Date(assessment.childBirthDate).toISOString().split('T')[0] : '',
                 gender: assessment.childGender,
+                nationalIdentity: assessment.childNationalIdentity || '',
                 otherInfo: assessment.childOtherInfo || '',
                 age: assessment.childAge,
               },
@@ -79,7 +80,7 @@ const SensoryProfileForm: React.FC = () => {
               const sections = [
                 'auditoryProcessing', 'visualProcessing', 'tactileProcessing', 
                 'movementProcessing', 'bodyPositionProcessing', 'oralSensitivityProcessing', 
-                'socialEmotionalResponses', 'attentionResponses'
+                'behavioralResponses', 'socialEmotionalResponses', 'attentionResponses'
               ] as const;
               
               // Update each section with the responses
@@ -206,7 +207,7 @@ const SensoryProfileForm: React.FC = () => {
     const sections = [
       'auditoryProcessing', 'visualProcessing', 'tactileProcessing', 
       'movementProcessing', 'oralSensitivityProcessing', 'bodyPositionProcessing', 
-      'socialEmotionalResponses', 'attentionResponses'
+      'behavioralResponses', 'socialEmotionalResponses', 'attentionResponses'
     ] as const;
     
     for (const section of sections) {
@@ -236,45 +237,92 @@ const SensoryProfileForm: React.FC = () => {
       setSubmitting(true);
       const token = await getToken();
       
-      // Enviar os dados no formato original do formData
+      // Transform data to backend expected format
       if (isNewMode) {
-        // Extrair os comentários de cada seção
-        const comments = [
-          { section: 'auditoryProcessing', comments: formData.auditoryProcessing.comments },
-          { section: 'visualProcessing', comments: formData.visualProcessing.comments },
-          { section: 'tactileProcessing', comments: formData.tactileProcessing.comments },
-          { section: 'movementProcessing', comments: formData.movementProcessing.comments },
-          { section: 'bodyPositionProcessing', comments: formData.bodyPositionProcessing.comments },
-          { section: 'oralSensitivityProcessing', comments: formData.oralSensitivityProcessing.comments },
-          { section: 'socialEmotionalResponses', comments: formData.socialEmotionalResponses.comments },
-          { section: 'attentionResponses', comments: formData.attentionResponses.comments }
-        ];
+        // Extract section comments
+        const sectionComments = [
+          { section: 'auditoryProcessing', comments: formData.auditoryProcessing.comments || '' },
+          { section: 'visualProcessing', comments: formData.visualProcessing.comments || '' },
+          { section: 'tactileProcessing', comments: formData.tactileProcessing.comments || '' },
+          { section: 'movementProcessing', comments: formData.movementProcessing.comments || '' },
+          { section: 'bodyPositionProcessing', comments: formData.bodyPositionProcessing.comments || '' },
+          { section: 'oralSensitivityProcessing', comments: formData.oralSensitivityProcessing.comments || '' },
+          { section: 'behavioralResponses', comments: formData.behavioralResponses.comments || '' },
+          { section: 'socialEmotionalResponses', comments: formData.socialEmotionalResponses.comments || '' },
+          { section: 'attentionResponses', comments: formData.attentionResponses.comments || '' }
+        ].filter(comment => comment.comments.trim() !== '');
+
+        // Extract all responses from all sections
+        const responses: Array<{itemId: number, response: string}> = [];
+        const sections = [
+          'auditoryProcessing', 'visualProcessing', 'tactileProcessing', 
+          'movementProcessing', 'bodyPositionProcessing', 'oralSensitivityProcessing', 
+          'behavioralResponses', 'socialEmotionalResponses', 'attentionResponses'
+        ] as const;
+
+        sections.forEach(section => {
+          const sectionData = formData[section];
+          sectionData.items.forEach(item => {
+            if (item.response) {
+              responses.push({
+                itemId: item.id,
+                response: item.response
+              });
+            }
+          });
+        });
         
-        // Incluir os comentários no payload
+        // Create payload in backend expected format
         const dataToCreate = {
-          ...formData,
-          comments
+          child: formData.child,
+          examiner: formData.examiner,
+          caregiver: formData.caregiver,
+          responses,
+          sectionComments
         };
         
         await assessmentApi.createAssessment(dataToCreate, token);
       } else if (isEditMode && id) {
-        // Extrair os comentários de cada seção
-        const comments = [
-          { section: 'auditoryProcessing', comments: formData.auditoryProcessing.comments },
-          { section: 'visualProcessing', comments: formData.visualProcessing.comments },
-          { section: 'tactileProcessing', comments: formData.tactileProcessing.comments },
-          { section: 'movementProcessing', comments: formData.movementProcessing.comments },
-          { section: 'bodyPositionProcessing', comments: formData.bodyPositionProcessing.comments },
-          { section: 'oralSensitivityProcessing', comments: formData.oralSensitivityProcessing.comments },
-          { section: 'socialEmotionalResponses', comments: formData.socialEmotionalResponses.comments },
-          { section: 'attentionResponses', comments: formData.attentionResponses.comments }
-        ];
+        // Extract section comments
+        const sectionComments = [
+          { section: 'auditoryProcessing', comments: formData.auditoryProcessing.comments || '' },
+          { section: 'visualProcessing', comments: formData.visualProcessing.comments || '' },
+          { section: 'tactileProcessing', comments: formData.tactileProcessing.comments || '' },
+          { section: 'movementProcessing', comments: formData.movementProcessing.comments || '' },
+          { section: 'bodyPositionProcessing', comments: formData.bodyPositionProcessing.comments || '' },
+          { section: 'oralSensitivityProcessing', comments: formData.oralSensitivityProcessing.comments || '' },
+          { section: 'behavioralResponses', comments: formData.behavioralResponses.comments || '' },
+          { section: 'socialEmotionalResponses', comments: formData.socialEmotionalResponses.comments || '' },
+          { section: 'attentionResponses', comments: formData.attentionResponses.comments || '' }
+        ].filter(comment => comment.comments.trim() !== '');
+
+        // Extract all responses from all sections
+        const responses: Array<{itemId: number, response: string}> = [];
+        const sections = [
+          'auditoryProcessing', 'visualProcessing', 'tactileProcessing', 
+          'movementProcessing', 'bodyPositionProcessing', 'oralSensitivityProcessing', 
+          'behavioralResponses', 'socialEmotionalResponses', 'attentionResponses'
+        ] as const;
+
+        sections.forEach(section => {
+          const sectionData = formData[section];
+          sectionData.items.forEach(item => {
+            if (item.response) {
+              responses.push({
+                itemId: item.id,
+                response: item.response
+              });
+            }
+          });
+        });
         
-        // Para edição, vamos garantir que o ID esteja incluído
+        // Create payload in backend expected format for update
         const dataToUpdate = {
-          ...formData,
-          id: id,
-          comments
+          child: formData.child,
+          examiner: formData.examiner,
+          caregiver: formData.caregiver,
+          responses,
+          sectionComments
         };
         
         await assessmentApi.updateAssessment(id, dataToUpdate, token);

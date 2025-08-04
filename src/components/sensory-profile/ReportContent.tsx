@@ -31,12 +31,12 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData }) => {
     if (!items || items.length === 0) return 0;
     
     const responseValueMap: Record<string, number> = {
-      "not_applied": 0,
-      "almost_never": 1,
-      "occasionally": 2,
-      "half_time": 3,
-      "frequently": 4,
-      "almost_always": 5
+      "não se aplica": 0,
+      "quase nunca": 1,
+      "ocasionalmente": 2,
+      "metade do tempo": 3,
+      "frequentemente": 4,
+      "quase sempre": 5
     };
     
     return items.reduce((total, item) => {
@@ -55,7 +55,7 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData }) => {
       oralSensitivityProcessing: { veryLow: 12, low: 24, average: 36, high: 48 },
       socialEmotionalResponses: { veryLow: 8, low: 16, average: 24, high: 32 },
       attentionResponses: { veryLow: 7, low: 14, average: 21, high: 28 },
-      conductProcessing: { veryLow: 9, low: 18, average: 27, high: 36 }
+      behavioralResponses: { veryLow: 9, low: 18, average: 27, high: 36 }
     };
     
     const ranges = scoreRanges[section];
@@ -76,7 +76,7 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData }) => {
     { key: "movementProcessing" as SensorySectionKey, title: "Processamento de Movimento" },
     { key: "bodyPositionProcessing" as SensorySectionKey, title: "Processamento de Posição do Corpo" },
     { key: "oralSensitivityProcessing" as SensorySectionKey, title: "Processamento de Sensibilidade Oral" },
-    { key: "conductProcessing" as SensorySectionKey, title: "Conduta associada ao processamento sensorial" },
+    { key: "behavioralResponses" as SensorySectionKey, title: "Conduta associada ao processamento sensorial" },
     { key: "socialEmotionalResponses" as SensorySectionKey, title: "Respostas Socioemocionais" },
     { key: "attentionResponses" as SensorySectionKey, title: "Respostas de Atenção" },
   ];
@@ -364,29 +364,29 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData }) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {items.map((item: { response: string; description: string; id: any; }, itemIndex: React.Key | null | undefined) => {
+                      {items.map((item, itemIndex) => {
                         const frequencyOptions = [
-                          { value: "not_applied", label: "Não se aplica" },
-                          { value: "almost_never", label: "Quase Nunca" },
-                          { value: "half_time", label: "Metade do Tempo" },
-                          { value: "occasionally", label: "Ocasionalmente" },
-                          { value: "almost_always", label: "Quase Sempre" },
-                          { value: "frequently", label: "Frequentemente" }
+                          { value: "não se aplica", label: "Não se aplica" },
+                          { value: "quase nunca", label: "Quase Nunca" },
+                          { value: "ocasionalmente", label: "Ocasionalmente" },
+                          { value: "metade do tempo", label: "Metade do Tempo" },
+                          { value: "frequentemente", label: "Frequentemente" },
+                          { value: "quase sempre", label: "Quase Sempre" }
                         ];
 
                         const responseText = frequencyOptions.find(option => option.value === item.response)?.label || "Não respondido";
                         
                         // Map response to numeric value for scoring
                         const responseValueMap: Record<string, number> = {
-                          "not_applied": 0,
-                          "almost_never": 1,
-                          "occasionally": 2,
-                          "half_time": 3,
-                          "frequently": 4,
-                          "almost_always": 5
+                          "não se aplica": 0,
+                          "quase nunca": 1,
+                          "ocasionalmente": 2,
+                          "metade do tempo": 3,
+                          "frequentemente": 4,
+                          "quase sempre": 5
                         };
                         
-                        const responseValue = Number(responseValueMap[item.response]) || 0;
+                        const responseValue = item.response ? Number(responseValueMap[item.response]) || 0 : 0;
                         
                         // Ensure we have a description for the item
                         const itemDescription = item.description || `Item ${item.id}`;

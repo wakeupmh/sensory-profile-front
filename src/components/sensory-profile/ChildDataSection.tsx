@@ -97,17 +97,30 @@ const ChildDataSection: React.FC<ChildDataSectionProps> = memo(({ formData, upda
           />
         </Box>
       </Flex>
-      <Box>
-        <FastTextField
-          name="otherInfo"
-          label="Outras Informações Relevantes:"
-          placeholder="Informações adicionais relevantes"
-          initialValue={formData.child?.otherInfo}
-          onValueChange={handleValueChange}
-          disabled={disabled}
-          required={false}
-        />
-      </Box>
+      <Flex gap="4" direction={{ initial: 'column', sm: 'row' }} mb="3">
+        <Box style={{ flex: 1 }}>
+          <FastTextField
+            name="nationalIdentity"
+            label="Identidade Nacional (RG/CPF):"
+            placeholder="RG ou CPF"
+            initialValue={formData.child?.nationalIdentity}
+            onValueChange={handleValueChange}
+            disabled={disabled}
+            required={false}
+          />
+        </Box>
+        <Box style={{ flex: 1 }}>
+          <FastTextField
+            name="otherInfo"
+            label="Outras Informações:"
+            placeholder="Informações adicionais relevantes"
+            initialValue={formData.child?.otherInfo}
+            onValueChange={handleValueChange}
+            disabled={disabled}
+            required={false}
+          />
+        </Box>
+      </Flex>
     </Box>
   );
 });

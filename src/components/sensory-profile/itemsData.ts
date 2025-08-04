@@ -19,8 +19,8 @@ export const visualProcessingItems: SensoryItem[] = [
   { id: 11, quadrant: 'OB', description: 'se diverte ao olhar para detalhes visuais em objetos.', response: null },
   { id: 12, quadrant: 'OB', description: 'precisa de ajuda para encontrar objetos que são óbvios para outros.', response: null },
   { id: 13, quadrant: 'SN', description: 'se incomoda mais com luzes brilhantes do que outras crianças da mesma idade.', response: null },
-  { id: 14, quadrant: 'EX', description: 'observa as pessoas conforme elas se movem ao redor da sala.', response: null },
-  { id: 15, quadrant: 'EV', description: 'se incomoda com luzes brilhantes (por exemplo, se esconde da luz solar que reluz através da janela do carro).', response: null }
+  { id: 14, quadrant: 'EX', description: 'observa as pessoas conforme elas se movem ao redor da sala.', response: null }
+  // Item 15 is excluded from scoring per backend validation
 ];
 
 // Itens de processamento do tato
@@ -76,8 +76,8 @@ export const oralSensitivityProcessingItems: SensoryItem[] = [
   { id: 52, quadrant: 'SN', description: 'morde a língua ou lábios mais do que as crianças da mesma idade.', response: null }
 ];
 
-// Itens de conduta associada ao processamento sensorial
-export const conductProcessingItems: SensoryItem[] = [
+// Itens de conduta associada ao processamento sensorial (BEHAVIORAL RESPONSES)
+export const behavioralResponsesItems: SensoryItem[] = [
   { id: 53, quadrant: 'OB', description: 'parece propenso(a) a acidentes.', response: null },
   { id: 54, quadrant: 'OB', description: 'se apressa em atividades de colorir, escrever ou desenhar.', response: null },
   { id: 55, quadrant: 'EX', description: 'se expõe a riscos excessivos (por exemplo, sobe alto em uma árvore, salta de móveis altos) que comprometem sua própria segurança.', response: null },
@@ -100,8 +100,8 @@ export const attentionResponsesItems: SensoryItem[] = [
   { id: 82, quadrant: 'EX', description: 'observa a todos conforme se movem ao redor da sala.', response: null },
   { id: 83, quadrant: 'EX', description: 'muda de uma coisa para outra de modo a interferir com as atividades.', response: null },
   { id: 84, quadrant: 'SN', description: 'se perde facilmente.', response: null },
-  { id: 85, quadrant: 'OB', description: 'tem dificuldade para encontrar objetos em espaços cheios de coisas (por exemplo, sapatos em um quarto bagunçado, lápis na “gaveta de bagunças”).', response: null },
-  { id: 86, quadrant: 'OB', description: 'parece não se dar conta quando pessoas entram na sala.', response: null }
+  { id: 85, quadrant: 'OB', description: 'tem dificuldade para encontrar objetos em espaços cheios de coisas (por exemplo, sapatos em um quarto bagunçado, lápis na "gaveta de bagunças").', response: null }
+  // Item 86 is excluded from scoring per backend validation
 ];
 
 // Itens de respostas socioemocionais associadas ao processamento sensorial
