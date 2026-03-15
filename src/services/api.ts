@@ -1,20 +1,30 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios';
 
+const baseURL = import.meta.env.VITE_API_URL;
+if (!baseURL && import.meta.env.PROD) {
+  throw new Error('VITE_API_URL environment variable is required in production');
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+  baseURL: baseURL || 'http://localhost:3000',
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
+function getAuthHeaders(token: string | null): { Authorization: string } {
+  if (!token) {
+    throw new Error('Authentication token is missing. Please sign in.');
+  }
+  return { Authorization: `Bearer ${token}` };
+}
+
 export const assessmentApi = {
   getAllAssessments: async (token: string | null) => {
     try {
       const response = await api.get('/api/assessments', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: getAuthHeaders(token),
       });
       return response.data;
     } catch (error) {
@@ -26,9 +36,7 @@ export const assessmentApi = {
   getAssessmentById: async (id: string, token: string | null) => {
     try {
       const response = await api.get(`/api/assessments/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: getAuthHeaders(token),
       });
       return response.data;
     } catch (error) {
@@ -40,9 +48,7 @@ export const assessmentApi = {
   createAssessment: async (assessmentData: any, token: string | null) => {
     try {
       const response = await api.post('/api/assessments', assessmentData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: getAuthHeaders(token),
       });
       return response.data;
     } catch (error) {
@@ -51,13 +57,10 @@ export const assessmentApi = {
     }
   },
 
-  // Update assessment
   updateAssessment: async (id: string, assessmentData: any, token: string | null) => {
     try {
       const response = await api.put(`/api/assessments/${id}`, assessmentData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: getAuthHeaders(token),
       });
       return response.data;
     } catch (error) {
@@ -66,16 +69,11 @@ export const assessmentApi = {
     }
   },
 
-  // Delete assessment
   deleteAssessment: async (id: string, token: string | null) => {
     try {
-      const response = await api.delete(`/api/assessments/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await api.delete(`/api/assessments/${id}`, {
+        headers: getAuthHeaders(token),
+      });
       return response.data;
     } catch (error) {
       console.error(`Error deleting assessment ${id}:`, error);
@@ -83,13 +81,10 @@ export const assessmentApi = {
     }
   },
 
-  // Generate report
   generateReport: async (id: string, token: string | null) => {
     try {
       const response = await api.get(`/api/assessments/${id}/report`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: getAuthHeaders(token),
       });
       return response.data;
     } catch (error) {

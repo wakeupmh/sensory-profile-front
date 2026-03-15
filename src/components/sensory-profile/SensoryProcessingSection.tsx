@@ -29,6 +29,7 @@ const SensorySection = memo(({
   updateComments: (section: string, comments: string) => void;
   disabled?: boolean;
 }) => {
+  const textareaId = `comments-${sectionKey}`;
   return (
     <Box mb="6">
       <Text size="5" weight="bold" mb="3">{title}</Text>
@@ -40,9 +41,10 @@ const SensorySection = memo(({
         disabled={disabled}
       />
       <Box mt="3">
-        <Text size="2" weight="bold" mb="1">Comentários:</Text>
-        <TextArea 
-          placeholder="Adicione comentários sobre esta seção" 
+        <Text as="label" htmlFor={textareaId} size="2" weight="bold" mb="1">Comentários:</Text>
+        <TextArea
+          id={textareaId}
+          placeholder="Adicione comentários sobre esta seção"
           value={comments || ''}
           onChange={(e) => updateComments(sectionKey, e.target.value)}
           disabled={disabled}
@@ -52,6 +54,8 @@ const SensorySection = memo(({
     </Box>
   );
 });
+
+SensorySection.displayName = 'SensorySection';
 
 const SensoryProcessingSection: React.FC<SensoryProcessingSectionProps> = memo(({
   formData,
@@ -99,5 +103,7 @@ const SensoryProcessingSection: React.FC<SensoryProcessingSectionProps> = memo((
     </>
   );
 });
+
+SensoryProcessingSection.displayName = 'SensoryProcessingSection';
 
 export default SensoryProcessingSection;

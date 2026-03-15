@@ -53,7 +53,10 @@ const Menu: React.FC = () => {
             
             <DropdownMenu.Root>
               <DropdownMenu.Trigger>
-                <Flex gap="2" align="center" style={{ cursor: 'pointer' }}>
+                <Flex gap="2" align="center" style={{
+                  cursor: 'pointer',
+                  color: location.pathname.startsWith('/assessment') ? 'var(--violet-9)' : 'var(--gray-11)'
+                }}>
                   <FileTextIcon />
                   <Text size="2" weight="medium">Avaliações</Text>
                   <ChevronDownIcon />

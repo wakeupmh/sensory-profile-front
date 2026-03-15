@@ -4,9 +4,11 @@ import Layout from './components/Layout';
 import Home from './pages/Home';
 import SensoryProfileForm from './pages/SensoryProfile';
 import ReportPage from './pages/ReportPage';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   return (
+    <ErrorBoundary>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Layout />}>
@@ -72,6 +74,7 @@ function App() {
           </Route>
         </Routes>
       </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

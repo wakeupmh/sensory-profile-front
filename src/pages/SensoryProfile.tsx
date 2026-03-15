@@ -225,109 +225,56 @@ const SensoryProfileForm: React.FC = () => {
     return true;
   };
 
+  const buildAssessmentPayload = () => {
+    const sectionKeys = [
+      'auditoryProcessing', 'visualProcessing', 'tactileProcessing',
+      'movementProcessing', 'bodyPositionProcessing', 'oralSensitivityProcessing',
+      'behavioralResponses', 'socialEmotionalResponses', 'attentionResponses'
+    ] as const;
+
+    const sectionComments = sectionKeys
+      .map(section => ({
+        section,
+        comments: formData[section].comments || ''
+      }))
+      .filter(comment => comment.comments.trim() !== '');
+
+    const responses: Array<{ itemId: number; response: string }> = [];
+    sectionKeys.forEach(section => {
+      formData[section].items.forEach(item => {
+        if (item.response) {
+          responses.push({ itemId: item.id, response: item.response });
+        }
+      });
+    });
+
+    return {
+      child: formData.child,
+      examiner: formData.examiner,
+      caregiver: formData.caregiver,
+      responses,
+      sectionComments
+    };
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    
-    // Validate form
+
     if (!validateForm()) {
       return;
     }
-    
+
     try {
       setSubmitting(true);
       const token = await getToken();
-      
-      // Transform data to backend expected format
+      const payload = buildAssessmentPayload();
+
       if (isNewMode) {
-        // Extract section comments
-        const sectionComments = [
-          { section: 'auditoryProcessing', comments: formData.auditoryProcessing.comments || '' },
-          { section: 'visualProcessing', comments: formData.visualProcessing.comments || '' },
-          { section: 'tactileProcessing', comments: formData.tactileProcessing.comments || '' },
-          { section: 'movementProcessing', comments: formData.movementProcessing.comments || '' },
-          { section: 'bodyPositionProcessing', comments: formData.bodyPositionProcessing.comments || '' },
-          { section: 'oralSensitivityProcessing', comments: formData.oralSensitivityProcessing.comments || '' },
-          { section: 'behavioralResponses', comments: formData.behavioralResponses.comments || '' },
-          { section: 'socialEmotionalResponses', comments: formData.socialEmotionalResponses.comments || '' },
-          { section: 'attentionResponses', comments: formData.attentionResponses.comments || '' }
-        ].filter(comment => comment.comments.trim() !== '');
-
-        // Extract all responses from all sections
-        const responses: Array<{itemId: number, response: string}> = [];
-        const sections = [
-          'auditoryProcessing', 'visualProcessing', 'tactileProcessing', 
-          'movementProcessing', 'bodyPositionProcessing', 'oralSensitivityProcessing', 
-          'behavioralResponses', 'socialEmotionalResponses', 'attentionResponses'
-        ] as const;
-
-        sections.forEach(section => {
-          const sectionData = formData[section];
-          sectionData.items.forEach(item => {
-            if (item.response) {
-              responses.push({
-                itemId: item.id,
-                response: item.response
-              });
-            }
-          });
-        });
-        
-        // Create payload in backend expected format
-        const dataToCreate = {
-          child: formData.child,
-          examiner: formData.examiner,
-          caregiver: formData.caregiver,
-          responses,
-          sectionComments
-        };
-        
-        await assessmentApi.createAssessment(dataToCreate, token);
+        await assessmentApi.createAssessment(payload, token);
       } else if (isEditMode && id) {
-        // Extract section comments
-        const sectionComments = [
-          { section: 'auditoryProcessing', comments: formData.auditoryProcessing.comments || '' },
-          { section: 'visualProcessing', comments: formData.visualProcessing.comments || '' },
-          { section: 'tactileProcessing', comments: formData.tactileProcessing.comments || '' },
-          { section: 'movementProcessing', comments: formData.movementProcessing.comments || '' },
-          { section: 'bodyPositionProcessing', comments: formData.bodyPositionProcessing.comments || '' },
-          { section: 'oralSensitivityProcessing', comments: formData.oralSensitivityProcessing.comments || '' },
-          { section: 'behavioralResponses', comments: formData.behavioralResponses.comments || '' },
-          { section: 'socialEmotionalResponses', comments: formData.socialEmotionalResponses.comments || '' },
-          { section: 'attentionResponses', comments: formData.attentionResponses.comments || '' }
-        ].filter(comment => comment.comments.trim() !== '');
-
-        // Extract all responses from all sections
-        const responses: Array<{itemId: number, response: string}> = [];
-        const sections = [
-          'auditoryProcessing', 'visualProcessing', 'tactileProcessing', 
-          'movementProcessing', 'bodyPositionProcessing', 'oralSensitivityProcessing', 
-          'behavioralResponses', 'socialEmotionalResponses', 'attentionResponses'
-        ] as const;
-
-        sections.forEach(section => {
-          const sectionData = formData[section];
-          sectionData.items.forEach(item => {
-            if (item.response) {
-              responses.push({
-                itemId: item.id,
-                response: item.response
-              });
-            }
-          });
-        });
-        
-        // Create payload in backend expected format for update
-        const dataToUpdate = {
-          child: formData.child,
-          examiner: formData.examiner,
-          caregiver: formData.caregiver,
-          responses,
-          sectionComments
-        };
-        
-        await assessmentApi.updateAssessment(id, dataToUpdate, token);
+        await assessmentApi.updateAssessment(id, payload, token);
       }
-      
+
       navigate('/');
     } catch (err) {
       setError('Erro ao salvar avaliação. Por favor, tente novamente.');
@@ -392,7 +339,7 @@ const SensoryProfileForm: React.FC = () => {
           </Flex>
 
           {validationError && (
-            <Box mb="4" p="3" style={{ backgroundColor: '#FFEBEE', borderRadius: '4px' }}>
+            <Box mb="4" p="3" role="alert" style={{ backgroundColor: '#FFEBEE', borderRadius: '4px' }}>
               <Text color="crimson" weight="bold">Erros de validação:</Text>
               <Text color="crimson">{validationError}</Text>
             </Box>

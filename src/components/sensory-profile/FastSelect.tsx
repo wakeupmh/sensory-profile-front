@@ -30,11 +30,11 @@ const FastSelect = memo(({
   onValueChange 
 }: FastSelectProps) => {
   // Estado local para o valor do campo
-  const [value, setValue] = useState(initialValue || 'placeholder');
-  
+  const [value, setValue] = useState(initialValue !== undefined && initialValue !== '' ? initialValue : 'placeholder');
+
   // Atualizar o valor inicial se ele mudar
   useEffect(() => {
-    setValue(initialValue || 'placeholder');
+    setValue(initialValue !== undefined && initialValue !== '' ? initialValue : 'placeholder');
   }, [initialValue]);
 
   // Manipulador de alteração que atualiza o estado local e notifica o componente pai
@@ -73,5 +73,7 @@ const FastSelect = memo(({
     </Box>
   );
 });
+
+FastSelect.displayName = 'FastSelect';
 
 export default FastSelect;

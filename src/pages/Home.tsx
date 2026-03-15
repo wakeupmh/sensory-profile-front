@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { assessmentApi } from '../services/api';
 import { 
@@ -39,31 +39,27 @@ const Home = () => {
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { getToken } = useAuth();
-  const fetchedRef = useRef(false);
+  const getTokenRef = useRef(getToken);
+  getTokenRef.current = getToken;
+
+  const fetchAssessments = useCallback(async () => {
+    try {
+      setLoading(true);
+      const token = await getTokenRef.current();
+      const response = await assessmentApi.getAllAssessments(token);
+      setAssessments(response.data ?? response);
+      setError(null);
+    } catch (err) {
+      setError('Erro ao carregar avaliações. Por favor, tente novamente.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchAssessments = async () => {
-      // Skip if we've already fetched in this session
-      if (fetchedRef.current) return;
-      
-      try {
-        setLoading(true);
-        const token = await getToken();
-        const data = await assessmentApi.getAllAssessments(token);
-        setAssessments(data);
-        setError(null);
-        // Mark as fetched
-        fetchedRef.current = true;
-      } catch (err) {
-        setError('Erro ao carregar avaliações. Por favor, tente novamente.');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchAssessments();
-  }, [getToken]);
+  }, [fetchAssessments]);
 
   const handleDeleteAssessment = async (id: string) => {
     try {
@@ -145,24 +141,24 @@ const Home = () => {
                   <Table.Cell>{new Date(assessment.createdAt).toLocaleDateString('pt-BR')}</Table.Cell>
                   <Table.Cell>
                     <Flex gap="2" justify="center">
-                      <IconButton variant="soft" color="gray" size="1" asChild title="Visualizar">
+                      <IconButton variant="soft" color="gray" size="1" asChild title="Visualizar" aria-label="Visualizar avaliação">
                         <Link to={`/assessment/${assessment.id}`}>
                           <EyeOpenIcon />
                         </Link>
                       </IconButton>
-                      <IconButton variant="soft" color="violet" size="1" asChild title="Editar">
+                      <IconButton variant="soft" color="violet" size="1" asChild title="Editar" aria-label="Editar avaliação">
                         <Link to={`/assessment/${assessment.id}/edit`}>
                           <Pencil1Icon />
                         </Link>
                       </IconButton>
-                      <IconButton variant="soft" color="jade" size="1" asChild title="Relatório">
+                      <IconButton variant="soft" color="jade" size="1" asChild title="Relatório" aria-label="Ver relatório">
                         <Link to={`/assessment/${assessment.id}/report`}>
                           <FileTextIcon />
                         </Link>
                       </IconButton>
                       <AlertDialog.Root>
                         <AlertDialog.Trigger>
-                          <IconButton variant="soft" color="red" size="1" title="Excluir">
+                          <IconButton variant="soft" color="red" size="1" title="Excluir" aria-label="Excluir avaliação">
                             <TrashIcon />
                           </IconButton>
                         </AlertDialog.Trigger>

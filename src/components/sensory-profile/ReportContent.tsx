@@ -200,11 +200,13 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData }) => {
             </div>
             <div style={{ flex: 1 }}>
               <span style={fieldLabelStyle}>Gênero:</span> {
-                formData.child.gender === 'male' 
-                  ? 'Masculino' 
-                  : formData.child.gender === 'female' 
-                    ? 'Feminino' 
-                    : formData.child.gender || 'Não informado'
+                formData.child.gender === 'male'
+                  ? 'Masculino'
+                  : formData.child.gender === 'female'
+                    ? 'Feminino'
+                    : formData.child.gender === 'other'
+                      ? 'Outro'
+                      : formData.child.gender || 'Não informado'
               }
             </div>
           </div>
@@ -246,6 +248,8 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData }) => {
                 formData.caregiver.relationship === 'mother' ? 'Mãe' :
                 formData.caregiver.relationship === 'grandparent' ? 'Avô/Avó' :
                 formData.caregiver.relationship === 'other_relative' ? 'Outro Familiar' :
+                formData.caregiver.relationship === 'sibling' ? 'Irmão/Irmã' :
+                formData.caregiver.relationship === 'other' ? 'Outro' :
                 formData.caregiver.relationship || 'Não informada'
               }
             </div>
