@@ -65,10 +65,16 @@ const Menu: React.FC = () => {
               </DropdownMenu.Trigger>
               <DropdownMenu.Content>
                 <DropdownMenu.Item>
-                  <Link to="/assessment/new" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', width: '100%' }}>
-                    Nova Avaliação
+                  <Link to="/assessment/new?instrument=crianca-3-14" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', width: '100%' }}>
+                    Nova avaliação — Criança (3–14 anos)
                   </Link>
                 </DropdownMenu.Item>
+                <DropdownMenu.Item>
+                  <Link to="/assessment/new?instrument=crianca-pequena" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', width: '100%' }}>
+                    Nova avaliação — Criança Pequena (7–36 meses)
+                  </Link>
+                </DropdownMenu.Item>
+                <DropdownMenu.Separator />
                 <DropdownMenu.Item>
                   <Link to="/" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', width: '100%' }}>
                     Listar Avaliações

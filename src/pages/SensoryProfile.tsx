@@ -9,6 +9,7 @@ import ExaminerDataSection from '../components/sensory-profile/ExaminerDataSecti
 import CaregiverDataSection from '../components/sensory-profile/CaregiverDataSection';
 import InstructionsSection from '../components/sensory-profile/InstructionsSection';
 import SensoryProcessingSection from '../components/sensory-profile/SensoryProcessingSection';
+import InstrumentPicker from '../components/sensory-profile/InstrumentPicker';
 import useFormData from '../components/sensory-profile/useFormData';
 import AnamneseSelector from '../components/anamnese/AnamneseSelector';
 import type { Anamnese } from '../components/anamnese/types';
@@ -27,8 +28,22 @@ const SensoryProfileForm: React.FC = () => {
   const [searchParams] = useSearchParams();
   const initialInstrumentId = searchParams.get('instrument') || DEFAULT_INSTRUMENT_ID;
 
-  const { formData, updateFormData, updateItemResponse, setFormData } =
+  const { formData, updateFormData, updateItemResponse, setFormData, switchInstrument } =
     useFormData(initialInstrumentId);
+
+  const handleInstrumentChange = (newId: string) => {
+    if (newId === formData.instrumentId) return;
+    const hasAnyResponse = Object.values(formData.sections || {}).some((s) =>
+      s.items.some((i) => !!i.response),
+    );
+    if (hasAnyResponse) {
+      const confirmed = typeof window === 'undefined'
+        ? true
+        : window.confirm('Trocar de instrumento irá reiniciar as respostas já preenchidas. Deseja continuar?');
+      if (!confirmed) return;
+    }
+    switchInstrument(newId);
+  };
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -317,12 +332,18 @@ const SensoryProfileForm: React.FC = () => {
           )}
 
           {isNewMode && (
-            <AnamneseSelector
-              onSelect={(a: Anamnese) => {
-                updateFormData('child', a.child);
-                updateFormData('caregiver', a.caregiver);
-              }}
-            />
+            <>
+              <InstrumentPicker
+                value={formData.instrumentId}
+                onChange={handleInstrumentChange}
+              />
+              <AnamneseSelector
+                onSelect={(a: Anamnese) => {
+                  updateFormData('child', a.child);
+                  updateFormData('caregiver', a.caregiver);
+                }}
+              />
+            </>
           )}
 
           <ChildDataSection

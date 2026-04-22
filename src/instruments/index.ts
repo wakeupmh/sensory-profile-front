@@ -1,8 +1,10 @@
 import type { Instrument } from './types';
 import { crianca3a14 } from './crianca-3-14';
+import { criancaPequena } from './crianca-pequena';
 
 export const instruments: Record<string, Instrument> = {
   [crianca3a14.id]: crianca3a14,
+  [criancaPequena.id]: criancaPequena,
 };
 
 export type InstrumentId = string;
