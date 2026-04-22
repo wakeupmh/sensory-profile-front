@@ -4,57 +4,17 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Card, Flex, Text, Button, Heading } from '@radix-ui/themes';
 import PDFGenerator from '../components/sensory-profile/PDFGenerator';
 import ReportContent from '../components/sensory-profile/ReportContent';
-import { FormData } from '../components/sensory-profile/types';
+import { FormData, SensoryItem, SensorySection } from '../components/sensory-profile/types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import NotFound from '../components/NotFound';
 import { useAuth } from '@clerk/clerk-react';
 import { assessmentApi } from '../services/api';
 import {
-  auditoryProcessingItems,
-  visualProcessingItems,
-  tactileProcessingItems,
-  movementProcessingItems,
-  bodyPositionProcessingItems,
-  oralSensitivityProcessingItems,
-  behavioralResponsesItems,
-  socialEmotionalResponsesItems,
-  attentionResponsesItems
-} from '../components/sensory-profile/itemsData';
-
-// Build items lookup once at module level
-const allItems = [
-  ...auditoryProcessingItems,
-  ...visualProcessingItems,
-  ...tactileProcessingItems,
-  ...movementProcessingItems,
-  ...bodyPositionProcessingItems,
-  ...oralSensitivityProcessingItems,
-  ...behavioralResponsesItems,
-  ...socialEmotionalResponsesItems,
-  ...attentionResponsesItems
-];
-
-const itemsById = new Map<number, typeof allItems[0]>();
-allItems.forEach(item => {
-  itemsById.set(item.id, item);
-});
-
-const sectionRanges = [
-  { start: 1, end: 8, section: 'auditoryProcessing' },
-  { start: 9, end: 14, section: 'visualProcessing' },
-  { start: 16, end: 26, section: 'tactileProcessing' },
-  { start: 27, end: 34, section: 'movementProcessing' },
-  { start: 35, end: 42, section: 'bodyPositionProcessing' },
-  { start: 43, end: 52, section: 'oralSensitivityProcessing' },
-  { start: 53, end: 61, section: 'behavioralResponses' },
-  { start: 62, end: 75, section: 'socialEmotionalResponses' },
-  { start: 76, end: 85, section: 'attentionResponses' }
-];
-
-const getSectionForItemId = (itemId: number) => {
-  const range = sectionRanges.find(r => itemId >= r.start && itemId <= r.end);
-  return range ? range.section : null;
-};
+  DEFAULT_INSTRUMENT_ID,
+  findSectionByItemId,
+  getInstrument,
+} from '../instruments';
+import { toSensoryItems } from '../instruments/types';
 
 const ReportPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -76,101 +36,70 @@ const ReportPage: React.FC = () => {
         setLoading(true);
         const token = await getToken();
         const response = await assessmentApi.getAssessmentById(id, token);
-
         if (cancelled) return;
 
         if (response.assessment && response.responses) {
-          const responsesBySection: Record<string, any[]> = {
-            auditoryProcessing: [],
-            visualProcessing: [],
-            tactileProcessing: [],
-            movementProcessing: [],
-            bodyPositionProcessing: [],
-            oralSensitivityProcessing: [],
-            behavioralResponses: [],
-            socialEmotionalResponses: [],
-            attentionResponses: []
-          };
+          const instrumentId: string = response.assessment.instrumentId || DEFAULT_INSTRUMENT_ID;
+          const instrument = getInstrument(instrumentId);
 
-          response.responses.forEach((responseItem: any) => {
-            const itemId = responseItem.itemId;
-            const section = getSectionForItemId(itemId);
+          const sections: Record<string, SensorySection> = Object.fromEntries(
+            instrument.sections.map((s) => [
+              s.key,
+              { items: toSensoryItems(s.items) as SensoryItem[], rawScore: 0, comments: '' },
+            ]),
+          );
 
-            if (section && responsesBySection[section]) {
-              const originalItem = itemsById.get(itemId);
-
-              responsesBySection[section].push({
-                id: itemId,
-                quadrant: originalItem?.quadrant || '',
-                description: originalItem?.description || `Item ${itemId}`,
-                response: responseItem.response,
-                responseId: responseItem.id
-              });
+          response.responses.forEach((r: { itemId: number; response: string; id?: string }) => {
+            const sectionKey = findSectionByItemId(instrument, r.itemId);
+            if (!sectionKey) return;
+            const target = sections[sectionKey].items.find((it) => it.id === r.itemId);
+            if (target) {
+              target.response = r.response as SensoryItem['response'];
+              if (r.id) target.responseId = r.id;
             }
           });
 
-          const newFormData: FormData = {
+          instrument.sections.forEach((s) => {
+            const scoreField = `${s.key}RawScore`;
+            if (response.assessment[scoreField] !== undefined && response.assessment[scoreField] !== null) {
+              sections[s.key].rawScore = response.assessment[scoreField];
+            }
+          });
+
+          if (Array.isArray(response.assessment.sectionComments)) {
+            response.assessment.sectionComments.forEach((c: { section: string; comments: string }) => {
+              if (sections[c.section]) sections[c.section].comments = c.comments || '';
+            });
+          }
+
+          setFormData({
+            instrumentId,
             child: {
               name: response.assessment.childName || '',
               birthDate: response.assessment.childBirthDate || '',
               gender: response.assessment.childGender || 'male',
               nationalIdentity: response.assessment.childNationalIdentity || '',
               otherInfo: response.assessment.childOtherInfo || '',
-              age: response.assessment.childAge || 0
+              age: response.assessment.childAge || 0,
             },
             examiner: {
               name: response.assessment.examinerName || '',
               profession: response.assessment.examinerProfession || '',
-              contact: response.assessment.examinerContact || ''
+              contact: response.assessment.examinerContact || '',
             },
             caregiver: {
               name: response.assessment.caregiverName || '',
               relationship: response.assessment.caregiverRelationship || '',
-              contact: response.assessment.caregiverContact || ''
+              contact: response.assessment.caregiverContact || '',
             },
-            auditoryProcessing: {
-              items: responsesBySection.auditoryProcessing,
-              rawScore: response.assessment.auditoryProcessingRawScore || 0
-            },
-            visualProcessing: {
-              items: responsesBySection.visualProcessing,
-              rawScore: response.assessment.visualProcessingRawScore || 0
-            },
-            tactileProcessing: {
-              items: responsesBySection.tactileProcessing,
-              rawScore: response.assessment.tactileProcessingRawScore || 0
-            },
-            movementProcessing: {
-              items: responsesBySection.movementProcessing,
-              rawScore: response.assessment.movementProcessingRawScore || 0
-            },
-            bodyPositionProcessing: {
-              items: responsesBySection.bodyPositionProcessing,
-              rawScore: response.assessment.bodyPositionProcessingRawScore || 0
-            },
-            oralSensitivityProcessing: {
-              items: responsesBySection.oralSensitivityProcessing,
-              rawScore: response.assessment.oralSensitivityProcessingRawScore || 0
-            },
-            behavioralResponses: {
-              items: responsesBySection.behavioralResponses,
-              rawScore: response.assessment.behavioralResponsesRawScore || 0
-            },
-            socialEmotionalResponses: {
-              items: responsesBySection.socialEmotionalResponses,
-              rawScore: response.assessment.socialEmotionalResponsesRawScore || 0
-            },
-            attentionResponses: {
-              items: responsesBySection.attentionResponses,
-              rawScore: response.assessment.attentionResponsesRawScore || 0
-            },
+            sections,
             createdAt: response.assessment.createdAt,
-            id: response.assessment.id
-          };
-
-          setFormData(newFormData);
+          });
         } else {
-          setFormData(response);
+          setFormData({
+            instrumentId: response.instrumentId || DEFAULT_INSTRUMENT_ID,
+            ...response,
+          });
         }
       } catch (err: any) {
         if (cancelled) return;
@@ -181,17 +110,12 @@ const ReportPage: React.FC = () => {
           setError('Erro ao carregar a avaliação. Por favor, tente novamente.');
         }
       } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+        if (!cancelled) setLoading(false);
       }
     };
 
     fetchAssessment();
-
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [id, getToken]);
 
   return (
@@ -211,19 +135,17 @@ const ReportPage: React.FC = () => {
         <Card>
           <Flex align="center" justify="center" direction="column" gap="3" py="9">
             <Text color="red">{error}</Text>
-            <Button onClick={() => navigate('/')} color='gray'>Voltar</Button>
+            <Button onClick={() => navigate('/')} color="gray">Voltar</Button>
           </Flex>
         </Card>
       ) : formData ? (
         <Box>
           <Flex justify="between" align="center" mb="6">
-            <Heading size="7" color='violet'>
-              Relatório de Avaliação
-            </Heading>
+            <Heading size="7" color="violet">Relatório de Avaliação</Heading>
             <Flex gap="3">
               <PDFGenerator formData={formData} assessmentId={id || ''} />
-              <Button onClick={() => navigate(`/assessment/${id}`)} variant="outline" color='gray'>Voltar para Avaliação</Button>
-              <Button onClick={() => navigate('/')} variant="outline" color='gray'>Voltar para Home</Button>
+              <Button onClick={() => navigate(`/assessment/${id}`)} variant="outline" color="gray">Voltar para Avaliação</Button>
+              <Button onClick={() => navigate('/')} variant="outline" color="gray">Voltar para Home</Button>
             </Flex>
           </Flex>
 

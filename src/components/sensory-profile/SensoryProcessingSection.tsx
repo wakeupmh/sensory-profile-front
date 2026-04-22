@@ -2,6 +2,7 @@
 import React, { memo } from 'react';
 import SensoryItemsTable from './SensoryItemsTable';
 import { FormData, FrequencyResponse, SensoryItem } from './types';
+import { getInstrument } from '../../instruments';
 import { Text, Box, TextArea } from '@radix-ui/themes';
 
 interface SensoryProcessingSectionProps {
@@ -11,18 +12,17 @@ interface SensoryProcessingSectionProps {
   disabled?: boolean;
 }
 
-// Componente de seção individual para melhorar a performance
-const SensorySection = memo(({ 
-  title, 
-  sectionKey, 
-  items, 
+const SensorySection = memo(({
+  title,
+  sectionKey,
+  items,
   comments,
-  updateItemResponse, 
+  updateItemResponse,
   updateComments,
-  disabled 
-}: { 
-  title: string; 
-  sectionKey: string; 
+  disabled,
+}: {
+  title: string;
+  sectionKey: string;
   items: SensoryItem[];
   comments: string;
   updateItemResponse: (section: string, itemId: number, response: FrequencyResponse) => void;
@@ -35,7 +35,7 @@ const SensorySection = memo(({
       <Text size="5" weight="bold" mb="3">{title}</Text>
       <SensoryItemsTable
         items={items}
-        onResponseChange={(itemId, response) => 
+        onResponseChange={(itemId, response) =>
           updateItemResponse(sectionKey, itemId, response)
         }
         disabled={disabled}
@@ -61,29 +61,18 @@ const SensoryProcessingSection: React.FC<SensoryProcessingSectionProps> = memo((
   formData,
   updateItemResponse,
   updateFormData,
-  disabled
+  disabled,
 }) => {
-  // Process all sections
-  const sections = [
-    { title: "Processamento Auditivo", key: "auditoryProcessing" },
-    { title: "Processamento Visual", key: "visualProcessing" },
-    { title: "Processamento Tátil", key: "tactileProcessing" },
-    { title: "Processamento de Movimento", key: "movementProcessing" },
-    { title: "Processamento de Posição do Corpo", key: "bodyPositionProcessing" },
-    { title: "Processamento de Sensibilidade Oral", key: "oralSensitivityProcessing" },
-    { title: "Conduta associada ao processamento sensorial", key: "behavioralResponses" },
-    { title: "Respostas Socioemocionais", key: "socialEmotionalResponses" },
-    { title: "Respostas de Atenção", key: "attentionResponses" }
-  ];
+  const instrument = getInstrument(formData.instrumentId);
 
   const handleCommentsChange = (section: string, comments: string) => {
-    updateFormData(`${section}.comments`, comments);
+    updateFormData(`sections.${section}.comments`, comments);
   };
 
   return (
     <>
-      {sections.map(section => {
-        const sectionData = (formData as any)[section.key];
+      {instrument.sections.map((section) => {
+        const sectionData = formData.sections?.[section.key];
         const items: SensoryItem[] = sectionData?.items || [];
         const comments: string = sectionData?.comments || '';
 

@@ -1,150 +1,117 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback } from 'react';
-import { 
-  FormData, 
-  FrequencyResponse, 
-  SensoryItem 
+import {
+  FormData,
+  FrequencyResponse,
+  SensoryItem,
+  SensorySection,
 } from './types';
-import { 
-  auditoryProcessingItems, 
-  visualProcessingItems, 
-  tactileProcessingItems, 
-  movementProcessingItems, 
-  bodyPositionProcessingItems, 
-  oralSensitivityProcessingItems, 
-  behavioralResponsesItems, 
-  socialEmotionalResponsesItems, 
-  attentionResponsesItems 
-} from './itemsData';
+import {
+  DEFAULT_INSTRUMENT_ID,
+  getInstrument,
+} from '../../instruments';
+import { toSensoryItems } from '../../instruments/types';
 
-const useFormData = () => {
-  const [formData, setFormData] = useState<FormData>({
-    child: {
-      name: '',
-      birthDate: '',
-      gender: 'male',
-      nationalIdentity: '',
-      otherInfo: '',
-      age: 0,
-    },
-    examiner: {
-      name: '',
-      profession: '',
-      contact: '',
-    },
-    caregiver: {
-      name: '',
-      relationship: '',
-      contact: '',
-    },
-    auditoryProcessing: {
-      items: auditoryProcessingItems,
-      rawScore: 0,
-      comments: '',
-    },
-    visualProcessing: {
-      items: visualProcessingItems,
-      rawScore: 0,
-      comments: '',
-    },
-    tactileProcessing: {
-      items: tactileProcessingItems,
-      rawScore: 0,
-      comments: '',
-    },
-    movementProcessing: {
-      items: movementProcessingItems,
-      rawScore: 0,
-      comments: '',
-    },
-    bodyPositionProcessing: {
-      items: bodyPositionProcessingItems,
-      rawScore: 0,
-      comments: '',
-    },
-    oralSensitivityProcessing: {
-      items: oralSensitivityProcessingItems,
-      rawScore: 0,
-      comments: '',
-    },
-    behavioralResponses: {
-      items: behavioralResponsesItems,
-      rawScore: 0,
-      comments: '',
-    },
-    socialEmotionalResponses: {
-      items: socialEmotionalResponsesItems,
-      rawScore: 0,
-      comments: '',
-    },
-    attentionResponses: {
-      items: attentionResponsesItems,
-      rawScore: 0,
-      comments: '',
-    },
-  });
+const buildSectionsForInstrument = (instrumentId: string): Record<string, SensorySection> => {
+  const instrument = getInstrument(instrumentId);
+  return Object.fromEntries(
+    instrument.sections.map((s) => [
+      s.key,
+      { items: toSensoryItems(s.items), rawScore: 0, comments: '' },
+    ]),
+  );
+};
 
-  // Função para atualizar formData
+const buildInitialFormData = (instrumentId: string): FormData => ({
+  instrumentId,
+  child: {
+    name: '',
+    birthDate: '',
+    gender: 'male',
+    nationalIdentity: '',
+    otherInfo: '',
+    age: 0,
+  },
+  examiner: {
+    name: '',
+    profession: '',
+    contact: '',
+  },
+  caregiver: {
+    name: '',
+    relationship: '',
+    contact: '',
+  },
+  sections: buildSectionsForInstrument(instrumentId),
+});
+
+const useFormData = (initialInstrumentId: string = DEFAULT_INSTRUMENT_ID) => {
+  const [formData, setFormData] = useState<FormData>(() => buildInitialFormData(initialInstrumentId));
+
   const updateFormData = useCallback((path: string, value: any) => {
     setFormData((prevData) => {
-      const newData = { ...prevData };
+      const newData: any = { ...prevData };
       const keys = path.split('.');
       let current: any = newData;
-      
+
       for (let i = 0; i < keys.length - 1; i++) {
-        current = current[keys[i]];
+        const key = keys[i];
+        current[key] = { ...current[key] };
+        current = current[key];
       }
-      
+
       current[keys[keys.length - 1]] = value;
-      
       return newData;
     });
   }, []);
 
-  // Função para atualizar resposta de item e recalcular pontuação
-  const updateItemResponse = useCallback((section: string, itemId: number, response: FrequencyResponse) => {
-    setFormData((prevData) => {
-      const newData = { ...prevData };
-      const sectionData = (newData as any)[section];
-      
-      // Encontre o item e atualize sua resposta
-      const itemIndex = sectionData.items.findIndex((item: SensoryItem) => item.id === itemId);
-      if (itemIndex !== -1) {
-        sectionData.items[itemIndex] = {
-          ...sectionData.items[itemIndex],
-          response
-        };
-      }
-      
-      // Recalcule a pontuação bruta
-      sectionData.rawScore = calculateRawScore(sectionData.items);
-      
-      return newData;
-    });
+  const updateItemResponse = useCallback(
+    (sectionKey: string, itemId: number, response: FrequencyResponse) => {
+      setFormData((prevData) => {
+        const sections = { ...prevData.sections };
+        const section = sections[sectionKey];
+        if (!section) return prevData;
+
+        const items = section.items.map((item: SensoryItem) =>
+          item.id === itemId ? { ...item, response } : item,
+        );
+        const rawScore = calculateRawScore(items);
+
+        sections[sectionKey] = { ...section, items, rawScore };
+        return { ...prevData, sections };
+      });
+    },
+    [],
+  );
+
+  const switchInstrument = useCallback((newInstrumentId: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      instrumentId: newInstrumentId,
+      sections: buildSectionsForInstrument(newInstrumentId),
+    }));
   }, []);
 
-  const calculateRawScore = useCallback((items: SensoryItem[]) => {
-    const responseValues = {
-      'quase sempre': 5,
-      'frequentemente': 4,
-      'metade do tempo': 3,
-      'ocasionalmente': 2,
-      'quase nunca': 1,
-      'não se aplica': 0
-    };
-
-    return items.reduce((total, item) => {
-      return total + (responseValues[item.response as keyof typeof responseValues] || 0);
-    }, 0);
-  }, []);
-
-  return { 
-    formData, 
-    setFormData, 
-    updateFormData, 
-    updateItemResponse, 
-    calculateRawScore
+  return {
+    formData,
+    setFormData,
+    updateFormData,
+    updateItemResponse,
+    calculateRawScore,
+    switchInstrument,
   };
 };
+
+const responseValues: Record<string, number> = {
+  'quase sempre': 5,
+  'frequentemente': 4,
+  'metade do tempo': 3,
+  'ocasionalmente': 2,
+  'quase nunca': 1,
+  'não se aplica': 0,
+};
+
+export const calculateRawScore = (items: SensoryItem[]): number =>
+  items.reduce((total, item) => total + (responseValues[item.response as string] || 0), 0);
 
 export default useFormData;

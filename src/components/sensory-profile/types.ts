@@ -36,30 +36,18 @@ export interface SensorySection {
   rawScore?: number;
 }
 
-export type SensorySectionKey = 
-  | 'auditoryProcessing'
-  | 'visualProcessing'
-  | 'tactileProcessing'
-  | 'movementProcessing'
-  | 'bodyPositionProcessing'
-  | 'oralSensitivityProcessing'
-  | 'behavioralResponses'
-  | 'socialEmotionalResponses'
-  | 'attentionResponses';
+/**
+ * @deprecated Section keys are now defined by the selected Instrument.
+ * Kept as a string alias for backwards compatibility during the refactor.
+ */
+export type SensorySectionKey = string;
 
 export interface FormData {
+  instrumentId: string;
   child: ChildData;
   examiner: ExaminerData;
   caregiver: CaregiverData;
-  auditoryProcessing: SensorySection;
-  visualProcessing: SensorySection;
-  tactileProcessing: SensorySection;
-  movementProcessing: SensorySection;
-  bodyPositionProcessing: SensorySection;
-  oralSensitivityProcessing: SensorySection;
-  behavioralResponses: SensorySection;
-  socialEmotionalResponses: SensorySection;
-  attentionResponses: SensorySection;
+  sections: Record<string, SensorySection>;
   createdAt?: string;
   [key: string]: any;
 }
