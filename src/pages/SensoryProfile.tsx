@@ -11,6 +11,8 @@ import InstructionsSection from '../components/sensory-profile/InstructionsSecti
 import SensoryProcessingSection from '../components/sensory-profile/SensoryProcessingSection';
 import useFormData from '../components/sensory-profile/useFormData';
 import { SensorySection } from '../components/sensory-profile/types';
+import AnamneseSelector from '../components/anamnese/AnamneseSelector';
+import type { Anamnese } from '../components/anamnese/types';
 import { Button, Flex, Text, Box, Card, Heading } from '@radix-ui/themes';
 import LoadingSpinner from '../components/LoadingSpinner';
 import NotFound from '../components/NotFound';
@@ -345,10 +347,19 @@ const SensoryProfileForm: React.FC = () => {
             </Box>
           )}
 
-          <ChildDataSection 
-            formData={formData} 
-            updateFormData={updateFormData} 
-            disabled={isViewMode || isReportMode} 
+          {isNewMode && (
+            <AnamneseSelector
+              onSelect={(a: Anamnese) => {
+                updateFormData('child', a.child);
+                updateFormData('caregiver', a.caregiver);
+              }}
+            />
+          )}
+
+          <ChildDataSection
+            formData={formData}
+            updateFormData={updateFormData}
+            disabled={isViewMode || isReportMode}
           />
           
           <ExaminerDataSection 
