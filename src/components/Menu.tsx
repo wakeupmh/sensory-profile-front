@@ -8,10 +8,11 @@ import {
   Heading, 
   DropdownMenu,
 } from '@radix-ui/themes';
-import { 
-  HomeIcon, 
+import {
+  HomeIcon,
   FileTextIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
+  ClipboardIcon
 } from '@radix-ui/react-icons';
 
 const Menu: React.FC = () => {
@@ -71,6 +72,31 @@ const Menu: React.FC = () => {
                 <DropdownMenu.Item>
                   <Link to="/" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', width: '100%' }}>
                     Listar Avaliações
+                  </Link>
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu.Root>
+
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger>
+                <Flex gap="2" align="center" style={{
+                  cursor: 'pointer',
+                  color: location.pathname.startsWith('/anamnese') ? 'var(--violet-9)' : 'var(--gray-11)'
+                }}>
+                  <ClipboardIcon />
+                  <Text size="2" weight="medium">Anamneses</Text>
+                  <ChevronDownIcon />
+                </Flex>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Content>
+                <DropdownMenu.Item>
+                  <Link to="/anamnese/new" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', width: '100%' }}>
+                    Nova Anamnese
+                  </Link>
+                </DropdownMenu.Item>
+                <DropdownMenu.Item>
+                  <Link to="/anamneses" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', width: '100%' }}>
+                    Listar Anamneses
                   </Link>
                 </DropdownMenu.Item>
               </DropdownMenu.Content>

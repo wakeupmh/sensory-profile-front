@@ -94,4 +94,101 @@ export const assessmentApi = {
   },
 };
 
+export const anamneseApi = {
+  list: async (token: string | null) => {
+    try {
+      const response = await api.get('/api/anamneses', {
+        headers: getAuthHeaders(token),
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching anamneses:', error);
+      throw error;
+    }
+  },
+
+  getById: async (id: string, token: string | null) => {
+    try {
+      const response = await api.get(`/api/anamneses/${id}`, {
+        headers: getAuthHeaders(token),
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching anamnese ${id}:`, error);
+      throw error;
+    }
+  },
+
+  create: async (data: any, token: string | null) => {
+    try {
+      const response = await api.post('/api/anamneses', data, {
+        headers: getAuthHeaders(token),
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error creating anamnese:', error);
+      throw error;
+    }
+  },
+
+  update: async (id: string, data: any, token: string | null) => {
+    try {
+      const response = await api.put(`/api/anamneses/${id}`, data, {
+        headers: getAuthHeaders(token),
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating anamnese ${id}:`, error);
+      throw error;
+    }
+  },
+
+  remove: async (id: string, token: string | null) => {
+    try {
+      const response = await api.delete(`/api/anamneses/${id}`, {
+        headers: getAuthHeaders(token),
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting anamnese ${id}:`, error);
+      throw error;
+    }
+  },
+
+  generateShareLink: async (id: string, token: string | null) => {
+    try {
+      const response = await api.post(`/api/anamneses/${id}/share`, {}, {
+        headers: getAuthHeaders(token),
+      });
+      return response.data as { shareToken: string; sharedAt?: string };
+    } catch (error) {
+      console.error(`Error generating share link for anamnese ${id}:`, error);
+      throw error;
+    }
+  },
+
+  revokeShareLink: async (id: string, token: string | null) => {
+    try {
+      const response = await api.delete(`/api/anamneses/${id}/share`, {
+        headers: getAuthHeaders(token),
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error revoking share link for anamnese ${id}:`, error);
+      throw error;
+    }
+  },
+
+  // Public endpoint — intentionally omits Authorization header.
+  getBySharedToken: async (shareToken: string) => {
+    try {
+      const response = await api.get(`/api/anamneses/shared/${shareToken}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching shared anamnese ${shareToken}:`, error);
+      throw error;
+    }
+  },
+};
+
 export default api;
