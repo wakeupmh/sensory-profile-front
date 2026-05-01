@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react';
-import { useState, FormEvent, useEffect, useRef } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useState, FormEvent, useEffect, useMemo, useRef } from 'react';
+import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { assessmentApi } from '../services/api';
 
 import ChildDataSection from '../components/sensory-profile/ChildDataSection';
@@ -9,17 +9,41 @@ import ExaminerDataSection from '../components/sensory-profile/ExaminerDataSecti
 import CaregiverDataSection from '../components/sensory-profile/CaregiverDataSection';
 import InstructionsSection from '../components/sensory-profile/InstructionsSection';
 import SensoryProcessingSection from '../components/sensory-profile/SensoryProcessingSection';
+import InstrumentPicker from '../components/sensory-profile/InstrumentPicker';
 import useFormData from '../components/sensory-profile/useFormData';
-import { SensorySection } from '../components/sensory-profile/types';
 import AnamneseSelector from '../components/anamnese/AnamneseSelector';
 import type { Anamnese } from '../components/anamnese/types';
-import { Button, Flex, Text, Box, Card, Heading } from '@radix-ui/themes';
+import { Button, Flex, Text, Box, Card, Heading, Badge } from '@radix-ui/themes';
 import LoadingSpinner from '../components/LoadingSpinner';
 import NotFound from '../components/NotFound';
 import { useAuth } from '@clerk/clerk-react';
+import {
+  DEFAULT_INSTRUMENT_ID,
+  findSectionByItemId,
+  getInstrument,
+} from '../instruments';
+import { toSensoryItems } from '../instruments/types';
 
 const SensoryProfileForm: React.FC = () => {
-  const { formData, updateFormData, updateItemResponse, setFormData } = useFormData();
+  const [searchParams] = useSearchParams();
+  const initialInstrumentId = searchParams.get('instrument') || DEFAULT_INSTRUMENT_ID;
+
+  const { formData, updateFormData, updateItemResponse, setFormData, switchInstrument } =
+    useFormData(initialInstrumentId);
+
+  const handleInstrumentChange = (newId: string) => {
+    if (newId === formData.instrumentId) return;
+    const hasAnyResponse = Object.values(formData.sections || {}).some((s) =>
+      s.items.some((i) => !!i.response),
+    );
+    if (hasAnyResponse) {
+      const confirmed = typeof window === 'undefined'
+        ? true
+        : window.confirm('Trocar de instrumento irá reiniciar as respostas já preenchidas. Deseja continuar?');
+      if (!confirmed) return;
+    }
+    switchInstrument(newId);
+  };
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,110 +55,121 @@ const SensoryProfileForm: React.FC = () => {
   const { getToken } = useAuth();
   const fetchedAssessmentRef = useRef(false);
   const fetchedReportRef = useRef(false);
-  
+
   const isViewMode = !!id && !location.pathname.includes('/edit') && !location.pathname.includes('/report');
   const isEditMode = !!id && location.pathname.includes('/edit');
   const isReportMode = !!id && location.pathname.includes('/report');
   const isNewMode = !id;
 
-  useEffect(() => {
-    if (id && !isNewMode) {
-      const fetchAssessment = async () => {
-        if (fetchedAssessmentRef.current) return;
-        
-        try {
-          setLoading(true);
-          setNotFound(false);
-          const token = await getToken();
-          const response = await assessmentApi.getAssessmentById(id, token);
-          
-          // Verificar se a resposta está no formato novo (com assessment e responses)
-          if (response.assessment && response.responses) {
-            // Formato novo - transformar para o formato do formData
-            const { assessment, responses } = response;
-            
-            // Create a new formData object based on the response
-            const newFormData = {
-              ...formData,
-              child: {
-                name: assessment.childName,
-                birthDate: assessment.childBirthDate ? new Date(assessment.childBirthDate).toISOString().split('T')[0] : '',
-                gender: assessment.childGender,
-                nationalIdentity: assessment.childNationalIdentity || '',
-                otherInfo: assessment.childOtherInfo || '',
-                age: assessment.childAge,
-              },
-              examiner: {
-                name: assessment.examinerName,
-                profession: assessment.examinerProfession,
-                contact: assessment.examinerContact,
-              },
-              caregiver: {
-                name: assessment.caregiverName,
-                relationship: assessment.caregiverRelationship,
-                contact: assessment.caregiverContact,
-              },
-            };
-            
-            // Process sensory item responses
-            if (responses && responses.length > 0) {
-              // Map responses to their respective sections
-              const sections = [
-                'auditoryProcessing', 'visualProcessing', 'tactileProcessing', 
-                'movementProcessing', 'bodyPositionProcessing', 'oralSensitivityProcessing', 
-                'behavioralResponses', 'socialEmotionalResponses', 'attentionResponses'
-              ] as const;
-              
-              // Update each section with the responses
-              sections.forEach(section => {
-                const sectionItems = [...newFormData[section].items];
-                
-                // Update each item with its response from the backend
-                sectionItems.forEach(item => {
-                  const responseData = responses.find((r: { itemId: number; }) => r.itemId === item.id);
-                  if (responseData) {
-                    item.response = responseData.response;
-                    item.responseId = responseData.id;
-                  }
-                });
-                
-                // Update the section in the form data
-                newFormData[section] = {
-                  ...newFormData[section],
-                  items: sectionItems,
-                  rawScore: assessment[`${section}RawScore`] || 0
-                };
-              });
-            }
-            
-            setFormData(newFormData);
-          } else {
-            setFormData(response);
-          }
-          
-          setError(null);
-          fetchedAssessmentRef.current = true;
-        } catch (err: any) {
-          if (err.response && err.response.status === 404) {
-            setNotFound(true);
-          } else {
-            setError('Erro ao carregar avaliação. Por favor, tente novamente.');
-          }
-          console.error(err);
-        } finally {
-          setLoading(false);
-        }
-      };
+  const instrument = useMemo(() => getInstrument(formData.instrumentId), [formData.instrumentId]);
 
-      fetchAssessment();
-    }
-  }, [id, isNewMode, setFormData, getToken, formData]);
+  useEffect(() => {
+    if (!id || isNewMode) return;
+
+    const fetchAssessment = async () => {
+      if (fetchedAssessmentRef.current) return;
+
+      try {
+        setLoading(true);
+        setNotFound(false);
+        const token = await getToken();
+        const response = await assessmentApi.getAssessmentById(id, token);
+
+        if (response.assessment && response.responses) {
+          const { assessment, responses } = response;
+          const loadedInstrumentId: string = assessment.instrumentId || DEFAULT_INSTRUMENT_ID;
+          const loadedInstrument = getInstrument(loadedInstrumentId);
+
+          const builtSections: Record<string, { items: any[]; rawScore: number; comments: string }> =
+            Object.fromEntries(
+              loadedInstrument.sections.map((s) => [
+                s.key,
+                { items: toSensoryItems(s.items), rawScore: 0, comments: '' },
+              ]),
+            );
+
+          if (Array.isArray(responses)) {
+            responses.forEach((r: { itemId: number; response: string; id?: string }) => {
+              const sectionKey = findSectionByItemId(loadedInstrument, r.itemId);
+              if (!sectionKey) return;
+              const section = builtSections[sectionKey];
+              const target = section.items.find((it) => it.id === r.itemId);
+              if (target) {
+                target.response = r.response;
+                if (r.id) target.responseId = r.id;
+              }
+            });
+          }
+
+          // Rehydrate rawScore per section from the assessment payload if available
+          loadedInstrument.sections.forEach((s) => {
+            const scoreField = `${s.key}RawScore`;
+            if (assessment[scoreField] !== undefined && assessment[scoreField] !== null) {
+              builtSections[s.key].rawScore = assessment[scoreField];
+            }
+          });
+
+          // Apply section comments if the backend sends them
+          if (Array.isArray(assessment.sectionComments)) {
+            assessment.sectionComments.forEach((c: { section: string; comments: string }) => {
+              if (builtSections[c.section]) {
+                builtSections[c.section].comments = c.comments || '';
+              }
+            });
+          }
+
+          setFormData({
+            instrumentId: loadedInstrumentId,
+            child: {
+              name: assessment.childName,
+              birthDate: assessment.childBirthDate
+                ? new Date(assessment.childBirthDate).toISOString().split('T')[0]
+                : '',
+              gender: assessment.childGender,
+              nationalIdentity: assessment.childNationalIdentity || '',
+              otherInfo: assessment.childOtherInfo || '',
+              age: assessment.childAge,
+            },
+            examiner: {
+              name: assessment.examinerName,
+              profession: assessment.examinerProfession,
+              contact: assessment.examinerContact,
+            },
+            caregiver: {
+              name: assessment.caregiverName,
+              relationship: assessment.caregiverRelationship,
+              contact: assessment.caregiverContact,
+            },
+            sections: builtSections,
+            createdAt: assessment.createdAt,
+          });
+        } else {
+          // Legacy shape fallback — assume default instrument
+          setFormData((prev) => ({ ...prev, ...response, instrumentId: response.instrumentId || DEFAULT_INSTRUMENT_ID }));
+        }
+
+        setError(null);
+        fetchedAssessmentRef.current = true;
+      } catch (err: any) {
+        if (err.response && err.response.status === 404) {
+          setNotFound(true);
+        } else {
+          setError('Erro ao carregar avaliação. Por favor, tente novamente.');
+        }
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAssessment();
+  }, [id, isNewMode, setFormData, getToken]);
 
   useEffect(() => {
     if (id && isReportMode) {
       const fetchReport = async () => {
         if (fetchedReportRef.current) return;
-        
+
         try {
           setLoading(true);
           const token = await getToken();
@@ -159,112 +194,64 @@ const SensoryProfileForm: React.FC = () => {
 
   const validateForm = () => {
     setValidationError(null);
-    
-    if (!formData.child?.name) {
-      setValidationError('Nome da criança é obrigatório');
-      return false;
-    }
-    if (!formData.child?.birthDate) {
-      setValidationError('Data de nascimento da criança é obrigatória');
-      return false;
-    }
-    if (!formData.child?.gender) {
-      setValidationError('Gênero da criança é obrigatório');
-      return false;
-    }
-    if (!formData.child?.age) {
-      setValidationError('Idade da criança é obrigatória');
-      return false;
-    }
-    
-    // Check examiner data
-    if (!formData.examiner?.name) {
-      setValidationError('Nome do examinador é obrigatório');
-      return false;
-    }
-    if (!formData.examiner?.profession) {
-      setValidationError('Cargo/Função do examinador é obrigatório');
-      return false;
-    }
-    if (!formData.examiner?.contact) {
-      setValidationError('Contato do examinador é obrigatório');
-      return false;
-    }
-    
-    // Check caregiver data
-    if (!formData.caregiver?.name) {
-      setValidationError('Nome do cuidador é obrigatório');
-      return false;
-    }
-    if (!formData.caregiver?.relationship) {
-      setValidationError('Relação do cuidador com a criança é obrigatória');
-      return false;
-    }
-    if (!formData.caregiver?.contact) {
-      setValidationError('Contato do cuidador é obrigatório');
-      return false;
-    }
-    
-    // Check sensory processing items
-    const sections = [
-      'auditoryProcessing', 'visualProcessing', 'tactileProcessing', 
-      'movementProcessing', 'oralSensitivityProcessing', 'bodyPositionProcessing', 
-      'behavioralResponses', 'socialEmotionalResponses', 'attentionResponses'
-    ] as const;
-    
-    for (const section of sections) {
-      const items = formData[section as keyof typeof formData];
-      if (items) {
-        for (const item of (items as SensorySection).items) {
-          if (!item.response) {
-            setValidationError(`Todos os itens de processamento sensorial são obrigatórios`);
-            return false;
-          }
+
+    if (!formData.child?.name) return fail('Nome da criança é obrigatório');
+    if (!formData.child?.birthDate) return fail('Data de nascimento da criança é obrigatória');
+    if (!formData.child?.gender) return fail('Gênero da criança é obrigatório');
+    if (!formData.child?.age) return fail('Idade da criança é obrigatória');
+
+    if (!formData.examiner?.name) return fail('Nome do examinador é obrigatório');
+    if (!formData.examiner?.profession) return fail('Cargo/Função do examinador é obrigatório');
+    if (!formData.examiner?.contact) return fail('Contato do examinador é obrigatório');
+
+    if (!formData.caregiver?.name) return fail('Nome do cuidador é obrigatório');
+    if (!formData.caregiver?.relationship) return fail('Relação do cuidador com a criança é obrigatória');
+    if (!formData.caregiver?.contact) return fail('Contato do cuidador é obrigatório');
+
+    for (const section of instrument.sections) {
+      const sectionData = formData.sections?.[section.key];
+      if (!sectionData) continue;
+      for (const item of sectionData.items) {
+        if (!item.response) {
+          return fail('Todos os itens de processamento sensorial são obrigatórios');
         }
       }
     }
-    
+
     return true;
+
+    function fail(message: string) {
+      setValidationError(message);
+      return false;
+    }
   };
 
   const buildAssessmentPayload = () => {
-    const sectionKeys = [
-      'auditoryProcessing', 'visualProcessing', 'tactileProcessing',
-      'movementProcessing', 'bodyPositionProcessing', 'oralSensitivityProcessing',
-      'behavioralResponses', 'socialEmotionalResponses', 'attentionResponses'
-    ] as const;
-
-    const sectionComments = sectionKeys
-      .map(section => ({
-        section,
-        comments: formData[section].comments || ''
-      }))
-      .filter(comment => comment.comments.trim() !== '');
+    const sectionComments = instrument.sections
+      .map((s) => ({ section: s.key, comments: formData.sections?.[s.key]?.comments || '' }))
+      .filter((c) => c.comments.trim() !== '');
 
     const responses: Array<{ itemId: number; response: string }> = [];
-    sectionKeys.forEach(section => {
-      formData[section].items.forEach(item => {
-        if (item.response) {
-          responses.push({ itemId: item.id, response: item.response });
-        }
+    instrument.sections.forEach((s) => {
+      formData.sections?.[s.key]?.items.forEach((item) => {
+        if (item.response) responses.push({ itemId: item.id, response: item.response });
       });
     });
 
     return {
+      instrumentId: formData.instrumentId,
       child: formData.child,
       examiner: formData.examiner,
       caregiver: formData.caregiver,
       responses,
-      sectionComments
+      sectionComments,
     };
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     try {
       setSubmitting(true);
@@ -306,23 +293,26 @@ const SensoryProfileForm: React.FC = () => {
           </Flex>
         </Card>
       ) : notFound ? (
-        <NotFound 
-          title="Avaliação não encontrada" 
+        <NotFound
+          title="Avaliação não encontrada"
           message="A avaliação que você está procurando não existe ou foi removida."
         />
       ) : error ? (
         <Card>
           <Flex align="center" justify="center" direction="column" gap="3" py="9">
             <Text color="red">{error}</Text>
-            <Button onClick={() => navigate('/')} color='gray'>Voltar</Button>
+            <Button onClick={() => navigate('/')} color="gray">Voltar</Button>
           </Flex>
         </Card>
       ) : (
         <form onSubmit={handleSubmit}>
           <Flex justify="between" align="center" mb="6">
-            <Heading size="7" color='violet'>
-              {getTitle()}
-            </Heading>
+            <Flex direction="column" gap="1">
+              <Heading size="7" color="violet">{getTitle()}</Heading>
+              <Badge color="violet" variant="soft" style={{ alignSelf: 'flex-start' }}>
+                {instrument.shortName}
+              </Badge>
+            </Flex>
             <Flex gap="3">
               {!isNewMode && !isEditMode && !isReportMode && (
                 <Button onClick={() => navigate(`/assessment/${id}/edit`)}>Editar</Button>
@@ -330,30 +320,30 @@ const SensoryProfileForm: React.FC = () => {
               {!isNewMode && !isReportMode && (
                 <Button onClick={() => navigate(`/assessment/${id}/report`)}>Ver Relatório</Button>
               )}
-              {(isEditMode) && (
-                <Button type="submit" color='violet'>Salvar</Button>
-              )}
-              {(isNewMode) && (
-                <Button type="submit" color='violet'>Nova Avaliação</Button>
-              )}
-              <Button onClick={() => navigate('/')} variant="outline" color='gray'>Voltar</Button>
+              <Button onClick={() => navigate('/')} variant="outline" color="gray">Voltar</Button>
             </Flex>
           </Flex>
 
           {validationError && (
             <Box mb="4" p="3" role="alert" style={{ backgroundColor: '#FFEBEE', borderRadius: '4px' }}>
-              <Text color="crimson" weight="bold">Erros de validação:</Text>
+              <Text color="crimson" weight="bold">Erros de validação: </Text>
               <Text color="crimson">{validationError}</Text>
             </Box>
           )}
 
           {isNewMode && (
-            <AnamneseSelector
-              onSelect={(a: Anamnese) => {
-                updateFormData('child', a.child);
-                updateFormData('caregiver', a.caregiver);
-              }}
-            />
+            <>
+              <InstrumentPicker
+                value={formData.instrumentId}
+                onChange={handleInstrumentChange}
+              />
+              <AnamneseSelector
+                onSelect={(a: Anamnese) => {
+                  updateFormData('child', a.child);
+                  updateFormData('caregiver', a.caregiver);
+                }}
+              />
+            </>
           )}
 
           <ChildDataSection
@@ -361,24 +351,24 @@ const SensoryProfileForm: React.FC = () => {
             updateFormData={updateFormData}
             disabled={isViewMode || isReportMode}
           />
-          
-          <ExaminerDataSection 
-            formData={formData} 
-            updateFormData={updateFormData} 
-            disabled={isViewMode || isReportMode} 
+
+          <ExaminerDataSection
+            formData={formData}
+            updateFormData={updateFormData}
+            disabled={isViewMode || isReportMode}
           />
-          
-          <CaregiverDataSection 
-            formData={formData} 
-            updateFormData={updateFormData} 
-            disabled={isViewMode || isReportMode} 
+
+          <CaregiverDataSection
+            formData={formData}
+            updateFormData={updateFormData}
+            disabled={isViewMode || isReportMode}
           />
-          
+
           <InstructionsSection />
-          
-          <SensoryProcessingSection 
-            formData={formData} 
-            updateItemResponse={updateItemResponse} 
+
+          <SensoryProcessingSection
+            formData={formData}
+            updateItemResponse={updateItemResponse}
             updateFormData={updateFormData}
             disabled={isViewMode || isReportMode}
           />
@@ -389,9 +379,9 @@ const SensoryProfileForm: React.FC = () => {
                 <Button variant="soft" color="gray" onClick={handleClose}>
                   Cancelar
                 </Button>
-                <Button 
-                  type="submit" 
-                  color="violet" 
+                <Button
+                  type="submit"
+                  color="violet"
                   disabled={submitting}
                 >
                   {submitting ? (

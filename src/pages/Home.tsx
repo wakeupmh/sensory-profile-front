@@ -1,19 +1,21 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { assessmentApi } from '../services/api';
-import { 
-  Box, 
-  Heading, 
-  Text, 
-  Button, 
-  Flex, 
-  Table, 
-  Card, 
-  AlertDialog, 
+import {
+  Box,
+  Heading,
+  Text,
+  Button,
+  Flex,
+  Table,
+  Card,
+  AlertDialog,
   IconButton,
   Separator,
-  Callout
+  Callout,
+  Badge,
 } from '@radix-ui/themes';
+import { getInstrument } from '../instruments';
 import { 
   PlusIcon, 
   EyeOpenIcon, 
@@ -31,6 +33,7 @@ interface Assessment {
   childName: string;
   examinerName: string;
   createdAt: string;
+  instrumentId?: string;
 }
 
 const Home = () => {
@@ -126,6 +129,7 @@ const Home = () => {
             <Table.Header>
               <Table.Row>
                 <Table.ColumnHeaderCell>Nome da Criança</Table.ColumnHeaderCell>
+                <Table.ColumnHeaderCell>Instrumento</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell>Examinador</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell>Data</Table.ColumnHeaderCell>
                 <Table.ColumnHeaderCell align="center">Ações</Table.ColumnHeaderCell>
@@ -136,6 +140,11 @@ const Home = () => {
                 <Table.Row key={assessment.id}>
                   <Table.Cell>
                     <Text weight="medium">{assessment.childName}</Text>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Badge color="violet" variant="soft">
+                      {getInstrument(assessment.instrumentId).shortName}
+                    </Badge>
                   </Table.Cell>
                   <Table.Cell>{assessment.examinerName}</Table.Cell>
                   <Table.Cell>{new Date(assessment.createdAt).toLocaleDateString('pt-BR')}</Table.Cell>
