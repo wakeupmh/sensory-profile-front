@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FormData } from './types';
 import { memo } from 'react';
-import { Text, Flex, Box } from '@radix-ui/themes';
+import { Flex, Box } from '@radix-ui/themes';
 import FastTextField from './FastTextField';
+import GumroadHeading from '../design-system/GumroadHeading';
 
 interface ExaminerDataSectionProps {
   formData: FormData;
@@ -17,7 +18,9 @@ const ExaminerDataSection: React.FC<ExaminerDataSectionProps> = memo(({ formData
 
   return (
     <Box mb="6">
-      <Text size="5" weight="bold" mb="3">Dados do Examinador</Text>
+      <GumroadHeading level="title-lg" as="h2" style={{ marginBottom: '12px' }}>
+        Dados do Examinador
+      </GumroadHeading>
       <Flex gap="4" direction={{ initial: 'column', sm: 'row' }} mb="3">
         <Box style={{ flex: 1 }}>
           <FastTextField

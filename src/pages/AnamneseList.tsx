@@ -1,20 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { anamneseApi } from '../services/api';
-import {
-  Box,
-  Heading,
-  Text,
-  Button,
-  Flex,
-  Table,
-  Card,
-  AlertDialog,
-  IconButton,
-  Separator,
-  Callout,
-  Badge,
-} from '@radix-ui/themes';
+import { Box, Flex, AlertDialog, IconButton, Separator } from '@radix-ui/themes';
 import {
   PlusIcon,
   EyeOpenIcon,
@@ -27,6 +14,11 @@ import {
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useAuthContext } from '../context/AuthContext';
 import type { AnamneseSummary } from '../components/anamnese/types';
+import { colors, spacing } from '../theme/tokens';
+import GumroadCard from '../components/design-system/GumroadCard';
+import GumroadButton from '../components/design-system/GumroadButton';
+import GumroadBadge from '../components/design-system/GumroadBadge';
+import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
 
 const AnamneseList = () => {
   const [items, setItems] = useState<AnamneseSummary[]>([]);
@@ -71,131 +63,180 @@ const AnamneseList = () => {
   };
 
   return (
-    <Box style={{ margin: '0 auto' }}>
-      <Flex justify="between" align="center" mb="6" gap="6">
+    <Box>
+      <Flex
+        justify="between"
+        align={{ initial: 'start', sm: 'center' }}
+        mb="6"
+        gap="4"
+        direction={{ initial: 'column', sm: 'row' }}
+      >
         <Box>
-          <Heading size="6" mb="1">Anamneses</Heading>
-          <Text size="2" color="gray">Centralize a anamnese da criança e compartilhe com os profissionais envolvidos</Text>
+          <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
+            Anamneses
+          </GumroadHeading>
+          <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
+            Centralize a anamnese da criança e compartilhe com os profissionais
+          </GumroadText>
         </Box>
-        <Button size="2" color="violet" asChild>
-          <Link to="/anamnese/new" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <GumroadButton variant="primary" size="md" asChild>
+          <Link to="/anamnese/new" style={{ textDecoration: 'none', display: 'inline-flex' }}>
             <PlusIcon />
             Nova Anamnese
           </Link>
-        </Button>
+        </GumroadButton>
       </Flex>
 
       <Separator size="4" mb="6" />
 
       {loading ? (
-        <Card variant="surface" size="2" style={{ textAlign: 'center', padding: '40px 0' }}>
-          <Flex direction="column" align="center" gap="4">
-            <LoadingSpinner size="large" text="Carregando anamneses..." />
-          </Flex>
-        </Card>
+        <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
+          <LoadingSpinner size="large" text="Carregando anamneses..." />
+        </GumroadCard>
       ) : error ? (
-        <Callout.Root color="crimson" size="2" mb="4">
-          <Callout.Icon>
+        <GumroadCard color="salmon" shadow="md" padding="lg">
+          <Flex align="center" gap="2">
             <ExclamationTriangleIcon />
-          </Callout.Icon>
-          <Callout.Text>{error}</Callout.Text>
-        </Callout.Root>
+            <GumroadText level="body-md" as="p">{error}</GumroadText>
+          </Flex>
+        </GumroadCard>
       ) : items.length === 0 ? (
-        <Card variant="surface" size="2" style={{ textAlign: 'center', padding: '60px 0' }}>
+        <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">
-            <InfoCircledIcon width={32} height={32} color="var(--gray-8)" />
+            <InfoCircledIcon width={40} height={40} />
             <Box>
-              <Text size="4" weight="medium" mb="1">Nenhuma anamnese cadastrada</Text><br />
-              <Text size="2" color="gray">Crie uma anamnese para reutilizar os dados em várias avaliações</Text>
+              <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
+                Nenhuma anamnese cadastrada
+              </GumroadHeading>
+              <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
+                Crie uma anamnese para reutilizar os dados em várias avaliações
+              </GumroadText>
             </Box>
-            <Button size="2" color="violet" mt="4" asChild>
+            <GumroadButton variant="primary" size="md" asChild>
               <Link to="/anamnese/new" style={{ textDecoration: 'none' }}>
                 Criar primeira anamnese
               </Link>
-            </Button>
+            </GumroadButton>
           </Flex>
-        </Card>
+        </GumroadCard>
       ) : (
-        <Card variant="surface" size="2">
-          <Table.Root>
-            <Table.Header>
-              <Table.Row>
-                <Table.ColumnHeaderCell>Nome da Criança</Table.ColumnHeaderCell>
-                <Table.ColumnHeaderCell>Responsável</Table.ColumnHeaderCell>
-                <Table.ColumnHeaderCell>Criada em</Table.ColumnHeaderCell>
-                <Table.ColumnHeaderCell>Compartilhada</Table.ColumnHeaderCell>
-                <Table.ColumnHeaderCell align="center">Ações</Table.ColumnHeaderCell>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {items.map((a) => (
-                <Table.Row key={a.id}>
-                  <Table.Cell>
-                    <Text weight="medium">{a.childName}</Text>
-                  </Table.Cell>
-                  <Table.Cell>{a.caregiverName}</Table.Cell>
-                  <Table.Cell>{new Date(a.createdAt).toLocaleDateString('pt-BR')}</Table.Cell>
-                  <Table.Cell>
-                    {a.shareToken ? (
-                      <Badge color="jade" variant="soft">
-                        <Share1Icon /> Sim
-                      </Badge>
-                    ) : (
-                      <Badge color="gray" variant="soft">Não</Badge>
-                    )}
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Flex gap="2" justify="center">
-                      <IconButton variant="soft" color="gray" size="1" asChild title="Visualizar" aria-label="Visualizar anamnese">
-                        <Link to={`/anamnese/${a.id}`}>
-                          <EyeOpenIcon />
-                        </Link>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+            gap: '20px',
+          }}
+        >
+          {items.map((a) => (
+            <GumroadCard key={a.id} color="white" shadow="md" padding="lg">
+              <Flex direction="column" gap="3" style={{ height: '100%' }}>
+                <Flex justify="between" align="start" gap="2">
+                  <GumroadHeading level="title-md" as="h3" style={{ wordBreak: 'break-word', flex: 1 }}>
+                    {a.childName}
+                  </GumroadHeading>
+                  {a.shareToken ? (
+                    <GumroadBadge color="mint">
+                      <Share1Icon /> Compartilhada
+                    </GumroadBadge>
+                  ) : (
+                    <GumroadBadge color="cream">Privada</GumroadBadge>
+                  )}
+                </Flex>
+
+                <Flex direction="column" gap="1">
+                  <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
+                    <strong>Responsável:</strong> {a.caregiverName}
+                  </GumroadText>
+                  <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
+                    <strong>Criada em:</strong>{' '}
+                    {new Date(a.createdAt).toLocaleDateString('pt-BR')}
+                  </GumroadText>
+                </Flex>
+
+                <Flex gap="2" mt="auto" pt="2">
+                  <IconButton
+                    variant="soft"
+                    size="2"
+                    asChild
+                    title="Visualizar"
+                    aria-label="Visualizar anamnese"
+                    style={{
+                      background: colors.canvas,
+                      border: `2px solid ${colors.ink}`,
+                      borderRadius: '10px',
+                      boxShadow: '2px 2px 0px #0A0A1A',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <Link to={`/anamnese/${a.id}`}>
+                      <EyeOpenIcon />
+                    </Link>
+                  </IconButton>
+                  <IconButton
+                    variant="soft"
+                    size="2"
+                    asChild
+                    title="Editar"
+                    aria-label="Editar anamnese"
+                    style={{
+                      background: colors['brand-cyan'],
+                      border: `2px solid ${colors.ink}`,
+                      borderRadius: '10px',
+                      boxShadow: '2px 2px 0px #0A0A1A',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <Link to={`/anamnese/${a.id}/edit`}>
+                      <Pencil1Icon />
+                    </Link>
+                  </IconButton>
+                  <AlertDialog.Root>
+                    <AlertDialog.Trigger>
+                      <IconButton
+                        variant="soft"
+                        size="2"
+                        title="Excluir"
+                        aria-label="Excluir anamnese"
+                        style={{
+                          background: colors['brand-salmon'],
+                          border: `2px solid ${colors.ink}`,
+                          borderRadius: '10px',
+                          boxShadow: '2px 2px 0px #0A0A1A',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <TrashIcon />
                       </IconButton>
-                      <IconButton variant="soft" color="violet" size="1" asChild title="Editar" aria-label="Editar anamnese">
-                        <Link to={`/anamnese/${a.id}/edit`}>
-                          <Pencil1Icon />
-                        </Link>
-                      </IconButton>
-                      <AlertDialog.Root>
-                        <AlertDialog.Trigger>
-                          <IconButton variant="soft" color="red" size="1" title="Excluir" aria-label="Excluir anamnese">
-                            <TrashIcon />
-                          </IconButton>
-                        </AlertDialog.Trigger>
-                        <AlertDialog.Content size="2">
-                          <AlertDialog.Title>Excluir Anamnese</AlertDialog.Title>
-                          <AlertDialog.Description size="2">
-                            Tem certeza que deseja excluir esta anamnese? Esta ação não pode ser desfeita e links compartilhados deixarão de funcionar.
-                          </AlertDialog.Description>
-                          <Flex gap="3" mt="4" justify="end">
-                            <AlertDialog.Cancel>
-                              <Button variant="soft" color="gray">Cancelar</Button>
-                            </AlertDialog.Cancel>
-                            <AlertDialog.Action>
-                              <Button
-                                variant="solid"
-                                color="crimson"
-                                disabled={deleteLoading === a.id}
-                                onClick={() => handleDelete(a.id)}
-                              >
-                                {deleteLoading === a.id ? (
-                                  <Flex gap="2" align="center">
-                                    <LoadingSpinner size="small" />
-                                    <Text>Excluindo...</Text>
-                                  </Flex>
-                                ) : 'Excluir'}
-                              </Button>
-                            </AlertDialog.Action>
-                          </Flex>
-                        </AlertDialog.Content>
-                      </AlertDialog.Root>
-                    </Flex>
-                  </Table.Cell>
-                </Table.Row>
-              ))}
-            </Table.Body>
-          </Table.Root>
-        </Card>
+                    </AlertDialog.Trigger>
+                    <AlertDialog.Content size="2">
+                      <AlertDialog.Title>Excluir Anamnese</AlertDialog.Title>
+                      <AlertDialog.Description size="2">
+                        Tem certeza que deseja excluir esta anamnese? Esta ação não pode ser desfeita e links compartilhados deixarão de funcionar.
+                      </AlertDialog.Description>
+                      <Flex gap="3" mt="4" justify="end">
+                        <AlertDialog.Cancel>
+                          <GumroadButton variant="secondary" size="sm">
+                            Cancelar
+                          </GumroadButton>
+                        </AlertDialog.Cancel>
+                        <AlertDialog.Action>
+                          <GumroadButton
+                            variant="danger"
+                            size="sm"
+                            disabled={deleteLoading === a.id}
+                            onClick={() => handleDelete(a.id)}
+                          >
+                            {deleteLoading === a.id ? 'Excluindo...' : 'Excluir'}
+                          </GumroadButton>
+                        </AlertDialog.Action>
+                      </Flex>
+                    </AlertDialog.Content>
+                  </AlertDialog.Root>
+                </Flex>
+              </Flex>
+            </GumroadCard>
+          ))}
+        </div>
       )}
     </Box>
   );

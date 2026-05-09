@@ -1,3 +1,159 @@
+/**
+ * Global Styles — Gumroad-Style Playful Design System
+ */
+
+:root {
+  /* Colors */
+  --color-canvas: #FFFEF5;
+  --color-ink: #0A0A1A;
+  --color-surface: #FFFFFF;
+  --color-surface-cream: #FFF8E1;
+
+  --color-brand-cyan: #4ECDC4;
+  --color-brand-yellow: #FFD93D;
+  --color-brand-salmon: #FF6B6B;
+  --color-brand-mint: #A8E6CF;
+  --color-brand-lavender: #C7B8FF;
+  --color-brand-peach: #FFC09F;
+
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+
+  /* Shadows */
+  --shadow-card: 6px 6px 0px #0A0A1A;
+  --shadow-card-hover: 8px 8px 0px #0A0A1A;
+  --shadow-card-sm: 4px 4px 0px #0A0A1A;
+  --shadow-button: 3px 3px 0px #0A0A1A;
+  --shadow-button-active: 1px 1px 0px #0A0A1A;
+  --shadow-input: 2px 2px 0px #0A0A1A;
+
+  /* Radii */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-pill: 9999px;
+
+  /* Typography */
+  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Z-Index */
+  --z-menu: 1000;
+  --z-bottom-nav: 999;
+  --z-modal: 1100;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-body);
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  line-height: 1.6;
+}
+
+/* Headlines */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  margin: 0;
+}
+
+/* Links */
+a {
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+/* Bottom nav responsive */
+@media (min-width: 768px) {
+  .bottom-nav {
+    display: none !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .bottom-nav {
+    display: block !important;
+  }
+}
+
+/* Radix TextField — make inner input transparent so wrapper bg shows */
+.rt-TextFieldRoot input,
+.rt-TextFieldInput {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Radix Select trigger — override internal bg */
+.rt-SelectTrigger {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Radix TextArea — override internal bg/border */
+.rt-TextAreaRoot textarea,
+.rt-TextAreaInput {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* RadioCards — Gumroad thick-border style */
+.rt-RadioCardsRoot {
+  gap: 8px !important;
+}
+
+.rt-RadioCardsItem {
+  border: 2px solid var(--color-ink) !important;
+  border-radius: 12px !important;
+  box-shadow: 2px 2px 0px var(--color-ink) !important;
+  padding: 12px 16px !important;
+  font-family: var(--font-display) !important;
+  font-weight: 500 !important;
+  transition: all 0.15s ease !important;
+}
+
+.rt-RadioCardsItem[data-state="checked"] {
+  background-color: var(--color-brand-lavender) !important;
+  color: var(--color-ink) !important;
+  border-color: var(--color-ink) !important;
+  box-shadow: 3px 3px 0px var(--color-ink) !important;
+}
+
+.rt-RadioCardsItem:hover {
+  background-color: var(--color-surface-cream) !important;
+}
+
+/* Table styling for sensory items */
+.rt-TableRoot {
+  border: 2px solid var(--color-ink) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+.rt-TableRow {
+  border-bottom: 1px solid var(--color-ink) !important;
+}
+
+.rt-TableHeader {
+  background-color: var(--color-surface-cream) !important;
+}
+
+/* Print */
 @media print {
   .legend-color-dot {
     -webkit-print-color-adjust: exact !important;

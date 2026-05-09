@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import { Box, Button, Card, Flex, Heading, Text, TextField } from '@radix-ui/themes';
+import { Box, Flex, TextField } from '@radix-ui/themes';
 import { CopyIcon, Link2Icon, Share1Icon } from '@radix-ui/react-icons';
 import { useAuthContext } from '../../context/AuthContext';
 import { anamneseApi } from '../../services/api';
+import { colors, shadows, radii, typography } from '../../theme/tokens';
+import GumroadButton from '../design-system/GumroadButton';
+import GumroadHeading, { GumroadText } from '../design-system/GumroadHeading';
 
 interface ShareLinkBoxProps {
   anamneseId: string;
@@ -69,14 +72,16 @@ const ShareLinkBox: React.FC<ShareLinkBoxProps> = ({ anamneseId, shareToken, onT
   };
 
   return (
-    <Card mb="4">
+    <Box>
       <Flex align="center" gap="2" mb="2">
         <Share1Icon />
-        <Heading size="4">Compartilhar anamnese</Heading>
+        <GumroadHeading level="title-md" as="h3">
+          Compartilhar anamnese
+        </GumroadHeading>
       </Flex>
-      <Text size="2" color="gray" mb="3" as="p">
-        Gere um link somente-leitura para compartilhar com outros profissionais. Quem receber o link poderá ver a anamnese sem precisar de conta.
-      </Text>
+      <GumroadText level="body-sm" as="p" style={{ opacity: 0.8, marginBottom: '12px' }}>
+        Gere um link somente-leitura para compartilhar com outros profissionais.
+      </GumroadText>
 
       {shareToken ? (
         <Flex direction="column" gap="2">
@@ -87,6 +92,18 @@ const ShareLinkBox: React.FC<ShareLinkBoxProps> = ({ anamneseId, shareToken, onT
                 value={buildShareUrl(shareToken)}
                 readOnly
                 onFocus={(e) => e.currentTarget.select()}
+                style={{
+                  backgroundColor: colors.canvas,
+                  color: colors.ink,
+                  border: `2px solid ${colors.ink}`,
+                  borderRadius: radii.md,
+                  boxShadow: shadows.input,
+                  height: '48px',
+                  padding: '12px 16px',
+                  fontFamily: typography['body-md'].font,
+                  fontSize: typography['body-md'].size,
+                  width: '100%',
+                }}
               >
                 <TextField.Slot>
                   <Link2Icon />
@@ -94,25 +111,25 @@ const ShareLinkBox: React.FC<ShareLinkBoxProps> = ({ anamneseId, shareToken, onT
               </TextField.Root>
             </Box>
             <Flex gap="2">
-              <Button variant="soft" color="violet" onClick={handleCopy} disabled={loading}>
+              <GumroadButton variant="secondary" size="sm" onClick={handleCopy} disabled={loading}>
                 <CopyIcon /> {copied ? 'Copiado!' : 'Copiar'}
-              </Button>
-              <Button variant="soft" color="crimson" onClick={handleRevoke} disabled={loading}>
+              </GumroadButton>
+              <GumroadButton variant="danger" size="sm" onClick={handleRevoke} disabled={loading}>
                 Revogar
-              </Button>
+              </GumroadButton>
             </Flex>
           </Flex>
-          {error && <Text color="crimson" size="2">{error}</Text>}
+          {error && <GumroadText level="body-sm" as="p" style={{ color: colors['brand-salmon'] }}>{error}</GumroadText>}
         </Flex>
       ) : (
         <Flex direction="column" gap="2">
-          <Button color="violet" onClick={handleGenerate} disabled={loading} style={{ alignSelf: 'flex-start' }}>
+          <GumroadButton variant="primary" size="sm" onClick={handleGenerate} disabled={loading}>
             <Share1Icon /> {loading ? 'Gerando...' : 'Gerar link de compartilhamento'}
-          </Button>
-          {error && <Text color="crimson" size="2">{error}</Text>}
+          </GumroadButton>
+          {error && <GumroadText level="body-sm" as="p" style={{ color: colors['brand-salmon'] }}>{error}</GumroadText>}
         </Flex>
       )}
-    </Card>
+    </Box>
   );
 };
 

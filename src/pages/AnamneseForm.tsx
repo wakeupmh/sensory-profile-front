@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { useState, FormEvent, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Box, Button, Card, Flex, Heading, Text } from '@radix-ui/themes';
+import { Box, Flex } from '@radix-ui/themes';
 import { useAuthContext } from '../context/AuthContext';
 
 import { anamneseApi } from '../services/api';
@@ -14,6 +14,10 @@ import ShareLinkBox from '../components/anamnese/ShareLinkBox';
 import { emptyClinicalHistory } from '../components/anamnese/types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import NotFound from '../components/NotFound';
+import { spacing } from '../theme/tokens';
+import GumroadCard from '../components/design-system/GumroadCard';
+import GumroadButton from '../components/design-system/GumroadButton';
+import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
 
 const AnamneseForm: React.FC = () => {
   const { formData, setFormData, updateFormData } = useAnamneseForm();
@@ -122,12 +126,12 @@ const AnamneseForm: React.FC = () => {
 
   if (loading) {
     return (
-      <Box p="4" width="100%">
-        <Card>
+      <Box width="100%">
+        <GumroadCard color="cream" shadow="md" padding="xl">
           <Flex align="center" justify="center" direction="column" gap="3" py="9">
             <LoadingSpinner size="large" text="Carregando anamnese..." />
           </Flex>
-        </Card>
+        </GumroadCard>
       </Box>
     );
   }
@@ -143,87 +147,101 @@ const AnamneseForm: React.FC = () => {
 
   if (error) {
     return (
-      <Box p="4" width="100%">
-        <Card>
+      <Box width="100%">
+        <GumroadCard color="salmon" shadow="md" padding="xl">
           <Flex align="center" justify="center" direction="column" gap="3" py="9">
-            <Text color="red">{error}</Text>
-            <Button onClick={() => navigate('/anamneses')} color="gray">Voltar</Button>
+            <GumroadText level="body-md" as="p">{error}</GumroadText>
+            <GumroadButton variant="secondary" size="md" onClick={() => navigate('/anamneses')}>
+              Voltar
+            </GumroadButton>
           </Flex>
-        </Card>
+        </GumroadCard>
       </Box>
     );
   }
 
   return (
-    <Box p="4" width="100%">
+    <Box width="100%">
       <form onSubmit={handleSubmit}>
-        <Flex justify="between" align="center" mb="6">
-          <Heading size="7" color="violet">{getTitle()}</Heading>
-          <Flex gap="3">
+        <Flex
+          justify="between"
+          align={{ initial: 'start', sm: 'center' }}
+          mb="6"
+          gap="4"
+          direction={{ initial: 'column', sm: 'row' }}
+        >
+          <GumroadHeading level="display-sm" as="h1">
+            {getTitle()}
+          </GumroadHeading>
+          <Flex gap="3" wrap="wrap">
             {isViewMode && (
-              <Button onClick={() => navigate(`/anamnese/${id}/edit`)}>Editar</Button>
+              <GumroadButton variant="secondary" size="sm" onClick={() => navigate(`/anamnese/${id}/edit`)}>
+                Editar
+              </GumroadButton>
             )}
-            <Button onClick={() => navigate('/anamneses')} variant="outline" color="gray">
+            <GumroadButton variant="secondary" size="sm" onClick={() => navigate('/anamneses')}>
               Voltar
-            </Button>
+            </GumroadButton>
           </Flex>
         </Flex>
 
         {validationError && (
-          <Box mb="4" p="3" role="alert" style={{ backgroundColor: '#FFEBEE', borderRadius: '4px' }}>
-            <Text color="crimson" weight="bold">Erros de validação: </Text>
-            <Text color="crimson">{validationError}</Text>
-          </Box>
+          <GumroadCard color="salmon" shadow="sm" padding="md" style={{ marginBottom: spacing.lg }}>
+            <GumroadText level="body-md" as="p" style={{ fontWeight: 600 }}>
+              Erros de validação: {validationError}
+            </GumroadText>
+          </GumroadCard>
         )}
 
         {isViewMode && id && (
-          <ShareLinkBox
-            anamneseId={id}
-            shareToken={shareToken}
-            onTokenChange={setShareToken}
-          />
+          <GumroadCard color="mint" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+            <ShareLinkBox
+              anamneseId={id}
+              shareToken={shareToken}
+              onTokenChange={setShareToken}
+            />
+          </GumroadCard>
         )}
 
-        <ChildSection
-          formData={formData}
-          updateFormData={updateFormData}
-          disabled={disabled}
-        />
+        <GumroadCard color="cyan" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+          <ChildSection
+            formData={formData}
+            updateFormData={updateFormData}
+            disabled={disabled}
+          />
+        </GumroadCard>
 
-        <CaregiverSection
-          formData={formData}
-          updateFormData={updateFormData}
-          disabled={disabled}
-        />
+        <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+          <CaregiverSection
+            formData={formData}
+            updateFormData={updateFormData}
+            disabled={disabled}
+          />
+        </GumroadCard>
 
-        <ClinicalHistorySection
-          formData={formData}
-          updateFormData={updateFormData}
-          disabled={disabled}
-        />
+        <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+          <ClinicalHistorySection
+            formData={formData}
+            updateFormData={updateFormData}
+            disabled={disabled}
+          />
+        </GumroadCard>
 
-        <Flex gap="3" mt="4" justify="end">
+        <Flex gap="3" mt="4" justify="end" wrap="wrap">
           {!isViewMode && (
             <>
-              <Button variant="soft" color="gray" onClick={() => navigate('/anamneses')}>
+              <GumroadButton variant="secondary" size="md" onClick={() => navigate('/anamneses')}>
                 Cancelar
-              </Button>
-              <Button type="submit" color="violet" disabled={submitting}>
-                {submitting ? (
-                  <Flex gap="2" align="center">
-                    <LoadingSpinner size="small" />
-                    <Text>{isNewMode ? 'Criando...' : 'Salvando...'}</Text>
-                  </Flex>
-                ) : (
-                  isNewMode ? 'Criar Anamnese' : 'Salvar Alterações'
-                )}
-              </Button>
+              </GumroadButton>
+              <GumroadButton variant="primary" size="md" type="submit" disabled={submitting}>
+                {submitting ? (isNewMode ? 'Criando...' : 'Salvando...') : (isNewMode ? 'Criar Anamnese' : 'Salvar Alterações')}
+              </GumroadButton>
             </>
           )}
           {isViewMode && (
-            <Button variant="soft" color="gray" onClick={() => navigate('/anamneses')}>
+            <GumroadButton variant="secondary" size="md" onClick={() => navigate('/anamneses')}>
               Voltar
-            </Button>
+            </GumroadButton>
           )}
         </Flex>
       </form>

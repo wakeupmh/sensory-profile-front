@@ -6,7 +6,7 @@ import { Theme } from "@radix-ui/themes";
 import { AuthProvider } from "./context/AuthContext.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <Theme grayColor="slate" radius="medium" scaling="100%">
+  <Theme accentColor="teal" grayColor="sand" radius="large" scaling="100%">
     <AuthProvider>
       <App />
     </AuthProvider>

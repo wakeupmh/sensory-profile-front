@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 import { ReactNode } from "react";
 import Layout from './components/Layout';
 import Home from './pages/Home';
+import LandingPage from './pages/LandingPage';
 import SensoryProfileForm from './pages/SensoryProfile';
 import ReportPage from './pages/ReportPage';
 import AnamneseList from './pages/AnamneseList';
@@ -25,11 +26,12 @@ function App() {
     <ErrorBoundary>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<LandingPage />} />
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/anamnese/shared/:token" element={<AnamneseSharedView />} />
 
           <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
+            <Route path="/dashboard" element={<ProtectedRoute><Home /></ProtectedRoute>} />
             <Route path="/assessment/new" element={<ProtectedRoute><SensoryProfileForm /></ProtectedRoute>} />
             <Route path="/assessment/:id" element={<ProtectedRoute><SensoryProfileForm /></ProtectedRoute>} />
             <Route path="/assessment/:id/edit" element={<ProtectedRoute><SensoryProfileForm /></ProtectedRoute>} />

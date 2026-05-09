@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FormData } from './types';
 import { useEffect, useState, memo } from 'react';
-import { Text, Flex, Box } from '@radix-ui/themes';
+import { Flex, Box } from '@radix-ui/themes';
 import FastTextField from './FastTextField';
 import FastSelect from './FastSelect';
+import GumroadHeading from '../design-system/GumroadHeading';
 
 interface ChildDataSectionProps {
   formData: FormData;
@@ -47,7 +48,9 @@ const ChildDataSection: React.FC<ChildDataSectionProps> = memo(({ formData, upda
 
   return (
     <Box mb="6">
-      <Text size="5" weight="bold" mb="3">Dados da Criança</Text>
+      <GumroadHeading level="title-lg" as="h2" style={{ marginBottom: '12px' }}>
+        Dados da Criança
+      </GumroadHeading>
       <Flex gap="4" direction={{ initial: 'column', sm: 'row' }} mb="3">
         <Box style={{ flex: 1 }}>
           <FastTextField
@@ -74,9 +77,9 @@ const ChildDataSection: React.FC<ChildDataSectionProps> = memo(({ formData, upda
       </Flex>
       <Flex gap="4" direction={{ initial: 'column', sm: 'row' }} mb="3">
         <Box style={{ flex: 1 }}>
-          <Text as="label" size="2" weight="bold" mb="1">
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '16px', display: 'block', marginBottom: '6px' }}>
             Idade:
-          </Text>
+          </span>
           <FastTextField
             name="age"
             label=""

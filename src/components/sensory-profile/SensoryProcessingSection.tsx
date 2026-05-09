@@ -3,7 +3,9 @@ import React, { memo } from 'react';
 import SensoryItemsTable from './SensoryItemsTable';
 import { FormData, FrequencyResponse, SensoryItem } from './types';
 import { getInstrument } from '../../instruments';
-import { Text, Box, TextArea } from '@radix-ui/themes';
+import { Box, TextArea } from '@radix-ui/themes';
+import { colors, shadows, radii, typography } from '../../theme/tokens';
+import GumroadHeading from '../design-system/GumroadHeading';
 
 interface SensoryProcessingSectionProps {
   formData: FormData;
@@ -32,7 +34,9 @@ const SensorySection = memo(({
   const textareaId = `comments-${sectionKey}`;
   return (
     <Box mb="6">
-      <Text size="5" weight="bold" mb="3">{title}</Text>
+      <GumroadHeading level="title-lg" as="h3" style={{ marginBottom: '12px' }}>
+        {title}
+      </GumroadHeading>
       <SensoryItemsTable
         items={items}
         onResponseChange={(itemId, response) =>
@@ -41,14 +45,26 @@ const SensorySection = memo(({
         disabled={disabled}
       />
       <Box mt="3">
-        <Text as="label" htmlFor={textareaId} size="2" weight="bold" mb="1">Comentários:</Text>
+        <label htmlFor={textareaId} style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '16px', display: 'block', marginBottom: '6px' }}>
+          Comentários:
+        </label>
         <TextArea
           id={textareaId}
           placeholder="Adicione comentários sobre esta seção"
           value={comments || ''}
           onChange={(e) => updateComments(sectionKey, e.target.value)}
           disabled={disabled}
-          style={{ width: '100%' }}
+          style={{
+            width: '100%',
+            backgroundColor: colors.canvas,
+            border: `2px solid ${colors.ink}`,
+            borderRadius: radii.md,
+            boxShadow: shadows.input,
+            padding: '12px 16px',
+            fontFamily: typography['body-md'].font,
+            fontSize: typography['body-md'].size,
+            outline: 'none',
+          }}
         />
       </Box>
     </Box>

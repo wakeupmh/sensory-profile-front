@@ -21,7 +21,7 @@ const bands = (veryLow: number, low: number, average: number, high: number): Cla
 
 export const crianca3a14: Instrument = {
   id: 'crianca-3-14',
-  name: 'Perfil Sensorial — Criança (3 a 14 anos)',
+  name: '🧒 Perfil Sensorial — Criança (3 a 14 anos)',
   shortName: 'Criança (3–14)',
   ageRange: { minMonths: 36, maxMonths: 168 },
   description:

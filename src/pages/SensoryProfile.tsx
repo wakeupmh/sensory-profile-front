@@ -3,6 +3,7 @@ import * as React from 'react';
 import { useState, FormEvent, useEffect, useMemo, useRef } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { assessmentApi } from '../services/api';
+import { Box, Flex, Badge } from '@radix-ui/themes';
 
 import ChildDataSection from '../components/sensory-profile/ChildDataSection';
 import ExaminerDataSection from '../components/sensory-profile/ExaminerDataSection';
@@ -13,7 +14,6 @@ import InstrumentPicker from '../components/sensory-profile/InstrumentPicker';
 import useFormData from '../components/sensory-profile/useFormData';
 import AnamneseSelector from '../components/anamnese/AnamneseSelector';
 import type { Anamnese } from '../components/anamnese/types';
-import { Button, Flex, Text, Box, Card, Heading, Badge } from '@radix-ui/themes';
 import LoadingSpinner from '../components/LoadingSpinner';
 import NotFound from '../components/NotFound';
 import { useAuthContext } from '../context/AuthContext';
@@ -23,6 +23,10 @@ import {
   getInstrument,
 } from '../instruments';
 import { toSensoryItems } from '../instruments/types';
+import { colors, spacing, typography } from '../theme/tokens';
+import GumroadCard from '../components/design-system/GumroadCard';
+import GumroadButton from '../components/design-system/GumroadButton';
+import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
 
 const SensoryProfileForm: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -101,7 +105,6 @@ const SensoryProfileForm: React.FC = () => {
             });
           }
 
-          // Rehydrate rawScore per section from the assessment payload if available
           loadedInstrument.sections.forEach((s) => {
             const scoreField = `${s.key}RawScore`;
             if (assessment[scoreField] !== undefined && assessment[scoreField] !== null) {
@@ -109,7 +112,6 @@ const SensoryProfileForm: React.FC = () => {
             }
           });
 
-          // Apply section comments if the backend sends them
           if (Array.isArray(assessment.sectionComments)) {
             assessment.sectionComments.forEach((c: { section: string; comments: string }) => {
               if (builtSections[c.section]) {
@@ -144,7 +146,6 @@ const SensoryProfileForm: React.FC = () => {
             createdAt: assessment.createdAt,
           });
         } else {
-          // Legacy shape fallback — assume default instrument
           setFormData((prev) => ({ ...prev, ...response, instrumentId: response.instrumentId || DEFAULT_INSTRUMENT_ID }));
         }
 
@@ -264,7 +265,7 @@ const SensoryProfileForm: React.FC = () => {
         await assessmentApi.updateAssessment(id, payload, token);
       }
 
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       setError('Erro ao salvar avaliação. Por favor, tente novamente.');
       console.error(err);
@@ -274,7 +275,7 @@ const SensoryProfileForm: React.FC = () => {
   };
 
   const handleClose = () => {
-    navigate('/');
+    navigate('/dashboard');
   };
 
   const getTitle = () => {
@@ -285,125 +286,153 @@ const SensoryProfileForm: React.FC = () => {
   };
 
   return (
-    <Box p="4" width="100%">
+    <Box width="100%">
       {loading ? (
-        <Card>
+        <GumroadCard color="cream" shadow="md" padding="xl">
           <Flex align="center" justify="center" direction="column" gap="3" py="9">
             <LoadingSpinner size="large" text="Carregando dados..." />
           </Flex>
-        </Card>
+        </GumroadCard>
       ) : notFound ? (
         <NotFound
           title="Avaliação não encontrada"
           message="A avaliação que você está procurando não existe ou foi removida."
         />
       ) : error ? (
-        <Card>
+        <GumroadCard color="salmon" shadow="md" padding="xl">
           <Flex align="center" justify="center" direction="column" gap="3" py="9">
-            <Text color="red">{error}</Text>
-            <Button onClick={() => navigate('/')} color="gray">Voltar</Button>
+            <GumroadText level="body-md" as="p">{error}</GumroadText>
+            <GumroadButton variant="secondary" size="md" onClick={() => navigate('/dashboard')}>
+              Voltar
+            </GumroadButton>
           </Flex>
-        </Card>
+        </GumroadCard>
       ) : (
         <form onSubmit={handleSubmit}>
-          <Flex justify="between" align="center" mb="6">
+          {/* Header */}
+          <Flex
+            justify="between"
+            align={{ initial: 'start', sm: 'center' }}
+            mb="6"
+            gap="4"
+            direction={{ initial: 'column', sm: 'row' }}
+          >
             <Flex direction="column" gap="1">
-              <Heading size="7" color="violet">{getTitle()}</Heading>
-              <Badge color="violet" variant="soft" style={{ alignSelf: 'flex-start' }}>
+              <GumroadHeading level="display-sm" as="h1">
+                {getTitle()}
+              </GumroadHeading>
+              <Badge
+                color="teal"
+                variant="soft"
+                style={{
+                  alignSelf: 'flex-start',
+                  border: `2px solid ${colors.ink}`,
+                  borderRadius: '9999px',
+                  fontFamily: typography.caption.font,
+                }}
+              >
                 {instrument.shortName}
               </Badge>
             </Flex>
-            <Flex gap="3">
+            <Flex gap="3" wrap="wrap">
               {!isNewMode && !isEditMode && !isReportMode && (
-                <Button onClick={() => navigate(`/assessment/${id}/edit`)}>Editar</Button>
+                <GumroadButton variant="secondary" size="sm" onClick={() => navigate(`/assessment/${id}/edit`)}>
+                  Editar
+                </GumroadButton>
               )}
               {!isNewMode && !isReportMode && (
-                <Button onClick={() => navigate(`/assessment/${id}/report`)}>Ver Relatório</Button>
+                <GumroadButton variant="secondary" size="sm" onClick={() => navigate(`/assessment/${id}/report`)}>
+                  Ver Relatório
+                </GumroadButton>
               )}
-              <Button onClick={() => navigate('/')} variant="outline" color="gray">Voltar</Button>
+              <GumroadButton variant="secondary" size="sm" onClick={handleClose}>
+                Voltar
+              </GumroadButton>
             </Flex>
           </Flex>
 
           {validationError && (
-            <Box mb="4" p="3" role="alert" style={{ backgroundColor: '#FFEBEE', borderRadius: '4px' }}>
-              <Text color="crimson" weight="bold">Erros de validação: </Text>
-              <Text color="crimson">{validationError}</Text>
-            </Box>
+            <GumroadCard color="salmon" shadow="sm" padding="md" style={{ marginBottom: spacing.lg }}>
+              <GumroadText level="body-md" as="p" style={{ fontWeight: 600 }}>
+                Erros de validação: {validationError}
+              </GumroadText>
+            </GumroadCard>
           )}
 
           {isNewMode && (
-            <>
-              <InstrumentPicker
-                value={formData.instrumentId}
-                onChange={handleInstrumentChange}
-              />
-              <AnamneseSelector
-                onSelect={(a: Anamnese) => {
-                  updateFormData('child', a.child);
-                  updateFormData('caregiver', a.caregiver);
-                }}
-              />
-            </>
+            <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+              <Flex direction="column" gap="4">
+                <InstrumentPicker
+                  value={formData.instrumentId}
+                  onChange={handleInstrumentChange}
+                />
+                <AnamneseSelector
+                  onSelect={(a: Anamnese) => {
+                    updateFormData('child', a.child);
+                    updateFormData('caregiver', a.caregiver);
+                  }}
+                />
+              </Flex>
+            </GumroadCard>
           )}
 
-          <ChildDataSection
-            formData={formData}
-            updateFormData={updateFormData}
-            disabled={isViewMode || isReportMode}
-          />
+          <GumroadCard color="cyan" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+            <ChildDataSection
+              formData={formData}
+              updateFormData={updateFormData}
+              disabled={isViewMode || isReportMode}
+            />
+          </GumroadCard>
 
-          <ExaminerDataSection
-            formData={formData}
-            updateFormData={updateFormData}
-            disabled={isViewMode || isReportMode}
-          />
+          <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+            <ExaminerDataSection
+              formData={formData}
+              updateFormData={updateFormData}
+              disabled={isViewMode || isReportMode}
+            />
+          </GumroadCard>
 
-          <CaregiverDataSection
-            formData={formData}
-            updateFormData={updateFormData}
-            disabled={isViewMode || isReportMode}
-          />
+          <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+            <CaregiverDataSection
+              formData={formData}
+              updateFormData={updateFormData}
+              disabled={isViewMode || isReportMode}
+            />
+          </GumroadCard>
 
-          <InstructionsSection />
+          <GumroadCard color="cream" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+            <InstructionsSection />
+          </GumroadCard>
 
-          <SensoryProcessingSection
-            formData={formData}
-            updateItemResponse={updateItemResponse}
-            updateFormData={updateFormData}
-            disabled={isViewMode || isReportMode}
-          />
+          <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+            <SensoryProcessingSection
+              formData={formData}
+              updateItemResponse={updateItemResponse}
+              updateFormData={updateFormData}
+              disabled={isViewMode || isReportMode}
+            />
+          </GumroadCard>
 
-          <Flex gap="3" mt="4" justify="end">
+          <Flex gap="3" mt="4" justify="end" wrap="wrap">
             {!isViewMode && !isReportMode && (
               <>
-                <Button variant="soft" color="gray" onClick={handleClose}>
+                <GumroadButton variant="secondary" size="md" onClick={handleClose}>
                   Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  color="violet"
-                  disabled={submitting}
-                >
-                  {submitting ? (
-                    <Flex gap="2" align="center">
-                      <LoadingSpinner size="small" />
-                      <Text>{isNewMode ? 'Criando...' : 'Salvando...'}</Text>
-                    </Flex>
-                  ) : (
-                    isNewMode ? 'Criar Avaliação' : 'Salvar Alterações'
-                  )}
-                </Button>
+                </GumroadButton>
+                <GumroadButton variant="primary" size="md" type="submit" disabled={submitting}>
+                  {submitting ? (isNewMode ? 'Criando...' : 'Salvando...') : (isNewMode ? 'Criar Avaliação' : 'Salvar Alterações')}
+                </GumroadButton>
               </>
             )}
             {(isViewMode || isReportMode) && (
               <>
-                <Button variant="soft" color="gray" onClick={handleClose}>
+                <GumroadButton variant="secondary" size="md" onClick={handleClose}>
                   Voltar
-                </Button>
+                </GumroadButton>
                 {isViewMode && (
-                  <Button onClick={() => navigate(`/assessment/${id}/edit`)}>
+                  <GumroadButton variant="primary" size="md" onClick={() => navigate(`/assessment/${id}/edit`)}>
                     Editar
-                  </Button>
+                  </GumroadButton>
                 )}
               </>
             )}

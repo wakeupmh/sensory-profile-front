@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { memo } from 'react';
-import { Box, Flex, Heading, Separator, Text } from '@radix-ui/themes';
+import { Box, Flex } from '@radix-ui/themes';
 import FastTextField from '../sensory-profile/FastTextField';
 import FastSelect from '../sensory-profile/FastSelect';
 import FastTextArea from './FastTextArea';
 import type { AnamneseFormData } from './types';
+import { colors } from '../../theme/tokens';
+import GumroadHeading from '../design-system/GumroadHeading';
 
 interface ClinicalHistorySectionProps {
   formData: AnamneseFormData;
@@ -61,13 +63,27 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
     updateFormData(`clinicalHistory.${path}`, value);
   };
 
+  const sectionTitle = (text: string) => (
+    <GumroadHeading level="title-lg" as="h3" style={{ marginBottom: '8px', marginTop: '8px' }}>
+      {text}
+    </GumroadHeading>
+  );
+
+  const separatorStyle = {
+    backgroundColor: colors.ink,
+    height: '2px',
+    margin: '16px 0',
+  };
+
   return (
     <Box mb="6">
-      <Heading size="5" mb="3">Histórico Clínico</Heading>
+      <GumroadHeading level="display-sm" as="h2" style={{ marginBottom: '16px' }}>
+        Histórico Clínico
+      </GumroadHeading>
 
       {/* Queixa */}
       <Box mb="5">
-        <Text size="4" weight="bold" mb="2">Queixa Principal</Text>
+        {sectionTitle('Queixa Principal')}
         <Flex direction="column" gap="3" mt="2">
           <FastTextArea
             name="mainComplaint"
@@ -103,11 +119,11 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
         </Flex>
       </Box>
 
-      <Separator size="4" my="3" />
+      <div style={separatorStyle} />
 
       {/* Gestação e parto */}
       <Box mb="5">
-        <Text size="4" weight="bold" mb="2">Gestação e Parto</Text>
+        {sectionTitle('Gestação e Parto')}
         <Flex direction="column" gap="3" mt="2">
           <Flex gap="4" direction={{ initial: 'column', sm: 'row' }}>
             <Box style={{ flex: 1 }}>
@@ -220,11 +236,11 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
         </Flex>
       </Box>
 
-      <Separator size="4" my="3" />
+      <div style={separatorStyle} />
 
       {/* Desenvolvimento */}
       <Box mb="5">
-        <Text size="4" weight="bold" mb="2">Desenvolvimento</Text>
+        {sectionTitle('Desenvolvimento')}
         <Flex direction="column" gap="3" mt="2">
           <Flex gap="4" direction={{ initial: 'column', sm: 'row' }} wrap="wrap">
             <Box style={{ flex: 1, minWidth: 180 }}>
@@ -319,11 +335,11 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
         </Flex>
       </Box>
 
-      <Separator size="4" my="3" />
+      <div style={separatorStyle} />
 
       {/* Saúde */}
       <Box mb="5">
-        <Text size="4" weight="bold" mb="2">Saúde</Text>
+        {sectionTitle('Saúde')}
         <Flex direction="column" gap="3" mt="2">
           <Flex gap="4" direction={{ initial: 'column', sm: 'row' }}>
             <Box style={{ flex: 1 }}>
@@ -409,11 +425,11 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
         </Flex>
       </Box>
 
-      <Separator size="4" my="3" />
+      <div style={separatorStyle} />
 
       {/* Escola */}
       <Box mb="5">
-        <Text size="4" weight="bold" mb="2">Escola</Text>
+        {sectionTitle('Escola')}
         <Flex direction="column" gap="3" mt="2">
           <Flex gap="4" direction={{ initial: 'column', sm: 'row' }}>
             <Box style={{ flex: 1 }}>
@@ -495,11 +511,11 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
         </Flex>
       </Box>
 
-      <Separator size="4" my="3" />
+      <div style={separatorStyle} />
 
       {/* Família */}
       <Box mb="2">
-        <Text size="4" weight="bold" mb="2">Família e Contexto</Text>
+        {sectionTitle('Família e Contexto')}
         <Flex direction="column" gap="3" mt="2">
           <Flex gap="4" direction={{ initial: 'column', sm: 'row' }}>
             <Box style={{ flex: 1 }}>

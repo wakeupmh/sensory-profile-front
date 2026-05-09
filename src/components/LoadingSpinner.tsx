@@ -1,6 +1,7 @@
 import { Box, Flex, Text } from '@radix-ui/themes';
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
+import { colors } from '../theme/tokens';
 
 interface LoadingSpinnerProps {
   size?: 'small' | 'medium' | 'large';
@@ -14,16 +15,16 @@ const spin = keyframes`
 `;
 
 const SpinnerContainer = styled(Box)<{ size: string; color: string }>`
-  width: ${props => 
-    props.size === 'small' ? '24px' : 
+  width: ${props =>
+    props.size === 'small' ? '24px' :
     props.size === 'large' ? '48px' : '36px'
   };
-  height: ${props => 
-    props.size === 'small' ? '24px' : 
+  height: ${props =>
+    props.size === 'small' ? '24px' :
     props.size === 'large' ? '48px' : '36px'
   };
-  border: ${props => 
-    props.size === 'small' ? '3px' : 
+  border: ${props =>
+    props.size === 'small' ? '3px' :
     props.size === 'large' ? '5px' : '4px'
   } solid rgba(0, 0, 0, 0.1);
   border-radius: 50%;
@@ -33,7 +34,7 @@ const SpinnerContainer = styled(Box)<{ size: string; color: string }>`
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = 'medium',
-  color = 'var(--violet-9)',
+  color = colors['brand-cyan'],
   text,
 }) => {
   return (

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Box, Card, Flex, Select, Text } from '@radix-ui/themes';
 import { ClipboardIcon } from '@radix-ui/react-icons';
 import { useAuthContext } from '../../context/AuthContext';
@@ -13,6 +14,7 @@ const MANUAL_VALUE = '__manual__';
 
 const AnamneseSelector: React.FC<AnamneseSelectorProps> = ({ onSelect }) => {
   const { getToken } = useAuthContext();
+  const navigate = useNavigate();
   const getTokenRef = useRef(getToken);
   getTokenRef.current = getToken;
 
@@ -68,27 +70,47 @@ const AnamneseSelector: React.FC<AnamneseSelectorProps> = ({ onSelect }) => {
         Selecione uma anamnese já cadastrada para preencher automaticamente os dados da criança e do responsável. Ao selecionar, os campos abaixo serão sobrescritos.
       </Text>
 
-      <Box>
-        <Select.Root value={selected} onValueChange={handleChange} disabled={loading || loadingDetail}>
-          <Select.Trigger placeholder="Selecione uma anamnese" />
-          <Select.Content>
-            <Select.Item value={MANUAL_VALUE}>— Preencher manualmente —</Select.Item>
-            {items.map((a) => (
-              <Select.Item key={a.id} value={a.id}>
-                {a.childName} · {new Date(a.createdAt).toLocaleDateString('pt-BR')}
-              </Select.Item>
-            ))}
-          </Select.Content>
-        </Select.Root>
-      </Box>
-
       {loading && <Text size="1" color="gray" mt="2" as="p">Carregando anamneses...</Text>}
       {loadingDetail && <Text size="1" color="gray" mt="2" as="p">Carregando dados selecionados...</Text>}
       {error && <Text size="1" color="crimson" mt="2" as="p">{error}</Text>}
+
+      {!loading && items.length > 0 && (
+        <Box>
+          <Select.Root value={selected} onValueChange={handleChange} disabled={loadingDetail}>
+            <Select.Trigger placeholder="Selecione uma anamnese" />
+            <Select.Content>
+              <Select.Item value={MANUAL_VALUE}>— Preencher manualmente —</Select.Item>
+              {items.map((a) => (
+                <Select.Item key={a.id} value={a.id}>
+                  {a.childName} · {new Date(a.createdAt).toLocaleDateString('pt-BR')}
+                </Select.Item>
+              ))}
+            </Select.Content>
+          </Select.Root>
+        </Box>
+      )}
+
       {!loading && items.length === 0 && !error && (
-        <Text size="1" color="gray" mt="2" as="p">
-          Nenhuma anamnese cadastrada ainda. Você pode continuar preenchendo manualmente.
-        </Text>
+        <Flex align="center" gap="3" mt="2" wrap="wrap">
+          <Text size="1" color="gray" as="p">Nenhuma anamnese cadastrada ainda.</Text>
+          <button
+            type="button"
+            onClick={() => navigate('/anamnese/new')}
+            style={{
+              fontSize: '12px',
+              fontWeight: 600,
+              padding: '4px 12px',
+              borderRadius: '8px',
+              border: '2px solid #0A0A1A',
+              background: '#4ECDC4',
+              color: '#0A0A1A',
+              cursor: 'pointer',
+              boxShadow: '2px 2px 0px #0A0A1A',
+            }}
+          >
+            + Criar anamnese
+          </button>
+        </Flex>
       )}
     </Card>
   );

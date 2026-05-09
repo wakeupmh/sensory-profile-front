@@ -1,5 +1,9 @@
 import React from 'react';
-import { Box, Card, Flex, Text, Button, Heading } from '@radix-ui/themes';
+import { Box, Flex } from '@radix-ui/themes';
+
+import GumroadCard from './design-system/GumroadCard';
+import GumroadButton from './design-system/GumroadButton';
+import GumroadHeading, { GumroadText } from './design-system/GumroadHeading';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -32,38 +36,34 @@ class ErrorBoundary extends React.Component<
     if (this.state.hasError) {
       return (
         <Box p="6" style={{ maxWidth: 600, margin: '80px auto' }}>
-          <Card>
-            <Flex direction="column" align="center" gap="4" p="6">
-              <Heading size="6" color="crimson">
+          <GumroadCard color="salmon" shadow="md" padding="xl">
+            <Flex direction="column" align="center" gap="4" py="6">
+              <GumroadHeading level="display-md" as="h1" style={{ textAlign: 'center' }}>
                 Algo deu errado
-              </Heading>
-              <Text size="3" color="gray" align="center">
+              </GumroadHeading>
+              <GumroadText level="body-md" as="p" style={{ textAlign: 'center', opacity: 0.8 }}>
                 Ocorreu um erro inesperado. Por favor, tente recarregar a
                 página ou voltar para a página inicial.
-              </Text>
+              </GumroadText>
               {this.state.error && (
-                <Text size="1" color="gray" style={{ fontFamily: 'monospace' }}>
+                <GumroadText
+                  level="caption"
+                  as="p"
+                  style={{ fontFamily: 'monospace', opacity: 0.6, textAlign: 'center' }}
+                >
                   {this.state.error.message}
-                </Text>
+                </GumroadText>
               )}
-              <Flex gap="3" mt="2">
-                <Button
-                  variant="solid"
-                  color="violet"
-                  onClick={() => window.location.reload()}
-                >
+              <Flex gap="3" mt="2" wrap="wrap" justify="center">
+                <GumroadButton variant="primary" size="md" onClick={() => window.location.reload()}>
                   Recarregar Página
-                </Button>
-                <Button
-                  variant="outline"
-                  color="gray"
-                  onClick={this.handleReset}
-                >
+                </GumroadButton>
+                <GumroadButton variant="secondary" size="md" onClick={this.handleReset}>
                   Voltar para Início
-                </Button>
+                </GumroadButton>
               </Flex>
             </Flex>
-          </Card>
+          </GumroadCard>
         </Box>
       );
     }

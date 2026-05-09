@@ -1,5 +1,8 @@
-import { Button, Card, Flex, Heading, Text } from '@radix-ui/themes';
 import { useNavigate } from 'react-router-dom';
+import { Flex } from '@radix-ui/themes';
+import GumroadCard from './design-system/GumroadCard';
+import GumroadButton from './design-system/GumroadButton';
+import GumroadHeading, { GumroadText } from './design-system/GumroadHeading';
 
 interface NotFoundProps {
   title?: string;
@@ -17,7 +20,7 @@ const NotFound: React.FC<NotFoundProps> = ({
   const navigate = useNavigate();
 
   return (
-    <Card size="3">
+    <GumroadCard color="cream" shadow="md" padding="xl">
       <Flex
         direction="column"
         align="center"
@@ -26,24 +29,20 @@ const NotFound: React.FC<NotFoundProps> = ({
         py="9"
         px="6"
       >
-        <Heading size="8" color="gray">
+        <GumroadHeading level="display-xl" as="h1" style={{ opacity: 0.3 }}>
           404
-        </Heading>
-        <Heading size="6" color="violet">
+        </GumroadHeading>
+        <GumroadHeading level="display-md" as="h2">
           {title}
-        </Heading>
-        <Text align="center" size="3" color="gray">
+        </GumroadHeading>
+        <GumroadText level="body-md" as="p" style={{ textAlign: 'center', maxWidth: '400px', opacity: 0.8 }}>
           {message}
-        </Text>
-        <Button
-          size="3"
-          color="violet"
-          onClick={() => navigate(redirectTo)}
-        >
+        </GumroadText>
+        <GumroadButton variant="primary" size="md" onClick={() => navigate(redirectTo)}>
           {buttonText}
-        </Button>
+        </GumroadButton>
       </Flex>
-    </Card>
+    </GumroadCard>
   );
 };
 

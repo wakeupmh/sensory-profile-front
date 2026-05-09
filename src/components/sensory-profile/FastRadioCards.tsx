@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { memo, useEffect, useState } from 'react';
-import { RadioCards, Text, Box } from '@radix-ui/themes';
+import { memo, useEffect, useState, CSSProperties } from 'react';
+import { colors, shadows, radii, typography } from '../../theme/tokens';
 
 interface RadioOption {
   value: string;
@@ -18,73 +17,98 @@ interface FastRadioCardsProps {
   onValueChange?: (name: string, value: string) => void;
 }
 
-/**
- * Um componente de cartões de rádio otimizado para desempenho que gerencia seu próprio estado
- * em vez de depender do estado do componente pai, seguindo a abordagem da Epic React.
- */
-const FastRadioCards = memo(({ 
-  name, 
-  options, 
-  initialValue = '', 
+const frequencyBg: Record<string, { bg: string; text: string }> = {
+  'não se aplica':   { bg: '#EDE8FA', text: '#0A0A1A' },
+  'quase nunca':     { bg: '#D4CAFE', text: '#0A0A1A' },
+  'ocasionalmente':  { bg: '#B8A3E3', text: '#0A0A1A' },
+  'metade do tempo': { bg: '#9B7FE8', text: '#FFFFFF' },
+  'frequentemente':  { bg: '#7B5FD8', text: '#FFFFFF' },
+  'quase sempre':    { bg: '#5B3EC8', text: '#FFFFFF' },
+};
+
+const FastRadioCards = memo(({
+  name,
+  options,
+  initialValue = '',
   disabled = false,
   required = false,
-  color = 'violet',
-  onValueChange 
+  onValueChange
 }: FastRadioCardsProps) => {
   const [value, setValue] = useState(initialValue);
-  
+
   useEffect(() => {
     setValue(initialValue);
   }, [initialValue]);
 
-  const handleValueChange = (newValue: string) => {
-    setValue(newValue);
-    if (onValueChange) {
-      onValueChange(name, newValue);
-    }
+  const handleClick = (optionValue: string) => {
+    if (disabled) return;
+    setValue(optionValue);
+    if (onValueChange) onValueChange(name, optionValue);
   };
 
   return (
-    <Box>
-      <style>
-        {`
-          @media (max-width: 767px) {
-            .radio-grid {
-              grid-template-columns: 1fr !important;
-              grid-template-rows: repeat(6, auto) !important;
-            }
+    <>
+      <style>{`
+        @media (max-width: 767px) {
+          .radio-grid-${name.replace(/[^a-z0-9]/gi, '')} {
+            grid-template-columns: 1fr !important;
           }
-          
-          @media (min-width: 768px) {
-            .radio-grid {
-              grid-template-columns: repeat(3, 1fr) !important;
-              grid-template-rows: repeat(2, auto) !important;
-            }
+        }
+        @media (min-width: 768px) {
+          .radio-grid-${name.replace(/[^a-z0-9]/gi, '')} {
+            grid-template-columns: repeat(3, 1fr) !important;
           }
-        `}
-      </style>
-      <RadioCards.Root 
-        value={value}
-        onValueChange={handleValueChange}
-        disabled={disabled}
-        color={color as any}
-        variant="classic"
-        size="2"
-        required={required}
-        className="radio-grid"
-        style={{ 
-          display: 'grid',
-          gap: '8px'
-        }}
+        }
+      `}</style>
+      <div
+        className={`radio-grid-${name.replace(/[^a-z0-9]/gi, '')}`}
+        style={{ display: 'grid', gap: '8px', width: '100%' }}
       >
-        {options.map(option => (
-          <RadioCards.Item key={option.value} value={option.value}>
-            <Text size="1" weight="medium">{option.label}</Text>
-          </RadioCards.Item>
-        ))}
-      </RadioCards.Root>
-    </Box>
+        {options.map((option) => {
+          const isSelected = value === option.value;
+          const freq = frequencyBg[option.value];
+          const bg = freq?.bg ?? colors.canvas;
+          const textColor = freq?.text ?? colors.ink;
+
+          const style: CSSProperties = {
+            backgroundColor: isSelected ? bg : '#FFFFFF',
+            color: isSelected ? textColor : colors.ink,
+            border: `2px solid ${colors.ink}`,
+            borderRadius: radii.md,
+            boxShadow: isSelected ? '4px 4px 0px #0A0A1A' : shadows.input,
+            padding: '12px',
+            fontFamily: typography['body-md'].font,
+            fontSize: '14px',
+            fontWeight: isSelected ? 700 : 500,
+            cursor: disabled ? 'not-allowed' : 'pointer',
+            opacity: disabled ? 0.7 : 1,
+            width: '100%',
+            textAlign: 'center',
+            transition: 'box-shadow 0.15s ease, transform 0.1s ease, background-color 0.15s ease',
+            transform: isSelected ? 'translate(2px, 2px)' : 'none',
+            outline: 'none',
+          };
+
+          return (
+            <button
+              key={option.value}
+              type="button"
+              role="radio"
+              aria-checked={isSelected}
+              aria-required={required}
+              disabled={disabled}
+              onClick={() => handleClick(option.value)}
+              style={style}
+            >
+              {option.label}
+            </button>
+          );
+        })}
+      </div>
+    </>
   );
 });
+
+FastRadioCards.displayName = 'FastRadioCards';
 
 export default FastRadioCards;

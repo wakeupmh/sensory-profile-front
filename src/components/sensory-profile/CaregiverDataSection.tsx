@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FormData } from './types';
 import { memo } from 'react';
-import { Text, Flex, Box } from '@radix-ui/themes';
+import { Flex, Box } from '@radix-ui/themes';
 import FastTextField from './FastTextField';
 import FastSelect from './FastSelect';
+import GumroadHeading from '../design-system/GumroadHeading';
 
 interface CaregiverDataSectionProps {
   formData: FormData;
@@ -26,7 +27,9 @@ const CaregiverDataSection: React.FC<CaregiverDataSectionProps> = memo(({ formDa
 
   return (
     <Box mb="6">
-      <Text size="5" weight="bold" mb="3">Dados do Cuidador</Text>
+      <GumroadHeading level="title-lg" as="h2" style={{ marginBottom: '12px' }}>
+        Dados do Cuidador
+      </GumroadHeading>
       <Flex gap="4" direction={{ initial: 'column', sm: 'row' }} mb="3" mt="3">
         <Box style={{ flex: 1 }}>
           <FastTextField

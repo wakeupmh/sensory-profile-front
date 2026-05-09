@@ -1,32 +1,24 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { assessmentApi } from '../services/api';
-import {
-  Box,
-  Heading,
-  Text,
-  Button,
-  Flex,
-  Table,
-  Card,
-  AlertDialog,
-  IconButton,
-  Separator,
-  Callout,
-  Badge,
-} from '@radix-ui/themes';
+import { Box, Flex, AlertDialog, IconButton } from '@radix-ui/themes';
 import { getInstrument } from '../instruments';
-import { 
-  PlusIcon, 
-  EyeOpenIcon, 
-  Pencil1Icon, 
-  FileTextIcon, 
+import {
+  PlusIcon,
+  EyeOpenIcon,
+  Pencil1Icon,
+  FileTextIcon,
   TrashIcon,
   InfoCircledIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
 } from '@radix-ui/react-icons';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useAuthContext } from '../context/AuthContext';
+import { colors, spacing } from '../theme/tokens';
+import GumroadCard from '../components/design-system/GumroadCard';
+import GumroadButton from '../components/design-system/GumroadButton';
+import GumroadBadge from '../components/design-system/GumroadBadge';
+import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
 
 interface Assessment {
   id: string;
@@ -71,7 +63,7 @@ const Home = () => {
       setDeleteLoading(id);
       const token = await getToken();
       await assessmentApi.deleteAssessment(id, token);
-      setAssessments(assessments.filter(assessment => assessment.id !== id));
+      setAssessments(assessments.filter((a) => a.id !== id));
     } catch (err) {
       setError('Erro ao excluir avaliação. Por favor, tente novamente.');
       console.error(err);
@@ -81,134 +73,208 @@ const Home = () => {
   };
 
   return (
-    <Box style={{ margin: '0 auto' }}>
-      <Flex justify="between" align="center" mb="6" gap="6">
+    <Box>
+      {/* Header */}
+      <Flex
+        justify="between"
+        align={{ initial: 'start', sm: 'center' }}
+        mb="6"
+        gap="4"
+        direction={{ initial: 'column', sm: 'row' }}
+      >
         <Box>
-          <Heading size="6" mb="1">Avaliações de Perfil Sensorial</Heading>
-          <Text size="2" color="gray">Gerencie todas as avaliações de perfil sensorial em um só lugar</Text>
+          <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
+            Avaliações
+          </GumroadHeading>
+          <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7 }}>
+            Gerencie todas as avaliações de perfil sensorial
+          </GumroadText>
         </Box>
-       <Button size="2" color="violet" asChild>
-          <Link to="/assessment/new" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <GumroadButton variant="primary" size="md" asChild>
+          <Link
+            to="/assessment/new?instrument=crianca-3-14"
+            style={{ textDecoration: 'none', display: 'inline-flex' }}
+          >
             <PlusIcon />
             Nova Avaliação
           </Link>
-        </Button>
+        </GumroadButton>
       </Flex>
 
-      <Separator size="4" mb="6" />
-
       {loading ? (
-        <Card variant="surface" size="2" style={{ textAlign: 'center', padding: '40px 0' }}>
-          <Flex direction="column" align="center" gap="4">
-            <LoadingSpinner size="large" text="Carregando avaliações..." />
-          </Flex>
-        </Card>
+        <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
+          <LoadingSpinner size="large" text="Carregando avaliações..." />
+        </GumroadCard>
       ) : error ? (
-        <Callout.Root color="crimson" size="2" mb="4">
-          <Callout.Icon>
+        <GumroadCard color="salmon" shadow="md" padding="lg">
+          <Flex align="center" gap="2">
             <ExclamationTriangleIcon />
-          </Callout.Icon>
-          <Callout.Text>{error}</Callout.Text>
-        </Callout.Root>
+            <GumroadText level="body-md" as="p">
+              {error}
+            </GumroadText>
+          </Flex>
+        </GumroadCard>
       ) : assessments.length === 0 ? (
-        <Card variant="surface" size="2" style={{ textAlign: 'center', padding: '60px 0' }}>
+        <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">
-            <InfoCircledIcon width={32} height={32} color="var(--gray-8)" />
+            <InfoCircledIcon width={40} height={40} />
             <Box>
-              <Text size="4" weight="medium" mb="1">Nenhuma avaliação encontrada</Text><br></br>
-              <Text size="2" color="gray">Clique em "Nova Avaliação" para começar a criar perfis sensoriais</Text>
+              <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
+                Nenhuma avaliação encontrada
+              </GumroadHeading>
+              <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
+                Clique em "Nova Avaliação" para começar
+              </GumroadText>
             </Box>
-            <Button size="2" color="violet" mt="4" asChild>
-              <Link to="/assessment/new" style={{ textDecoration: 'none' }}>
+            <GumroadButton variant="primary" size="md" asChild>
+              <Link to="/assessment/new?instrument=crianca-3-14" style={{ textDecoration: 'none' }}>
                 Criar primeira avaliação
               </Link>
-            </Button>
+            </GumroadButton>
           </Flex>
-        </Card>
+        </GumroadCard>
       ) : (
-        <Card variant="surface" size="2">
-          <Table.Root>
-            <Table.Header>
-              <Table.Row>
-                <Table.ColumnHeaderCell>Nome da Criança</Table.ColumnHeaderCell>
-                <Table.ColumnHeaderCell>Instrumento</Table.ColumnHeaderCell>
-                <Table.ColumnHeaderCell>Examinador</Table.ColumnHeaderCell>
-                <Table.ColumnHeaderCell>Data</Table.ColumnHeaderCell>
-                <Table.ColumnHeaderCell align="center">Ações</Table.ColumnHeaderCell>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {assessments.map((assessment) => (
-                <Table.Row key={assessment.id}>
-                  <Table.Cell>
-                    <Text weight="medium">{assessment.childName}</Text>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Badge color="violet" variant="soft">
-                      {getInstrument(assessment.instrumentId).shortName}
-                    </Badge>
-                  </Table.Cell>
-                  <Table.Cell>{assessment.examinerName}</Table.Cell>
-                  <Table.Cell>{new Date(assessment.createdAt).toLocaleDateString('pt-BR')}</Table.Cell>
-                  <Table.Cell>
-                    <Flex gap="2" justify="center">
-                      <IconButton variant="soft" color="gray" size="1" asChild title="Visualizar" aria-label="Visualizar avaliação">
-                        <Link to={`/assessment/${assessment.id}`}>
-                          <EyeOpenIcon />
-                        </Link>
-                      </IconButton>
-                      <IconButton variant="soft" color="violet" size="1" asChild title="Editar" aria-label="Editar avaliação">
-                        <Link to={`/assessment/${assessment.id}/edit`}>
-                          <Pencil1Icon />
-                        </Link>
-                      </IconButton>
-                      <IconButton variant="soft" color="jade" size="1" asChild title="Relatório" aria-label="Ver relatório">
-                        <Link to={`/assessment/${assessment.id}/report`}>
-                          <FileTextIcon />
-                        </Link>
-                      </IconButton>
-                      <AlertDialog.Root>
-                        <AlertDialog.Trigger>
-                          <IconButton variant="soft" color="red" size="1" title="Excluir" aria-label="Excluir avaliação">
-                            <TrashIcon />
-                          </IconButton>
-                        </AlertDialog.Trigger>
-                        <AlertDialog.Content size="2">
-                          <AlertDialog.Title>Excluir Avaliação</AlertDialog.Title>
-                          <AlertDialog.Description size="2">
-                            Tem certeza que deseja excluir esta avaliação? Esta ação não pode ser desfeita.
-                          </AlertDialog.Description>
-                          <Flex gap="3" mt="4" justify="end">
-                            <AlertDialog.Cancel>
-                              <Button variant="soft" color="gray">
-                                Cancelar
-                              </Button>
-                            </AlertDialog.Cancel>
-                            <AlertDialog.Action>
-                              <Button 
-                                variant="solid" 
-                                color="crimson"
-                                disabled={deleteLoading === assessment.id}
-                                onClick={() => handleDeleteAssessment(assessment.id)}
-                              >
-                                {deleteLoading === assessment.id ? (
-                                  <Flex gap="2" align="center">
-                                    <LoadingSpinner size="small" />
-                                    <Text>Excluindo...</Text>
-                                  </Flex>
-                                ) : 'Excluir'}
-                              </Button>
-                            </AlertDialog.Action>
-                          </Flex>
-                        </AlertDialog.Content>
-                      </AlertDialog.Root>
-                    </Flex>
-                  </Table.Cell>
-                </Table.Row>
-              ))}
-            </Table.Body>
-          </Table.Root>
-        </Card>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+            gap: '20px',
+          }}
+        >
+          {assessments.map((assessment) => {
+            const instrument = getInstrument(assessment.instrumentId);
+            return (
+              <GumroadCard key={assessment.id} color="white" shadow="md" padding="lg">
+                <Flex direction="column" gap="3" style={{ height: '100%' }}>
+                  {/* Top row */}
+                  <Flex justify="between" align="start" gap="2">
+                    <GumroadHeading
+                      level="title-md"
+                      as="h3"
+                      style={{ wordBreak: 'break-word', flex: 1 }}
+                    >
+                      {assessment.childName}
+                    </GumroadHeading>
+                    <GumroadBadge color="yellow">
+                      {instrument.shortName}
+                    </GumroadBadge>
+                  </Flex>
+
+                  {/* Details */}
+                  <Flex direction="column" gap="1">
+                    <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
+                      <strong>Examinador:</strong> {assessment.examinerName}
+                    </GumroadText>
+                    <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
+                      <strong>Data:</strong>{' '}
+                      {new Date(assessment.createdAt).toLocaleDateString('pt-BR')}
+                    </GumroadText>
+                  </Flex>
+
+                  {/* Actions */}
+                  <Flex gap="2" mt="auto" pt="2">
+                    <IconButton
+                      variant="soft"
+                      size="2"
+                      asChild
+                      title="Visualizar"
+                      aria-label="Visualizar avaliação"
+                      style={{
+                        background: colors.canvas,
+                        border: `2px solid ${colors.ink}`,
+                        borderRadius: '10px',
+                        boxShadow: '2px 2px 0px #0A0A1A',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <Link to={`/assessment/${assessment.id}`}>
+                        <EyeOpenIcon />
+                      </Link>
+                    </IconButton>
+                    <IconButton
+                      variant="soft"
+                      size="2"
+                      asChild
+                      title="Editar"
+                      aria-label="Editar avaliação"
+                      style={{
+                        background: colors['brand-cyan'],
+                        border: `2px solid ${colors.ink}`,
+                        borderRadius: '10px',
+                        boxShadow: '2px 2px 0px #0A0A1A',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <Link to={`/assessment/${assessment.id}/edit`}>
+                        <Pencil1Icon />
+                      </Link>
+                    </IconButton>
+                    <IconButton
+                      variant="soft"
+                      size="2"
+                      asChild
+                      title="Relatório"
+                      aria-label="Ver relatório"
+                      style={{
+                        background: colors['brand-mint'],
+                        border: `2px solid ${colors.ink}`,
+                        borderRadius: '10px',
+                        boxShadow: '2px 2px 0px #0A0A1A',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <Link to={`/assessment/${assessment.id}/report`}>
+                        <FileTextIcon />
+                      </Link>
+                    </IconButton>
+                    <AlertDialog.Root>
+                      <AlertDialog.Trigger>
+                        <IconButton
+                          variant="soft"
+                          size="2"
+                          title="Excluir"
+                          aria-label="Excluir avaliação"
+                          style={{
+                            background: colors['brand-salmon'],
+                            border: `2px solid ${colors.ink}`,
+                            borderRadius: '10px',
+                            boxShadow: '2px 2px 0px #0A0A1A',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <TrashIcon />
+                        </IconButton>
+                      </AlertDialog.Trigger>
+                      <AlertDialog.Content size="2">
+                        <AlertDialog.Title>Excluir Avaliação</AlertDialog.Title>
+                        <AlertDialog.Description size="2">
+                          Tem certeza que deseja excluir esta avaliação? Esta ação não pode ser desfeita.
+                        </AlertDialog.Description>
+                        <Flex gap="3" mt="4" justify="end">
+                          <AlertDialog.Cancel>
+                            <GumroadButton variant="secondary" size="sm">
+                              Cancelar
+                            </GumroadButton>
+                          </AlertDialog.Cancel>
+                          <AlertDialog.Action>
+                            <GumroadButton
+                              variant="danger"
+                              size="sm"
+                              disabled={deleteLoading === assessment.id}
+                              onClick={() => handleDeleteAssessment(assessment.id)}
+                            >
+                              {deleteLoading === assessment.id ? 'Excluindo...' : 'Excluir'}
+                            </GumroadButton>
+                          </AlertDialog.Action>
+                        </Flex>
+                      </AlertDialog.Content>
+                    </AlertDialog.Root>
+                  </Flex>
+                </Flex>
+              </GumroadCard>
+            );
+          })}
+        </div>
       )}
     </Box>
   );

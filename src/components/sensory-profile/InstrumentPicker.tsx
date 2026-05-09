@@ -1,6 +1,7 @@
 import { memo } from 'react';
-import { Box, Card, Flex, Heading, Text, RadioCards } from '@radix-ui/themes';
+import { Box, Card, Flex, Heading, Text } from '@radix-ui/themes';
 import { listInstruments } from '../../instruments';
+import { colors, radii, shadows } from '../../theme/tokens';
 
 interface InstrumentPickerProps {
   value: string;
@@ -24,26 +25,44 @@ const InstrumentPicker: React.FC<InstrumentPickerProps> = memo(({ value, onChang
           Escolha o questionário adequado à faixa etária. Ao trocar, as respostas já preenchidas desta avaliação serão reiniciadas.
         </Text>
       </Flex>
-      <RadioCards.Root
-        value={value}
-        onValueChange={onChange}
-        disabled={disabled}
-        columns={{ initial: '1', sm: '2' }}
-      >
-        {instruments.map((i) => (
-          <RadioCards.Item key={i.id} value={i.id}>
-            <Flex direction="column" gap="1" width="100%">
-              <Text weight="bold">{i.name}</Text>
-              <Text size="1" color="gray">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
+        {instruments.map((i) => {
+          const isSelected = value === i.id;
+          return (
+            <button
+              key={i.id}
+              type="button"
+              role="radio"
+              aria-checked={isSelected}
+              disabled={disabled}
+              onClick={() => !disabled && onChange(i.id)}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px',
+                textAlign: 'left',
+                padding: '16px',
+                borderRadius: radii.md,
+                border: `2px solid ${colors.ink}`,
+                boxShadow: isSelected ? '4px 4px 0px #0A0A1A' : shadows.input,
+                backgroundColor: isSelected ? '#2A9D8F' : '#FFFFFF',
+                color: isSelected ? '#FFFFFF' : colors.ink,
+                cursor: disabled ? 'not-allowed' : 'pointer',
+                opacity: disabled ? 0.7 : 1,
+                transform: isSelected ? 'translate(2px, 2px)' : 'none',
+                transition: 'background-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease',
+                width: '100%',
+              }}
+            >
+              <span style={{ fontWeight: 700, fontSize: '14px', color: 'inherit' }}>{i.name}</span>
+              <span style={{ fontSize: '12px', opacity: isSelected ? 0.85 : 0.6 }}>
                 Faixa etária: {formatAgeRange(i.ageRange.minMonths, i.ageRange.maxMonths)} · {i.sections.length} seções
-              </Text>
-              <Box mt="1">
-                <Text size="1">{i.description}</Text>
-              </Box>
-            </Flex>
-          </RadioCards.Item>
-        ))}
-      </RadioCards.Root>
+              </span>
+              <span style={{ fontSize: '13px', marginTop: '4px', color: 'inherit' }}>{i.description}</span>
+            </button>
+          );
+        })}
+      </div>
     </Card>
   );
 });
