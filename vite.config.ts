@@ -10,8 +10,11 @@ export default defineConfig({
     ],
   })],
   // Otimizações de desempenho
+  resolve: {
+    dedupe: ['react', 'react-dom'],
+  },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', '@radix-ui/themes'],
+    include: ['react', 'react-dom', 'react-router-dom', '@radix-ui/themes', '@supabase/auth-ui-react', '@supabase/auth-ui-shared'],
     exclude: [],
   },
   build: {
