@@ -7,7 +7,7 @@ import ReportContent from '../components/sensory-profile/ReportContent';
 import { FormData, SensoryItem, SensorySection } from '../components/sensory-profile/types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import NotFound from '../components/NotFound';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuthContext } from '../context/AuthContext';
 import { assessmentApi } from '../services/api';
 import {
   DEFAULT_INSTRUMENT_ID,
@@ -19,7 +19,7 @@ import { toSensoryItems } from '../instruments/types';
 const ReportPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getToken } = useAuth();
+  const { getToken } = useAuthContext();
 
   const [formData, setFormData] = useState<FormData | null>(null);
   const [loading, setLoading] = useState(true);

@@ -1,22 +1,25 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { UserButton } from '@clerk/clerk-react';
-import { 
-  Box, 
-  Flex, 
-  Text, 
-  Heading, 
+import { useAuthContext } from '../context/AuthContext';
+import {
+  Box,
+  Button,
+  Flex,
+  Text,
+  Heading,
   DropdownMenu,
 } from '@radix-ui/themes';
 import {
   HomeIcon,
   FileTextIcon,
   ChevronDownIcon,
-  ClipboardIcon
+  ClipboardIcon,
+  ExitIcon
 } from '@radix-ui/react-icons';
 
 const Menu: React.FC = () => {
   const location = useLocation();
+  const { signOut } = useAuthContext();
 
   return (
     <Box 
@@ -111,7 +114,9 @@ const Menu: React.FC = () => {
         </Flex>
         
         <Flex align="center">
-          <UserButton />
+          <Button variant="ghost" color="gray" onClick={signOut} size="2">
+            <ExitIcon />
+          </Button>
         </Flex>
       </Flex>
     </Box>

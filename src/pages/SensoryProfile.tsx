@@ -16,7 +16,7 @@ import type { Anamnese } from '../components/anamnese/types';
 import { Button, Flex, Text, Box, Card, Heading, Badge } from '@radix-ui/themes';
 import LoadingSpinner from '../components/LoadingSpinner';
 import NotFound from '../components/NotFound';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuthContext } from '../context/AuthContext';
 import {
   DEFAULT_INSTRUMENT_ID,
   findSectionByItemId,
@@ -52,7 +52,7 @@ const SensoryProfileForm: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { getToken } = useAuth();
+  const { getToken } = useAuthContext();
   const fetchedAssessmentRef = useRef(false);
   const fetchedReportRef = useRef(false);
 

@@ -26,7 +26,7 @@ import {
   ExclamationTriangleIcon
 } from '@radix-ui/react-icons';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuthContext } from '../context/AuthContext';
 
 interface Assessment {
   id: string;
@@ -41,7 +41,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { getToken } = useAuth();
+  const { getToken, isLoaded, session } = useAuthContext();
   const getTokenRef = useRef(getToken);
   getTokenRef.current = getToken;
 
@@ -61,8 +61,10 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    fetchAssessments();
-  }, [fetchAssessments]);
+    if (isLoaded && session) {
+      fetchAssessments();
+    }
+  }, [fetchAssessments, isLoaded, session]);
 
   const handleDeleteAssessment = async (id: string) => {
     try {
