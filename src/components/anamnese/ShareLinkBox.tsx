@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Box, Button, Card, Flex, Heading, Text, TextField } from '@radix-ui/themes';
 import { CopyIcon, Link2Icon, Share1Icon } from '@radix-ui/react-icons';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuthContext } from '../../context/AuthContext';
 import { anamneseApi } from '../../services/api';
 
 interface ShareLinkBoxProps {
@@ -16,7 +16,7 @@ const buildShareUrl = (token: string): string => {
 };
 
 const ShareLinkBox: React.FC<ShareLinkBoxProps> = ({ anamneseId, shareToken, onTokenChange }) => {
-  const { getToken } = useAuth();
+  const { getToken } = useAuthContext();
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Box, Card, Flex, Select, Text } from '@radix-ui/themes';
 import { ClipboardIcon } from '@radix-ui/react-icons';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuthContext } from '../../context/AuthContext';
 import { anamneseApi } from '../../services/api';
 import type { Anamnese, AnamneseSummary } from './types';
 
@@ -12,7 +12,7 @@ interface AnamneseSelectorProps {
 const MANUAL_VALUE = '__manual__';
 
 const AnamneseSelector: React.FC<AnamneseSelectorProps> = ({ onSelect }) => {
-  const { getToken } = useAuth();
+  const { getToken } = useAuthContext();
   const getTokenRef = useRef(getToken);
   getTokenRef.current = getToken;
 

@@ -25,7 +25,7 @@ import {
   Share1Icon,
 } from '@radix-ui/react-icons';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuthContext } from '../context/AuthContext';
 import type { AnamneseSummary } from '../components/anamnese/types';
 
 const AnamneseList = () => {
@@ -33,7 +33,7 @@ const AnamneseList = () => {
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { getToken } = useAuth();
+  const { getToken } = useAuthContext();
   const getTokenRef = useRef(getToken);
   getTokenRef.current = getToken;
 

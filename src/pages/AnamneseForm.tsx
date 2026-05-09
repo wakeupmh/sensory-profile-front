@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useState, FormEvent, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Box, Button, Card, Flex, Heading, Text } from '@radix-ui/themes';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuthContext } from '../context/AuthContext';
 
 import { anamneseApi } from '../services/api';
 import useAnamneseForm from '../components/anamnese/useAnamneseForm';
@@ -26,7 +26,7 @@ const AnamneseForm: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { getToken } = useAuth();
+  const { getToken } = useAuthContext();
   const fetchedRef = useRef(false);
 
   const isViewMode = !!id && !location.pathname.includes('/edit');
