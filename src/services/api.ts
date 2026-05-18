@@ -191,4 +191,133 @@ export const anamneseApi = {
   },
 };
 
+export const draftApi = {
+  getDraft: async (formType: string, token: string | null) => {
+    try {
+      const response = await api.get(`/api/drafts/${formType}`, {
+        headers: getAuthHeaders(token),
+      });
+      return response.data.data as DraftData | null;
+    } catch {
+      return null;
+    }
+  },
+
+  saveDraft: async (
+    formType: string,
+    payload: Record<string, unknown>,
+    currentStep: number,
+    instrumentId: string | null | undefined,
+    token: string | null
+  ) => {
+    try {
+      const response = await api.put(
+        `/api/drafts/${formType}`,
+        { payload, currentStep, instrumentId },
+        { headers: getAuthHeaders(token) }
+      );
+      return response.data.data as DraftData;
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      throw error;
+    }
+  },
+
+  deleteDraft: async (formType: string, token: string | null) => {
+    try {
+      await api.delete(`/api/drafts/${formType}`, {
+        headers: getAuthHeaders(token),
+      });
+    } catch (error) {
+      console.error('Error deleting draft:', error);
+    }
+  },
+};
+
+export interface DraftData {
+  id: string;
+  formType: string;
+  payload: Record<string, unknown>;
+  currentStep: number;
+  instrumentId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ChildData {
+  id: string;
+  userId: string;
+  name: string;
+  birthDate: string;
+  gender?: 'male' | 'female' | 'other';
+  nationalIdentity?: string;
+  otherInfo?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+type ChildPayload = Omit<ChildData, 'id' | 'userId' | 'createdAt' | 'updatedAt'>;
+type ChildUpdatePayload = Partial<ChildPayload>;
+
+export const childApi = {
+  list: async (token: string | null): Promise<ChildData[]> => {
+    try {
+      const response = await api.get('/api/children', {
+        headers: getAuthHeaders(token),
+      });
+      return response.data.data;
+    } catch (error) {
+      console.error('Error fetching children:', error);
+      throw error;
+    }
+  },
+
+  get: async (id: string, token: string | null): Promise<ChildData> => {
+    try {
+      const response = await api.get(`/api/children/${id}`, {
+        headers: getAuthHeaders(token),
+      });
+      return response.data.data;
+    } catch (error) {
+      console.error(`Error fetching child ${id}:`, error);
+      throw error;
+    }
+  },
+
+  create: async (payload: ChildPayload, token: string | null): Promise<ChildData> => {
+    try {
+      const response = await api.post('/api/children', payload, {
+        headers: getAuthHeaders(token),
+      });
+      return response.data.data;
+    } catch (error) {
+      console.error('Error creating child:', error);
+      throw error;
+    }
+  },
+
+  update: async (id: string, payload: ChildUpdatePayload, token: string | null): Promise<ChildData> => {
+    try {
+      const response = await api.put(`/api/children/${id}`, payload, {
+        headers: getAuthHeaders(token),
+      });
+      return response.data.data;
+    } catch (error) {
+      console.error(`Error updating child ${id}:`, error);
+      throw error;
+    }
+  },
+
+  delete: async (id: string, token: string | null): Promise<void> => {
+    try {
+      await api.delete(`/api/children/${id}`, {
+        headers: getAuthHeaders(token),
+      });
+    } catch (error) {
+      console.error(`Error deleting child ${id}:`, error);
+      throw error;
+    }
+  },
+};
+
 export default api;

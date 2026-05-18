@@ -2,14 +2,15 @@
 import * as React from 'react';
 import { useState, FormEvent, useEffect, useMemo, useRef } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { assessmentApi } from '../services/api';
+import { assessmentApi, ChildData } from '../services/api';
 import { Box, Flex, Badge } from '@radix-ui/themes';
 
 import ChildDataSection from '../components/sensory-profile/ChildDataSection';
+import ChildPicker from '../components/sensory-profile/ChildPicker';
 import ExaminerDataSection from '../components/sensory-profile/ExaminerDataSection';
 import CaregiverDataSection from '../components/sensory-profile/CaregiverDataSection';
 import InstructionsSection from '../components/sensory-profile/InstructionsSection';
-import SensoryProcessingSection from '../components/sensory-profile/SensoryProcessingSection';
+import SensoryProcessingSection, { SensorySection } from '../components/sensory-profile/SensoryProcessingSection';
 import InstrumentPicker from '../components/sensory-profile/InstrumentPicker';
 import useFormData from '../components/sensory-profile/useFormData';
 import AnamneseSelector from '../components/anamnese/AnamneseSelector';
@@ -27,10 +28,29 @@ import { colors, spacing, typography } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
+import GumroadStepper from '../components/design-system/GumroadStepper';
+import { useDraftPersistence } from '../hooks/useDraftPersistence';
+
+const STEPS = [
+  { key: 'child', label: 'Criança' },
+  { key: 'examiner', label: 'Examinador' },
+  { key: 'caregiver', label: 'Responsável' },
+  { key: 'instructions', label: 'Instruções' },
+  { key: 'auditoryProcessing', label: 'Processamento Auditivo' },
+  { key: 'visualProcessing', label: 'Processamento Visual' },
+  { key: 'tactileProcessing', label: 'Processamento Tátil' },
+  { key: 'movementProcessing', label: 'Processamento de Movimento' },
+  { key: 'bodyPositionProcessing', label: 'Processamento de Posição do Corpo' },
+  { key: 'oralSensitivityProcessing', label: 'Processamento de Sensibilidade Oral' },
+  { key: 'behavioralResponses', label: 'Conduta associada ao processamento sensorial' },
+  { key: 'socialEmotionalResponses', label: 'Respostas Socioemocionais' },
+  { key: 'attentionResponses', label: 'Respostas de Atenção' },
+];
 
 const SensoryProfileForm: React.FC = () => {
   const [searchParams] = useSearchParams();
   const initialInstrumentId = searchParams.get('instrument') || DEFAULT_INSTRUMENT_ID;
+  const isFresh = searchParams.get('fresh') === '1';
 
   const { formData, updateFormData, updateItemResponse, setFormData, switchInstrument } =
     useFormData(initialInstrumentId);
@@ -48,6 +68,7 @@ const SensoryProfileForm: React.FC = () => {
     }
     switchInstrument(newId);
   };
+
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,6 +87,116 @@ const SensoryProfileForm: React.FC = () => {
   const isNewMode = !id;
 
   const instrument = useMemo(() => getInstrument(formData.instrumentId), [formData.instrumentId]);
+
+  // Stepper state (new-mode only)
+  const [currentStep, setCurrentStep] = useState(0);
+  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [draftPromptVisible, setDraftPromptVisible] = useState(false);
+  const [pendingDraft, setPendingDraft] = useState<any>(null);
+  const draftCheckedRef = useRef(false);
+
+  const { loadDraft, clearDraft, saveOnStepChange } = useDraftPersistence({
+    formType: 'sensory_assessment',
+    formData: formData as Record<string, unknown>,
+    currentStep,
+    instrumentId: formData.instrumentId,
+    enabled: isNewMode,
+  });
+
+  // Load draft on mount (new-mode only)
+  useEffect(() => {
+    if (!isNewMode || draftCheckedRef.current) return;
+    draftCheckedRef.current = true;
+
+    if (isFresh) {
+      clearDraft();
+      return;
+    }
+
+    const checkDraft = async () => {
+      const draft = await loadDraft();
+      if (draft) {
+        setPendingDraft(draft);
+        setDraftPromptVisible(true);
+      }
+    };
+
+    checkDraft();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isNewMode]);
+
+  const handleResumeDraft = () => {
+    if (!pendingDraft) return;
+    setFormData(pendingDraft.payload as any);
+    const step = pendingDraft.currentStep ?? 0;
+    setCurrentStep(step);
+    const completed = new Set<number>();
+    for (let i = 0; i < step; i++) completed.add(i);
+    setCompletedSteps(completed);
+    if (pendingDraft.instrumentId && pendingDraft.instrumentId !== formData.instrumentId) {
+      switchInstrument(pendingDraft.instrumentId);
+    }
+    setPendingDraft(null);
+    setDraftPromptVisible(false);
+  };
+
+  const handleDiscardDraft = async () => {
+    await clearDraft();
+    setPendingDraft(null);
+    setDraftPromptVisible(false);
+    setCurrentStep(0);
+    setCompletedSteps(new Set());
+  };
+
+  // Per-step validation
+  const validateStep = (step: number): boolean => {
+    setValidationError(null);
+
+    const fail = (msg: string) => {
+      setValidationError(msg);
+      return false;
+    };
+
+    if (step === 0) {
+      if (!formData.child?.id) return fail('Selecione ou cadastre uma criança para continuar.');
+    } else if (step === 1) {
+      if (!formData.examiner?.name) return fail('Nome do examinador é obrigatório');
+      if (!formData.examiner?.profession) return fail('Cargo/Função do examinador é obrigatório');
+      if (!formData.examiner?.contact) return fail('Contato do examinador é obrigatório');
+    } else if (step === 2) {
+      if (!formData.caregiver?.name) return fail('Nome do cuidador é obrigatório');
+      if (!formData.caregiver?.relationship) return fail('Relação do cuidador com a criança é obrigatória');
+      if (!formData.caregiver?.contact) return fail('Contato do cuidador é obrigatório');
+    } else if (step === 3) {
+      // No validation for instructions
+    }
+    // Steps 4-12 are individual sensory sections — no required-field validation
+
+    return true;
+  };
+
+  const handleStepBack = () => {
+    if (currentStep === 0) return;
+    const newStep = currentStep - 1;
+    setCompletedSteps((prev) => new Set([...prev, currentStep]));
+    setCurrentStep(newStep);
+    saveOnStepChange(newStep);
+    setValidationError(null);
+  };
+
+  const handleStepNext = () => {
+    if (!validateStep(currentStep)) return;
+    const newStep = currentStep + 1;
+    setCompletedSteps((prev) => new Set([...prev, currentStep]));
+    setCurrentStep(newStep);
+    saveOnStepChange(newStep);
+  };
+
+  const handleStepClick = (i: number) => {
+    if (!completedSteps.has(i) && i !== currentStep) return;
+    setValidationError(null);
+    setCurrentStep(i);
+  };
 
   useEffect(() => {
     if (!id || isNewMode) return;
@@ -249,8 +380,8 @@ const SensoryProfileForm: React.FC = () => {
     };
   };
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: FormEvent) => {
+    if (e) e.preventDefault();
 
     if (!validateForm()) return;
 
@@ -261,6 +392,7 @@ const SensoryProfileForm: React.FC = () => {
 
       if (isNewMode) {
         await assessmentApi.createAssessment(payload, token);
+        await clearDraft();
       } else if (isEditMode && id) {
         await assessmentApi.updateAssessment(id, payload, token);
       }
@@ -274,6 +406,15 @@ const SensoryProfileForm: React.FC = () => {
     }
   };
 
+  const handleFormSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (isNewMode) {
+      // In new-mode submit is driven by stepper buttons; prevent implicit form submit
+      return;
+    }
+    handleSubmit(e);
+  };
+
   const handleClose = () => {
     navigate('/dashboard');
   };
@@ -283,6 +424,93 @@ const SensoryProfileForm: React.FC = () => {
     if (isEditMode) return 'Editar Avaliação';
     if (isReportMode) return 'Relatório de Avaliação';
     return 'Visualizar Avaliação';
+  };
+
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 0:
+        return (
+          <>
+            <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+              <Flex direction="column" gap="4">
+                <InstrumentPicker
+                  value={formData.instrumentId}
+                  onChange={handleInstrumentChange}
+                />
+                <AnamneseSelector
+                  onSelect={(a: Anamnese) => {
+                    updateFormData('child', a.child);
+                    updateFormData('caregiver', a.caregiver);
+                  }}
+                />
+              </Flex>
+            </GumroadCard>
+            <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+              <ChildPicker
+                selectedId={formData.child?.id ?? null}
+                onSelect={(child: ChildData) => {
+                  updateFormData('child', {
+                    id: child.id,
+                    name: child.name,
+                    birthDate: child.birthDate,
+                    gender: child.gender ?? '',
+                    nationalIdentity: child.nationalIdentity ?? '',
+                    otherInfo: child.otherInfo ?? '',
+                  });
+                }}
+              />
+            </GumroadCard>
+          </>
+        );
+      case 1:
+        return (
+          <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+            <ExaminerDataSection
+              formData={formData}
+              updateFormData={updateFormData}
+              disabled={false}
+            />
+          </GumroadCard>
+        );
+      case 2:
+        return (
+          <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+            <CaregiverDataSection
+              formData={formData}
+              updateFormData={updateFormData}
+              disabled={false}
+            />
+          </GumroadCard>
+        );
+      case 3:
+        return (
+          <GumroadCard color="cream" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+            <InstructionsSection />
+          </GumroadCard>
+        );
+      default: {
+        // Steps 4-12: one section per step
+        const sectionIndex = currentStep - 4;
+        const section = instrument.sections[sectionIndex];
+        if (!section) return null;
+        const sectionData = formData.sections?.[section.key];
+        const items = sectionData?.items || [];
+        const comments = sectionData?.comments || '';
+        return (
+          <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+            <SensorySection
+              title={section.title}
+              sectionKey={section.key}
+              items={items}
+              comments={comments}
+              updateItemResponse={updateItemResponse}
+              updateComments={(sectionKey, value) => updateFormData(`sections.${sectionKey}.comments`, value)}
+              disabled={false}
+            />
+          </GumroadCard>
+        );
+      }
+    }
   };
 
   return (
@@ -308,7 +536,7 @@ const SensoryProfileForm: React.FC = () => {
           </Flex>
         </GumroadCard>
       ) : (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleFormSubmit}>
           {/* Header */}
           <Flex
             justify="between"
@@ -351,6 +579,33 @@ const SensoryProfileForm: React.FC = () => {
             </Flex>
           </Flex>
 
+          {/* Draft resume prompt (new-mode only) */}
+          {isNewMode && draftPromptVisible && (
+            <GumroadCard
+              color="yellow"
+              shadow="md"
+              padding="lg"
+              style={{ marginBottom: spacing.lg }}
+            >
+              <Flex direction="column" gap="3">
+                <GumroadHeading level="title-sm" as="h2">
+                  Rascunho em andamento
+                </GumroadHeading>
+                <GumroadText level="body-md" as="p">
+                  Você tem um rascunho em andamento. Deseja continuar de onde parou?
+                </GumroadText>
+                <Flex gap="3" wrap="wrap">
+                  <GumroadButton variant="primary" size="md" onClick={handleResumeDraft}>
+                    Continuar
+                  </GumroadButton>
+                  <GumroadButton variant="secondary" size="md" onClick={handleDiscardDraft}>
+                    Começar novo
+                  </GumroadButton>
+                </Flex>
+              </Flex>
+            </GumroadCard>
+          )}
+
           {validationError && (
             <GumroadCard color="salmon" shadow="sm" padding="md" style={{ marginBottom: spacing.lg }}>
               <GumroadText level="body-md" as="p" style={{ fontWeight: 600 }}>
@@ -359,84 +614,120 @@ const SensoryProfileForm: React.FC = () => {
             </GumroadCard>
           )}
 
-          {isNewMode && (
-            <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
-              <Flex direction="column" gap="4">
-                <InstrumentPicker
-                  value={formData.instrumentId}
-                  onChange={handleInstrumentChange}
-                />
-                <AnamneseSelector
-                  onSelect={(a: Anamnese) => {
-                    updateFormData('child', a.child);
-                    updateFormData('caregiver', a.caregiver);
-                  }}
-                />
-              </Flex>
-            </GumroadCard>
-          )}
+          {/* NEW MODE: stepper + one section at a time */}
+          {isNewMode ? (
+            <>
+              <GumroadStepper
+                steps={STEPS}
+                current={currentStep}
+                completed={completedSteps}
+                onStepClick={handleStepClick}
+              />
 
-          <GumroadCard color="cyan" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
-            <ChildDataSection
-              formData={formData}
-              updateFormData={updateFormData}
-              disabled={isViewMode || isReportMode}
-            />
-          </GumroadCard>
+              {renderStepContent()}
 
-          <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
-            <ExaminerDataSection
-              formData={formData}
-              updateFormData={updateFormData}
-              disabled={isViewMode || isReportMode}
-            />
-          </GumroadCard>
-
-          <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
-            <CaregiverDataSection
-              formData={formData}
-              updateFormData={updateFormData}
-              disabled={isViewMode || isReportMode}
-            />
-          </GumroadCard>
-
-          <GumroadCard color="cream" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
-            <InstructionsSection />
-          </GumroadCard>
-
-          <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
-            <SensoryProcessingSection
-              formData={formData}
-              updateItemResponse={updateItemResponse}
-              updateFormData={updateFormData}
-              disabled={isViewMode || isReportMode}
-            />
-          </GumroadCard>
-
-          <Flex gap="3" mt="4" justify="end" wrap="wrap">
-            {!isViewMode && !isReportMode && (
-              <>
+              <Flex gap="3" mt="4" justify="end" wrap="wrap">
                 <GumroadButton variant="secondary" size="md" onClick={handleClose}>
                   Cancelar
                 </GumroadButton>
-                <GumroadButton variant="primary" size="md" type="submit" disabled={submitting}>
-                  {submitting ? (isNewMode ? 'Criando...' : 'Salvando...') : (isNewMode ? 'Criar Avaliação' : 'Salvar Alterações')}
-                </GumroadButton>
-              </>
-            )}
-            {(isViewMode || isReportMode) && (
-              <>
-                <GumroadButton variant="secondary" size="md" onClick={handleClose}>
-                  Voltar
-                </GumroadButton>
-                {isViewMode && (
-                  <GumroadButton variant="primary" size="md" onClick={() => navigate(`/assessment/${id}/edit`)}>
-                    Editar
+                {currentStep > 0 && (
+                  <GumroadButton variant="secondary" size="md" onClick={handleStepBack}>
+                    Voltar
                   </GumroadButton>
                 )}
-              </>
-            )}
-          </Flex>
+                {currentStep < STEPS.length - 1 ? (
+                  <GumroadButton variant="primary" size="md" onClick={handleStepNext}>
+                    Próximo
+                  </GumroadButton>
+                ) : (
+                  <GumroadButton
+                    variant="primary"
+                    size="md"
+                    onClick={() => handleSubmit()}
+                    disabled={submitting}
+                  >
+                    {submitting ? 'Criando...' : 'Criar Avaliação'}
+                  </GumroadButton>
+                )}
+              </Flex>
+            </>
+          ) : (
+            /* EDIT / VIEW / REPORT MODE: all sections at once */
+            <>
+              {isEditMode && (
+                <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+                  <Flex direction="column" gap="4">
+                    <InstrumentPicker
+                      value={formData.instrumentId}
+                      onChange={handleInstrumentChange}
+                    />
+                  </Flex>
+                </GumroadCard>
+              )}
+
+              <GumroadCard color="cyan" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+                <ChildDataSection
+                  formData={formData}
+                  updateFormData={updateFormData}
+                  disabled={isViewMode || isReportMode}
+                />
+              </GumroadCard>
+
+              <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+                <ExaminerDataSection
+                  formData={formData}
+                  updateFormData={updateFormData}
+                  disabled={isViewMode || isReportMode}
+                />
+              </GumroadCard>
+
+              <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+                <CaregiverDataSection
+                  formData={formData}
+                  updateFormData={updateFormData}
+                  disabled={isViewMode || isReportMode}
+                />
+              </GumroadCard>
+
+              <GumroadCard color="cream" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+                <InstructionsSection />
+              </GumroadCard>
+
+              <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+                <SensoryProcessingSection
+                  formData={formData}
+                  updateItemResponse={updateItemResponse}
+                  updateFormData={updateFormData}
+                  disabled={isViewMode || isReportMode}
+                />
+              </GumroadCard>
+
+              <Flex gap="3" mt="4" justify="end" wrap="wrap">
+                {!isViewMode && !isReportMode && (
+                  <>
+                    <GumroadButton variant="secondary" size="md" onClick={handleClose}>
+                      Cancelar
+                    </GumroadButton>
+                    <GumroadButton variant="primary" size="md" type="submit" disabled={submitting}>
+                      {submitting ? 'Salvando...' : 'Salvar Alterações'}
+                    </GumroadButton>
+                  </>
+                )}
+                {(isViewMode || isReportMode) && (
+                  <>
+                    <GumroadButton variant="secondary" size="md" onClick={handleClose}>
+                      Voltar
+                    </GumroadButton>
+                    {isViewMode && (
+                      <GumroadButton variant="primary" size="md" onClick={() => navigate(`/assessment/${id}/edit`)}>
+                        Editar
+                      </GumroadButton>
+                    )}
+                  </>
+                )}
+              </Flex>
+            </>
+          )}
         </form>
       )}
     </Box>

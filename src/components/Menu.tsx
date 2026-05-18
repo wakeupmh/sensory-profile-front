@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
 import { Box, Flex } from '@radix-ui/themes';
-import { HomeIcon, FileTextIcon, ClipboardIcon, ExitIcon } from '@radix-ui/react-icons';
+import { HomeIcon, FileTextIcon, ClipboardIcon, PersonIcon, ExitIcon } from '@radix-ui/react-icons';
 import { colors, typography, zIndex } from '../theme/tokens';
 import GumroadButton from './design-system/GumroadButton';
 
@@ -82,6 +82,10 @@ const Menu: React.FC = () => {
             <Link to="/anamneses" style={navLinkStyle(isActive('/anamnese'))}>
               <ClipboardIcon width={16} height={16} />
               Anamneses
+            </Link>
+            <Link to="/children" style={navLinkStyle(isActive('/children'))}>
+              <PersonIcon width={16} height={16} />
+              Crianças
             </Link>
           </Flex>
         </Flex>

@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react';
 import { useState, FormEvent, useEffect, useRef } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Box, Flex } from '@radix-ui/themes';
 import { useAuthContext } from '../context/AuthContext';
 
 import { anamneseApi } from '../services/api';
 import useAnamneseForm from '../components/anamnese/useAnamneseForm';
 import ChildSection from '../components/anamnese/ChildSection';
+import ChildPicker from '../components/sensory-profile/ChildPicker';
 import CaregiverSection from '../components/anamnese/CaregiverSection';
 import ClinicalHistorySection from '../components/anamnese/ClinicalHistorySection';
 import ShareLinkBox from '../components/anamnese/ShareLinkBox';
@@ -18,6 +19,14 @@ import { spacing } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
+import GumroadStepper from '../components/design-system/GumroadStepper';
+import { useDraftPersistence } from '../hooks/useDraftPersistence';
+
+const STEPS = [
+  { key: 'child', label: 'Criança' },
+  { key: 'caregiver', label: 'Responsável' },
+  { key: 'clinical', label: 'Histórico Clínico' },
+];
 
 const AnamneseForm: React.FC = () => {
   const { formData, setFormData, updateFormData } = useAnamneseForm();
@@ -27,9 +36,15 @@ const AnamneseForm: React.FC = () => {
   const [notFound, setNotFound] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [shareToken, setShareToken] = useState<string | null>(null);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [showDraftPrompt, setShowDraftPrompt] = useState(false);
+  const [draftChecked, setDraftChecked] = useState(false);
+
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { getToken } = useAuthContext();
   const fetchedRef = useRef(false);
 
@@ -37,6 +52,57 @@ const AnamneseForm: React.FC = () => {
   const isEditMode = !!id && location.pathname.includes('/edit');
   const isNewMode = !id;
 
+  const { loadDraft, clearDraft, saveOnStepChange } = useDraftPersistence({
+    formType: 'anamnese',
+    formData: formData as Record<string, unknown>,
+    currentStep,
+    enabled: isNewMode,
+  });
+
+  // Draft loading on mount (new-mode only)
+  useEffect(() => {
+    if (!isNewMode || draftChecked) return;
+
+    const checkDraft = async () => {
+      const isFresh = searchParams.get('fresh') === '1';
+      if (isFresh) {
+        await clearDraft();
+        setDraftChecked(true);
+        return;
+      }
+
+      const draft = await loadDraft();
+      if (draft) {
+        setShowDraftPrompt(true);
+      }
+      setDraftChecked(true);
+    };
+
+    checkDraft();
+  }, [isNewMode]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleContinueDraft = async () => {
+    const draft = await loadDraft();
+    if (draft) {
+      setFormData(draft.payload as any);
+      setCurrentStep(draft.currentStep);
+      const completed = new Set<number>();
+      for (let i = 0; i < draft.currentStep; i++) {
+        completed.add(i);
+      }
+      setCompletedSteps(completed);
+    }
+    setShowDraftPrompt(false);
+  };
+
+  const handleStartFresh = async () => {
+    await clearDraft();
+    setShowDraftPrompt(false);
+    setCurrentStep(0);
+    setCompletedSteps(new Set());
+  };
+
+  // Fetch existing anamnese for view/edit
   useEffect(() => {
     if (!id) return;
     if (fetchedRef.current) return;
@@ -72,6 +138,23 @@ const AnamneseForm: React.FC = () => {
     run();
   }, [id, getToken, setFormData, formData.child, formData.caregiver]);
 
+  const validateStep = (step: number): boolean => {
+    setValidationError(null);
+    if (step === 0) {
+      if (!formData.child?.selectedChildId) { setValidationError('Selecione ou cadastre uma criança'); return false; }
+    } else if (step === 1) {
+      if (!formData.caregiver?.name) { setValidationError('Nome do responsável é obrigatório'); return false; }
+      if (!formData.caregiver?.relationship) { setValidationError('Relação do responsável é obrigatória'); return false; }
+      if (!formData.caregiver?.contact) { setValidationError('Contato do responsável é obrigatório'); return false; }
+    } else if (step === 2) {
+      if (!formData.clinicalHistory?.queixa?.mainComplaint) {
+        setValidationError('Queixa principal é obrigatória');
+        return false;
+      }
+    }
+    return true;
+  };
+
   const validateForm = (): boolean => {
     setValidationError(null);
     if (!formData.child?.name) { setValidationError('Nome da criança é obrigatório'); return false; }
@@ -88,9 +171,31 @@ const AnamneseForm: React.FC = () => {
     return true;
   };
 
+  const handleBack = async () => {
+    if (currentStep === 0) return;
+    const newStep = currentStep - 1;
+    setCompletedSteps(prev => new Set(prev).add(currentStep));
+    setCurrentStep(newStep);
+    await saveOnStepChange(newStep);
+    setValidationError(null);
+  };
+
+  const handleNext = async () => {
+    if (!validateStep(currentStep)) return;
+    const newStep = currentStep + 1;
+    setCompletedSteps(prev => new Set(prev).add(currentStep));
+    setCurrentStep(newStep);
+    await saveOnStepChange(newStep);
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) return;
+
+    if (isNewMode) {
+      if (!validateStep(currentStep)) return;
+    } else {
+      if (!validateForm()) return;
+    }
 
     try {
       setSubmitting(true);
@@ -103,6 +208,7 @@ const AnamneseForm: React.FC = () => {
 
       if (isNewMode) {
         await anamneseApi.create(payload, token);
+        await clearDraft();
       } else if (isEditMode && id) {
         await anamneseApi.update(id, payload, token);
       }
@@ -160,6 +266,35 @@ const AnamneseForm: React.FC = () => {
     );
   }
 
+  // Draft prompt (new-mode only, shown before form)
+  if (isNewMode && showDraftPrompt) {
+    return (
+      <Box width="100%">
+        <Flex justify="between" align={{ initial: 'start', sm: 'center' }} mb="6" gap="4" direction={{ initial: 'column', sm: 'row' }}>
+          <GumroadHeading level="display-sm" as="h1">Nova Anamnese</GumroadHeading>
+        </Flex>
+        <GumroadCard color="yellow" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+          <Flex direction="column" gap="4">
+            <GumroadText level="body-md" as="p" style={{ fontWeight: 600 }}>
+              Você tem um rascunho em andamento.
+            </GumroadText>
+            <GumroadText level="body-sm" as="p">
+              Deseja continuar de onde parou ou começar uma nova anamnese do zero?
+            </GumroadText>
+            <Flex gap="3" wrap="wrap">
+              <GumroadButton variant="primary" size="md" onClick={handleContinueDraft}>
+                Continuar
+              </GumroadButton>
+              <GumroadButton variant="secondary" size="md" onClick={handleStartFresh}>
+                Começar novo
+              </GumroadButton>
+            </Flex>
+          </Flex>
+        </GumroadCard>
+      </Box>
+    );
+  }
+
   return (
     <Box width="100%">
       <form onSubmit={handleSubmit}>
@@ -185,6 +320,23 @@ const AnamneseForm: React.FC = () => {
           </Flex>
         </Flex>
 
+        {/* Stepper — new-mode only */}
+        {isNewMode && (
+          <Box mb="6">
+            <GumroadStepper
+              steps={STEPS}
+              current={currentStep}
+              completed={completedSteps}
+              onStepClick={(i) => {
+                if (completedSteps.has(i) || i === currentStep) {
+                  setCurrentStep(i);
+                  setValidationError(null);
+                }
+              }}
+            />
+          </Box>
+        )}
+
         {validationError && (
           <GumroadCard color="salmon" shadow="sm" padding="md" style={{ marginBottom: spacing.lg }}>
             <GumroadText level="body-md" as="p" style={{ fontWeight: 600 }}>
@@ -203,42 +355,109 @@ const AnamneseForm: React.FC = () => {
           </GumroadCard>
         )}
 
-        <GumroadCard color="cyan" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
-          <ChildSection
-            formData={formData}
-            updateFormData={updateFormData}
-            disabled={disabled}
-          />
-        </GumroadCard>
+        {/* New-mode: one section at a time */}
+        {isNewMode ? (
+          <>
+            {currentStep === 0 && (
+              <GumroadCard color="cyan" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+                <ChildPicker
+                  selectedId={formData.child?.selectedChildId ?? null}
+                  onSelect={(child) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      child: {
+                        ...prev.child,
+                        selectedChildId: child.id,
+                        name: child.name,
+                        birthDate: child.birthDate,
+                        gender: child.gender ?? 'other',
+                        nationalIdentity: child.nationalIdentity ?? '',
+                        otherInfo: child.otherInfo ?? '',
+                      },
+                    }));
+                  }}
+                />
+              </GumroadCard>
+            )}
+            {currentStep === 1 && (
+              <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+                <CaregiverSection
+                  formData={formData}
+                  updateFormData={updateFormData}
+                  disabled={false}
+                />
+              </GumroadCard>
+            )}
+            {currentStep === 2 && (
+              <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+                <ClinicalHistorySection
+                  formData={formData}
+                  updateFormData={updateFormData}
+                  disabled={false}
+                />
+              </GumroadCard>
+            )}
+          </>
+        ) : (
+          /* View/edit mode: all sections at once */
+          <>
+            <GumroadCard color="cyan" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+              <ChildSection
+                formData={formData}
+                updateFormData={updateFormData}
+                disabled={disabled}
+              />
+            </GumroadCard>
 
-        <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
-          <CaregiverSection
-            formData={formData}
-            updateFormData={updateFormData}
-            disabled={disabled}
-          />
-        </GumroadCard>
+            <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+              <CaregiverSection
+                formData={formData}
+                updateFormData={updateFormData}
+                disabled={disabled}
+              />
+            </GumroadCard>
 
-        <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
-          <ClinicalHistorySection
-            formData={formData}
-            updateFormData={updateFormData}
-            disabled={disabled}
-          />
-        </GumroadCard>
+            <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+              <ClinicalHistorySection
+                formData={formData}
+                updateFormData={updateFormData}
+                disabled={disabled}
+              />
+            </GumroadCard>
+          </>
+        )}
 
         <Flex gap="3" mt="4" justify="end" wrap="wrap">
-          {!isViewMode && (
+          {isNewMode ? (
+            <>
+              <GumroadButton variant="secondary" size="md" onClick={() => navigate('/anamneses')}>
+                Cancelar
+              </GumroadButton>
+              {currentStep > 0 && (
+                <GumroadButton variant="secondary" size="md" onClick={handleBack}>
+                  Voltar
+                </GumroadButton>
+              )}
+              {currentStep < STEPS.length - 1 ? (
+                <GumroadButton variant="primary" size="md" onClick={handleNext}>
+                  Próximo
+                </GumroadButton>
+              ) : (
+                <GumroadButton variant="primary" size="md" type="submit" disabled={submitting}>
+                  {submitting ? 'Criando...' : 'Criar Anamnese'}
+                </GumroadButton>
+              )}
+            </>
+          ) : !isViewMode ? (
             <>
               <GumroadButton variant="secondary" size="md" onClick={() => navigate('/anamneses')}>
                 Cancelar
               </GumroadButton>
               <GumroadButton variant="primary" size="md" type="submit" disabled={submitting}>
-                {submitting ? (isNewMode ? 'Criando...' : 'Salvando...') : (isNewMode ? 'Criar Anamnese' : 'Salvar Alterações')}
+                {submitting ? 'Salvando...' : 'Salvar Alterações'}
               </GumroadButton>
             </>
-          )}
-          {isViewMode && (
+          ) : (
             <GumroadButton variant="secondary" size="md" onClick={() => navigate('/anamneses')}>
               Voltar
             </GumroadButton>

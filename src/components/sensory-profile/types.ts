@@ -8,6 +8,7 @@ export interface ChildData {
   nationalIdentity?: string;
   otherInfo?: string;
   age: number;
+  selectedChildId?: string;
 }
 
 export interface ExaminerData {

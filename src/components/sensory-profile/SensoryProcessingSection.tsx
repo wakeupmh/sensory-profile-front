@@ -73,6 +73,8 @@ const SensorySection = memo(({
 
 SensorySection.displayName = 'SensorySection';
 
+export { SensorySection };
+
 const SensoryProcessingSection: React.FC<SensoryProcessingSectionProps> = memo(({
   formData,
   updateItemResponse,

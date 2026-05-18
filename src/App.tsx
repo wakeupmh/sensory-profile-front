@@ -8,6 +8,7 @@ import ReportPage from './pages/ReportPage';
 import AnamneseList from './pages/AnamneseList';
 import AnamneseForm from './pages/AnamneseForm';
 import AnamneseSharedView from './pages/AnamneseSharedView';
+import Children from './pages/Children';
 import SignIn from './pages/SignIn';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useAuthContext } from './context/AuthContext';
@@ -40,6 +41,7 @@ function App() {
             <Route path="/anamnese/new" element={<ProtectedRoute><AnamneseForm /></ProtectedRoute>} />
             <Route path="/anamnese/:id" element={<ProtectedRoute><AnamneseForm /></ProtectedRoute>} />
             <Route path="/anamnese/:id/edit" element={<ProtectedRoute><AnamneseForm /></ProtectedRoute>} />
+            <Route path="/children" element={<ProtectedRoute><Children /></ProtectedRoute>} />
           </Route>
         </Routes>
       </BrowserRouter>

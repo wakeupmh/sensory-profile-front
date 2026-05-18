@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import { assessmentApi } from '../services/api';
+import { Link, useNavigate } from 'react-router-dom';
+import { assessmentApi, draftApi, DraftData } from '../services/api';
 import { Box, Flex, AlertDialog, IconButton } from '@radix-ui/themes';
 import { getInstrument } from '../instruments';
 import {
@@ -33,9 +33,12 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [assessmentDraft, setAssessmentDraft] = useState<DraftData | null>(null);
+  const [anamneseDraft, setAnamneseDraft] = useState<DraftData | null>(null);
   const { getToken, isLoaded, session } = useAuthContext();
   const getTokenRef = useRef(getToken);
   getTokenRef.current = getToken;
+  const navigate = useNavigate();
 
   const fetchAssessments = useCallback(async () => {
     try {
@@ -57,6 +60,35 @@ const Home = () => {
       fetchAssessments();
     }
   }, [fetchAssessments, isLoaded, session]);
+
+  useEffect(() => {
+    if (!isLoaded || !session) return;
+    const fetchDrafts = async () => {
+      try {
+        const token = await getTokenRef.current();
+        const [ad, anmd] = await Promise.all([
+          draftApi.getDraft('sensory_assessment', token),
+          draftApi.getDraft('anamnese', token),
+        ]);
+        setAssessmentDraft(ad);
+        setAnamneseDraft(anmd);
+      } catch (err) {
+        console.error('Erro ao carregar rascunhos:', err);
+      }
+    };
+    fetchDrafts();
+  }, [isLoaded, session]);
+
+  const handleDiscardDraft = async (formType: 'sensory_assessment' | 'anamnese') => {
+    try {
+      const token = await getTokenRef.current();
+      await draftApi.deleteDraft(formType, token);
+      if (formType === 'sensory_assessment') setAssessmentDraft(null);
+      else setAnamneseDraft(null);
+    } catch (err) {
+      console.error('Erro ao descartar rascunho:', err);
+    }
+  };
 
   const handleDeleteAssessment = async (id: string) => {
     try {
@@ -100,6 +132,74 @@ const Home = () => {
           </Link>
         </GumroadButton>
       </Flex>
+
+      {/* Draft Banners */}
+      {(assessmentDraft || anamneseDraft) && (
+        <Flex direction="column" gap="3" mb="5">
+          {assessmentDraft && (
+            <GumroadCard color="yellow" shadow="md" padding="md">
+              <Flex justify="between" align="center" gap="4" wrap="wrap">
+                <Box>
+                  <GumroadText level="body-md" as="p" style={{ fontWeight: 600 }}>
+                    Rascunho em andamento: Avaliação de Perfil Sensorial
+                  </GumroadText>
+                  <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, marginTop: spacing.xxs }}>
+                    Última edição:{' '}
+                    {new Date(assessmentDraft.updatedAt).toLocaleString('pt-BR')}
+                  </GumroadText>
+                </Box>
+                <Flex gap="2">
+                  <GumroadButton
+                    variant="primary"
+                    size="sm"
+                    onClick={() => navigate('/assessment/new')}
+                  >
+                    Continuar
+                  </GumroadButton>
+                  <GumroadButton
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleDiscardDraft('sensory_assessment')}
+                  >
+                    Descartar
+                  </GumroadButton>
+                </Flex>
+              </Flex>
+            </GumroadCard>
+          )}
+          {anamneseDraft && (
+            <GumroadCard color="yellow" shadow="md" padding="md">
+              <Flex justify="between" align="center" gap="4" wrap="wrap">
+                <Box>
+                  <GumroadText level="body-md" as="p" style={{ fontWeight: 600 }}>
+                    Rascunho em andamento: Anamnese
+                  </GumroadText>
+                  <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, marginTop: spacing.xxs }}>
+                    Última edição:{' '}
+                    {new Date(anamneseDraft.updatedAt).toLocaleString('pt-BR')}
+                  </GumroadText>
+                </Box>
+                <Flex gap="2">
+                  <GumroadButton
+                    variant="primary"
+                    size="sm"
+                    onClick={() => navigate('/anamnese/new')}
+                  >
+                    Continuar
+                  </GumroadButton>
+                  <GumroadButton
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleDiscardDraft('anamnese')}
+                  >
+                    Descartar
+                  </GumroadButton>
+                </Flex>
+              </Flex>
+            </GumroadCard>
+          )}
+        </Flex>
+      )}
 
       {loading ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>

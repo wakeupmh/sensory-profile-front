@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FormData } from './types';
 import { useEffect, useState, memo } from 'react';
-import { Flex, Box } from '@radix-ui/themes';
+import { Box } from '@radix-ui/themes';
 import FastTextField from './FastTextField';
-import FastSelect from './FastSelect';
 import GumroadHeading from '../design-system/GumroadHeading';
+import ChildForm, { ChildFormValue } from './ChildForm';
 
 interface ChildDataSectionProps {
   formData: FormData;
@@ -19,111 +19,56 @@ const ChildDataSection: React.FC<ChildDataSectionProps> = memo(({ formData, upda
     if (formData.child?.birthDate) {
       const birthDate = new Date(formData.child.birthDate);
       const today = new Date();
-      
+
       let age = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
-      
+
       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
         age--;
       }
-      
+
       setCalculatedAge(age);
-      
+
       if (age !== formData.child.age) {
         updateFormData('child.age', age);
       }
     }
   }, [formData.child?.birthDate, formData.child?.age, updateFormData]);
 
-  // Manipulador para atualizar o formData quando os campos mudarem
-  const handleValueChange = (path: string, value: any) => {
-    updateFormData(`child.${path}`, value);
+  const childFormValue: ChildFormValue = {
+    name: formData.child?.name ?? '',
+    birthDate: formData.child?.birthDate ?? '',
+    gender: formData.child?.gender ?? '',
+    nationalIdentity: formData.child?.nationalIdentity ?? '',
+    otherInfo: formData.child?.otherInfo ?? '',
   };
 
-  const genderOptions = [
-    { value: 'male', label: 'Masculino' },
-    { value: 'female', label: 'Feminino' },
-    { value: 'other', label: 'Outro' }
-  ];
+  const handleChildFormChange = (field: string, value: string) => {
+    updateFormData(`child.${field}`, value);
+  };
 
   return (
     <Box mb="6">
       <GumroadHeading level="title-lg" as="h2" style={{ marginBottom: '12px' }}>
         Dados da Criança
       </GumroadHeading>
-      <Flex gap="4" direction={{ initial: 'column', sm: 'row' }} mb="3">
-        <Box style={{ flex: 1 }}>
-          <FastTextField
-            name="name"
-            label="Nome da Criança:"
-            placeholder="Nome completo"
-            initialValue={formData.child?.name}
-            onValueChange={handleValueChange}
-            disabled={disabled}
-            required={true}
-          />
-        </Box>
-        <Box style={{ flex: 1 }}>
-          <FastTextField
-            name="birthDate"
-            label="Data de Nascimento:"
-            type="date"
-            initialValue={formData.child?.birthDate}
-            onValueChange={handleValueChange}
-            disabled={disabled}
-            required={true}
-          />
-        </Box>
-      </Flex>
-      <Flex gap="4" direction={{ initial: 'column', sm: 'row' }} mb="3">
-        <Box style={{ flex: 1 }}>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '16px', display: 'block', marginBottom: '6px' }}>
-            Idade:
-          </span>
-          <FastTextField
-            name="age"
-            label=""
-            type="number"
-            initialValue={calculatedAge.toString()}
-            disabled={true}
-          />
-        </Box>
-        <Box style={{ flex: 1 }}>
-          <FastSelect
-            name="gender"
-            label="Gênero:"
-            options={genderOptions}
-            initialValue={formData.child?.gender}
-            onValueChange={handleValueChange}
-            disabled={disabled}
-            required={true}
-          />
-        </Box>
-      </Flex>
-      <Flex gap="4" direction={{ initial: 'column', sm: 'row' }} mb="3">
-        <Box style={{ flex: 1 }}>
-          <FastTextField
-            name="nationalIdentity"
-            label="Identidade Nacional (RG/CPF):"
-            placeholder="RG ou CPF"
-            initialValue={formData.child?.nationalIdentity}
-            onValueChange={handleValueChange}
-            disabled={disabled}
-            required={false}
-          />
-        </Box>
-        <Box style={{ flex: 1 }}>
-          <FastTextField
-            name="otherInfo"
-            label="Outras Informações:"
-            placeholder="Informações adicionais relevantes"
-            initialValue={formData.child?.otherInfo}
-            onValueChange={handleValueChange}
-            disabled={disabled}
-            required={false}
-          />
-        </Box>
-      </Flex>
+
+      <ChildForm
+        value={childFormValue}
+        onChange={handleChildFormChange}
+        disabled={disabled}
+      />
+
+      {/* Calculated age display */}
+      <Box mt="3" style={{ maxWidth: '200px' }}>
+        <FastTextField
+          name="age"
+          label="Idade:"
+          type="number"
+          initialValue={calculatedAge.toString()}
+          disabled={true}
+        />
+      </Box>
     </Box>
   );
 });

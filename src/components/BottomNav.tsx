@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
 import { Box } from '@radix-ui/themes';
-import { HomeIcon, PlusIcon, ClipboardIcon, ExitIcon } from '@radix-ui/react-icons';
+import { HomeIcon, PlusIcon, ClipboardIcon, PersonIcon, ExitIcon } from '@radix-ui/react-icons';
 import { colors, zIndex, typography } from '../theme/tokens';
 
 const BottomNav: React.FC = () => {
@@ -19,6 +19,7 @@ const BottomNav: React.FC = () => {
     { path: '/dashboard', label: 'Início', icon: HomeIcon },
     { path: '/assessment/new?instrument=crianca-3-14', label: 'Nova', icon: PlusIcon },
     { path: '/anamneses', label: 'Anamneses', icon: ClipboardIcon },
+    { path: '/children', label: 'Crianças', icon: PersonIcon },
   ];
 
   const handleSignOut = () => signOut().then(() => navigate('/sign-in', { replace: true }));
