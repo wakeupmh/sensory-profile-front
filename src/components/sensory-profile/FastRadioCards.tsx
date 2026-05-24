@@ -1,5 +1,6 @@
 import { memo, useEffect, useState, CSSProperties } from 'react';
 import { colors, shadows, radii, typography } from '../../theme/tokens';
+import type { ResponseScale } from '../../instruments/types';
 
 interface RadioOption {
   value: string;
@@ -15,6 +16,10 @@ interface FastRadioCardsProps {
   columns?: { initial: string; xs?: string; sm?: string; md?: string; lg?: string };
   color?: string;
   onValueChange?: (name: string, value: string) => void;
+  /** When provided, overrides the hardcoded SP-2 options with scale.options */
+  scale?: ResponseScale;
+  /** Per-value color overrides; keys match option.value. Falls back to frequencyBg when absent. */
+  theme?: Record<string, { bg: string; text?: string }>;
 }
 
 const frequencyBg: Record<string, { bg: string; text: string }> = {
@@ -32,7 +37,9 @@ const FastRadioCards = memo(({
   initialValue = '',
   disabled = false,
   required = false,
-  onValueChange
+  onValueChange,
+  scale,
+  theme,
 }: FastRadioCardsProps) => {
   const [value, setValue] = useState(initialValue);
 
@@ -64,11 +71,13 @@ const FastRadioCards = memo(({
         className={`radio-grid-${name.replace(/[^a-z0-9]/gi, '')}`}
         style={{ display: 'grid', gap: '8px', width: '100%' }}
       >
-        {options.map((option) => {
+        {(scale ? scale.options : options).map((option) => {
           const isSelected = value === option.value;
-          const freq = frequencyBg[option.value];
-          const bg = freq?.bg ?? colors.canvas;
-          const textColor = freq?.text ?? colors.ink;
+          const colorEntry = theme
+            ? theme[option.value]
+            : frequencyBg[option.value];
+          const bg = colorEntry?.bg ?? colors.canvas;
+          const textColor = (colorEntry as { bg: string; text?: string } | undefined)?.text ?? colors.ink;
 
           const style: CSSProperties = {
             backgroundColor: isSelected ? bg : '#FFFFFF',

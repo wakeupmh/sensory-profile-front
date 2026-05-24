@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
 import { Box } from '@radix-ui/themes';
-import { HomeIcon, PlusIcon, ClipboardIcon, PersonIcon, ExitIcon } from '@radix-ui/react-icons';
+import { HomeIcon, PlusIcon, ClipboardIcon, PersonIcon, ExitIcon, ActivityLogIcon, HeartIcon, PlusCircledIcon, BarChartIcon, ReaderIcon } from '@radix-ui/react-icons';
 import { colors, zIndex, typography } from '../theme/tokens';
 
 const BottomNav: React.FC = () => {
@@ -17,8 +17,13 @@ const BottomNav: React.FC = () => {
 
   const tabs = [
     { path: '/dashboard', label: 'Início', icon: HomeIcon },
-    { path: '/assessment/new?instrument=crianca-3-14', label: 'Nova', icon: PlusIcon },
+    { path: '/assessment/new', label: 'Nova', icon: PlusIcon },
     { path: '/anamneses', label: 'Anamneses', icon: ClipboardIcon },
+    { path: '/logs', label: 'Registros', icon: ActivityLogIcon },
+    { path: '/therapy', label: 'Terapia', icon: HeartIcon },
+    { path: '/medical', label: 'Saúde', icon: PlusCircledIcon },
+    { path: '/development', label: 'Desenvolvimento', icon: BarChartIcon },
+    { path: '/education', label: 'Educação', icon: ReaderIcon },
     { path: '/children', label: 'Crianças', icon: PersonIcon },
   ];
 

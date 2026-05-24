@@ -9,6 +9,14 @@ import AnamneseList from './pages/AnamneseList';
 import AnamneseForm from './pages/AnamneseForm';
 import AnamneseSharedView from './pages/AnamneseSharedView';
 import Children from './pages/Children';
+import ChildProfilePage from './pages/ChildProfilePage';
+import LogsPage from './pages/LogsPage';
+import TherapyPage from './pages/TherapyPage';
+import MedicalPage from './pages/MedicalPage';
+import DevelopmentPage from './pages/DevelopmentPage';
+import EducationPage from './pages/EducationPage';
+import ConsolidatedReportPage from './pages/ConsolidatedReportPage';
+import ConsolidatedReportSharedView from './pages/ConsolidatedReportSharedView';
 import SignIn from './pages/SignIn';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useAuthContext } from './context/AuthContext';
@@ -30,6 +38,7 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/anamnese/shared/:token" element={<AnamneseSharedView />} />
+          <Route path="/consolidated/shared/:token" element={<ConsolidatedReportSharedView />} />
 
           <Route path="/" element={<Layout />}>
             <Route path="/dashboard" element={<ProtectedRoute><Home /></ProtectedRoute>} />
@@ -42,6 +51,13 @@ function App() {
             <Route path="/anamnese/:id" element={<ProtectedRoute><AnamneseForm /></ProtectedRoute>} />
             <Route path="/anamnese/:id/edit" element={<ProtectedRoute><AnamneseForm /></ProtectedRoute>} />
             <Route path="/children" element={<ProtectedRoute><Children /></ProtectedRoute>} />
+            <Route path="/children/:childId" element={<ProtectedRoute><ChildProfilePage /></ProtectedRoute>} />
+            <Route path="/logs" element={<ProtectedRoute><LogsPage /></ProtectedRoute>} />
+            <Route path="/therapy" element={<ProtectedRoute><TherapyPage /></ProtectedRoute>} />
+            <Route path="/medical" element={<ProtectedRoute><MedicalPage /></ProtectedRoute>} />
+            <Route path="/development" element={<ProtectedRoute><DevelopmentPage /></ProtectedRoute>} />
+            <Route path="/education" element={<ProtectedRoute><EducationPage /></ProtectedRoute>} />
+            <Route path="/consolidated/:childId" element={<ProtectedRoute><ConsolidatedReportPage /></ProtectedRoute>} />
           </Route>
         </Routes>
       </BrowserRouter>

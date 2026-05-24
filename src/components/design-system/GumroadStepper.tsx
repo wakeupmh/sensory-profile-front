@@ -268,41 +268,13 @@ const GumroadStepper: React.FC<GumroadStepperProps> = ({
           </div>
 
           {/* Current step label */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontFamily: fonts.display,
-              fontSize: '13px',
-              fontWeight: 600,
-              color: colors.ink,
-            }}
-          >
-            <span
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '20px',
-                height: '20px',
-                borderRadius: '50%',
-                background: colors['brand-cyan'],
-                border: borders.default,
-                fontSize: '11px',
-                fontWeight: 700,
-                color: colors.ink,
-                flexShrink: 0,
-              }}
-            >
-              {current + 1}
-            </span>
-            <span style={{ color: colors['brand-cyan'] }}>
+          <div style={{ textAlign: 'center', fontFamily: fonts.display }}>
+            <div style={{ fontSize: '11px', fontWeight: 500, color: '#888', marginBottom: '2px' }}>
+              Etapa {current + 1} de {steps.length}
+            </div>
+            <div style={{ fontSize: '14px', fontWeight: 700, color: colors['brand-cyan'] }}>
               {steps[current]?.label}
-            </span>
-            <span style={{ color: '#888', fontWeight: 400, fontSize: '12px' }}>
-              de {steps.length}
-            </span>
+            </div>
           </div>
         </div>
       )}

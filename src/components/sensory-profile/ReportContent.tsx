@@ -6,6 +6,7 @@ import type { ClassificationBand, InstrumentSection } from "../../instruments/ty
 
 interface ReportContentProps {
   formData: FormData;
+  assessmentId?: string;
 }
 
 const quadrants = {
@@ -24,7 +25,7 @@ const responseValueMap: Record<string, number> = {
   "quase sempre": 5,
 };
 
-const ReportContent: React.FC<ReportContentProps> = ({ formData }) => {
+const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId }) => {
   const instrument = getInstrument(formData.instrumentId);
 
   const calculateSectionScore = (items: SensoryItem[]): number => {
@@ -39,7 +40,10 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData }) => {
     const bands: ClassificationBand[] = section.bands ?? instrument.defaultBands;
     if (!bands || bands.length === 0) return { label: "Sem dados suficientes", color: "#888" };
 
-    const maxPossible = section.items.length * 5;
+    const maxPerItem = instrument.scale
+      ? Math.max(...instrument.scale.options.map((o) => o.numeric))
+      : 5; // SP-2 fallback
+    const maxPossible = section.items.length * maxPerItem;
     for (const band of bands) {
       if (band.maxScoreAbs !== undefined && score <= band.maxScoreAbs) return { label: band.label, color: band.color };
       if (band.maxScorePct !== undefined) {
@@ -241,40 +245,46 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData }) => {
         </div>
       </div>
 
-      <div style={sectionStyle} className="avoid-break section-container">
-        <h3 style={subHeaderStyle}>Quadrantes de Processamento Sensorial</h3>
-        <p style={{ fontStyle: "italic", marginBottom: "15px" }}>
-          Os quatro quadrantes descrevem como a criança processa estímulos sensoriais no cotidiano.
-        </p>
-        <div style={{ marginTop: "15px" }}>
-          <div style={colorBarStyle(quadrants.exploration.color)}>
-            <div style={{ fontWeight: "bold", color: quadrants.exploration.color }}>Exploração/Criança exploradora</div>
-            <div style={{ fontSize: "14px" }}>
-              Busca ativamente experiências sensoriais, demonstrando comportamentos de busca sensorial.
+      {instrument.hasQuadrants && (
+        <div style={sectionStyle} className="avoid-break section-container">
+          <h3 style={subHeaderStyle}>Quadrantes de Processamento Sensorial</h3>
+          <p style={{ fontStyle: "italic", marginBottom: "15px" }}>
+            Os quatro quadrantes descrevem como a criança processa estímulos sensoriais no cotidiano.
+          </p>
+          <div style={{ marginTop: "15px" }}>
+            <div style={colorBarStyle(quadrants.exploration.color)}>
+              <div style={{ fontWeight: "bold", color: quadrants.exploration.color }}>Exploração/Criança exploradora</div>
+              <div style={{ fontSize: "14px" }}>
+                Busca ativamente experiências sensoriais, demonstrando comportamentos de busca sensorial.
+              </div>
             </div>
-          </div>
-          <div style={colorBarStyle(quadrants.avoidance.color)}>
-            <div style={{ fontWeight: "bold", color: quadrants.avoidance.color }}>Esquiva/Criança que se esquiva</div>
-            <div style={{ fontSize: "14px" }}>
-              Evita experiências sensoriais, demonstrando comportamentos de esquiva sensorial.
+            <div style={colorBarStyle(quadrants.avoidance.color)}>
+              <div style={{ fontWeight: "bold", color: quadrants.avoidance.color }}>Esquiva/Criança que se esquiva</div>
+              <div style={{ fontSize: "14px" }}>
+                Evita experiências sensoriais, demonstrando comportamentos de esquiva sensorial.
+              </div>
             </div>
-          </div>
-          <div style={colorBarStyle(quadrants.sensitivity.color)}>
-            <div style={{ fontWeight: "bold", color: quadrants.sensitivity.color }}>Sensibilidade/Criança sensível</div>
-            <div style={{ fontSize: "14px" }}>
-              Nota e reage com maior intensidade a estímulos sensoriais.
+            <div style={colorBarStyle(quadrants.sensitivity.color)}>
+              <div style={{ fontWeight: "bold", color: quadrants.sensitivity.color }}>Sensibilidade/Criança sensível</div>
+              <div style={{ fontSize: "14px" }}>
+                Nota e reage com maior intensidade a estímulos sensoriais.
+              </div>
             </div>
-          </div>
-          <div style={colorBarStyle(quadrants.observation.color)}>
-            <div style={{ fontWeight: "bold", color: quadrants.observation.color }}>Observação/Criança observadora</div>
-            <div style={{ fontSize: "14px" }}>
-              Tende a não perceber estímulos que outras crianças notam; registro sensorial reduzido.
+            <div style={colorBarStyle(quadrants.observation.color)}>
+              <div style={{ fontWeight: "bold", color: quadrants.observation.color }}>Observação/Criança observadora</div>
+              <div style={{ fontSize: "14px" }}>
+                Tende a não perceber estímulos que outras crianças notam; registro sensorial reduzido.
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div className="page-break"></div>
+
+      {instrument.summaryComponent && (
+        <instrument.summaryComponent scores={scoreData} instrument={instrument} assessmentId={assessmentId} />
+      )}
 
       <div style={sectionStyle} className="avoid-break section-container">
         <h3 style={subHeaderStyle}>Resumo das Pontuações</h3>

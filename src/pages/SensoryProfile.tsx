@@ -31,26 +31,20 @@ import GumroadHeading, { GumroadText } from '../components/design-system/Gumroad
 import GumroadStepper from '../components/design-system/GumroadStepper';
 import { useDraftPersistence } from '../hooks/useDraftPersistence';
 
-const STEPS = [
+const PRELUDE_STEP_KEYS = [
   { key: 'child', label: 'Criança' },
   { key: 'examiner', label: 'Examinador' },
   { key: 'caregiver', label: 'Responsável' },
   { key: 'instructions', label: 'Instruções' },
-  { key: 'auditoryProcessing', label: 'Processamento Auditivo' },
-  { key: 'visualProcessing', label: 'Processamento Visual' },
-  { key: 'tactileProcessing', label: 'Processamento Tátil' },
-  { key: 'movementProcessing', label: 'Processamento de Movimento' },
-  { key: 'bodyPositionProcessing', label: 'Processamento de Posição do Corpo' },
-  { key: 'oralSensitivityProcessing', label: 'Processamento de Sensibilidade Oral' },
-  { key: 'behavioralResponses', label: 'Conduta associada ao processamento sensorial' },
-  { key: 'socialEmotionalResponses', label: 'Respostas Socioemocionais' },
-  { key: 'attentionResponses', label: 'Respostas de Atenção' },
-];
+] as const;
+
+const PRELUDE_COUNT = PRELUDE_STEP_KEYS.length; // 4
 
 const SensoryProfileForm: React.FC = () => {
   const [searchParams] = useSearchParams();
   const initialInstrumentId = searchParams.get('instrument') || DEFAULT_INSTRUMENT_ID;
   const isFresh = searchParams.get('fresh') === '1';
+  const parentId = searchParams.get('parent');
 
   const { formData, updateFormData, updateItemResponse, setFormData, switchInstrument } =
     useFormData(initialInstrumentId);
@@ -68,6 +62,9 @@ const SensoryProfileForm: React.FC = () => {
     }
     switchInstrument(newId);
   };
+
+  const [parentData, setParentData] = useState<{ scores_json: Record<string, unknown> } | null>(null);
+  const [parentLoading, setParentLoading] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -88,11 +85,24 @@ const SensoryProfileForm: React.FC = () => {
 
   const instrument = useMemo(() => getInstrument(formData.instrumentId), [formData.instrumentId]);
 
+  const effectiveSections = useMemo(() => {
+    if (instrument.dynamicSections && parentData) {
+      return instrument.dynamicSections(parentData);
+    }
+    return instrument.sections;
+  }, [instrument, parentData]);
+
+  const steps = useMemo(
+    () => [
+      ...PRELUDE_STEP_KEYS,
+      ...effectiveSections.map((s) => ({ key: s.key, label: s.title ?? s.key })),
+    ],
+    [effectiveSections],
+  );
+
   // Stepper state (new-mode only)
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  const [draftPromptVisible, setDraftPromptVisible] = useState(false);
-  const [pendingDraft, setPendingDraft] = useState<any>(null);
   const draftCheckedRef = useRef(false);
 
   const { loadDraft, clearDraft, saveOnStepChange } = useDraftPersistence({
@@ -103,7 +113,7 @@ const SensoryProfileForm: React.FC = () => {
     enabled: isNewMode,
   });
 
-  // Load draft on mount (new-mode only)
+  // Auto-resume draft on mount (new-mode only)
   useEffect(() => {
     if (!isNewMode || draftCheckedRef.current) return;
     draftCheckedRef.current = true;
@@ -115,9 +125,15 @@ const SensoryProfileForm: React.FC = () => {
 
     const checkDraft = async () => {
       const draft = await loadDraft();
-      if (draft) {
-        setPendingDraft(draft);
-        setDraftPromptVisible(true);
+      if (!draft) return;
+      setFormData(draft.payload as any);
+      const step = draft.currentStep ?? 0;
+      setCurrentStep(step);
+      const completed = new Set<number>();
+      for (let i = 0; i < step; i++) completed.add(i);
+      setCompletedSteps(completed);
+      if (draft.instrumentId && draft.instrumentId !== formData.instrumentId) {
+        switchInstrument(draft.instrumentId);
       }
     };
 
@@ -125,28 +141,25 @@ const SensoryProfileForm: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isNewMode]);
 
-  const handleResumeDraft = () => {
-    if (!pendingDraft) return;
-    setFormData(pendingDraft.payload as any);
-    const step = pendingDraft.currentStep ?? 0;
-    setCurrentStep(step);
-    const completed = new Set<number>();
-    for (let i = 0; i < step; i++) completed.add(i);
-    setCompletedSteps(completed);
-    if (pendingDraft.instrumentId && pendingDraft.instrumentId !== formData.instrumentId) {
-      switchInstrument(pendingDraft.instrumentId);
-    }
-    setPendingDraft(null);
-    setDraftPromptVisible(false);
-  };
-
-  const handleDiscardDraft = async () => {
-    await clearDraft();
-    setPendingDraft(null);
-    setDraftPromptVisible(false);
-    setCurrentStep(0);
-    setCompletedSteps(new Set());
-  };
+  // Fetch parent assessment when ?parent= is present
+  useEffect(() => {
+    if (!parentId) return;
+    setParentLoading(true);
+    const fetchParent = async () => {
+      try {
+        const token = await getToken();
+        const response = await assessmentApi.getAssessmentById(parentId, token);
+        const assessment = response.assessment ?? response;
+        setParentData({ scores_json: assessment.scores_json ?? {} });
+      } catch (err) {
+        console.error('Error fetching parent assessment:', err);
+      } finally {
+        setParentLoading(false);
+      }
+    };
+    fetchParent();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [parentId]);
 
   // Per-step validation
   const validateStep = (step: number): boolean => {
@@ -340,7 +353,7 @@ const SensoryProfileForm: React.FC = () => {
     if (!formData.caregiver?.relationship) return fail('Relação do cuidador com a criança é obrigatória');
     if (!formData.caregiver?.contact) return fail('Contato do cuidador é obrigatório');
 
-    for (const section of instrument.sections) {
+    for (const section of effectiveSections) {
       const sectionData = formData.sections?.[section.key];
       if (!sectionData) continue;
       for (const item of sectionData.items) {
@@ -359,12 +372,12 @@ const SensoryProfileForm: React.FC = () => {
   };
 
   const buildAssessmentPayload = () => {
-    const sectionComments = instrument.sections
+    const sectionComments = effectiveSections
       .map((s) => ({ section: s.key, comments: formData.sections?.[s.key]?.comments || '' }))
       .filter((c) => c.comments.trim() !== '');
 
     const responses: Array<{ itemId: number; response: string }> = [];
-    instrument.sections.forEach((s) => {
+    effectiveSections.forEach((s) => {
       formData.sections?.[s.key]?.items.forEach((item) => {
         if (item.response) responses.push({ itemId: item.id, response: item.response });
       });
@@ -377,6 +390,7 @@ const SensoryProfileForm: React.FC = () => {
       caregiver: formData.caregiver,
       responses,
       sectionComments,
+      ...(parentId ? { parentAssessmentId: parentId } : {}),
     };
   };
 
@@ -489,9 +503,9 @@ const SensoryProfileForm: React.FC = () => {
           </GumroadCard>
         );
       default: {
-        // Steps 4-12: one section per step
-        const sectionIndex = currentStep - 4;
-        const section = instrument.sections[sectionIndex];
+        // Steps PRELUDE_COUNT..(PRELUDE_COUNT + sections.length - 1): one section per step
+        const sectionIndex = currentStep - PRELUDE_COUNT;
+        const section = effectiveSections[sectionIndex];
         if (!section) return null;
         const sectionData = formData.sections?.[section.key];
         const items = sectionData?.items || [];
@@ -515,7 +529,7 @@ const SensoryProfileForm: React.FC = () => {
 
   return (
     <Box width="100%">
-      {loading ? (
+      {loading || parentLoading ? (
         <GumroadCard color="cream" shadow="md" padding="xl">
           <Flex align="center" justify="center" direction="column" gap="3" py="9">
             <LoadingSpinner size="large" text="Carregando dados..." />
@@ -579,33 +593,6 @@ const SensoryProfileForm: React.FC = () => {
             </Flex>
           </Flex>
 
-          {/* Draft resume prompt (new-mode only) */}
-          {isNewMode && draftPromptVisible && (
-            <GumroadCard
-              color="yellow"
-              shadow="md"
-              padding="lg"
-              style={{ marginBottom: spacing.lg }}
-            >
-              <Flex direction="column" gap="3">
-                <GumroadHeading level="title-sm" as="h2">
-                  Rascunho em andamento
-                </GumroadHeading>
-                <GumroadText level="body-md" as="p">
-                  Você tem um rascunho em andamento. Deseja continuar de onde parou?
-                </GumroadText>
-                <Flex gap="3" wrap="wrap">
-                  <GumroadButton variant="primary" size="md" onClick={handleResumeDraft}>
-                    Continuar
-                  </GumroadButton>
-                  <GumroadButton variant="secondary" size="md" onClick={handleDiscardDraft}>
-                    Começar novo
-                  </GumroadButton>
-                </Flex>
-              </Flex>
-            </GumroadCard>
-          )}
-
           {validationError && (
             <GumroadCard color="salmon" shadow="sm" padding="md" style={{ marginBottom: spacing.lg }}>
               <GumroadText level="body-md" as="p" style={{ fontWeight: 600 }}>
@@ -618,7 +605,7 @@ const SensoryProfileForm: React.FC = () => {
           {isNewMode ? (
             <>
               <GumroadStepper
-                steps={STEPS}
+                steps={steps}
                 current={currentStep}
                 completed={completedSteps}
                 onStepClick={handleStepClick}
@@ -635,7 +622,7 @@ const SensoryProfileForm: React.FC = () => {
                     Voltar
                   </GumroadButton>
                 )}
-                {currentStep < STEPS.length - 1 ? (
+                {currentStep < steps.length - 1 ? (
                   <GumroadButton variant="primary" size="md" onClick={handleStepNext}>
                     Próximo
                   </GumroadButton>

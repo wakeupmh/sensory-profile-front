@@ -1,10 +1,16 @@
 import type { Instrument } from './types';
 import { crianca3a14 } from './crianca-3-14';
 import { criancaPequena } from './crianca-pequena';
+import { atec } from './atec';
+import { mchatR } from './mchat-r';
+import { mchatRFFollowup } from './mchat-rf-followup';
 
 export const instruments: Record<string, Instrument> = {
   [criancaPequena.id]: criancaPequena,
   [crianca3a14.id]: crianca3a14,
+  [atec.id]: atec,
+  [mchatR.id]: mchatR,
+  [mchatRFFollowup.id]: mchatRFFollowup,
 };
 
 export type InstrumentId = string;

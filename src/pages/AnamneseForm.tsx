@@ -38,8 +38,7 @@ const AnamneseForm: React.FC = () => {
   const [shareToken, setShareToken] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  const [showDraftPrompt, setShowDraftPrompt] = useState(false);
-  const [draftChecked, setDraftChecked] = useState(false);
+  const draftCheckedRef = useRef(false);
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -59,48 +58,30 @@ const AnamneseForm: React.FC = () => {
     enabled: isNewMode,
   });
 
-  // Draft loading on mount (new-mode only)
+  // Auto-resume draft on mount (new-mode only)
   useEffect(() => {
-    if (!isNewMode || draftChecked) return;
+    if (!isNewMode || draftCheckedRef.current) return;
+    draftCheckedRef.current = true;
 
     const checkDraft = async () => {
       const isFresh = searchParams.get('fresh') === '1';
       if (isFresh) {
         await clearDraft();
-        setDraftChecked(true);
         return;
       }
 
       const draft = await loadDraft();
-      if (draft) {
-        setShowDraftPrompt(true);
-      }
-      setDraftChecked(true);
+      if (!draft) return;
+      setFormData(draft.payload as any);
+      const step = draft.currentStep ?? 0;
+      setCurrentStep(step);
+      const completed = new Set<number>();
+      for (let i = 0; i < step; i++) completed.add(i);
+      setCompletedSteps(completed);
     };
 
     checkDraft();
   }, [isNewMode]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handleContinueDraft = async () => {
-    const draft = await loadDraft();
-    if (draft) {
-      setFormData(draft.payload as any);
-      setCurrentStep(draft.currentStep);
-      const completed = new Set<number>();
-      for (let i = 0; i < draft.currentStep; i++) {
-        completed.add(i);
-      }
-      setCompletedSteps(completed);
-    }
-    setShowDraftPrompt(false);
-  };
-
-  const handleStartFresh = async () => {
-    await clearDraft();
-    setShowDraftPrompt(false);
-    setCurrentStep(0);
-    setCompletedSteps(new Set());
-  };
 
   // Fetch existing anamnese for view/edit
   useEffect(() => {
@@ -260,35 +241,6 @@ const AnamneseForm: React.FC = () => {
             <GumroadButton variant="secondary" size="md" onClick={() => navigate('/anamneses')}>
               Voltar
             </GumroadButton>
-          </Flex>
-        </GumroadCard>
-      </Box>
-    );
-  }
-
-  // Draft prompt (new-mode only, shown before form)
-  if (isNewMode && showDraftPrompt) {
-    return (
-      <Box width="100%">
-        <Flex justify="between" align={{ initial: 'start', sm: 'center' }} mb="6" gap="4" direction={{ initial: 'column', sm: 'row' }}>
-          <GumroadHeading level="display-sm" as="h1">Nova Anamnese</GumroadHeading>
-        </Flex>
-        <GumroadCard color="yellow" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
-          <Flex direction="column" gap="4">
-            <GumroadText level="body-md" as="p" style={{ fontWeight: 600 }}>
-              Você tem um rascunho em andamento.
-            </GumroadText>
-            <GumroadText level="body-sm" as="p">
-              Deseja continuar de onde parou ou começar uma nova anamnese do zero?
-            </GumroadText>
-            <Flex gap="3" wrap="wrap">
-              <GumroadButton variant="primary" size="md" onClick={handleContinueDraft}>
-                Continuar
-              </GumroadButton>
-              <GumroadButton variant="secondary" size="md" onClick={handleStartFresh}>
-                Começar novo
-              </GumroadButton>
-            </Flex>
           </Flex>
         </GumroadCard>
       </Box>

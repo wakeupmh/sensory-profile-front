@@ -108,7 +108,7 @@ const ChildPicker: React.FC<ChildPickerProps> = ({ selectedId, onSelect }) => {
   if (loading) {
     return (
       <Box style={{ padding: spacing.lg }}>
-        <GumroadText>Carregando...</GumroadText>
+        <GumroadText level="body-md">Carregando...</GumroadText>
       </Box>
     );
   }
@@ -129,7 +129,7 @@ const ChildPicker: React.FC<ChildPickerProps> = ({ selectedId, onSelect }) => {
             marginBottom: spacing.md,
           }}
         >
-          <GumroadText style={{ color: colors.ink, fontSize: '14px' }}>
+          <GumroadText level="body-sm" style={{ color: colors.ink }}>
             A criança selecionada anteriormente foi removida. Por favor, selecione outra.
           </GumroadText>
         </Box>
@@ -137,7 +137,7 @@ const ChildPicker: React.FC<ChildPickerProps> = ({ selectedId, onSelect }) => {
 
       {children.length === 0 && !showForm && (
         <Box style={{ marginBottom: spacing.md }}>
-          <GumroadText style={{ color: '#666' }}>
+          <GumroadText level="body-md" style={{ color: '#666' }}>
             Nenhuma criança cadastrada. Clique em &ldquo;Nova Criança&rdquo; para começar.
           </GumroadText>
         </Box>
@@ -305,7 +305,7 @@ const ChildPicker: React.FC<ChildPickerProps> = ({ selectedId, onSelect }) => {
 
           {saveError && (
             <Box mt="2">
-              <GumroadText style={{ color: colors.error, fontSize: '13px' }}>{saveError}</GumroadText>
+              <GumroadText level="body-sm" style={{ color: colors['brand-salmon'] }}>{saveError}</GumroadText>
             </Box>
           )}
 

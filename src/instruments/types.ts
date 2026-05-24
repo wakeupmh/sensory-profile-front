@@ -1,6 +1,22 @@
+import type { ComponentType } from 'react';
 import type { SensoryItem } from '../components/sensory-profile/types';
 
 export type Quadrant = 'EV' | 'SN' | 'EX' | 'OB';
+
+export interface ResponseOption {
+  value: string;
+  label: string;
+  numeric: number;
+}
+
+export interface ResponseScale {
+  id: string;
+  options: ResponseOption[];
+}
+
+export type ResponseValue = string;
+// Backward-compat alias
+export type FrequencyResponse = ResponseValue;
 
 export interface InstrumentItem {
   id: number;
@@ -24,6 +40,7 @@ export interface InstrumentSection {
   items: InstrumentItem[];
   /** Overrides the instrument's defaultBands for this section. */
   bands?: ClassificationBand[];
+  allowedValues?: string[];
 }
 
 export interface Instrument {
@@ -40,6 +57,22 @@ export interface Instrument {
    * When false, only the summary table is shown.
    */
   hasNormalCurve?: boolean;
+  /** Response scale definition for this instrument. */
+  scale?: ResponseScale;
+  /** When true, instrument uses Dunn's four-quadrant model. */
+  hasQuadrants?: boolean;
+  /** When true, instrument items may have linked follow-up items. */
+  allowsLinkedFollowup?: boolean;
+  /** ID of a parent instrument (for follow-up/linked instruments). */
+  parentInstrumentId?: string;
+  /** Dynamic sections derived from parent instrument scores. */
+  dynamicSections?: (parent: { scores_json: Record<string, unknown> }) => InstrumentSection[];
+  /**
+   * Optional per-instrument summary block rendered near the top of the report,
+   * before the per-section breakdown. Receives the computed scoreData array and
+   * the instrument definition.
+   */
+  summaryComponent?: ComponentType<{ scores: unknown; instrument: Instrument; assessmentId?: string }>;
 }
 
 /** Build the initial SensoryItem[] for a section from its instrument definition. */

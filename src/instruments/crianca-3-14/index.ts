@@ -27,6 +27,18 @@ export const crianca3a14: Instrument = {
   description:
     'Questionário de processamento sensorial para crianças de 3 a 14 anos, organizado em 9 áreas de processamento e respostas.',
   hasNormalCurve: true,
+  hasQuadrants: true,
+  scale: {
+    id: 'sp2-likert-5',
+    options: [
+      { value: 'quase sempre',    label: 'Quase Sempre',     numeric: 5 },
+      { value: 'frequentemente',  label: 'Frequentemente',   numeric: 4 },
+      { value: 'metade do tempo', label: 'Metade do Tempo',  numeric: 3 },
+      { value: 'ocasionalmente',  label: 'Ocasionalmente',   numeric: 2 },
+      { value: 'quase nunca',     label: 'Quase Nunca',      numeric: 1 },
+      { value: 'não se aplica',   label: 'Não Se Aplica',    numeric: 0 },
+    ],
+  },
   defaultBands: bands(0, 0, 0, 0),
   sections: [
     {

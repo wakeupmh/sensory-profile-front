@@ -24,6 +24,18 @@ export const criancaPequena: Instrument = {
   disclaimer:
     'Triagem interna inspirada no modelo de processamento sensorial dos quatro quadrantes (Dunn). Não substitui instrumentos normativos padronizados — o resultado deve ser interpretado como apoio à observação clínica.',
   hasNormalCurve: false,
+  hasQuadrants: true,
+  scale: {
+    id: 'sp2-likert-5',
+    options: [
+      { value: 'quase sempre',    label: 'Quase Sempre',     numeric: 5 },
+      { value: 'frequentemente',  label: 'Frequentemente',   numeric: 4 },
+      { value: 'metade do tempo', label: 'Metade do Tempo',  numeric: 3 },
+      { value: 'ocasionalmente',  label: 'Ocasionalmente',   numeric: 2 },
+      { value: 'quase nunca',     label: 'Quase Nunca',      numeric: 1 },
+      { value: 'não se aplica',   label: 'Não Se Aplica',    numeric: 0 },
+    ],
+  },
   defaultBands: proportionalBands,
   sections: [
     { key: 'toddlerAuditory',   title: 'Processamento Auditivo',             items: toddlerAuditoryItems },

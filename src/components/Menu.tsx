@@ -73,7 +73,7 @@ const Menu: React.FC = () => {
               Início
             </Link>
             <Link
-              to="/assessment/new?instrument=crianca-3-14"
+              to="/assessment/new"
               style={navLinkStyle(isActive('/assessment'))}
             >
               <FileTextIcon width={16} height={16} />
