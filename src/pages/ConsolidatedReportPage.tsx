@@ -56,11 +56,10 @@ const ConsolidatedReportPage = () => {
   useEffect(() => {
     fetchSummary(periodDays);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [childId]);
+  }, [childId, periodDays]);
 
   const handlePeriodChange = (period: number) => {
     setPeriodDays(period);
-    fetchSummary(period);
   };
 
   return (

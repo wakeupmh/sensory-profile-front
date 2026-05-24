@@ -49,28 +49,49 @@ export default function MedicalPage() {
   const [comorbidityPanelOpen, setComorbidityPanelOpen] = useState(false);
   const [appointmentPanelOpen, setAppointmentPanelOpen] = useState(false);
 
+  const fetchChildren = useCallback(async () => {
+    const token = await getTokenRef.current();
+    const childList = await childApi.list(token);
+    setChildren(childList);
+  }, []);
+
+  const fetchMedications = useCallback(async () => {
+    const token = await getTokenRef.current();
+    const childIdParam = selectedChildId || undefined;
+    const meds = await medicationApi.list(token, { childId: childIdParam });
+    setMedications(meds);
+  }, [selectedChildId]);
+
+  const fetchComorbidities = useCallback(async () => {
+    const token = await getTokenRef.current();
+    const childIdParam = selectedChildId || undefined;
+    const comorbList = await comorbidityApi.list(token, { childId: childIdParam });
+    setComorbidities(comorbList);
+  }, [selectedChildId]);
+
+  const fetchAppointments = useCallback(async () => {
+    const token = await getTokenRef.current();
+    const childIdParam = selectedChildId || undefined;
+    const appts = await appointmentApi.list(token, { childId: childIdParam });
+    setAppointments(appts.data ?? appts);
+  }, [selectedChildId]);
+
   const fetchAll = useCallback(async () => {
     try {
       setLoading(true);
-      const token = await getTokenRef.current();
-      const childIdParam = selectedChildId || undefined;
-      const [meds, comorbList, appts, childList] = await Promise.all([
-        medicationApi.list(token, { childId: childIdParam }),
-        comorbidityApi.list(token, { childId: childIdParam }),
-        appointmentApi.list(token, { childId: childIdParam }),
-        childApi.list(token),
+      await Promise.all([
+        fetchMedications(),
+        fetchComorbidities(),
+        fetchAppointments(),
+        fetchChildren(),
       ]);
-      setMedications(meds);
-      setComorbidities(comorbList);
-      setAppointments(appts.data ?? appts);
-      setChildren(childList);
       setError(null);
     } catch {
       setError('Erro ao carregar dados. Por favor, tente novamente.');
     } finally {
       setLoading(false);
     }
-  }, [selectedChildId]);
+  }, [fetchMedications, fetchComorbidities, fetchAppointments, fetchChildren]);
 
   useEffect(() => {
     if (isLoaded && session) {
@@ -84,57 +105,57 @@ export default function MedicalPage() {
   const handleAddMedication = async (payload: CreateMedicationPayload) => {
     const token = await getTokenRef.current();
     await medicationApi.create(token, payload);
-    await fetchAll();
+    await fetchMedications();
   };
 
   const handleEditMedication = async (id: string, payload: UpdateMedicationPayload) => {
     const token = await getTokenRef.current();
     await medicationApi.update(token, id, payload);
-    await fetchAll();
+    await fetchMedications();
   };
 
   const handleDeleteMedication = async (id: string) => {
     const token = await getTokenRef.current();
     await medicationApi.delete(token, id);
-    await fetchAll();
+    await fetchMedications();
   };
 
   // Comorbidity handlers
   const handleAddComorbidity = async (payload: CreateComorbidityPayload) => {
     const token = await getTokenRef.current();
     await comorbidityApi.create(token, payload);
-    await fetchAll();
+    await fetchComorbidities();
   };
 
   const handleEditComorbidity = async (id: string, payload: UpdateComorbidityPayload) => {
     const token = await getTokenRef.current();
     await comorbidityApi.update(token, id, payload);
-    await fetchAll();
+    await fetchComorbidities();
   };
 
   const handleDeleteComorbidity = async (id: string) => {
     const token = await getTokenRef.current();
     await comorbidityApi.delete(token, id);
-    await fetchAll();
+    await fetchComorbidities();
   };
 
   // Appointment handlers
   const handleAddAppointment = async (payload: CreateAppointmentPayload) => {
     const token = await getTokenRef.current();
     await appointmentApi.create(token, payload);
-    await fetchAll();
+    await fetchAppointments();
   };
 
   const handleEditAppointment = async (id: string, payload: UpdateAppointmentPayload) => {
     const token = await getTokenRef.current();
     await appointmentApi.update(token, id, payload);
-    await fetchAll();
+    await fetchAppointments();
   };
 
   const handleDeleteAppointment = async (id: string) => {
     const token = await getTokenRef.current();
     await appointmentApi.delete(token, id);
-    await fetchAll();
+    await fetchAppointments();
   };
 
   const activeMeds = medications.filter((m) => m.active);

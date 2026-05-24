@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Flex } from '@radix-ui/themes';
 import { colors, radii, shadows } from '../../theme/tokens';
@@ -13,32 +13,35 @@ interface DomainStatsCardProps {
 }
 
 const DomainStatsCard: React.FC<DomainStatsCardProps> = ({ label, count, icon, href, accentColor }) => {
+  const [hovered, setHovered] = useState(false);
+
+  const baseStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    backgroundColor: colors.surface,
+    border: `2px solid ${colors.ink}`,
+    borderLeft: `6px solid ${accentColor}`,
+    borderRadius: radii.md,
+    boxShadow: shadows.card,
+    padding: '16px',
+    cursor: 'pointer',
+    transition: 'transform 0.12s ease, box-shadow 0.12s ease',
+  };
+
+  const hoverStyle: React.CSSProperties = {
+    transform: 'translate(-2px, -2px)',
+    boxShadow: shadows['card-hover'],
+  };
+
   return (
     <Link
       to={href}
       style={{ textDecoration: 'none' }}
     >
       <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          backgroundColor: colors.surface,
-          border: `2px solid ${colors.ink}`,
-          borderLeft: `6px solid ${accentColor}`,
-          borderRadius: radii.md,
-          boxShadow: shadows.card,
-          padding: '16px',
-          cursor: 'pointer',
-          transition: 'transform 0.12s ease, box-shadow 0.12s ease',
-        }}
-        onMouseEnter={(e) => {
-          (e.currentTarget as HTMLDivElement).style.transform = 'translate(-2px, -2px)';
-          (e.currentTarget as HTMLDivElement).style.boxShadow = shadows['card-hover'];
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLDivElement).style.transform = '';
-          (e.currentTarget as HTMLDivElement).style.boxShadow = shadows.card;
-        }}
+        style={{ ...baseStyle, ...(hovered ? hoverStyle : {}) }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
       >
         <Flex align="center" gap="2" style={{ marginBottom: '8px' }}>
           <span style={{ fontSize: '20px' }}>{icon}</span>

@@ -153,6 +153,13 @@ a {
   background-color: var(--color-surface-cream) !important;
 }
 
+/* Spin animation (used by loading spinners) */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Print */
 @media print {
   .legend-color-dot {

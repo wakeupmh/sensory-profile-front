@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { consolidatedReportApi } from '../../services/api';
 import { useAuthContext } from '../../context/AuthContext';
 import { colors, fonts, radii, shadows } from '../../theme/tokens';
@@ -21,6 +21,11 @@ const AISummaryPanel: React.FC<Props> = ({ childId, isPublicView }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [periodDays, setPeriodDays] = useState(90);
+
+  useEffect(() => {
+    setSummary(null);
+    setError(null);
+  }, [periodDays]);
 
   if (isPublicView) return null;
 
@@ -116,7 +121,7 @@ const AISummaryPanel: React.FC<Props> = ({ childId, isPublicView }) => {
               border: `2px solid ${colors.ink}`,
               borderTopColor: 'transparent',
               borderRadius: '50%',
-              animation: 'spin 0.8s linear infinite',
+              animation: 'spin 1s linear infinite',
             }}
           />
         )}
@@ -158,8 +163,6 @@ const AISummaryPanel: React.FC<Props> = ({ childId, isPublicView }) => {
           </p>
         </div>
       )}
-
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 };

@@ -20,7 +20,6 @@ interface UnifiedTimelineProps {
 const UnifiedTimeline: React.FC<UnifiedTimelineProps> = ({ childId }) => {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,9 +39,11 @@ const UnifiedTimeline: React.FC<UnifiedTimelineProps> = ({ childId }) => {
       const token = await getTokenRef.current();
       const result = await childApi.getTimeline(childId, token, { page: pageNum, limit: PAGE_LIMIT });
       setTotal(result.total);
-      setPage(result.page);
       if (append) {
-        setEvents((prev) => [...prev, ...result.data]);
+        setEvents((prev) => {
+          const map = new Map(prev.concat(result.data).map((e) => [e.id, e]));
+          return Array.from(map.values());
+        });
       } else {
         setEvents(result.data);
       }
@@ -57,12 +58,13 @@ const UnifiedTimeline: React.FC<UnifiedTimelineProps> = ({ childId }) => {
   useEffect(() => {
     setEvents([]);
     setTotal(0);
-    setPage(1);
     fetchPage(1, false);
   }, [fetchPage]);
 
   const handleLoadMore = () => {
-    fetchPage(page + 1, true);
+    if (loadingMore) return;
+    const nextPage = Math.ceil(events.length / PAGE_LIMIT) + 1;
+    fetchPage(nextPage, true);
   };
 
   if (loading) {

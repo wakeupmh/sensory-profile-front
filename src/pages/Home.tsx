@@ -60,12 +60,16 @@ const Home = () => {
     try {
       setLoading(true);
       const token = await getTokenRef.current();
-      const [response, kids] = await Promise.all([
+      const [response, kids, ad, anmd] = await Promise.all([
         assessmentApi.getAllAssessments(token),
         childApi.list(token).catch(() => [] as ChildData[]),
+        draftApi.getDraft('sensory_assessment', token).catch(() => null),
+        draftApi.getDraft('anamnese', token).catch(() => null),
       ]);
       setAssessments(response.data ?? response);
       setChildren(kids);
+      setAssessmentDraft(ad);
+      setAnamneseDraft(anmd);
       setError(null);
     } catch (err) {
       setError('Erro ao carregar avaliações. Por favor, tente novamente.');
@@ -80,24 +84,6 @@ const Home = () => {
       fetchAssessments();
     }
   }, [fetchAssessments, isLoaded, session]);
-
-  useEffect(() => {
-    if (!isLoaded || !session) return;
-    const fetchDrafts = async () => {
-      try {
-        const token = await getTokenRef.current();
-        const [ad, anmd] = await Promise.all([
-          draftApi.getDraft('sensory_assessment', token),
-          draftApi.getDraft('anamnese', token),
-        ]);
-        setAssessmentDraft(ad);
-        setAnamneseDraft(anmd);
-      } catch (err) {
-        console.error('Erro ao carregar rascunhos:', err);
-      }
-    };
-    fetchDrafts();
-  }, [isLoaded, session]);
 
   const handleDiscardDraft = async (formType: 'sensory_assessment' | 'anamnese') => {
     try {

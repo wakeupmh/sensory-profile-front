@@ -52,10 +52,11 @@ export default function EducationPage() {
       const childIdParam = selectedChildId || undefined;
       const [plansData, commsData, childList] = await Promise.all([
         educationPlanApi.list(token, { childId: childIdParam }),
-        schoolCommApi.list(token, { childId: childIdParam, limit: 1, page: 1 }),
+        schoolCommApi.list(token, { childId: childIdParam, limit: 3, page: 1 }),
         childApi.list(token),
       ]);
       setPlans(plansData);
+      setComms(commsData.data);
       setCommsTotal(commsData.total);
       setChildren(childList);
       setError(null);
@@ -66,25 +67,11 @@ export default function EducationPage() {
     }
   }, [selectedChildId]);
 
-  // Also fetch a small preview list of comms for display
-  const fetchCommsPreview = useCallback(async () => {
-    try {
-      const token = await getTokenRef.current();
-      const childIdParam = selectedChildId || undefined;
-      const result = await schoolCommApi.list(token, { childId: childIdParam, limit: 3, page: 1 });
-      setComms(result.data);
-      setCommsTotal(result.total);
-    } catch {
-      // silently handle
-    }
-  }, [selectedChildId]);
-
   useEffect(() => {
     if (isLoaded && session) {
       fetchAll();
-      fetchCommsPreview();
     }
-  }, [fetchAll, fetchCommsPreview, isLoaded, session]);
+  }, [fetchAll, isLoaded, session]);
 
   const effectiveChildId = selectedChildId || (children.length > 0 ? children[0].id : '');
 
@@ -106,7 +93,6 @@ export default function EducationPage() {
 
   const handleMutate = () => {
     fetchAll();
-    fetchCommsPreview();
   };
 
   return (

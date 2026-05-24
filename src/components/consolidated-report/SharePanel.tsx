@@ -1,8 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { AlertDialog, Flex } from '@radix-ui/themes';
 import { consolidatedReportApi } from '../../services/api';
 import type { ReportShare } from '../../types/consolidatedReport';
 import { useAuthContext } from '../../context/AuthContext';
 import { colors, fonts, radii, shadows } from '../../theme/tokens';
+import GumroadButton from '../design-system/GumroadButton';
 
 interface Props {
   childId: string;
@@ -16,22 +18,27 @@ const SharePanel: React.FC<Props> = ({ childId, isPublicView }) => {
   const [expiresInDays, setExpiresInDays] = useState(30);
   const [copied, setCopied] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const fetchedRef = useRef(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (isPublicView) return;
-    if (fetchedRef.current) return;
+    let cancelled = false;
     const load = async () => {
       try {
         const token = await getToken();
         const res = await consolidatedReportApi.listShares(token, childId);
-        setShares(res.shares);
-        fetchedRef.current = true;
+        if (!cancelled) {
+          setShares(res.shares);
+          setLoadError(null);
+        }
       } catch {
-        setLoadError('Erro ao carregar links compartilhados.');
+        if (!cancelled) setLoadError('Erro ao carregar links compartilhados.');
       }
     };
     load();
+    return () => {
+      cancelled = true;
+    };
   }, [childId, getToken, isPublicView]);
 
   if (isPublicView) return null;
@@ -54,11 +61,14 @@ const SharePanel: React.FC<Props> = ({ childId, isPublicView }) => {
 
   const handleDelete = async (id: string) => {
     try {
+      setDeletingId(id);
       const token = await getToken();
       await consolidatedReportApi.deleteShare(token, id);
       setShares((prev) => prev.filter((s) => s.id !== id));
     } catch {
       alert('Erro ao excluir link.');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -204,21 +214,49 @@ const SharePanel: React.FC<Props> = ({ childId, isPublicView }) => {
                       {isCopied ? 'Copiado!' : 'Copiar'}
                     </button>
                   )}
-                  <button
-                    onClick={() => handleDelete(share.id)}
-                    style={{
-                      background: colors['brand-salmon'],
-                      border: `2px solid ${colors.ink}`,
-                      borderRadius: '8px',
-                      padding: '4px 10px',
-                      fontSize: '0.78rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      boxShadow: '1px 1px 0px #0A0A1A',
-                    }}
-                  >
-                    Excluir
-                  </button>
+                  <AlertDialog.Root>
+                    <AlertDialog.Trigger>
+                      <button
+                        disabled={deletingId === share.id}
+                        style={{
+                          background: colors['brand-salmon'],
+                          border: `2px solid ${colors.ink}`,
+                          borderRadius: '8px',
+                          padding: '4px 10px',
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          cursor: deletingId === share.id ? 'not-allowed' : 'pointer',
+                          boxShadow: '1px 1px 0px #0A0A1A',
+                          opacity: deletingId === share.id ? 0.7 : 1,
+                        }}
+                      >
+                        {deletingId === share.id ? 'Excluindo...' : 'Excluir'}
+                      </button>
+                    </AlertDialog.Trigger>
+                    <AlertDialog.Content size="2">
+                      <AlertDialog.Title>Excluir link de compartilhamento?</AlertDialog.Title>
+                      <AlertDialog.Description size="2">
+                        Esta ação não pode ser desfeita.
+                      </AlertDialog.Description>
+                      <Flex gap="3" mt="4" justify="end">
+                        <AlertDialog.Cancel>
+                          <GumroadButton variant="secondary" size="sm">
+                            Cancelar
+                          </GumroadButton>
+                        </AlertDialog.Cancel>
+                        <AlertDialog.Action>
+                          <GumroadButton
+                            variant="danger"
+                            size="sm"
+                            disabled={deletingId === share.id}
+                            onClick={() => handleDelete(share.id)}
+                          >
+                            Excluir
+                          </GumroadButton>
+                        </AlertDialog.Action>
+                      </Flex>
+                    </AlertDialog.Content>
+                  </AlertDialog.Root>
                 </div>
               </div>
             );

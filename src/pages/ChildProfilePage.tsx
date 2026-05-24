@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Box, Flex } from '@radix-ui/themes';
 import { ArrowLeftIcon, ExclamationTriangleIcon, Pencil1Icon } from '@radix-ui/react-icons';
-import { childApi, ChildData } from '../services/api';
+import { childApi } from '../services/api';
 import { useAuthContext } from '../context/AuthContext';
 import { colors, spacing } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
@@ -50,6 +50,7 @@ const ChildProfilePage = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [editFormValue, setEditFormValue] = useState<ChildFormValue>({ name: '', birthDate: '', gender: '', nationalIdentity: '', otherInfo: '' });
+  const [editBaseline, setEditBaseline] = useState<ChildFormValue | null>(null);
   const [editSaving, setEditSaving] = useState(false);
 
   const fetchProfile = useCallback(async (period: number) => {
@@ -77,12 +78,21 @@ const ChildProfilePage = () => {
 
   const handleStartEdit = () => {
     if (!profile) return;
-    setEditFormValue(childProfileToFormValue(profile));
+    const initial = childProfileToFormValue(profile);
+    setEditFormValue(initial);
+    setEditBaseline(initial);
     setIsEditing(true);
   };
 
   const handleCancelEdit = () => {
+    const isDirty =
+      editBaseline !== null &&
+      JSON.stringify(editFormValue) !== JSON.stringify(editBaseline);
+    if (isDirty && !window.confirm('Descartar alterações?')) {
+      return;
+    }
     setIsEditing(false);
+    setEditBaseline(null);
   };
 
   const handleSaveEdit = async () => {
@@ -97,6 +107,7 @@ const ChildProfilePage = () => {
       };
       await childApi.update(childId, payload as Parameters<typeof childApi.update>[1], token);
       setIsEditing(false);
+      setEditBaseline(null);
       await fetchProfile(periodDays);
     } catch {
       setError('Erro ao salvar criança. Por favor, tente novamente.');
@@ -236,11 +247,14 @@ const ChildProfilePage = () => {
                   gap: '12px',
                 }}
               >
+                {/* TODO: target pages (/dashboard, /logs, /therapy, /medical, /development, /education)
+                    currently use local `selectedChildId` state and do not read `childId` from the URL.
+                    Add useSearchParams handling on each page to honor this pre-filter. */}
                 <DomainStatsCard
                   label="Avaliações"
                   count={stats.assessmentCount}
                   icon="🧠"
-                  href="/dashboard"
+                  href={`/dashboard?childId=${childId}`}
                   accentColor="#C7B8FF"
                 />
                 <DomainStatsCard
@@ -254,28 +268,28 @@ const ChildProfilePage = () => {
                   label="Sessões"
                   count={stats.therapySessionCount}
                   icon="💉"
-                  href="/therapy"
+                  href={`/therapy?childId=${childId}`}
                   accentColor="#4ECDC4"
                 />
                 <DomainStatsCard
                   label="Medicamentos"
                   count={stats.activeMedicationCount}
                   icon="💊"
-                  href="/medical"
+                  href={`/medical?childId=${childId}`}
                   accentColor="#FF6B6B"
                 />
                 <DomainStatsCard
                   label="Marcos alcançados"
                   count={stats.achievedMilestoneCount}
                   icon="🌱"
-                  href="/development"
+                  href={`/development?childId=${childId}`}
                   accentColor="#B8F0C7"
                 />
                 <DomainStatsCard
                   label="Planos educacionais"
                   count={stats.educationPlanCount}
                   icon="🎒"
-                  href="/education"
+                  href={`/education?childId=${childId}`}
                   accentColor="#A3D4FF"
                 />
               </div>
