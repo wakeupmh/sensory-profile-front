@@ -1,9 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
-import { medicationApi, comorbidityApi, appointmentApi, childApi } from '../services/api';
-import type { ChildData } from '../services/api';
+import { medicationApi, comorbidityApi, appointmentApi } from '../services/api';
 import type {
   Medication,
   Comorbidity,
@@ -16,7 +14,10 @@ import type {
   UpdateAppointmentPayload,
 } from '../types/medical';
 import { useAuthContext } from '../context/AuthContext';
-import { colors, spacing, shadows, radii, fonts } from '../theme/tokens';
+import { useDomainPage } from '../hooks/useDomainPage';
+import { ChildSelector } from '../components/domain/ChildSelector';
+import { previewItemStyle, emptyStyle } from '../components/domain/previewStyles';
+import { colors, spacing } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadBadge from '../components/design-system/GumroadBadge';
@@ -35,48 +36,38 @@ function formatDate(iso: string): string {
 }
 
 export default function MedicalPage() {
-  const { getToken, isLoaded, session } = useAuthContext();
-  const getTokenRef = useRef(getToken);
-  getTokenRef.current = getToken;
+  const { isLoaded, session } = useAuthContext();
+  const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
 
   const [medications, setMedications] = useState<Medication[]>([]);
   const [comorbidities, setComorbidities] = useState<Comorbidity[]>([]);
   const [appointments, setAppointments] = useState<MedicalAppointmentSummary[]>([]);
-  const [children, setChildren] = useState<ChildData[]>([]);
-  const [searchParams] = useSearchParams();
-  const [selectedChildId, setSelectedChildId] = useState<string>(searchParams.get('childId') || '');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [medsPanelOpen, setMedsPanelOpen] = useState(false);
   const [comorbidityPanelOpen, setComorbidityPanelOpen] = useState(false);
   const [appointmentPanelOpen, setAppointmentPanelOpen] = useState(false);
 
-  const fetchChildren = useCallback(async () => {
-    const token = await getTokenRef.current();
-    const childList = await childApi.list(token);
-    setChildren(childList);
-  }, []);
-
   const fetchMedications = useCallback(async () => {
     const token = await getTokenRef.current();
     const childIdParam = selectedChildId || undefined;
     const meds = await medicationApi.list(token, { childId: childIdParam });
     setMedications(meds);
-  }, [selectedChildId]);
+  }, [selectedChildId, getTokenRef]);
 
   const fetchComorbidities = useCallback(async () => {
     const token = await getTokenRef.current();
     const childIdParam = selectedChildId || undefined;
     const comorbList = await comorbidityApi.list(token, { childId: childIdParam });
     setComorbidities(comorbList);
-  }, [selectedChildId]);
+  }, [selectedChildId, getTokenRef]);
 
   const fetchAppointments = useCallback(async () => {
     const token = await getTokenRef.current();
     const childIdParam = selectedChildId || undefined;
     const appts = await appointmentApi.list(token, { childId: childIdParam });
     setAppointments(appts.data ?? appts);
-  }, [selectedChildId]);
+  }, [selectedChildId, getTokenRef]);
 
   const fetchAll = useCallback(async () => {
     try {
@@ -85,7 +76,6 @@ export default function MedicalPage() {
         fetchMedications(),
         fetchComorbidities(),
         fetchAppointments(),
-        fetchChildren(),
       ]);
       setError(null);
     } catch {
@@ -93,15 +83,13 @@ export default function MedicalPage() {
     } finally {
       setLoading(false);
     }
-  }, [fetchMedications, fetchComorbidities, fetchAppointments, fetchChildren]);
+  }, [fetchMedications, fetchComorbidities, fetchAppointments]);
 
   useEffect(() => {
     if (isLoaded && session) {
       fetchAll();
     }
   }, [fetchAll, isLoaded, session]);
-
-  const effectiveChildId = selectedChildId || (children.length > 0 ? children[0].id : '');
 
   // Medication handlers
   const handleAddMedication = async (payload: CreateMedicationPayload) => {
@@ -162,22 +150,6 @@ export default function MedicalPage() {
 
   const activeMeds = medications.filter((m) => m.active);
 
-  const previewItemStyle: React.CSSProperties = {
-    fontSize: '14px',
-    color: colors.ink,
-    fontFamily: fonts.body,
-    padding: `${spacing.xs} 0`,
-    borderBottom: `1px solid rgba(10,10,26,0.1)`,
-  };
-
-  const emptyStyle: React.CSSProperties = {
-    fontSize: '14px',
-    color: colors.ink,
-    fontFamily: fonts.body,
-    opacity: 0.5,
-    fontStyle: 'italic',
-  };
-
   return (
     <Box>
       {/* Header */}
@@ -199,35 +171,11 @@ export default function MedicalPage() {
       </Flex>
 
       {/* Child filter */}
-      {children.length > 0 && (
-        <Box mb="4">
-          <select
-            value={selectedChildId}
-            onChange={(e) => setSelectedChildId(e.target.value)}
-            style={{
-              height: '44px',
-              padding: '0 12px',
-              backgroundColor: colors.surface,
-              border: `2px solid ${colors.ink}`,
-              borderRadius: radii.md,
-              fontFamily: fonts.display,
-              fontSize: '14px',
-              fontWeight: 500,
-              color: colors.ink,
-              cursor: 'pointer',
-              boxShadow: shadows['card-sm'],
-              minWidth: '200px',
-            }}
-          >
-            <option value="">Todas as crianças</option>
-            {children.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </Box>
-      )}
+      <ChildSelector
+        children={children}
+        selectedChildId={selectedChildId}
+        onChange={setSelectedChildId}
+      />
 
       {/* Loading state */}
       {loading ? (
@@ -324,7 +272,7 @@ export default function MedicalPage() {
             ) : (
               appointments.slice(0, 3).map((appt) => (
                 <div key={appt.id} style={previewItemStyle}>
-                  {appt.appointmentDate ? formatDate(appt.appointmentDate) : '—'}
+                  {appt.occurredAt ? formatDate(appt.occurredAt) : '—'}
                   {appt.doctorName ? ` — ${appt.doctorName}` : ''}
                 </div>
               ))

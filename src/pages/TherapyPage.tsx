@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
 import {
   ExclamationTriangleIcon,
@@ -7,8 +6,7 @@ import {
   PlusIcon,
   HeartIcon,
 } from '@radix-ui/react-icons';
-import { therapyApi, therapistApi, childApi } from '../services/api';
-import type { ChildData } from '../services/api';
+import { therapyApi, therapistApi } from '../services/api';
 import type {
   TherapySessionSummary,
   Therapist,
@@ -17,7 +15,10 @@ import type {
   CreateTherapistPayload,
 } from '../types/therapy';
 import { useAuthContext } from '../context/AuthContext';
-import { colors, spacing, shadows, radii, fonts } from '../theme/tokens';
+import { useDomainPage } from '../hooks/useDomainPage';
+import { ChildSelector } from '../components/domain/ChildSelector';
+import { FilterPill } from '../components/domain/FilterPill';
+import { colors, spacing, shadows } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadBadge from '../components/design-system/GumroadBadge';
@@ -66,30 +67,16 @@ function formatOccurredAt(iso: string): string {
 }
 
 export default function TherapyPage() {
-  const { getToken, isLoaded, session } = useAuthContext();
-  const getTokenRef = useRef(getToken);
-  getTokenRef.current = getToken;
+  const { isLoaded, session } = useAuthContext();
+  const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
 
   const [sessions, setSessions] = useState<TherapySessionSummary[]>([]);
   const [therapists, setTherapists] = useState<Therapist[]>([]);
-  const [children, setChildren] = useState<ChildData[]>([]);
-  const [searchParams] = useSearchParams();
-  const [selectedChildId, setSelectedChildId] = useState<string>(searchParams.get('childId') || '');
   const [filter, setFilter] = useState<FilterType>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [therapistsPanelOpen, setTherapistsPanelOpen] = useState(false);
-
-  const fetchChildren = useCallback(async () => {
-    try {
-      const token = await getTokenRef.current();
-      const list = await childApi.list(token);
-      setChildren(list);
-    } catch {
-      // non-fatal
-    }
-  }, []);
 
   const fetchTherapists = useCallback(async () => {
     try {
@@ -99,7 +86,7 @@ export default function TherapyPage() {
     } catch {
       // non-fatal
     }
-  }, []);
+  }, [getTokenRef]);
 
   const fetchSessions = useCallback(async () => {
     try {
@@ -117,22 +104,19 @@ export default function TherapyPage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedChildId, filter]);
+  }, [selectedChildId, filter, getTokenRef]);
 
   useEffect(() => {
     if (isLoaded && session) {
-      fetchChildren();
       fetchTherapists();
     }
-  }, [fetchChildren, fetchTherapists, isLoaded, session]);
+  }, [fetchTherapists, isLoaded, session]);
 
   useEffect(() => {
     if (isLoaded && session) {
       fetchSessions();
     }
   }, [fetchSessions, isLoaded, session]);
-
-  const effectiveChildId = selectedChildId || (children.length > 0 ? children[0].id : '');
 
   const handleCreateSession = async (payload: CreateSessionPayload) => {
     const token = await getTokenRef.current();
@@ -163,20 +147,6 @@ export default function TherapyPage() {
     return therapists.find((t) => t.id === therapistId)?.name ?? null;
   }
 
-  const pillStyle = (active: boolean): React.CSSProperties => ({
-    padding: '4px 14px',
-    borderRadius: '9999px',
-    border: `2px solid ${colors.ink}`,
-    background: active ? colors.ink : colors.canvas,
-    color: active ? colors.canvas : colors.ink,
-    fontWeight: 600,
-    fontSize: '0.8rem',
-    cursor: 'pointer',
-    boxShadow: active ? 'none' : '2px 2px 0px #0A0A1A',
-    fontFamily: fonts.display,
-    whiteSpace: 'nowrap' as const,
-  });
-
   return (
     <Box>
       <Flex
@@ -204,45 +174,20 @@ export default function TherapyPage() {
         </GumroadButton>
       </Flex>
 
-      {children.length > 0 && (
-        <Box mb="4">
-          <select
-            value={selectedChildId}
-            onChange={(e) => setSelectedChildId(e.target.value)}
-            style={{
-              height: '44px',
-              padding: '0 12px',
-              backgroundColor: colors.surface,
-              border: `2px solid ${colors.ink}`,
-              borderRadius: radii.md,
-              fontFamily: fonts.display,
-              fontSize: '14px',
-              fontWeight: 500,
-              color: colors.ink,
-              cursor: 'pointer',
-              boxShadow: shadows['card-sm'],
-              minWidth: '200px',
-            }}
-          >
-            <option value="">Todas as crianças</option>
-            {children.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </Box>
-      )}
+      <ChildSelector
+        children={children}
+        selectedChildId={selectedChildId}
+        onChange={setSelectedChildId}
+      />
 
       <Flex align="center" gap="2" mb="5" wrap="wrap">
         {FILTER_OPTIONS.map(({ value, label }) => (
-          <button
+          <FilterPill
             key={value}
+            active={filter === value}
+            label={label}
             onClick={() => setFilter(value)}
-            style={pillStyle(filter === value)}
-          >
-            {label}
-          </button>
+          />
         ))}
       </Flex>
 

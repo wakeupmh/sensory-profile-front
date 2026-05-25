@@ -1,12 +1,13 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
 import { ExclamationTriangleIcon, InfoCircledIcon, PlusIcon } from '@radix-ui/react-icons';
-import { logApi, childApi } from '../services/api';
-import type { ChildData } from '../services/api';
+import { logApi } from '../services/api';
 import type { CreateLogPayload, DailyLog, LogType } from '../types/logs';
 import { useAuthContext } from '../context/AuthContext';
-import { colors, spacing, shadows, radii, fonts } from '../theme/tokens';
+import { useDomainPage } from '../hooks/useDomainPage';
+import { ChildSelector } from '../components/domain/ChildSelector';
+import { FilterPill } from '../components/domain/FilterPill';
+import { colors, spacing, shadows } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadBadge from '../components/design-system/GumroadBadge';
@@ -54,28 +55,14 @@ function formatOccurredAt(iso: string): string {
 }
 
 export default function LogsPage() {
-  const { getToken, isLoaded, session } = useAuthContext();
-  const getTokenRef = useRef(getToken);
-  getTokenRef.current = getToken;
+  const { isLoaded, session } = useAuthContext();
+  const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
 
   const [logs, setLogs] = useState<DailyLog[]>([]);
-  const [children, setChildren] = useState<ChildData[]>([]);
-  const [searchParams] = useSearchParams();
-  const [selectedChildId, setSelectedChildId] = useState<string>(searchParams.get('childId') || '');
   const [filter, setFilter] = useState<FilterType>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
-
-  const fetchChildren = useCallback(async () => {
-    try {
-      const token = await getTokenRef.current();
-      const list = await childApi.list(token);
-      setChildren(list);
-    } catch {
-      // non-fatal
-    }
-  }, []);
 
   const fetchLogs = useCallback(async () => {
     try {
@@ -93,13 +80,7 @@ export default function LogsPage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedChildId, filter]);
-
-  useEffect(() => {
-    if (isLoaded && session) {
-      fetchChildren();
-    }
-  }, [fetchChildren, isLoaded, session]);
+  }, [selectedChildId, filter, getTokenRef]);
 
   useEffect(() => {
     if (isLoaded && session) {
@@ -112,22 +93,6 @@ export default function LogsPage() {
     await logApi.createLog(token, payload);
     await fetchLogs();
   };
-
-  const pillStyle = (active: boolean): React.CSSProperties => ({
-    padding: '4px 14px',
-    borderRadius: '9999px',
-    border: `2px solid ${colors.ink}`,
-    background: active ? colors.ink : colors.canvas,
-    color: active ? colors.canvas : colors.ink,
-    fontWeight: 600,
-    fontSize: '0.8rem',
-    cursor: 'pointer',
-    boxShadow: active ? 'none' : '2px 2px 0px #0A0A1A',
-    fontFamily: fonts.display,
-    whiteSpace: 'nowrap' as const,
-  });
-
-  const effectiveChildId = selectedChildId || (children.length > 0 ? children[0].id : '');
 
   return (
     <Box>
@@ -148,45 +113,20 @@ export default function LogsPage() {
         </Box>
       </Flex>
 
-      {children.length > 0 && (
-        <Box mb="4">
-          <select
-            value={selectedChildId}
-            onChange={(e) => setSelectedChildId(e.target.value)}
-            style={{
-              height: '44px',
-              padding: '0 12px',
-              backgroundColor: colors.surface,
-              border: `2px solid ${colors.ink}`,
-              borderRadius: radii.md,
-              fontFamily: fonts.display,
-              fontSize: '14px',
-              fontWeight: 500,
-              color: colors.ink,
-              cursor: 'pointer',
-              boxShadow: shadows['card-sm'],
-              minWidth: '200px',
-            }}
-          >
-            <option value="">Todas as crianças</option>
-            {children.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </Box>
-      )}
+      <ChildSelector
+        children={children}
+        selectedChildId={selectedChildId}
+        onChange={setSelectedChildId}
+      />
 
       <Flex align="center" gap="2" mb="5" wrap="wrap">
         {FILTER_OPTIONS.map(({ value, label }) => (
-          <button
+          <FilterPill
             key={value}
+            active={filter === value}
+            label={label}
             onClick={() => setFilter(value)}
-            style={pillStyle(filter === value)}
-          >
-            {label}
-          </button>
+          />
         ))}
       </Flex>
 

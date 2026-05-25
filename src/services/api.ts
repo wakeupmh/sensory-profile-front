@@ -32,48 +32,31 @@ function getAuthHeaders(token: string | null): { Authorization: string } {
   return { Authorization: `Bearer ${token}` };
 }
 
+async function authRequest<T>(
+  method: 'get' | 'post' | 'put' | 'patch' | 'delete',
+  token: string | null,
+  url: string,
+  data?: unknown,
+  config?: { headers?: Record<string, string>; [key: string]: unknown }
+): Promise<T> {
+  const authHeaders = getAuthHeaders(token);
+  const mergedConfig = { ...config, headers: { ...(config?.headers ?? {}), ...authHeaders } };
+  switch (method) {
+    case 'get': return api.get(url, mergedConfig).then(r => r.data);
+    case 'post': return api.post(url, data, mergedConfig).then(r => r.data);
+    case 'put': return api.put(url, data, mergedConfig).then(r => r.data);
+    case 'patch': return api.patch(url, data, mergedConfig).then(r => r.data);
+    case 'delete': return api.delete(url, mergedConfig).then(r => r.data);
+  }
+}
+
 export const assessmentApi = {
-  getAllAssessments: async (token: string | null) => {
-        const response = await api.get('/api/assessments', {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
-  },
-
-  getAssessmentById: async (id: string, token: string | null) => {
-        const response = await api.get(`/api/assessments/${id}`, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
-  },
-
-  createAssessment: async (assessmentData: any, token: string | null) => {
-        const response = await api.post('/api/assessments', assessmentData, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
-  },
-
-  updateAssessment: async (id: string, assessmentData: any, token: string | null) => {
-        const response = await api.put(`/api/assessments/${id}`, assessmentData, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
-  },
-
-  deleteAssessment: async (id: string, token: string | null) => {
-        const response = await api.delete(`/api/assessments/${id}`, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
-  },
-
-  generateReport: async (id: string, token: string | null) => {
-        const response = await api.get(`/api/assessments/${id}/report`, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
-  },
+  getAllAssessments: (token: string | null) => authRequest<any>('get', token, '/api/assessments'),
+  getAssessmentById: (id: string, token: string | null) => authRequest<any>('get', token, `/api/assessments/${id}`),
+  createAssessment: (assessmentData: any, token: string | null) => authRequest<any>('post', token, '/api/assessments', assessmentData),
+  updateAssessment: (id: string, assessmentData: any, token: string | null) => authRequest<any>('put', token, `/api/assessments/${id}`, assessmentData),
+  deleteAssessment: (id: string, token: string | null) => authRequest<any>('delete', token, `/api/assessments/${id}`),
+  generateReport: (id: string, token: string | null) => authRequest<any>('get', token, `/api/assessments/${id}/report`),
 };
 
 export const anamneseApi = {

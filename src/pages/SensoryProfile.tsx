@@ -149,7 +149,7 @@ const SensoryProfileForm: React.FC = () => {
       try {
         const token = await getToken();
         const response = await assessmentApi.getAssessmentById(parentId, token);
-        const assessment = response.assessment ?? response;
+        const assessment = response.data?.assessment ?? response;
         setParentData({ scores_json: assessment.scores_json ?? {} });
       } catch (err) {
         console.error('Error fetching parent assessment:', err);
@@ -224,9 +224,10 @@ const SensoryProfileForm: React.FC = () => {
         setNotFound(false);
         const token = await getToken();
         const response = await assessmentApi.getAssessmentById(id, token);
+        const responseData = response.data || response;
 
-        if (response.assessment && response.responses) {
-          const { assessment, responses } = response;
+        if (responseData.assessment && responseData.responses) {
+          const { assessment, responses } = responseData;
           const loadedInstrumentId: string = assessment.instrumentId || DEFAULT_INSTRUMENT_ID;
           const loadedInstrument = getInstrument(loadedInstrumentId);
 
@@ -292,7 +293,7 @@ const SensoryProfileForm: React.FC = () => {
             createdAt: assessment.createdAt,
           });
         } else {
-          setFormData((prev) => ({ ...prev, ...response, instrumentId: response.instrumentId || DEFAULT_INSTRUMENT_ID }));
+          setFormData((prev) => ({ ...prev, ...responseData, instrumentId: responseData.instrumentId || DEFAULT_INSTRUMENT_ID }));
         }
 
         setError(null);

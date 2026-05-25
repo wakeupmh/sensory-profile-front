@@ -1,9 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
-import { milestoneApi, communicationLogApi, childApi } from '../services/api';
-import type { ChildData } from '../services/api';
+import { milestoneApi, communicationLogApi } from '../services/api';
 import type {
   DevelopmentalMilestone,
   CommunicationLogSummary,
@@ -13,7 +11,10 @@ import {
   COMMUNICATION_ENTRY_TYPE_LABELS,
 } from '../types/development';
 import { useAuthContext } from '../context/AuthContext';
-import { colors, spacing, shadows, radii, fonts } from '../theme/tokens';
+import { useDomainPage } from '../hooks/useDomainPage';
+import { ChildSelector } from '../components/domain/ChildSelector';
+import { previewItemStyle, emptyStyle } from '../components/domain/previewStyles';
+import { colors, spacing } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadBadge from '../components/design-system/GumroadBadge';
@@ -33,15 +34,11 @@ function formatDateTime(iso: string): string {
 }
 
 export default function DevelopmentPage() {
-  const { getToken, isLoaded, session } = useAuthContext();
-  const getTokenRef = useRef(getToken);
-  getTokenRef.current = getToken;
+  const { isLoaded, session } = useAuthContext();
+  const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
 
   const [milestones, setMilestones] = useState<DevelopmentalMilestone[]>([]);
   const [commLogs, setCommLogs] = useState<CommunicationLogSummary[]>([]);
-  const [children, setChildren] = useState<ChildData[]>([]);
-  const [searchParams] = useSearchParams();
-  const [selectedChildId, setSelectedChildId] = useState(searchParams.get('childId') || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [milestonesPanelOpen, setMilestonesPanelOpen] = useState(false);
@@ -52,45 +49,25 @@ export default function DevelopmentPage() {
       setLoading(true);
       const token = await getTokenRef.current();
       const childIdParam = selectedChildId || undefined;
-      const [milestonesData, logsData, childList] = await Promise.all([
+      const [milestonesData, logsData] = await Promise.all([
         milestoneApi.list(token, { childId: childIdParam }),
         communicationLogApi.list(token, { childId: childIdParam, limit: 20, page: 1 }),
-        childApi.list(token),
       ]);
       setMilestones(milestonesData);
       setCommLogs(logsData.data ?? logsData);
-      setChildren(childList);
       setError(null);
     } catch {
       setError('Erro ao carregar dados. Por favor, tente novamente.');
     } finally {
       setLoading(false);
     }
-  }, [selectedChildId]);
+  }, [selectedChildId, getTokenRef]);
 
   useEffect(() => {
     if (isLoaded && session) {
       fetchAll();
     }
   }, [fetchAll, isLoaded, session]);
-
-  const effectiveChildId = selectedChildId || (children.length > 0 ? children[0].id : '');
-
-  const previewItemStyle: React.CSSProperties = {
-    fontSize: '14px',
-    color: colors.ink,
-    fontFamily: fonts.body,
-    padding: `${spacing.xs} 0`,
-    borderBottom: `1px solid rgba(10,10,26,0.1)`,
-  };
-
-  const emptyStyle: React.CSSProperties = {
-    fontSize: '14px',
-    color: colors.ink,
-    fontFamily: fonts.body,
-    opacity: 0.5,
-    fontStyle: 'italic',
-  };
 
   return (
     <Box>
@@ -113,35 +90,11 @@ export default function DevelopmentPage() {
       </Flex>
 
       {/* Child filter */}
-      {children.length > 0 && (
-        <Box mb="4">
-          <select
-            value={selectedChildId}
-            onChange={(e) => setSelectedChildId(e.target.value)}
-            style={{
-              height: '44px',
-              padding: '0 12px',
-              backgroundColor: colors.surface,
-              border: `2px solid ${colors.ink}`,
-              borderRadius: radii.md,
-              fontFamily: fonts.display,
-              fontSize: '14px',
-              fontWeight: 500,
-              color: colors.ink,
-              cursor: 'pointer',
-              boxShadow: shadows['card-sm'],
-              minWidth: '200px',
-            }}
-          >
-            <option value="">Todas as crianças</option>
-            {children.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </Box>
-      )}
+      <ChildSelector
+        children={children}
+        selectedChildId={selectedChildId}
+        onChange={setSelectedChildId}
+      />
 
       {/* Loading state */}
       {loading ? (
