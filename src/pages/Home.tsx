@@ -66,7 +66,7 @@ const Home = () => {
         draftApi.getDraft('sensory_assessment', token).catch(() => null),
         draftApi.getDraft('anamnese', token).catch(() => null),
       ]);
-      setAssessments(response.data ?? response);
+      setAssessments(response.data);
       setChildren(kids);
       setAssessmentDraft(ad);
       setAnamneseDraft(anmd);
@@ -93,6 +93,7 @@ const Home = () => {
       else setAnamneseDraft(null);
     } catch (err) {
       console.error('Erro ao descartar rascunho:', err);
+      setError('Não foi possível descartar o rascunho. Tente novamente.');
     }
   };
 

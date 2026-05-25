@@ -176,6 +176,18 @@ a {
   box-shadow: 8px 8px 0px #0A0A1A !important;
 }
 
+/* FastRadioCards — responsive grid */
+@media (max-width: 767px) {
+  .radio-grid-responsive {
+    grid-template-columns: 1fr !important;
+  }
+}
+@media (min-width: 768px) {
+  .radio-grid-responsive {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
 /* Print */
 @media print {
   .legend-color-dot {

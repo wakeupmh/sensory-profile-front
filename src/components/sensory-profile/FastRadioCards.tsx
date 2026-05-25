@@ -82,21 +82,8 @@ const FastRadioCards = memo(({
   };
 
   return (
-    <>
-      <style>{`
-        @media (max-width: 767px) {
-          .radio-grid-${name.replace(/[^a-z0-9]/gi, '')} {
-            grid-template-columns: 1fr !important;
-          }
-        }
-        @media (min-width: 768px) {
-          .radio-grid-${name.replace(/[^a-z0-9]/gi, '')} {
-            grid-template-columns: repeat(3, 1fr) !important;
-          }
-        }
-      `}</style>
       <div
-        className={`radio-grid-${name.replace(/[^a-z0-9]/gi, '')}`}
+        className="radio-grid-responsive"
         role="radiogroup"
         aria-label={name}
         style={{ display: 'grid', gap: '8px', width: '100%' }}
@@ -147,7 +134,6 @@ const FastRadioCards = memo(({
           );
         })}
       </div>
-    </>
   );
 });
 

@@ -135,23 +135,19 @@ export const anamneseApi = {
 
 export const draftApi = {
   getDraft: async (formType: string, token: string | null) => {
-        const response = await api.get(`/api/drafts/${formType}`, {
+    const response = await api.get(`/api/drafts/${formType}`, {
       headers: getAuthHeaders(token),
     });
     return response.data.data as DraftData | null;
-  } catch {
-    return null;
-  }
   },
 
   saveDraft: async (
-  formType: string,
-  payload: Record<string, unknown>,
-  currentStep: number,
-  instrumentId: string | null | undefined,
-  token: string | null
+    formType: string,
+    payload: Record<string, unknown>,
+    currentStep: number,
+    instrumentId: string | null | undefined,
+    token: string | null
   ) => {
-  try {
     const response = await api.put(
       `/api/drafts/${formType}`,
       { payload, currentStep, instrumentId },
@@ -194,7 +190,6 @@ type ChildUpdatePayload = Partial<ChildPayload>;
 
 export const childApi = {
   list: async (token: string | null): Promise<ChildData[]> => {
-  try {
     const response = await api.get('/api/children', {
       headers: getAuthHeaders(token),
     });

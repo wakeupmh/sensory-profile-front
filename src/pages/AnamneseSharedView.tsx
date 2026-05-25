@@ -27,12 +27,15 @@ const AnamneseSharedView: React.FC = () => {
   const fetchedRef = useRef(false);
 
   useEffect(() => {
+    fetchedRef.current = false;
+    setInvalid(false);
+    setLoading(true);
+
     if (!token) {
       setInvalid(true);
       setLoading(false);
       return;
     }
-    if (fetchedRef.current) return;
 
     const run = async () => {
       try {
