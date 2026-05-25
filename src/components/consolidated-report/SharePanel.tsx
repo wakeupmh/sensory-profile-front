@@ -8,10 +8,11 @@ import GumroadButton from '../design-system/GumroadButton';
 
 interface Props {
   childId: string;
+  periodDays?: number;
   isPublicView?: boolean;
 }
 
-const SharePanel: React.FC<Props> = ({ childId, isPublicView }) => {
+const SharePanel: React.FC<Props> = ({ childId, periodDays = 90, isPublicView }) => {
   const { getToken } = useAuthContext();
   const [shares, setShares] = useState<ReportShare[]>([]);
   const [creating, setCreating] = useState(false);
@@ -49,7 +50,7 @@ const SharePanel: React.FC<Props> = ({ childId, isPublicView }) => {
       setCreating(true);
       setActionError(null);
       const token = await getToken();
-      const res = await consolidatedReportApi.createShare(token, { childId, expiresInDays });
+      const res = await consolidatedReportApi.createShare(token, { childId, expiresInDays, periodDays });
       setShares((prev) => [res.share, ...prev]);
       await navigator.clipboard.writeText(res.shareUrl);
       setCopied(res.shareUrl);

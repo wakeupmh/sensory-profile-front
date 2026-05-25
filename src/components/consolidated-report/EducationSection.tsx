@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ConsolidatedEducation } from '../../types/consolidatedReport';
-import { colors } from '../../theme/tokens';
+import { colors, itemCardStyle } from '../../theme/tokens';
 
 interface Props {
   data: ConsolidatedEducation;
@@ -57,10 +57,7 @@ const EducationSection: React.FC<Props> = ({ data }) => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  padding: '6px 12px',
-                  background: colors.canvas,
-                  border: `2px solid ${colors.ink}`,
-                  borderRadius: '10px',
+                  ...itemCardStyle,
                   flexWrap: 'wrap',
                 }}
               >
@@ -99,10 +96,7 @@ const EducationSection: React.FC<Props> = ({ data }) => {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: '6px 12px',
-                  background: colors.canvas,
-                  border: `2px solid ${colors.ink}`,
-                  borderRadius: '10px',
+                  ...itemCardStyle,
                   gap: '8px',
                   flexWrap: 'wrap',
                 }}

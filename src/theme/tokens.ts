@@ -86,6 +86,14 @@ export const borders = {
   thick: '3px solid #0A0A1A',
 } as const;
 
+// ─── Shared Styles ───────────────────────────────────────
+export const itemCardStyle: React.CSSProperties = {
+  background: '#FFFEF5',
+  border: '2px solid #0A0A1A',
+  borderRadius: '10px',
+  padding: '6px 12px',
+};
+
 // ─── Z-Index ──────────────────────────────────────────────
 export const zIndex = {
   menu: 1000,

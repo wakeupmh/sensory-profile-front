@@ -160,7 +160,7 @@ const ConsolidatedReportPage = () => {
 
           {childId && (
             <>
-              <SharePanel childId={childId} />
+              <SharePanel childId={childId} periodDays={periodDays} />
               <AISummaryPanel childId={childId} />
             </>
           )}

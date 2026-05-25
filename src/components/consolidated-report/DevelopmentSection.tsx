@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ConsolidatedDevelopment } from '../../types/consolidatedReport';
-import { colors } from '../../theme/tokens';
+import { colors, itemCardStyle } from '../../theme/tokens';
 
 interface Props {
   data: ConsolidatedDevelopment;
@@ -57,10 +57,7 @@ const DevelopmentSection: React.FC<Props> = ({ data }) => {
               <div
                 key={log.id}
                 style={{
-                  padding: '6px 12px',
-                  background: colors.canvas,
-                  border: `2px solid ${colors.ink}`,
-                  borderRadius: '10px',
+                  ...itemCardStyle,
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>

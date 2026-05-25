@@ -134,6 +134,7 @@ export interface ReportShare {
   userId: string;
   childId: string;
   token: string;
+  periodDays: number;
   expiresAt: string;
   createdAt: string;
 }
@@ -141,6 +142,7 @@ export interface ReportShare {
 export interface CreateSharePayload {
   childId: string;
   expiresInDays?: number;
+  periodDays?: number;
 }
 
 export interface CreateShareResponse {

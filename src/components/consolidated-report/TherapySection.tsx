@@ -1,7 +1,7 @@
 import React from 'react';
 import type { ConsolidatedTherapy } from '../../types/consolidatedReport';
 import { THERAPY_TYPE_LABELS } from '../../types/consolidatedReport';
-import { colors, fonts } from '../../theme/tokens';
+import { colors, fonts, itemCardStyle } from '../../theme/tokens';
 
 interface Props {
   data: ConsolidatedTherapy;
@@ -103,10 +103,7 @@ const TherapySection: React.FC<Props> = ({ data }) => {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: '6px 12px',
-                  background: colors.canvas,
-                  border: `2px solid ${colors.ink}`,
-                  borderRadius: '10px',
+                  ...itemCardStyle,
                   gap: '8px',
                   flexWrap: 'wrap',
                 }}
