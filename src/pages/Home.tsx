@@ -101,7 +101,7 @@ const Home = () => {
       setDeleteLoading(id);
       const token = await getToken();
       await assessmentApi.deleteAssessment(id, token);
-      setAssessments(assessments.filter((a) => a.id !== id));
+      setAssessments((prev) => prev.filter((a) => a.id !== id));
     } catch (err) {
       setError('Erro ao excluir avaliação. Por favor, tente novamente.');
       console.error(err);

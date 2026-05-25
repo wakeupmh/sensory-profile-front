@@ -212,6 +212,8 @@ const SensoryProfileForm: React.FC = () => {
   };
 
   useEffect(() => {
+    fetchedAssessmentRef.current = false;
+    fetchedReportRef.current = false;
     if (!id || isNewMode) return;
 
     const fetchAssessment = async () => {

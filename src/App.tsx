@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { ReactNode } from "react";
+import LoadingSpinner from './components/LoadingSpinner';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import LandingPage from './pages/LandingPage';
@@ -25,7 +26,7 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   const { session, isLoaded } = useAuthContext();
   const location = useLocation();
 
-  if (!isLoaded) return null;
+  if (!isLoaded) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}><LoadingSpinner /></div>;
   if (!session) return <Navigate to="/sign-in" state={{ from: location }} replace />;
   return <>{children}</>;
 }

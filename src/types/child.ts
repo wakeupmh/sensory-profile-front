@@ -11,6 +11,8 @@ export interface ChildProfile {
     id: string;
     name: string;
     dateOfBirth: string | null;
+    gender: string | null;
+    nationalIdentity: string | null;
     notes: string | null;
     createdAt: string;
   };

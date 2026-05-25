@@ -68,7 +68,7 @@ export function useDraftPersistence({
     (newStep: number) => {
       if (!enabled) return;
       if (debounceRef.current) clearTimeout(debounceRef.current);
-      saveNow(formData, newStep, instrumentId);
+      return saveNow(formData, newStep, instrumentId);
     },
     [enabled, formData, instrumentId, saveNow]
   );

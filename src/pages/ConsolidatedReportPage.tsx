@@ -67,7 +67,7 @@ const ConsolidatedReportPage = () => {
     <Box style={{ maxWidth: '720px', margin: '0 auto' }}>
       {/* Back button */}
       <div style={{ marginBottom: spacing.md }}>
-        <GumroadButton variant="secondary" size="sm" onClick={() => navigate(-1)}>
+        <GumroadButton variant="secondary" size="sm" onClick={() => navigate(childId ? `/children/${childId}` : '/dashboard')}>
           <ArrowLeftIcon /> Voltar
         </GumroadButton>
       </div>

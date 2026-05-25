@@ -38,8 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const getToken = async (): Promise<string | null> => {
-    const { data } = await supabase.auth.getSession();
-    return data.session?.access_token ?? null;
+    return session?.access_token ?? null;
   };
 
   const signOut = () => supabase.auth.signOut().then(() => undefined);

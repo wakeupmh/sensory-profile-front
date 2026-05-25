@@ -30,8 +30,8 @@ function childProfileToFormValue(profile: ChildProfile): ChildFormValue {
   return {
     name: profile.child.name,
     birthDate: profile.child.dateOfBirth ?? '',
-    gender: '',
-    nationalIdentity: '',
+    gender: profile.child.gender ?? '',
+    nationalIdentity: profile.child.nationalIdentity ?? '',
     otherInfo: profile.child.notes ?? '',
   };
 }
