@@ -15,10 +15,13 @@ export function useDomainPage() {
   const fetchChildren = useCallback(async () => {
     try {
       const token = await getTokenRef.current();
+      if (!token) return;
       const list = await childApi.list(token);
       setChildren(list);
-    } catch {
-      // non-fatal
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        window.location.href = '/sign-in';
+      }
     }
   }, []);
 
@@ -28,7 +31,7 @@ export function useDomainPage() {
     }
   }, [fetchChildren, isLoaded, session]);
 
-  const effectiveChildId = selectedChildId;
+  const effectiveChildId = selectedChildId || (children.length > 0 ? children[0].id : '');
 
   return { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef };
 }

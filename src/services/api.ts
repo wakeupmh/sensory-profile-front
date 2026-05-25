@@ -27,7 +27,7 @@ api.interceptors.response.use(
 
 function getAuthHeaders(token: string | null): { Authorization: string } {
   if (!token) {
-    throw new Error('Authentication token is missing. Please sign in.');
+    throw new Error('Sessão expirada. Por favor, faça login novamente.');
   }
   return { Authorization: `Bearer ${token}` };
 }
@@ -135,25 +135,17 @@ type ChildPayload = Omit<ChildData, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
 type ChildUpdatePayload = Partial<ChildPayload>;
 
 export const childApi = {
-  list: async (token: string | null): Promise<ChildData[]> => {
-    const response = await authRequest<any>('get', token, '/api/children');
-    return response.data;
-  },
+  list: (token: string | null): Promise<ChildData[]> =>
+    authRequest<{ data: ChildData[] }>('get', token, '/api/children').then((r) => r.data),
 
-  get: async (id: string, token: string | null): Promise<ChildData> => {
-    const response = await authRequest<any>('get', token, `/api/children/${id}`);
-    return response.data;
-  },
+  get: (id: string, token: string | null): Promise<ChildData> =>
+    authRequest<{ data: ChildData }>('get', token, `/api/children/${id}`).then((r) => r.data),
 
-  create: async (payload: ChildPayload, token: string | null): Promise<ChildData> => {
-    const response = await authRequest<any>('post', token, '/api/children', payload);
-    return response.data;
-  },
+  create: (payload: ChildPayload, token: string | null): Promise<ChildData> =>
+    authRequest<{ data: ChildData }>('post', token, '/api/children', payload).then((r) => r.data),
 
-  update: async (id: string, payload: ChildUpdatePayload, token: string | null): Promise<ChildData> => {
-    const response = await authRequest<any>('put', token, `/api/children/${id}`, payload);
-    return response.data;
-  },
+  update: (id: string, payload: ChildUpdatePayload, token: string | null): Promise<ChildData> =>
+    authRequest<{ data: ChildData }>('put', token, `/api/children/${id}`, payload).then((r) => r.data),
 
   delete: (id: string, token: string | null): Promise<void> =>
     authRequest<any>('delete', token, `/api/children/${id}`),
