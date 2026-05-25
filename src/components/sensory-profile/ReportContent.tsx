@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { FormData, SensoryItem } from "./types";
 import NormalCurveChart from "./NormalCurveChart";
 import { getInstrument } from "../../instruments";
@@ -16,7 +16,7 @@ const quadrants = {
   observation: { title: "Observação/Criança observadora", color: "#d62828" },
 };
 
-const responseValueMap: Record<string, number> = {
+const SP2_FALLBACK_VALUE_MAP: Record<string, number> = {
   "não se aplica": 0,
   "quase nunca": 1,
   "ocasionalmente": 2,
@@ -25,54 +25,83 @@ const responseValueMap: Record<string, number> = {
   "quase sempre": 5,
 };
 
+const SP2_FALLBACK_SCALE_OPTIONS = [
+  { value: "não se aplica", label: "Não se aplica" },
+  { value: "quase nunca", label: "Quase Nunca" },
+  { value: "ocasionalmente", label: "Ocasionalmente" },
+  { value: "metade do tempo", label: "Metade do Tempo" },
+  { value: "frequentemente", label: "Frequentemente" },
+  { value: "quase sempre", label: "Quase Sempre" },
+];
+
 const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId }) => {
   const instrument = getInstrument(formData.instrumentId);
 
-  const calculateSectionScore = (items: SensoryItem[]): number => {
-    if (!items || items.length === 0) return 0;
-    return items.reduce((total, item) => {
-      const score = item.response ? responseValueMap[item.response] || 0 : 0;
-      return total + score;
-    }, 0);
-  };
-
-  const classifyScore = (score: number, section: InstrumentSection): { label: string; color: string } => {
-    const bands: ClassificationBand[] = section.bands ?? instrument.defaultBands;
-    if (!bands || bands.length === 0) return { label: "Sem dados suficientes", color: "#888" };
-
-    const maxPerItem = instrument.scale
-      ? Math.max(...instrument.scale.options.map((o) => o.numeric))
-      : 5; // SP-2 fallback
-    const maxPossible = section.items.length * maxPerItem;
-    for (const band of bands) {
-      if (band.maxScoreAbs !== undefined && score <= band.maxScoreAbs) return { label: band.label, color: band.color };
-      if (band.maxScorePct !== undefined) {
-        const pct = maxPossible > 0 ? score / maxPossible : 0;
-        if (pct <= band.maxScorePct) return { label: band.label, color: band.color };
-      }
+  const responseValueMap = useMemo(() => {
+    if (!instrument?.scale?.options) {
+      return SP2_FALLBACK_VALUE_MAP;
     }
-    const last = bands[bands.length - 1];
-    return { label: last.label, color: last.color };
-  };
+    const map: Record<string, number> = {};
+    for (const opt of instrument.scale.options) {
+      map[opt.value] = opt.numeric;
+    }
+    return map;
+  }, [instrument]);
 
-  const scoreData = instrument.sections.map((section) => {
-    const sectionData = formData.sections?.[section.key] || { items: [] };
-    const items = sectionData.items || [];
+  const scaleOptions = useMemo(() => {
+    if (!instrument?.scale?.options) {
+      return SP2_FALLBACK_SCALE_OPTIONS;
+    }
+    return instrument.scale.options.map(o => ({ value: o.value, label: o.label }));
+  }, [instrument]);
 
-    const score = sectionData.rawScore !== undefined && sectionData.rawScore !== null
-      ? sectionData.rawScore
-      : calculateSectionScore(items);
-
-    const { label, color } = classifyScore(score, section);
-
-    return {
-      sectionKey: section.key,
-      section: section.title,
-      score,
-      classification: label,
-      color,
+  const scoreData = useMemo(() => {
+    const calculateSectionScore = (items: SensoryItem[]): number => {
+      if (!items || items.length === 0) return 0;
+      return items.reduce((total, item) => {
+        const score = item.response ? responseValueMap[item.response] || 0 : 0;
+        return total + score;
+      }, 0);
     };
-  });
+
+    const classifyScore = (score: number, section: InstrumentSection): { label: string; color: string } => {
+      const bands: ClassificationBand[] = section.bands ?? instrument.defaultBands;
+      if (!bands || bands.length === 0) return { label: "Sem dados suficientes", color: "#888" };
+
+      const maxPerItem = instrument.scale
+        ? Math.max(...instrument.scale.options.map((o) => o.numeric))
+        : 5; // SP-2 fallback
+      const maxPossible = section.items.length * maxPerItem;
+      for (const band of bands) {
+        if (band.maxScoreAbs !== undefined && score <= band.maxScoreAbs) return { label: band.label, color: band.color };
+        if (band.maxScorePct !== undefined) {
+          const pct = maxPossible > 0 ? score / maxPossible : 0;
+          if (pct <= band.maxScorePct) return { label: band.label, color: band.color };
+        }
+      }
+      const last = bands[bands.length - 1];
+      return { label: last.label, color: last.color };
+    };
+
+    return instrument.sections.map((section) => {
+      const sectionData = formData.sections?.[section.key] || { items: [] };
+      const items = sectionData.items || [];
+
+      const score = sectionData.rawScore !== undefined && sectionData.rawScore !== null
+        ? sectionData.rawScore
+        : calculateSectionScore(items);
+
+      const { label, color } = classifyScore(score, section);
+
+      return {
+        sectionKey: section.key,
+        section: section.title,
+        score,
+        classification: label,
+        color,
+      };
+    });
+  }, [instrument, formData.sections, responseValueMap]);
 
   const reportStyle = {
     fontFamily: "Arial, sans-serif",
@@ -350,16 +379,7 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
                     </thead>
                     <tbody>
                       {items.map((item, itemIndex) => {
-                        const frequencyOptions = [
-                          { value: "não se aplica", label: "Não se aplica" },
-                          { value: "quase nunca", label: "Quase Nunca" },
-                          { value: "ocasionalmente", label: "Ocasionalmente" },
-                          { value: "metade do tempo", label: "Metade do Tempo" },
-                          { value: "frequentemente", label: "Frequentemente" },
-                          { value: "quase sempre", label: "Quase Sempre" },
-                        ];
-
-                        const responseText = frequencyOptions.find(o => o.value === item.response)?.label || "Não respondido";
+                        const responseText = scaleOptions.find(o => o.value === item.response)?.label || "Não respondido";
                         const responseValue = item.response ? Number(responseValueMap[item.response]) || 0 : 0;
                         const itemDescription = item.description || `Item ${item.id}`;
 

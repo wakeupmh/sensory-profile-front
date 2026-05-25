@@ -1,4 +1,4 @@
-import { memo, useEffect, useState, CSSProperties } from 'react';
+import { memo, useEffect, useRef, useState, CSSProperties } from 'react';
 import { colors, shadows, radii, typography } from '../../theme/tokens';
 import type { ResponseScale } from '../../instruments/types';
 
@@ -42,15 +42,43 @@ const FastRadioCards = memo(({
   theme,
 }: FastRadioCardsProps) => {
   const [value, setValue] = useState(initialValue);
+  const [focusedIndex, setFocusedIndex] = useState(0);
+  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
     setValue(initialValue);
   }, [initialValue]);
 
+  useEffect(() => {
+    const opts = scale ? scale.options : options;
+    const idx = opts.findIndex(o => o.value === value);
+    if (idx >= 0) setFocusedIndex(idx);
+  }, [value, scale, options]);
+
   const handleClick = (optionValue: string) => {
     if (disabled) return;
     setValue(optionValue);
     if (onValueChange) onValueChange(name, optionValue);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
+    const opts = scale ? scale.options : options;
+    let newIndex = index;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      newIndex = (index + 1) % opts.length;
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      newIndex = (index - 1 + opts.length) % opts.length;
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleClick(opts[index].value);
+      return;
+    } else {
+      return;
+    }
+    setFocusedIndex(newIndex);
+    buttonRefs.current[newIndex]?.focus();
   };
 
   return (
@@ -69,9 +97,11 @@ const FastRadioCards = memo(({
       `}</style>
       <div
         className={`radio-grid-${name.replace(/[^a-z0-9]/gi, '')}`}
+        role="radiogroup"
+        aria-label={name}
         style={{ display: 'grid', gap: '8px', width: '100%' }}
       >
-        {(scale ? scale.options : options).map((option) => {
+        {(scale ? scale.options : options).map((option, index) => {
           const isSelected = value === option.value;
           const colorEntry = theme
             ? theme[option.value]
@@ -101,12 +131,15 @@ const FastRadioCards = memo(({
           return (
             <button
               key={option.value}
+              ref={(el) => { buttonRefs.current[index] = el; }}
               type="button"
               role="radio"
               aria-checked={isSelected}
               aria-required={required}
+              tabIndex={index === focusedIndex ? 0 : -1}
               disabled={disabled}
               onClick={() => handleClick(option.value)}
+              onKeyDown={(e) => handleKeyDown(e, index)}
               style={style}
             >
               {option.label}

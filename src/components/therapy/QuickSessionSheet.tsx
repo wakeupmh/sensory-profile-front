@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Flex } from '@radix-ui/themes';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { colors, shadows, radii, fonts, spacing } from '../../theme/tokens';
@@ -86,9 +86,12 @@ const QuickSessionSheet: React.FC<QuickSessionSheetProps> = ({
   const [notes, setNotes] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const previousFocus = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (isOpen) {
+      previousFocus.current = document.activeElement as HTMLElement;
       const now = new Date();
       const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
         .toISOString()
@@ -100,14 +103,47 @@ const QuickSessionSheet: React.FC<QuickSessionSheetProps> = ({
       setDurationMinutes('');
       setNotes('');
       setError(null);
+    } else if (previousFocus.current) {
+      previousFocus.current.focus();
+      previousFocus.current = null;
     }
   }, [isOpen, defaultTherapyType]);
 
   useEffect(() => {
+    if (!isOpen || !sheetRef.current) return;
+
+    const sheet = sheetRef.current;
+
+    // Auto-focus first focusable element
+    const focusables = sheet.querySelectorAll<HTMLElement>(
+      'button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusables.length > 0) focusables[0].focus();
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+
+      if (e.key !== 'Tab') return;
+      const focusableEls = sheet.querySelectorAll<HTMLElement>(
+        'button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusableEls.length === 0) return;
+      const first = focusableEls[0];
+      const last = focusableEls[focusableEls.length - 1];
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
-    if (isOpen) document.addEventListener('keydown', handleKeyDown);
+
+    document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
@@ -144,7 +180,7 @@ const QuickSessionSheet: React.FC<QuickSessionSheetProps> = ({
       style={overlayStyle}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div style={sheetStyle}>
+      <div ref={sheetRef} style={sheetStyle}>
         {/* Header */}
         <Flex justify="between" align="center" mb="4">
           <span style={{ fontFamily: fonts.display, fontWeight: 700, fontSize: '18px', color: colors.ink }}>

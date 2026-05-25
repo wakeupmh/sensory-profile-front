@@ -153,6 +153,12 @@ a {
   background-color: var(--color-surface-cream) !important;
 }
 
+/* GumroadButton — CSS :active press state */
+.gumroad-btn:active:not(:disabled) {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 1px 1px 0px #0A0A1A !important;
+}
+
 /* Spin animation (used by loading spinners) */
 @keyframes spin {
   to {

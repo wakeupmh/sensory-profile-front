@@ -73,23 +73,9 @@ const GumroadButton = React.forwardRef<HTMLButtonElement, GumroadButtonProps>(
         type={type}
         onClick={onClick}
         disabled={disabled}
-        className={className}
+        className={`gumroad-btn${className ? ' ' + className : ''}`}
         asChild={asChild}
         style={baseStyle}
-        onMouseDown={(e) => {
-          if (!disabled) {
-            (e.currentTarget as HTMLButtonElement).style.transform = 'translate(2px, 2px)';
-            (e.currentTarget as HTMLButtonElement).style.boxShadow = shadows['button-active'];
-          }
-        }}
-        onMouseUp={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.transform = 'translate(0, 0)';
-          (e.currentTarget as HTMLButtonElement).style.boxShadow = shadows.button;
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.transform = 'translate(0, 0)';
-          (e.currentTarget as HTMLButtonElement).style.boxShadow = disabled ? shadows.none : shadows.button;
-        }}
       >
         {children}
       </Button>
