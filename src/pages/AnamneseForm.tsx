@@ -97,8 +97,8 @@ const AnamneseForm: React.FC = () => {
         const data = response.data ?? response;
 
         setFormData({
-          child: data.child ?? formData.child,
-          caregiver: data.caregiver ?? formData.caregiver,
+          child: data.child ?? { name: '', birthDate: '', gender: '', selectedChildId: '' },
+          caregiver: data.caregiver ?? { name: '', relationship: '', contact: '' },
           clinicalHistory: data.clinicalHistory ?? emptyClinicalHistory(),
         });
         setShareToken(data.shareToken ?? null);
@@ -117,7 +117,7 @@ const AnamneseForm: React.FC = () => {
     };
 
     run();
-  }, [id, getToken, setFormData, formData.child, formData.caregiver]);
+  }, [id, getToken, setFormData]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const validateStep = (step: number): boolean => {
     setValidationError(null);
