@@ -168,7 +168,7 @@ const ReportPage: React.FC = () => {
           </Flex>
 
           <GumroadCard color="white" shadow="md" padding="lg">
-            <ReportContent formData={formData} />
+            <ReportContent formData={formData} assessmentId={id} />
           </GumroadCard>
         </Box>
       ) : null}

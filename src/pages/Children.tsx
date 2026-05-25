@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
+import { Link } from 'react-router-dom';
 import { PlusIcon, Pencil1Icon, TrashIcon, InfoCircledIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { childApi, ChildData } from '../services/api';
 import { useAuthContext } from '../context/AuthContext';
@@ -346,7 +347,15 @@ const Children = () => {
                       </Flex>
 
                       {/* Actions */}
-                      <Flex gap="2" mt="auto" pt="2">
+                      <Flex gap="2" mt="auto" pt="2" wrap="wrap">
+                        <GumroadButton variant="primary" size="sm" asChild style={{ flex: 1 }}>
+                          <Link
+                            to={`/children/${child.id}`}
+                            style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+                          >
+                            Ver Perfil
+                          </Link>
+                        </GumroadButton>
                         <GumroadButton
                           variant="secondary"
                           size="sm"

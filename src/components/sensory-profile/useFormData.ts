@@ -75,7 +75,7 @@ const useFormData = (initialInstrumentId: string = DEFAULT_INSTRUMENT_ID) => {
         const items = section.items.map((item: SensoryItem) =>
           item.id === itemId ? { ...item, response } : item,
         );
-        const rawScore = calculateRawScore(items);
+        const rawScore = calculateRawScore(items, prevData.instrumentId);
 
         sections[sectionKey] = { ...section, items, rawScore };
         return { ...prevData, sections };
@@ -102,7 +102,7 @@ const useFormData = (initialInstrumentId: string = DEFAULT_INSTRUMENT_ID) => {
   };
 };
 
-const responseValues: Record<string, number> = {
+const legacyResponseValues: Record<string, number> = {
   'quase sempre': 5,
   'frequentemente': 4,
   'metade do tempo': 3,
@@ -111,7 +111,17 @@ const responseValues: Record<string, number> = {
   'não se aplica': 0,
 };
 
-export const calculateRawScore = (items: SensoryItem[]): number =>
-  items.reduce((total, item) => total + (responseValues[item.response as string] || 0), 0);
+export const calculateRawScore = (items: SensoryItem[], instrumentId?: string): number => {
+  const scale = instrumentId ? getInstrument(instrumentId)?.scale : undefined;
+  return items.reduce((total, item) => {
+    const response = item.response as string;
+    if (!response) return total;
+    if (scale) {
+      const option = scale.options.find((o) => o.value === response);
+      return total + (option?.numeric ?? 0);
+    }
+    return total + (legacyResponseValues[response] ?? 0);
+  }, 0);
+};
 
 export default useFormData;

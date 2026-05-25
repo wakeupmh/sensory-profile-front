@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Box, Text } from "@radix-ui/themes";
 
 interface NormalCurveChartProps {
@@ -35,8 +35,15 @@ const classificationToX: Record<string, number> = {
 };
 
 const NormalCurveChart: React.FC<NormalCurveChartProps> = ({ scores }) => {
-  // For vertical stacking, distribute points with small vertical offsets if they share the same classification
-  const classificationCounts: Record<string, number> = {};
+  const positionedScores = useMemo(() => {
+    const counts: Record<string, number> = {};
+    return scores.map((score, idx) => {
+      const x = classificationToX[score.classification] || 400;
+      counts[score.classification] = (counts[score.classification] || 0) + 1;
+      const y = 170 - 18 - (counts[score.classification] - 1) * 18;
+      return { ...score, x, y, idx };
+    });
+  }, [scores]);
 
   // Print-friendly table as fallback
   const renderPrintFallback = () => (
@@ -136,18 +143,13 @@ const NormalCurveChart: React.FC<NormalCurveChartProps> = ({ scores }) => {
           {/* Normal curve path */}
           <path d="M 50 170 C 50 170, 100 170, 150 150 C 200 130, 250 70, 400 50 C 550 70, 600 130, 650 150 C 700 170, 750 170, 750 170" fill="none" stroke="#6a994e" strokeWidth="3" />
           {/* Plot the points with enhanced print compatibility */}
-          {scores.map((score, idx) => {
-            const x = classificationToX[score.classification] || 400;
-            // Count how many times this classification has been used so far
-            classificationCounts[score.classification] = (classificationCounts[score.classification] || 0) + 1;
-            // Stack vertically if needed
-            const y = 170 - 18 - (classificationCounts[score.classification] - 1) * 18;
-            const color = getSectionColor(score.section);
+          {positionedScores.map((ps) => {
+            const color = getSectionColor(ps.section);
             return (
-              <g key={idx}>
+              <g key={ps.idx}>
                 <circle
-                  cx={x}
-                  cy={y}
+                  cx={ps.x}
+                  cy={ps.y}
                   r={10}
                   fill={color}
                   stroke="#333"
@@ -158,22 +160,22 @@ const NormalCurveChart: React.FC<NormalCurveChartProps> = ({ scores }) => {
                     colorAdjust: 'exact'
                   }}
                 >
-                  <title>{`${score.section}: ${score.score} (${score.classification})`}</title>
+                  <title>{`${ps.section}: ${ps.score} (${ps.classification})`}</title>
                 </circle>
                 {/* Add text label for print clarity */}
-                <text 
-                  x={x} 
-                  y={y + 4} 
-                  textAnchor="middle" 
-                  fontSize="8" 
-                  fill="white" 
+                <text
+                  x={ps.x}
+                  y={ps.y + 4}
+                  textAnchor="middle"
+                  fontSize="8"
+                  fill="white"
                   fontWeight="bold"
                   style={{
                     printColorAdjust: 'exact',
                     WebkitPrintColorAdjust: 'exact'
                   }}
                 >
-                  {idx + 1}
+                  {ps.idx + 1}
                 </text>
               </g>
             );

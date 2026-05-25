@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
 import { colors, spacing, typography } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
@@ -13,6 +13,34 @@ import {
   StarIcon,
 } from '@radix-ui/react-icons';
 
+const SENSES = ['👁️', '👂', '🤲', '👃', '🧠'];
+const HeroEmoji = memo(() => {
+  const [idx, setIdx] = useState(0);
+  const [visible, setVisible] = useState(true);
+  useEffect(() => {
+    const cycle = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setIdx(i => (i + 1) % SENSES.length);
+        setVisible(true);
+      }, 300);
+    }, 1400);
+    return () => clearInterval(cycle);
+  }, []);
+  return (
+    <span style={{
+      fontSize: '56px',
+      lineHeight: 1,
+      display: 'block',
+      opacity: visible ? 1 : 0,
+      transform: visible ? 'scale(1)' : 'scale(0.7)',
+      transition: 'opacity 0.3s ease, transform 0.3s ease',
+    }}>
+      {SENSES[idx]}
+    </span>
+  );
+});
+
 const LandingPage = () => {
   const navigate = useNavigate();
   const { session } = useAuthContext();
@@ -21,21 +49,6 @@ const LandingPage = () => {
     if (session) navigate('/dashboard');
     else navigate('/sign-in');
   };
-
-  const senses = ['👁️', '👂', '🤲', '👃', '🧠'];
-  const [senseIdx, setSenseIdx] = useState(0);
-  const [visible, setVisible] = useState(true);
-
-  useEffect(() => {
-    const cycle = setInterval(() => {
-      setVisible(false);
-      setTimeout(() => {
-        setSenseIdx(i => (i + 1) % senses.length);
-        setVisible(true);
-      }, 300);
-    }, 1400);
-    return () => clearInterval(cycle);
-  }, []);
 
   return (
     <Box style={{ backgroundColor: colors.canvas, minHeight: '100vh' }}>
@@ -139,16 +152,7 @@ const LandingPage = () => {
               }}
             >
               <Flex direction="column" align="center" gap="2">
-                <span style={{
-                  fontSize: '56px',
-                  lineHeight: 1,
-                  display: 'block',
-                  opacity: visible ? 1 : 0,
-                  transform: visible ? 'scale(1)' : 'scale(0.7)',
-                  transition: 'opacity 0.3s ease, transform 0.3s ease',
-                }}>
-                  {senses[senseIdx]}
-                </span>
+                <HeroEmoji />
                 <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', opacity: 0.7 }}>
                   SENSORIAL
                 </span>

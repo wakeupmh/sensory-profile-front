@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { assessmentApi, draftApi, DraftData } from '../services/api';
+import { assessmentApi, draftApi, childApi, DraftData } from '../services/api';
+import type { ChildData } from '../services/api';
 import { Box, Flex, AlertDialog, IconButton } from '@radix-ui/themes';
 import { getInstrument } from '../instruments';
 import {
@@ -11,6 +12,7 @@ import {
   TrashIcon,
   InfoCircledIcon,
   ExclamationTriangleIcon,
+  BarChartIcon,
 } from '@radix-ui/react-icons';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useAuthContext } from '../context/AuthContext';
@@ -28,13 +30,27 @@ interface Assessment {
   instrumentId?: string;
 }
 
+type BadgeColor = 'yellow' | 'cyan' | 'salmon' | 'mint' | 'lavender' | 'peach' | 'cream' | 'ink';
+
+const INSTRUMENT_BADGE_COLOR: Record<string, BadgeColor> = {
+  'crianca-3-14': 'cyan',
+  'crianca-pequena': 'mint',
+  'atec': 'lavender',
+  'mchat-r': 'yellow',
+};
+
+const getInstrumentBadgeColor = (instrumentId?: string): BadgeColor =>
+  (instrumentId && INSTRUMENT_BADGE_COLOR[instrumentId]) || 'cream';
+
 const Home = () => {
   const [assessments, setAssessments] = useState<Assessment[]>([]);
+  const [children, setChildren] = useState<ChildData[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [assessmentDraft, setAssessmentDraft] = useState<DraftData | null>(null);
   const [anamneseDraft, setAnamneseDraft] = useState<DraftData | null>(null);
+  const [instrumentFilter, setInstrumentFilter] = useState<string>('all');
   const { getToken, isLoaded, session } = useAuthContext();
   const getTokenRef = useRef(getToken);
   getTokenRef.current = getToken;
@@ -44,8 +60,16 @@ const Home = () => {
     try {
       setLoading(true);
       const token = await getTokenRef.current();
-      const response = await assessmentApi.getAllAssessments(token);
-      setAssessments(response.data ?? response);
+      const [response, kids, ad, anmd] = await Promise.all([
+        assessmentApi.getAllAssessments(token),
+        childApi.list(token).catch(() => [] as ChildData[]),
+        draftApi.getDraft('sensory_assessment', token).catch(() => null),
+        draftApi.getDraft('anamnese', token).catch(() => null),
+      ]);
+      setAssessments(response.data);
+      setChildren(kids);
+      setAssessmentDraft(ad);
+      setAnamneseDraft(anmd);
       setError(null);
     } catch (err) {
       setError('Erro ao carregar avaliações. Por favor, tente novamente.');
@@ -61,24 +85,6 @@ const Home = () => {
     }
   }, [fetchAssessments, isLoaded, session]);
 
-  useEffect(() => {
-    if (!isLoaded || !session) return;
-    const fetchDrafts = async () => {
-      try {
-        const token = await getTokenRef.current();
-        const [ad, anmd] = await Promise.all([
-          draftApi.getDraft('sensory_assessment', token),
-          draftApi.getDraft('anamnese', token),
-        ]);
-        setAssessmentDraft(ad);
-        setAnamneseDraft(anmd);
-      } catch (err) {
-        console.error('Erro ao carregar rascunhos:', err);
-      }
-    };
-    fetchDrafts();
-  }, [isLoaded, session]);
-
   const handleDiscardDraft = async (formType: 'sensory_assessment' | 'anamnese') => {
     try {
       const token = await getTokenRef.current();
@@ -87,6 +93,7 @@ const Home = () => {
       else setAnamneseDraft(null);
     } catch (err) {
       console.error('Erro ao descartar rascunho:', err);
+      setError('Não foi possível descartar o rascunho. Tente novamente.');
     }
   };
 
@@ -95,7 +102,7 @@ const Home = () => {
       setDeleteLoading(id);
       const token = await getToken();
       await assessmentApi.deleteAssessment(id, token);
-      setAssessments(assessments.filter((a) => a.id !== id));
+      setAssessments((prev) => prev.filter((a) => a.id !== id));
     } catch (err) {
       setError('Erro ao excluir avaliação. Por favor, tente novamente.');
       console.error(err);
@@ -103,6 +110,19 @@ const Home = () => {
       setDeleteLoading(null);
     }
   };
+
+  const distinctInstrumentIds = useMemo(() => {
+    const seen = new Set<string>();
+    for (const a of assessments) {
+      seen.add(a.instrumentId ?? 'crianca-3-14');
+    }
+    return Array.from(seen);
+  }, [assessments]);
+
+  const filteredAssessments = useMemo(() => {
+    if (instrumentFilter === 'all') return assessments;
+    return assessments.filter((a) => (a.instrumentId ?? 'crianca-3-14') === instrumentFilter);
+  }, [assessments, instrumentFilter]);
 
   return (
     <Box>
@@ -124,7 +144,7 @@ const Home = () => {
         </Box>
         <GumroadButton variant="primary" size="md" asChild>
           <Link
-            to="/assessment/new?instrument=crianca-3-14"
+            to="/assessment/new"
             style={{ textDecoration: 'none', display: 'inline-flex' }}
           >
             <PlusIcon />
@@ -132,6 +152,51 @@ const Home = () => {
           </Link>
         </GumroadButton>
       </Flex>
+
+      {/* Consolidated Report Quick Access */}
+      {!loading && children.length > 0 && (
+        <GumroadCard color="cream" shadow="md" padding="md" style={{ marginBottom: spacing.lg }}>
+          <Flex align="center" justify="between" gap="3" wrap="wrap">
+            <Flex align="center" gap="2">
+              <BarChartIcon width={20} height={20} />
+              <GumroadText level="body-md" as="p" style={{ fontWeight: 700 }}>
+                Relatório Consolidado
+              </GumroadText>
+            </Flex>
+            <Flex gap="2" wrap="wrap">
+              {children.map((child) => (
+                <Flex key={child.id} gap="1" align="center">
+                  <GumroadButton
+                    variant="secondary"
+                    size="sm"
+                    asChild
+                  >
+                    <Link
+                      to={`/consolidated/${child.id}`}
+                      style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      <BarChartIcon width={14} height={14} />
+                      {child.name}
+                    </Link>
+                  </GumroadButton>
+                  <GumroadButton
+                    variant="primary"
+                    size="sm"
+                    asChild
+                  >
+                    <Link
+                      to={`/children/${child.id}`}
+                      style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      Ver perfil
+                    </Link>
+                  </GumroadButton>
+                </Flex>
+              ))}
+            </Flex>
+          </Flex>
+        </GumroadCard>
+      )}
 
       {/* Draft Banners */}
       {(assessmentDraft || anamneseDraft) && (
@@ -201,6 +266,54 @@ const Home = () => {
         </Flex>
       )}
 
+      {/* Instrument Filter */}
+      {!loading && !error && assessments.length > 0 && distinctInstrumentIds.length > 1 && (
+        <Flex align="center" gap="2" mb="4" wrap="wrap">
+          <GumroadText level="body-sm" as="span" style={{ opacity: 0.7, whiteSpace: 'nowrap' }}>
+            Filtrar por instrumento:
+          </GumroadText>
+          <button
+            onClick={() => setInstrumentFilter('all')}
+            style={{
+              padding: '4px 14px',
+              borderRadius: '9999px',
+              border: `2px solid ${colors.ink}`,
+              background: instrumentFilter === 'all' ? colors.ink : colors.canvas,
+              color: instrumentFilter === 'all' ? colors.canvas : colors.ink,
+              fontWeight: 600,
+              fontSize: '0.8rem',
+              cursor: 'pointer',
+              boxShadow: instrumentFilter === 'all' ? 'none' : '2px 2px 0px #0A0A1A',
+            }}
+          >
+            Todos
+          </button>
+          {distinctInstrumentIds.map((id) => {
+            const inst = getInstrument(id);
+            const active = instrumentFilter === id;
+            return (
+              <button
+                key={id}
+                onClick={() => setInstrumentFilter(id)}
+                style={{
+                  padding: '4px 14px',
+                  borderRadius: '9999px',
+                  border: `2px solid ${colors.ink}`,
+                  background: active ? colors.ink : colors.canvas,
+                  color: active ? colors.canvas : colors.ink,
+                  fontWeight: 600,
+                  fontSize: '0.8rem',
+                  cursor: 'pointer',
+                  boxShadow: active ? 'none' : '2px 2px 0px #0A0A1A',
+                }}
+              >
+                {inst.shortName}
+              </button>
+            );
+          })}
+        </Flex>
+      )}
+
       {loading ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <LoadingSpinner size="large" text="Carregando avaliações..." />
@@ -227,10 +340,24 @@ const Home = () => {
               </GumroadText>
             </Box>
             <GumroadButton variant="primary" size="md" asChild>
-              <Link to="/assessment/new?instrument=crianca-3-14" style={{ textDecoration: 'none' }}>
+              <Link to="/assessment/new" style={{ textDecoration: 'none' }}>
                 Criar primeira avaliação
               </Link>
             </GumroadButton>
+          </Flex>
+        </GumroadCard>
+      ) : filteredAssessments.length === 0 ? (
+        <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
+          <Flex direction="column" align="center" gap="4">
+            <InfoCircledIcon width={40} height={40} />
+            <Box>
+              <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
+                Nenhuma avaliação para este instrumento
+              </GumroadHeading>
+              <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
+                Selecione "Todos" ou outro instrumento para ver as avaliações
+              </GumroadText>
+            </Box>
           </Flex>
         </GumroadCard>
       ) : (
@@ -241,7 +368,7 @@ const Home = () => {
             gap: '20px',
           }}
         >
-          {assessments.map((assessment) => {
+          {filteredAssessments.map((assessment) => {
             const instrument = getInstrument(assessment.instrumentId);
             return (
               <GumroadCard key={assessment.id} color="white" shadow="md" padding="lg">
@@ -255,7 +382,7 @@ const Home = () => {
                     >
                       {assessment.childName}
                     </GumroadHeading>
-                    <GumroadBadge color="yellow">
+                    <GumroadBadge color={getInstrumentBadgeColor(assessment.instrumentId)}>
                       {instrument.shortName}
                     </GumroadBadge>
                   </Flex>

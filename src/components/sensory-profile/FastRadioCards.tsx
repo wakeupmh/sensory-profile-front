@@ -1,5 +1,6 @@
-import { memo, useEffect, useState, CSSProperties } from 'react';
+import { memo, useEffect, useRef, useState, CSSProperties } from 'react';
 import { colors, shadows, radii, typography } from '../../theme/tokens';
+import type { ResponseScale } from '../../instruments/types';
 
 interface RadioOption {
   value: string;
@@ -15,6 +16,10 @@ interface FastRadioCardsProps {
   columns?: { initial: string; xs?: string; sm?: string; md?: string; lg?: string };
   color?: string;
   onValueChange?: (name: string, value: string) => void;
+  /** When provided, overrides the hardcoded SP-2 options with scale.options */
+  scale?: ResponseScale;
+  /** Per-value color overrides; keys match option.value. Falls back to frequencyBg when absent. */
+  theme?: Record<string, { bg: string; text?: string }>;
 }
 
 const frequencyBg: Record<string, { bg: string; text: string }> = {
@@ -32,13 +37,23 @@ const FastRadioCards = memo(({
   initialValue = '',
   disabled = false,
   required = false,
-  onValueChange
+  onValueChange,
+  scale,
+  theme,
 }: FastRadioCardsProps) => {
   const [value, setValue] = useState(initialValue);
+  const [focusedIndex, setFocusedIndex] = useState(0);
+  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
     setValue(initialValue);
   }, [initialValue]);
+
+  useEffect(() => {
+    const opts = scale ? scale.options : options;
+    const idx = opts.findIndex(o => o.value === value);
+    if (idx >= 0) setFocusedIndex(idx);
+  }, [value, scale, options]);
 
   const handleClick = (optionValue: string) => {
     if (disabled) return;
@@ -46,29 +61,40 @@ const FastRadioCards = memo(({
     if (onValueChange) onValueChange(name, optionValue);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
+    const opts = scale ? scale.options : options;
+    let newIndex = index;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      newIndex = (index + 1) % opts.length;
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      newIndex = (index - 1 + opts.length) % opts.length;
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleClick(opts[index].value);
+      return;
+    } else {
+      return;
+    }
+    setFocusedIndex(newIndex);
+    buttonRefs.current[newIndex]?.focus();
+  };
+
   return (
-    <>
-      <style>{`
-        @media (max-width: 767px) {
-          .radio-grid-${name.replace(/[^a-z0-9]/gi, '')} {
-            grid-template-columns: 1fr !important;
-          }
-        }
-        @media (min-width: 768px) {
-          .radio-grid-${name.replace(/[^a-z0-9]/gi, '')} {
-            grid-template-columns: repeat(3, 1fr) !important;
-          }
-        }
-      `}</style>
       <div
-        className={`radio-grid-${name.replace(/[^a-z0-9]/gi, '')}`}
+        className="radio-grid-responsive"
+        role="radiogroup"
+        aria-label={name}
         style={{ display: 'grid', gap: '8px', width: '100%' }}
       >
-        {options.map((option) => {
+        {(scale ? scale.options : options).map((option, index) => {
           const isSelected = value === option.value;
-          const freq = frequencyBg[option.value];
-          const bg = freq?.bg ?? colors.canvas;
-          const textColor = freq?.text ?? colors.ink;
+          const colorEntry = theme
+            ? theme[option.value]
+            : frequencyBg[option.value];
+          const bg = colorEntry?.bg ?? colors.canvas;
+          const textColor = (colorEntry as { bg: string; text?: string } | undefined)?.text ?? colors.ink;
 
           const style: CSSProperties = {
             backgroundColor: isSelected ? bg : '#FFFFFF',
@@ -92,12 +118,15 @@ const FastRadioCards = memo(({
           return (
             <button
               key={option.value}
+              ref={(el) => { buttonRefs.current[index] = el; }}
               type="button"
               role="radio"
               aria-checked={isSelected}
               aria-required={required}
+              tabIndex={index === focusedIndex ? 0 : -1}
               disabled={disabled}
               onClick={() => handleClick(option.value)}
+              onKeyDown={(e) => handleKeyDown(e, index)}
               style={style}
             >
               {option.label}
@@ -105,7 +134,6 @@ const FastRadioCards = memo(({
           );
         })}
       </div>
-    </>
   );
 });
 
