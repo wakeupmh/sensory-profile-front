@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Flex } from '@radix-ui/themes';
 import { ExclamationTriangleIcon, BarChartIcon } from '@radix-ui/react-icons';
@@ -19,29 +19,30 @@ const ConsolidatedReportSharedView: React.FC = () => {
   const [summary, setSummary] = useState<ConsolidatedSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [invalid, setInvalid] = useState(false);
-  const fetchedRef = useRef(false);
-
   useEffect(() => {
     if (!token) {
       setInvalid(true);
       setLoading(false);
       return;
     }
-    if (fetchedRef.current) return;
+
+    let cancelled = false;
+    setLoading(true);
+    setInvalid(false);
 
     const run = async () => {
       try {
         const data = await consolidatedReportApi.getShared(token);
-        setSummary(data);
-        fetchedRef.current = true;
+        if (!cancelled) setSummary(data);
       } catch {
-        setInvalid(true);
+        if (!cancelled) setInvalid(true);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     run();
+    return () => { cancelled = true; };
   }, [token]);
 
   if (loading) {

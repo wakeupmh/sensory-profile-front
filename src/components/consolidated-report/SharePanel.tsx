@@ -18,6 +18,7 @@ const SharePanel: React.FC<Props> = ({ childId, isPublicView }) => {
   const [expiresInDays, setExpiresInDays] = useState(30);
   const [copied, setCopied] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -46,6 +47,7 @@ const SharePanel: React.FC<Props> = ({ childId, isPublicView }) => {
   const handleCreate = async () => {
     try {
       setCreating(true);
+      setActionError(null);
       const token = await getToken();
       const res = await consolidatedReportApi.createShare(token, { childId, expiresInDays });
       setShares((prev) => [res.share, ...prev]);
@@ -53,7 +55,7 @@ const SharePanel: React.FC<Props> = ({ childId, isPublicView }) => {
       setCopied(res.shareUrl);
       setTimeout(() => setCopied(null), 2000);
     } catch {
-      alert('Erro ao gerar link de compartilhamento.');
+      setActionError('Erro ao gerar link de compartilhamento.');
     } finally {
       setCreating(false);
     }
@@ -66,7 +68,7 @@ const SharePanel: React.FC<Props> = ({ childId, isPublicView }) => {
       await consolidatedReportApi.deleteShare(token, id);
       setShares((prev) => prev.filter((s) => s.id !== id));
     } catch {
-      alert('Erro ao excluir link.');
+      setActionError('Erro ao excluir link.');
     } finally {
       setDeletingId(null);
     }
@@ -111,7 +113,7 @@ const SharePanel: React.FC<Props> = ({ childId, isPublicView }) => {
             min={1}
             max={365}
             value={expiresInDays}
-            onChange={(e) => setExpiresInDays(Number(e.target.value))}
+            onChange={(e) => setExpiresInDays(Math.min(365, Math.max(1, Number(e.target.value) || 1)))}
             style={{
               marginLeft: '8px',
               width: '70px',
@@ -146,8 +148,10 @@ const SharePanel: React.FC<Props> = ({ childId, isPublicView }) => {
         </button>
       </div>
 
-      {loadError && (
-        <p style={{ color: colors['brand-salmon'], fontSize: '0.85rem', marginBottom: '8px' }}>{loadError}</p>
+      {(loadError || actionError) && (
+        <p style={{ color: colors['brand-salmon'], fontSize: '0.85rem', marginBottom: '8px' }}>
+          {loadError || actionError}
+        </p>
       )}
 
       {shares.length > 0 && (

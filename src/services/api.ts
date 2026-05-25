@@ -1033,11 +1033,12 @@ import type {
 } from '../types/consolidatedReport';
 
 export const consolidatedReportApi = {
-  getSummary: async (token: string | null, childId: string, periodDays = 90): Promise<ConsolidatedSummary> => {
+  getSummary: async (token: string | null, childId: string, periodDays = 90, signal?: AbortSignal): Promise<ConsolidatedSummary> => {
     try {
       const response = await api.get('/api/consolidated/summary', {
         headers: getAuthHeaders(token),
         params: { childId, periodDays },
+        signal,
       });
       return response.data;
     } catch (error) {

@@ -38,24 +38,25 @@ const ConsolidatedReportPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [periodDays, setPeriodDays] = useState(90);
 
-  const fetchSummary = async (period: number) => {
-    if (!childId) return;
-    try {
-      setLoading(true);
-      setError(null);
-      const token = await getTokenRef.current();
-      const data = await consolidatedReportApi.getSummary(token, childId, period);
-      setSummary(data);
-    } catch {
-      setError('Erro ao carregar o relatório consolidado. Tente novamente.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchSummary(periodDays);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!childId) return;
+    const ctrl = new AbortController();
+    const run = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const token = await getTokenRef.current();
+        const data = await consolidatedReportApi.getSummary(token, childId, periodDays, ctrl.signal);
+        if (!ctrl.signal.aborted) setSummary(data);
+      } catch (err) {
+        if (ctrl.signal.aborted) return;
+        setError('Erro ao carregar o relatório consolidado. Tente novamente.');
+      } finally {
+        if (!ctrl.signal.aborted) setLoading(false);
+      }
+    };
+    run();
+    return () => ctrl.abort();
   }, [childId, periodDays]);
 
   const handlePeriodChange = (period: number) => {

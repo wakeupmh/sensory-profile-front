@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Box, Flex } from '@radix-ui/themes';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { medicationApi, comorbidityApi, appointmentApi, childApi } from '../services/api';
@@ -42,7 +43,8 @@ export default function MedicalPage() {
   const [comorbidities, setComorbidities] = useState<Comorbidity[]>([]);
   const [appointments, setAppointments] = useState<MedicalAppointmentSummary[]>([]);
   const [children, setChildren] = useState<ChildData[]>([]);
-  const [selectedChildId, setSelectedChildId] = useState<string>('');
+  const [searchParams] = useSearchParams();
+  const [selectedChildId, setSelectedChildId] = useState<string>(searchParams.get('childId') || '');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [medsPanelOpen, setMedsPanelOpen] = useState(false);

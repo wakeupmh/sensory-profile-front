@@ -3,6 +3,8 @@
 export interface ConsolidatedChild {
   id: string;
   name: string;
+  birthDate: string | null;
+  notes: string | null;
 }
 
 export interface ConsolidatedPeriod {

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Box, Flex } from '@radix-ui/themes';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { milestoneApi, communicationLogApi, childApi } from '../services/api';
@@ -39,7 +40,8 @@ export default function DevelopmentPage() {
   const [milestones, setMilestones] = useState<DevelopmentalMilestone[]>([]);
   const [commLogs, setCommLogs] = useState<CommunicationLogSummary[]>([]);
   const [children, setChildren] = useState<ChildData[]>([]);
-  const [selectedChildId, setSelectedChildId] = useState('');
+  const [searchParams] = useSearchParams();
+  const [selectedChildId, setSelectedChildId] = useState(searchParams.get('childId') || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [milestonesPanelOpen, setMilestonesPanelOpen] = useState(false);

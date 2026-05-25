@@ -7,17 +7,29 @@ interface Props {
 }
 
 const PLAN_TYPE_COLORS: Record<string, string> = {
-  pei: colors['brand-cyan'],
-  pee: colors['brand-yellow'],
-  regular: '#e5e7eb',
+  pei: '#E3F2FD',
+  pei_simplificado: '#E8F5E9',
+  adaptacao_curricular: '#FFF8E1',
+  plano_aee: '#F3E5F5',
+  outro: '#F5F5F5',
+};
+
+const PLAN_TYPE_LABELS: Record<string, string> = {
+  pei: 'PEI',
+  pei_simplificado: 'PEI Simplificado',
+  adaptacao_curricular: 'Adaptação Curricular',
+  plano_aee: 'Plano AEE',
+  outro: 'Outro',
 };
 
 const COMM_TYPE_LABELS: Record<string, string> = {
-  meeting: 'Reunião',
+  reuniao: 'Reunião',
+  bilhete: 'Bilhete/Comunicado',
   email: 'E-mail',
-  phone: 'Telefone',
-  note: 'Bilhete',
-  report: 'Relatório',
+  telefone: 'Ligação telefônica',
+  incidente: 'Incidente',
+  relatorio: 'Relatório escolar',
+  outro: 'Outro',
 };
 
 const EducationSection: React.FC<Props> = ({ data }) => {
@@ -64,7 +76,7 @@ const EducationSection: React.FC<Props> = ({ data }) => {
                     textTransform: 'uppercase',
                   }}
                 >
-                  {plan.planType.toUpperCase()}
+                  {PLAN_TYPE_LABELS[plan.planType] ?? plan.planType.toUpperCase()}
                 </span>
                 <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>{plan.academicYear}</span>
               </div>

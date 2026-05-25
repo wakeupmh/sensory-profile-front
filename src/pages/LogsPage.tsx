@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Box, Flex } from '@radix-ui/themes';
 import { ExclamationTriangleIcon, InfoCircledIcon, PlusIcon } from '@radix-ui/react-icons';
 import { logApi, childApi } from '../services/api';
@@ -59,7 +60,8 @@ export default function LogsPage() {
 
   const [logs, setLogs] = useState<DailyLog[]>([]);
   const [children, setChildren] = useState<ChildData[]>([]);
-  const [selectedChildId, setSelectedChildId] = useState<string>('');
+  const [searchParams] = useSearchParams();
+  const [selectedChildId, setSelectedChildId] = useState<string>(searchParams.get('childId') || '');
   const [filter, setFilter] = useState<FilterType>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

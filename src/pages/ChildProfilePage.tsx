@@ -97,6 +97,7 @@ const ChildProfilePage = () => {
 
   const handleSaveEdit = async () => {
     if (!childId) return;
+    setError(null);
     setEditSaving(true);
     try {
       const token = await getTokenRef.current();
@@ -247,9 +248,6 @@ const ChildProfilePage = () => {
                   gap: '12px',
                 }}
               >
-                {/* TODO: target pages (/dashboard, /logs, /therapy, /medical, /development, /education)
-                    currently use local `selectedChildId` state and do not read `childId` from the URL.
-                    Add useSearchParams handling on each page to honor this pre-filter. */}
                 <DomainStatsCard
                   label="Avaliações"
                   count={stats.assessmentCount}
