@@ -60,68 +60,38 @@ export const assessmentApi = {
 };
 
 export const anamneseApi = {
-  list: async (token: string | null) => {
-        const response = await api.get('/api/anamneses', {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
-  },
+  list: (token: string | null) =>
+    authRequest<any>('get', token, '/api/anamneses'),
 
-  getById: async (id: string, token: string | null) => {
-        const response = await api.get(`/api/anamneses/${id}`, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
-  },
+  getById: (id: string, token: string | null) =>
+    authRequest<any>('get', token, `/api/anamneses/${id}`),
 
-  create: async (data: any, token: string | null) => {
-        const response = await api.post('/api/anamneses', data, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
-  },
+  create: (data: any, token: string | null) =>
+    authRequest<any>('post', token, '/api/anamneses', data),
 
-  update: async (id: string, data: any, token: string | null) => {
-        const response = await api.put(`/api/anamneses/${id}`, data, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
-  },
+  update: (id: string, data: any, token: string | null) =>
+    authRequest<any>('put', token, `/api/anamneses/${id}`, data),
 
-  remove: async (id: string, token: string | null) => {
-        const response = await api.delete(`/api/anamneses/${id}`, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
-  },
+  remove: (id: string, token: string | null) =>
+    authRequest<any>('delete', token, `/api/anamneses/${id}`),
 
-  generateShareLink: async (id: string, token: string | null) => {
-        const response = await api.post(`/api/anamneses/${id}/share`, {}, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data as { shareToken: string; sharedAt?: string };
-  },
+  generateShareLink: (id: string, token: string | null) =>
+    authRequest<{ shareToken: string; sharedAt?: string }>('post', token, `/api/anamneses/${id}/share`, {}),
 
-  revokeShareLink: async (id: string, token: string | null) => {
-        const response = await api.delete(`/api/anamneses/${id}/share`, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
-  },
+  revokeShareLink: (id: string, token: string | null) =>
+    authRequest<any>('delete', token, `/api/anamneses/${id}/share`),
 
   // Public endpoint — intentionally omits Authorization header.
   getBySharedToken: async (shareToken: string) => {
-        const response = await api.get(`/api/anamneses/shared/${shareToken}`);
+    const response = await api.get(`/api/anamneses/shared/${shareToken}`);
     return response.data;
   },
 };
 
 export const draftApi = {
   getDraft: async (formType: string, token: string | null) => {
-    const response = await api.get(`/api/drafts/${formType}`, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data.data as DraftData | null;
+    const response = await authRequest<any>('get', token, `/api/drafts/${formType}`);
+    return response.data as DraftData | null;
   },
 
   saveDraft: async (
@@ -131,19 +101,12 @@ export const draftApi = {
     instrumentId: string | null | undefined,
     token: string | null
   ) => {
-    const response = await api.put(
-      `/api/drafts/${formType}`,
-      { payload, currentStep, instrumentId },
-      { headers: getAuthHeaders(token) }
-    );
-    return response.data.data as DraftData;
+    const response = await authRequest<any>('put', token, `/api/drafts/${formType}`, { payload, currentStep, instrumentId });
+    return response.data as DraftData;
   },
 
-  deleteDraft: async (formType: string, token: string | null) => {
-    await api.delete(`/api/drafts/${formType}`, {
-      headers: getAuthHeaders(token),
-    });
-  },
+  deleteDraft: (formType: string, token: string | null) =>
+    authRequest<any>('delete', token, `/api/drafts/${formType}`),
 };
 
 export interface DraftData {
@@ -173,58 +136,37 @@ type ChildUpdatePayload = Partial<ChildPayload>;
 
 export const childApi = {
   list: async (token: string | null): Promise<ChildData[]> => {
-    const response = await api.get('/api/children', {
-      headers: getAuthHeaders(token),
-    });
-    return response.data.data;
+    const response = await authRequest<any>('get', token, '/api/children');
+    return response.data;
   },
 
   get: async (id: string, token: string | null): Promise<ChildData> => {
-        const response = await api.get(`/api/children/${id}`, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data.data;
+    const response = await authRequest<any>('get', token, `/api/children/${id}`);
+    return response.data;
   },
 
   create: async (payload: ChildPayload, token: string | null): Promise<ChildData> => {
-        const response = await api.post('/api/children', payload, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data.data;
+    const response = await authRequest<any>('post', token, '/api/children', payload);
+    return response.data;
   },
 
   update: async (id: string, payload: ChildUpdatePayload, token: string | null): Promise<ChildData> => {
-        const response = await api.put(`/api/children/${id}`, payload, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data.data;
-  },
-
-  delete: async (id: string, token: string | null): Promise<void> => {
-        await api.delete(`/api/children/${id}`, {
-      headers: getAuthHeaders(token),
-    });
-  },
-
-  getProfile: async (id: string, token: string | null, periodDays = 30): Promise<import('../types/child').ChildProfile> => {
-        const response = await api.get(`/api/children/${id}/profile`, {
-      headers: getAuthHeaders(token),
-      params: { periodDays },
-    });
+    const response = await authRequest<any>('put', token, `/api/children/${id}`, payload);
     return response.data;
   },
 
-  getTimeline: async (
+  delete: (id: string, token: string | null): Promise<void> =>
+    authRequest<any>('delete', token, `/api/children/${id}`),
+
+  getProfile: (id: string, token: string | null, periodDays = 30): Promise<import('../types/child').ChildProfile> =>
+    authRequest<any>('get', token, `/api/children/${id}/profile`, undefined, { params: { periodDays } }),
+
+  getTimeline: (
     id: string,
     token: string | null,
     params: { page?: number; limit?: number; from?: string; to?: string } = {}
-  ): Promise<import('../types/child').PaginatedTimeline> => {
-        const response = await api.get(`/api/children/${id}/timeline`, {
-      headers: getAuthHeaders(token),
-      params,
-    });
-    return response.data;
-  },
+  ): Promise<import('../types/child').PaginatedTimeline> =>
+    authRequest<any>('get', token, `/api/children/${id}/timeline`, undefined, { params }),
 };
 
 import type { CreateLogPayload, DailyLog, LogType } from '../types/logs';
@@ -246,40 +188,20 @@ export interface LogQueryParams {
 }
 
 export const logApi = {
-  getLogs: async (token: string | null, params?: LogQueryParams): Promise<PaginatedLogs> => {
-        const response = await api.get('/api/logs', {
-      headers: getAuthHeaders(token),
-      params,
-    });
-    return response.data;
-  },
+  getLogs: (token: string | null, params?: LogQueryParams): Promise<PaginatedLogs> =>
+    authRequest<PaginatedLogs>('get', token, '/api/logs', undefined, { params }),
 
-  getLog: async (token: string | null, id: string): Promise<DailyLog> => {
-        const response = await api.get(`/api/logs/${id}`, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
-  },
+  getLog: (token: string | null, id: string): Promise<DailyLog> =>
+    authRequest<DailyLog>('get', token, `/api/logs/${id}`),
 
-  createLog: async (token: string | null, payload: CreateLogPayload): Promise<DailyLog> => {
-        const response = await api.post('/api/logs', payload, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
-  },
+  createLog: (token: string | null, payload: CreateLogPayload): Promise<DailyLog> =>
+    authRequest<DailyLog>('post', token, '/api/logs', payload),
 
-  updateLog: async (token: string | null, id: string, payload: Partial<CreateLogPayload>): Promise<DailyLog> => {
-        const response = await api.patch(`/api/logs/${id}`, payload, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
-  },
+  updateLog: (token: string | null, id: string, payload: Partial<CreateLogPayload>): Promise<DailyLog> =>
+    authRequest<DailyLog>('patch', token, `/api/logs/${id}`, payload),
 
-  deleteLog: async (token: string | null, id: string): Promise<void> => {
-        await api.delete(`/api/logs/${id}`, {
-      headers: getAuthHeaders(token),
-    });
-  },
+  deleteLog: (token: string | null, id: string): Promise<void> =>
+    authRequest<any>('delete', token, `/api/logs/${id}`),
 };
 
 import type { CreateSessionPayload, CreateTherapistPayload, PaginatedSessions, TherapySession, Therapist, TherapyType } from '../types/therapy';
@@ -295,76 +217,51 @@ export interface SessionQueryParams {
 }
 
 export const therapyApi = {
-  getSessions: async (token: string | null, params?: SessionQueryParams): Promise<PaginatedSessions> => {
-        const response = await api.get('/api/therapy/sessions', {
-      headers: getAuthHeaders(token),
-      params,
-    });
+  getSessions: (token: string | null, params?: SessionQueryParams): Promise<PaginatedSessions> =>
+    authRequest<PaginatedSessions>('get', token, '/api/therapy/sessions', undefined, { params }),
+
+  getSession: async (token: string | null, id: string): Promise<TherapySession> => {
+    const response = await authRequest<any>('get', token, `/api/therapy/sessions/${id}`);
     return response.data;
   },
 
-  getSession: async (token: string | null, id: string): Promise<TherapySession> => {
-        const response = await api.get(`/api/therapy/sessions/${id}`, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data.data;
-  },
-
   createSession: async (token: string | null, payload: CreateSessionPayload): Promise<TherapySession> => {
-        const response = await api.post('/api/therapy/sessions', payload, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data.data;
+    const response = await authRequest<any>('post', token, '/api/therapy/sessions', payload);
+    return response.data;
   },
 
   updateSession: async (token: string | null, id: string, payload: Partial<CreateSessionPayload>): Promise<TherapySession> => {
-        const response = await api.patch(`/api/therapy/sessions/${id}`, payload, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data.data;
+    const response = await authRequest<any>('patch', token, `/api/therapy/sessions/${id}`, payload);
+    return response.data;
   },
 
-  deleteSession: async (token: string | null, id: string): Promise<void> => {
-        await api.delete(`/api/therapy/sessions/${id}`, {
-      headers: getAuthHeaders(token),
-    });
-  },
+  deleteSession: (token: string | null, id: string): Promise<void> =>
+    authRequest<any>('delete', token, `/api/therapy/sessions/${id}`),
 };
 
 export const therapistApi = {
   list: async (token: string | null): Promise<Therapist[]> => {
-        const response = await api.get('/api/therapy/therapists', {
-      headers: getAuthHeaders(token),
-    });
-    return response.data.data;
+    const response = await authRequest<any>('get', token, '/api/therapy/therapists');
+    return response.data;
   },
 
   getById: async (token: string | null, id: string): Promise<Therapist> => {
-        const response = await api.get(`/api/therapy/therapists/${id}`, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data.data;
+    const response = await authRequest<any>('get', token, `/api/therapy/therapists/${id}`);
+    return response.data;
   },
 
   create: async (token: string | null, payload: CreateTherapistPayload): Promise<Therapist> => {
-        const response = await api.post('/api/therapy/therapists', payload, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data.data;
+    const response = await authRequest<any>('post', token, '/api/therapy/therapists', payload);
+    return response.data;
   },
 
   update: async (token: string | null, id: string, payload: Partial<CreateTherapistPayload>): Promise<Therapist> => {
-        const response = await api.patch(`/api/therapy/therapists/${id}`, payload, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data.data;
+    const response = await authRequest<any>('patch', token, `/api/therapy/therapists/${id}`, payload);
+    return response.data;
   },
 
-  delete: async (token: string | null, id: string): Promise<void> => {
-        await api.delete(`/api/therapy/therapists/${id}`, {
-      headers: getAuthHeaders(token),
-    });
-  },
+  delete: (token: string | null, id: string): Promise<void> =>
+    authRequest<any>('delete', token, `/api/therapy/therapists/${id}`),
 };
 
 import type {
@@ -377,39 +274,27 @@ import type {
 
 export const medicationApi = {
   list: async (token: string | null, params?: MedicationQueryParams): Promise<Medication[]> => {
-        const response = await api.get('/api/medical/medications', {
-      headers: getAuthHeaders(token),
-      params,
-    });
-    return response.data.data;
+    const response = await authRequest<any>('get', token, '/api/medical/medications', undefined, { params });
+    return response.data;
   },
 
   get: async (token: string | null, id: string): Promise<Medication> => {
-        const response = await api.get(`/api/medical/medications/${id}`, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data.data;
+    const response = await authRequest<any>('get', token, `/api/medical/medications/${id}`);
+    return response.data;
   },
 
   create: async (token: string | null, payload: CreateMedicationPayload): Promise<Medication> => {
-        const response = await api.post('/api/medical/medications', payload, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data.data;
+    const response = await authRequest<any>('post', token, '/api/medical/medications', payload);
+    return response.data;
   },
 
   update: async (token: string | null, id: string, payload: UpdateMedicationPayload): Promise<Medication> => {
-        const response = await api.patch(`/api/medical/medications/${id}`, payload, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data.data;
+    const response = await authRequest<any>('patch', token, `/api/medical/medications/${id}`, payload);
+    return response.data;
   },
 
-  delete: async (token: string | null, id: string): Promise<void> => {
-        await api.delete(`/api/medical/medications/${id}`, {
-      headers: getAuthHeaders(token),
-    });
-  },
+  delete: (token: string | null, id: string): Promise<void> =>
+    authRequest<any>('delete', token, `/api/medical/medications/${id}`),
 };
 
 export const comorbidityApi = {

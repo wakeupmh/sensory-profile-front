@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Flex } from '@radix-ui/themes';
 import { Cross2Icon, PlusIcon } from '@radix-ui/react-icons';
 import { colors, shadows, radii, fonts, spacing } from '../../theme/tokens';
@@ -9,6 +9,7 @@ import { GumroadText } from '../design-system/GumroadHeading';
 import ComorbidityCard from './ComorbidityCard';
 import ComorbidityForm from './ComorbidityForm';
 import type { Comorbidity, CreateComorbidityPayload } from '../../types/medical';
+import { usePanelCrud } from '../../hooks/usePanelCrud';
 
 interface ComorbiditiesPanelProps {
   isOpen: boolean;
@@ -19,8 +20,6 @@ interface ComorbiditiesPanelProps {
   onEdit: (id: string, payload: Omit<CreateComorbidityPayload, 'childId'>) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 }
-
-type PanelView = 'list' | 'add' | 'edit';
 
 const overlayStyle: React.CSSProperties = {
   position: 'fixed',
@@ -55,27 +54,17 @@ const ComorbiditiesPanel: React.FC<ComorbiditiesPanelProps> = ({
   onEdit,
   onDelete,
 }) => {
-  const [view, setView] = useState<PanelView>('list');
-  const [editingComorbidity, setEditingComorbidity] = useState<Comorbidity | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (!isOpen) {
-      setView('list');
-      setEditingComorbidity(null);
-      setDeletingId(null);
-    }
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  const {
+    editingItem: editingComorbidity,
+    setEditingItem: setEditingComorbidity,
+    deletingId,
+    setDeletingId,
+    isLoading,
+    setIsLoading,
+    view,
+    setView,
+    startEdit,
+  } = usePanelCrud<Comorbidity>({ isOpen, onClose });
 
   const handleAdd = async (payload: CreateComorbidityPayload | Omit<CreateComorbidityPayload, 'childId'>) => {
     setIsLoading(true);

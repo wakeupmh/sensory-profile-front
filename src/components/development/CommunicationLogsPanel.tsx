@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { Flex } from '@radix-ui/themes';
 import { Cross2Icon, PlusIcon } from '@radix-ui/react-icons';
 import { colors, shadows, radii, fonts, spacing } from '../../theme/tokens';
@@ -16,6 +16,7 @@ import type {
   UpdateCommunicationLogPayload,
 } from '../../types/development';
 import { COMMUNICATION_ENTRY_TYPE_LABELS } from '../../types/development';
+import { usePanelCrud } from '../../hooks/usePanelCrud';
 
 interface CommunicationLogsPanelProps {
   isOpen: boolean;
@@ -24,8 +25,6 @@ interface CommunicationLogsPanelProps {
   onMutate?: () => void;
   getToken: () => Promise<string | null>;
 }
-
-type PanelView = 'list' | 'add' | 'edit';
 
 const overlayStyle: React.CSSProperties = {
   position: 'fixed',
@@ -68,40 +67,24 @@ const CommunicationLogsPanel: React.FC<CommunicationLogsPanelProps> = ({
   onMutate,
   getToken,
 }) => {
-  const [view, setView] = useState<PanelView>('list');
-  const [logs, setLogs] = useState<CommunicationLogSummary[]>([]);
-  const [editingLog, setEditingLog] = useState<CommunicationLog | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const fetchFn = useCallback(async () => {
+    const token = await getToken();
+    const result = await communicationLogApi.list(token, { childId: childId || undefined, limit: 20, page: 1 });
+    return result.data ?? result;
+  }, [getToken, childId]);
 
-  const fetchLogs = async () => {
-    try {
-      const token = await getToken();
-      const result = await communicationLogApi.list(token, { childId: childId || undefined, limit: 20, page: 1 });
-      setLogs(result.data ?? result);
-    } catch {
-      // silently handle
-    }
-  };
-
-  useEffect(() => {
-    if (!isOpen) {
-      setView('list');
-      setEditingLog(null);
-      setDeletingId(null);
-      return;
-    }
-    fetchLogs();
-  }, [isOpen, childId]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  const {
+    items: logs,
+    editingItem: editingLog,
+    setEditingItem: setEditingLog,
+    deletingId,
+    setDeletingId,
+    isLoading,
+    setIsLoading,
+    view,
+    setView,
+    fetchItems: fetchLogs,
+  } = usePanelCrud<CommunicationLogSummary, CommunicationLog>({ isOpen, onClose, childId, fetchFn });
 
   const handleAdd = async (payload: CreateCommunicationLogPayload | UpdateCommunicationLogPayload) => {
     setIsLoading(true);

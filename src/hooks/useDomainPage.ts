@@ -28,7 +28,7 @@ export function useDomainPage() {
     }
   }, [fetchChildren, isLoaded, session]);
 
-  const effectiveChildId = selectedChildId || (children.length > 0 ? children[0].id : '');
+  const effectiveChildId = selectedChildId;
 
   return { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef };
 }

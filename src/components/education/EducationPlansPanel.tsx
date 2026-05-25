@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { Flex } from '@radix-ui/themes';
 import { Cross2Icon, PlusIcon } from '@radix-ui/react-icons';
 import { colors, shadows, radii, fonts, spacing } from '../../theme/tokens';
@@ -15,6 +15,7 @@ import type {
   UpdateEducationPlanPayload,
 } from '../../types/education';
 import { useAuthContext } from '../../context/AuthContext';
+import { usePanelCrud } from '../../hooks/usePanelCrud';
 
 interface EducationPlansPanelProps {
   isOpen: boolean;
@@ -22,8 +23,6 @@ interface EducationPlansPanelProps {
   childId: string;
   onMutate?: () => void;
 }
-
-type PanelView = 'list' | 'add' | 'edit';
 
 const overlayStyle: React.CSSProperties = {
   position: 'fixed',
@@ -56,38 +55,23 @@ const EducationPlansPanel: React.FC<EducationPlansPanelProps> = ({
   onMutate,
 }) => {
   const { getToken } = useAuthContext();
-  const [view, setView] = useState<PanelView>('list');
-  const [plans, setPlans] = useState<EducationPlan[]>([]);
-  const [editingPlan, setEditingPlan] = useState<EducationPlan | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const fetchPlans = async () => {
-    try {
-      const token = await getToken();
-      const data = await educationPlanApi.list(token, { childId: childId || undefined });
-      setPlans(data);
-    } catch {
-      // silently handle
-    }
-  };
+  const fetchFn = useCallback(async () => {
+    const token = await getToken();
+    return educationPlanApi.list(token, { childId: childId || undefined });
+  }, [getToken, childId]);
 
-  useEffect(() => {
-    if (!isOpen) {
-      setView('list');
-      setEditingPlan(null);
-      return;
-    }
-    fetchPlans();
-  }, [isOpen, childId]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  const {
+    items: plans,
+    editingItem: editingPlan,
+    setEditingItem: setEditingPlan,
+    isLoading,
+    setIsLoading,
+    view,
+    setView,
+    fetchItems: fetchPlans,
+    startEdit,
+  } = usePanelCrud<EducationPlan>({ isOpen, onClose, childId, fetchFn });
 
   const handleAdd = async (payload: CreateEducationPlanPayload | UpdateEducationPlanPayload) => {
     setIsLoading(true);
@@ -182,10 +166,7 @@ const EducationPlansPanel: React.FC<EducationPlansPanelProps> = ({
                   <EducationPlanCard
                     key={plan.id}
                     plan={plan}
-                    onEdit={(item) => {
-                      setEditingPlan(item);
-                      setView('edit');
-                    }}
+                    onEdit={startEdit}
                     onDelete={handleDelete}
                   />
                 ))}

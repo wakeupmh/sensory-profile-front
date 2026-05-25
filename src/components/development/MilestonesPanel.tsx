@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { Flex } from '@radix-ui/themes';
 import { Cross2Icon, PlusIcon } from '@radix-ui/react-icons';
 import { colors, shadows, radii, fonts, spacing } from '../../theme/tokens';
@@ -15,6 +15,7 @@ import type {
   UpdateMilestonePayload,
 } from '../../types/development';
 import { MILESTONE_STATUS_LABELS } from '../../types/development';
+import { usePanelCrud } from '../../hooks/usePanelCrud';
 
 interface MilestonesPanelProps {
   isOpen: boolean;
@@ -23,8 +24,6 @@ interface MilestonesPanelProps {
   onMutate?: () => void;
   getToken: () => Promise<string | null>;
 }
-
-type PanelView = 'list' | 'add' | 'edit';
 
 const overlayStyle: React.CSSProperties = {
   position: 'fixed',
@@ -57,40 +56,24 @@ const MilestonesPanel: React.FC<MilestonesPanelProps> = ({
   onMutate,
   getToken,
 }) => {
-  const [view, setView] = useState<PanelView>('list');
-  const [milestones, setMilestones] = useState<DevelopmentalMilestone[]>([]);
-  const [editingMilestone, setEditingMilestone] = useState<DevelopmentalMilestone | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const fetchFn = useCallback(async () => {
+    const token = await getToken();
+    return milestoneApi.list(token, { childId: childId || undefined });
+  }, [getToken, childId]);
 
-  const fetchMilestones = async () => {
-    try {
-      const token = await getToken();
-      const data = await milestoneApi.list(token, { childId: childId || undefined });
-      setMilestones(data);
-    } catch {
-      // silently handle
-    }
-  };
-
-  useEffect(() => {
-    if (!isOpen) {
-      setView('list');
-      setEditingMilestone(null);
-      setDeletingId(null);
-      return;
-    }
-    fetchMilestones();
-  }, [isOpen, childId]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  const {
+    items: milestones,
+    editingItem: editingMilestone,
+    setEditingItem: setEditingMilestone,
+    deletingId,
+    setDeletingId,
+    isLoading,
+    setIsLoading,
+    view,
+    setView,
+    fetchItems: fetchMilestones,
+    startEdit,
+  } = usePanelCrud<DevelopmentalMilestone>({ isOpen, onClose, childId, fetchFn });
 
   const handleAdd = async (payload: CreateMilestonePayload | UpdateMilestonePayload) => {
     setIsLoading(true);
@@ -213,10 +196,7 @@ const MilestonesPanel: React.FC<MilestonesPanelProps> = ({
                     <MilestoneCard
                       key={m.id}
                       milestone={m}
-                      onEdit={(item) => {
-                        setEditingMilestone(item);
-                        setView('edit');
-                      }}
+                      onEdit={startEdit}
                       onDelete={(id) => setDeletingId(id)}
                     />
                   )

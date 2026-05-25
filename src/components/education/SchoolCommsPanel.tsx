@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Flex } from '@radix-ui/themes';
 import { Cross2Icon, PlusIcon } from '@radix-ui/react-icons';
 import { colors, shadows, radii, fonts, spacing } from '../../theme/tokens';
@@ -16,6 +16,7 @@ import type {
   UpdateSchoolCommPayload,
 } from '../../types/education';
 import { useAuthContext } from '../../context/AuthContext';
+import { usePanelCrud } from '../../hooks/usePanelCrud';
 
 interface SchoolCommsPanelProps {
   isOpen: boolean;
@@ -23,8 +24,6 @@ interface SchoolCommsPanelProps {
   childId: string;
   onMutate?: () => void;
 }
-
-type PanelView = 'list' | 'add' | 'edit';
 
 const LIMIT = 20;
 
@@ -59,26 +58,48 @@ const SchoolCommsPanel: React.FC<SchoolCommsPanelProps> = ({
   onMutate,
 }) => {
   const { getToken } = useAuthContext();
-  const [view, setView] = useState<PanelView>('list');
-  const [comms, setComms] = useState<SchoolCommunicationSummary[]>([]);
-  const [editingComm, setEditingComm] = useState<SchoolCommunication | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
 
-  const fetchComms = async (pageNum = 1, append = false) => {
+  const fetchFn = useCallback(async () => {
+    const token = await getToken();
+    const result = await schoolCommApi.list(token, {
+      childId: childId || undefined,
+      page: 1,
+      limit: LIMIT,
+    });
+    setTotal(result.total);
+    setPage(result.page);
+    return result.data;
+  }, [getToken, childId]);
+
+  const onReset = useCallback(() => {
+    setPage(1);
+    setTotal(0);
+  }, []);
+
+  const {
+    items: comms,
+    setItems: setComms,
+    editingItem: editingComm,
+    setEditingItem: setEditingComm,
+    isLoading,
+    setIsLoading,
+    view,
+    setView,
+    fetchItems: fetchComms,
+  } = usePanelCrud<SchoolCommunicationSummary, SchoolCommunication>({ isOpen, onClose, childId, fetchFn, onReset });
+
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
     try {
       const token = await getToken();
       const result = await schoolCommApi.list(token, {
         childId: childId || undefined,
-        page: pageNum,
+        page: nextPage,
         limit: LIMIT,
       });
-      if (append) {
-        setComms((prev) => [...prev, ...result.data]);
-      } else {
-        setComms(result.data);
-      }
+      setComms((prev) => [...prev, ...result.data]);
       setTotal(result.total);
       setPage(result.page);
     } catch {
@@ -86,38 +107,12 @@ const SchoolCommsPanel: React.FC<SchoolCommsPanelProps> = ({
     }
   };
 
-  useEffect(() => {
-    if (!isOpen) {
-      setView('list');
-      setEditingComm(null);
-      setComms([]);
-      setPage(1);
-      setTotal(0);
-      return;
-    }
-    fetchComms(1);
-  }, [isOpen, childId]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
-
-  const handleLoadMore = async () => {
-    const nextPage = page + 1;
-    await fetchComms(nextPage, true);
-  };
-
   const handleAdd = async (payload: CreateSchoolCommPayload | UpdateSchoolCommPayload) => {
     setIsLoading(true);
     try {
       const token = await getToken();
       await schoolCommApi.create(token, { ...(payload as CreateSchoolCommPayload), childId });
-      await fetchComms(1);
+      await fetchComms();
       onMutate?.();
       setView('list');
     } finally {
@@ -131,7 +126,7 @@ const SchoolCommsPanel: React.FC<SchoolCommsPanelProps> = ({
     try {
       const token = await getToken();
       await schoolCommApi.update(token, editingComm.id, payload as UpdateSchoolCommPayload);
-      await fetchComms(1);
+      await fetchComms();
       onMutate?.();
       setView('list');
       setEditingComm(null);
@@ -145,7 +140,7 @@ const SchoolCommsPanel: React.FC<SchoolCommsPanelProps> = ({
     try {
       const token = await getToken();
       await schoolCommApi.delete(token, id);
-      await fetchComms(1);
+      await fetchComms();
       onMutate?.();
     } finally {
       setIsLoading(false);

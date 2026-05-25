@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Flex } from '@radix-ui/themes';
 import { Cross2Icon, PlusIcon } from '@radix-ui/react-icons';
 import { colors, shadows, radii, fonts, spacing } from '../../theme/tokens';
@@ -9,6 +9,7 @@ import { GumroadText } from '../design-system/GumroadHeading';
 import MedicationCard from './MedicationCard';
 import MedicationForm from './MedicationForm';
 import type { Medication, CreateMedicationPayload, UpdateMedicationPayload } from '../../types/medical';
+import { usePanelCrud } from '../../hooks/usePanelCrud';
 
 interface MedicationsPanelProps {
   isOpen: boolean;
@@ -19,8 +20,6 @@ interface MedicationsPanelProps {
   onEdit: (id: string, payload: UpdateMedicationPayload) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 }
-
-type PanelView = 'list' | 'add' | 'edit';
 
 const overlayStyle: React.CSSProperties = {
   position: 'fixed',
@@ -55,27 +54,17 @@ const MedicationsPanel: React.FC<MedicationsPanelProps> = ({
   onEdit,
   onDelete,
 }) => {
-  const [view, setView] = useState<PanelView>('list');
-  const [editingMedication, setEditingMedication] = useState<Medication | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (!isOpen) {
-      setView('list');
-      setEditingMedication(null);
-      setDeletingId(null);
-    }
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  const {
+    editingItem: editingMedication,
+    setEditingItem: setEditingMedication,
+    deletingId,
+    setDeletingId,
+    isLoading,
+    setIsLoading,
+    view,
+    setView,
+    startEdit,
+  } = usePanelCrud<Medication>({ isOpen, onClose });
 
   const handleAdd = async (payload: CreateMedicationPayload | UpdateMedicationPayload) => {
     setIsLoading(true);
@@ -190,10 +179,7 @@ const MedicationsPanel: React.FC<MedicationsPanelProps> = ({
                     <MedicationCard
                       key={med.id}
                       medication={med}
-                      onEdit={(m) => {
-                        setEditingMedication(m);
-                        setView('edit');
-                      }}
+                      onEdit={startEdit}
                       onDelete={(id) => setDeletingId(id)}
                     />
                   )
