@@ -151,14 +151,14 @@ export const childApi = {
     authRequest<any>('delete', token, `/api/children/${id}`),
 
   getProfile: (id: string, token: string | null, periodDays = 30): Promise<import('../types/child').ChildProfile> =>
-    authRequest<any>('get', token, `/api/children/${id}/profile`, undefined, { params: { periodDays } }),
+    authRequest<{ data: import('../types/child').ChildProfile }>('get', token, `/api/children/${id}/profile`, undefined, { params: { periodDays } }).then(r => r.data),
 
   getTimeline: (
     id: string,
     token: string | null,
     params: { page?: number; limit?: number; from?: string; to?: string } = {}
   ): Promise<import('../types/child').PaginatedTimeline> =>
-    authRequest<any>('get', token, `/api/children/${id}/timeline`, undefined, { params }),
+    authRequest<{ data: import('../types/child').TimelineEvent[]; total: number; page: number; limit: number }>('get', token, `/api/children/${id}/timeline`, undefined, { params }).then(r => ({ data: r.data, total: r.total, page: r.page, limit: r.limit })),
 };
 
 import type { CreateLogPayload, DailyLog, LogType } from '../types/logs';
@@ -184,13 +184,13 @@ export const logApi = {
     authRequest<PaginatedLogs>('get', token, '/api/logs', undefined, { params }),
 
   getLog: (token: string | null, id: string): Promise<DailyLog> =>
-    authRequest<DailyLog>('get', token, `/api/logs/${id}`),
+    authRequest<{ data: DailyLog }>('get', token, `/api/logs/${id}`).then(r => r.data),
 
   createLog: (token: string | null, payload: CreateLogPayload): Promise<DailyLog> =>
-    authRequest<DailyLog>('post', token, '/api/logs', payload),
+    authRequest<{ data: DailyLog }>('post', token, '/api/logs', payload).then(r => r.data),
 
   updateLog: (token: string | null, id: string, payload: Partial<CreateLogPayload>): Promise<DailyLog> =>
-    authRequest<DailyLog>('patch', token, `/api/logs/${id}`, payload),
+    authRequest<{ data: DailyLog }>('patch', token, `/api/logs/${id}`, payload).then(r => r.data),
 
   deleteLog: (token: string | null, id: string): Promise<void> =>
     authRequest<any>('delete', token, `/api/logs/${id}`),

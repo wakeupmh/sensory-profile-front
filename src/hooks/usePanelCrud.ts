@@ -35,15 +35,20 @@ export function usePanelCrud<
   const [editingItem, setEditingItem] = useState<E | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<PanelView>('list');
 
   const fetchItems = useCallback(async () => {
     if (!fetchFn) return;
     try {
+      setIsLoading(true);
+      setError(null);
       const data = await fetchFn();
       setItems(data);
     } catch {
-      // silently handle
+      setError('Erro ao carregar dados. Tente novamente.');
+    } finally {
+      setIsLoading(false);
     }
   }, [fetchFn]);
 
@@ -90,6 +95,8 @@ export function usePanelCrud<
     setDeletingId,
     isLoading,
     setIsLoading,
+    error,
+    setError,
     view,
     setView,
     fetchItems,
