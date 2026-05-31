@@ -19,14 +19,16 @@ interface LogTypeSelectorProps {
 export default function LogTypeSelector({ selected, onSelect }: LogTypeSelectorProps) {
   return (
     <Flex direction="column" gap="2">
-      {LOG_TYPES.map(({ type, label, emoji }) => {
+      {LOG_TYPES.map(({ type, label, emoji }, i) => {
         const isActive = selected === type;
         return (
           <button
             key={type}
             type="button"
             onClick={() => onSelect(type)}
+            className="modal-stagger"
             style={{
+              ['--i' as string]: i,
               display: 'flex',
               alignItems: 'center',
               gap: '12px',
@@ -43,8 +45,15 @@ export default function LogTypeSelector({ selected, onSelect }: LogTypeSelectorP
               color: colors.ink,
               textAlign: 'left',
               width: '100%',
-              transform: isActive ? 'translate(2px, 2px)' : 'translate(0, 0)',
-              transition: 'transform 0.1s ease, box-shadow 0.1s ease, background-color 0.1s ease',
+              transition: 'box-shadow 0.12s ease, background-color 0.12s ease',
+            }}
+            onMouseEnter={(e) => {
+              if (isActive) return;
+              e.currentTarget.style.boxShadow = `4px 4px 0px ${colors.ink}`;
+            }}
+            onMouseLeave={(e) => {
+              if (isActive) return;
+              e.currentTarget.style.boxShadow = shadows.button;
             }}
           >
             <span style={{ fontSize: '20px', lineHeight: 1 }}>{emoji}</span>

@@ -6,6 +6,7 @@ import { getInstrument } from '../../instruments';
 import { Box, TextArea } from '@radix-ui/themes';
 import { colors, shadows, radii, typography } from '../../theme/tokens';
 import GumroadHeading from '../design-system/GumroadHeading';
+import type { ResponseScale } from '../../instruments/types';
 
 interface SensoryProcessingSectionProps {
   formData: FormData;
@@ -19,6 +20,7 @@ const SensorySection = memo(({
   sectionKey,
   items,
   comments,
+  scale,
   updateItemResponse,
   updateComments,
   disabled,
@@ -27,6 +29,7 @@ const SensorySection = memo(({
   sectionKey: string;
   items: SensoryItem[];
   comments: string;
+  scale?: ResponseScale;
   updateItemResponse: (section: string, itemId: number, response: FrequencyResponse) => void;
   updateComments: (section: string, comments: string) => void;
   disabled?: boolean;
@@ -39,6 +42,7 @@ const SensorySection = memo(({
       </GumroadHeading>
       <SensoryItemsTable
         items={items}
+        scale={scale}
         onResponseChange={(itemId, response) =>
           updateItemResponse(sectionKey, itemId, response)
         }
@@ -101,6 +105,7 @@ const SensoryProcessingSection: React.FC<SensoryProcessingSectionProps> = memo((
             sectionKey={section.key}
             items={items}
             comments={comments}
+            scale={instrument.scale}
             updateItemResponse={updateItemResponse}
             updateComments={handleCommentsChange}
             disabled={disabled}

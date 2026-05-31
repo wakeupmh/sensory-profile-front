@@ -103,6 +103,7 @@ const SensoryProfileForm: React.FC = () => {
   // Stepper state (new-mode only)
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [maxStepReached, setMaxStepReached] = useState(0);
   const draftCheckedRef = useRef(false);
 
   const { loadDraft, clearDraft, saveOnStepChange } = useDraftPersistence({
@@ -129,6 +130,7 @@ const SensoryProfileForm: React.FC = () => {
       setFormData(draft.payload as any);
       const step = draft.currentStep ?? 0;
       setCurrentStep(step);
+      setMaxStepReached(step);
       const completed = new Set<number>();
       for (let i = 0; i < step; i++) completed.add(i);
       setCompletedSteps(completed);
@@ -191,7 +193,6 @@ const SensoryProfileForm: React.FC = () => {
   const handleStepBack = () => {
     if (currentStep === 0) return;
     const newStep = currentStep - 1;
-    setCompletedSteps((prev) => new Set([...prev, currentStep]));
     setCurrentStep(newStep);
     saveOnStepChange(newStep);
     setValidationError(null);
@@ -201,12 +202,13 @@ const SensoryProfileForm: React.FC = () => {
     if (!validateStep(currentStep)) return;
     const newStep = currentStep + 1;
     setCompletedSteps((prev) => new Set([...prev, currentStep]));
+    setMaxStepReached((prev) => Math.max(prev, newStep));
     setCurrentStep(newStep);
     saveOnStepChange(newStep);
   };
 
   const handleStepClick = (i: number) => {
-    if (!completedSteps.has(i) && i !== currentStep) return;
+    if (i > maxStepReached) return;
     setValidationError(null);
     setCurrentStep(i);
   };

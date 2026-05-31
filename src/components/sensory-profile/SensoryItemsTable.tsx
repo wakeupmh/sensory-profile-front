@@ -3,11 +3,13 @@ import { Table, Box } from '@radix-ui/themes';
 import { SensoryItem, FrequencyResponse } from './types';
 import FastRadioCards from './FastRadioCards';
 import { colors, typography } from '../../theme/tokens';
+import type { ResponseScale } from '../../instruments/types';
 
 interface SensoryItemsTableProps {
   items: SensoryItem[];
   onResponseChange: (itemId: number, response: FrequencyResponse) => void;
   disabled?: boolean;
+  scale?: ResponseScale;
 }
 
 const frequencyOptions = [
@@ -26,7 +28,7 @@ const descriptionStyle: React.CSSProperties = {
   color: colors.ink,
 };
 
-const SensoryItemsTable: React.FC<SensoryItemsTableProps> = memo(({ items, onResponseChange, disabled }) => {
+const SensoryItemsTable: React.FC<SensoryItemsTableProps> = memo(({ items, onResponseChange, disabled, scale }) => {
   return (
     <>
       {/* Mobile: card list */}
@@ -71,6 +73,7 @@ const SensoryItemsTable: React.FC<SensoryItemsTableProps> = memo(({ items, onRes
             <FastRadioCards
               name={`item-${item.id}`}
               options={frequencyOptions}
+              scale={scale}
               initialValue={item.response || ""}
               onValueChange={(_, value) => onResponseChange(item.id, value as FrequencyResponse)}
               disabled={disabled}
@@ -103,6 +106,7 @@ const SensoryItemsTable: React.FC<SensoryItemsTableProps> = memo(({ items, onRes
                   <FastRadioCards
                     name={`item-${item.id}-desktop`}
                     options={frequencyOptions}
+                    scale={scale}
                     initialValue={item.response || ""}
                     onValueChange={(_, value) => onResponseChange(item.id, value as FrequencyResponse)}
                     disabled={disabled}

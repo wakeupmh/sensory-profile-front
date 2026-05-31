@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Flex } from '@radix-ui/themes';
 import { Cross2Icon } from '@radix-ui/react-icons';
-import { colors, shadows, radii, fonts, spacing } from '../../theme/tokens';
+import { colors, shadows, radii, fonts, spacing, zIndex } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
 import TherapyTypeSelector from './TherapyTypeSelector';
 import type { TherapyType, Therapist, CreateSessionPayload } from '../../types/therapy';
@@ -27,7 +27,7 @@ const overlayStyle: React.CSSProperties = {
   position: 'fixed',
   inset: 0,
   backgroundColor: 'rgba(10,10,26,0.5)',
-  zIndex: 200,
+  zIndex: zIndex.modal,
   display: 'flex',
   alignItems: 'flex-end',
   justifyContent: 'center',

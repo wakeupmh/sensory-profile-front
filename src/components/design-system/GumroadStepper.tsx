@@ -97,19 +97,19 @@ const GumroadStepper: React.FC<GumroadStepperProps> = ({
               transition: 'transform 0.1s, box-shadow 0.1s',
             };
 
-            if (isCompleted) {
-              circleStyle = {
-                ...circleStyle,
-                background: colors['brand-cyan'],
-                color: colors.surface,
-                boxShadow: shadows['card-sm'],
-              };
-            } else if (isCurrent) {
+            if (isCurrent) {
               circleStyle = {
                 ...circleStyle,
                 background: colors['brand-cyan'],
                 color: colors.surface,
                 boxShadow: `0 0 0 4px ${colors.surface}, 0 0 0 6px ${colors.ink}`,
+              };
+            } else if (isCompleted) {
+              circleStyle = {
+                ...circleStyle,
+                background: colors['brand-cyan'],
+                color: colors.surface,
+                boxShadow: shadows['card-sm'],
               };
             } else {
               circleStyle = {
@@ -135,7 +135,7 @@ const GumroadStepper: React.FC<GumroadStepperProps> = ({
                   onClick={isClickable ? () => onStepClick!(i) : undefined}
                   title={step.label}
                 >
-                  {isCompleted ? (
+                  {isCompleted && !isCurrent ? (
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                       <path
                         d="M2.5 7L5.5 10L11.5 4"
@@ -235,18 +235,18 @@ const GumroadStepper: React.FC<GumroadStepperProps> = ({
                   boxSizing: 'border-box',
                 };
 
-                if (isCompleted) {
-                  dotStyle = {
-                    ...dotStyle,
-                    background: colors['brand-cyan'],
-                  };
-                } else if (isCurrent) {
+                if (isCurrent) {
                   // Cyan fill + 2px white inner ring effect via box-shadow
                   dotStyle = {
                     ...dotStyle,
                     background: colors['brand-cyan'],
                     boxShadow: `0 0 0 2px ${colors['brand-cyan']}, 0 0 0 4px #FFFFFF, 0 0 0 6px ${colors.ink}`,
                     border: `2px solid ${colors.ink}`,
+                  };
+                } else if (isCompleted) {
+                  dotStyle = {
+                    ...dotStyle,
+                    background: colors['brand-cyan'],
                   };
                 } else {
                   dotStyle = {
