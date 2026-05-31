@@ -1,5 +1,5 @@
- import { memo, useEffect, useState } from 'react';
-import { Select, Text } from '@radix-ui/themes';
+import { memo, useEffect, useState } from 'react';
+import { Text } from '@radix-ui/themes';
 import { colors, shadows, radii, typography } from '../../theme/tokens';
 
 interface SelectOption {
@@ -17,9 +17,14 @@ interface FastSelectProps {
   onValueChange?: (name: string, value: string) => void;
 }
 
+// Chevron embutido como data-URI para o ícone à direita (appearance: none remove o nativo)
+const CHEVRON =
+  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'><path d='M4 6l4 4 4-4' stroke='%230A0A1A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>";
+
 /**
- * Um componente de seleção otimizado para desempenho que gerencia seu próprio estado
- * em vez de depender do estado do componente pai, seguindo a abordagem da Epic React.
+ * Componente de seleção otimizado que gerencia seu próprio estado.
+ * Usa um <select> nativo estilizado (neubrutalismo) em vez do Radix Select,
+ * cujo Trigger não aplica a borda do design system de forma confiável.
  */
 const FastSelect = memo(({
   name,
@@ -28,22 +33,18 @@ const FastSelect = memo(({
   initialValue = '',
   disabled = false,
   required = false,
-  onValueChange
+  onValueChange,
 }: FastSelectProps) => {
-  // Estado local para o valor do campo
-  const [value, setValue] = useState(initialValue !== undefined && initialValue !== '' ? initialValue : 'placeholder');
+  const [value, setValue] = useState(initialValue ?? '');
 
-  // Atualizar o valor inicial se ele mudar
   useEffect(() => {
-    setValue(initialValue !== undefined && initialValue !== '' ? initialValue : 'placeholder');
+    setValue(initialValue ?? '');
   }, [initialValue]);
 
-  // Manipulador de alteração que atualiza o estado local e notifica o componente pai
-  const handleValueChange = (newValue: string) => {
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newValue = e.target.value;
     setValue(newValue);
-    if (onValueChange) {
-      onValueChange(name, newValue === 'placeholder' ? '' : newValue);
-    }
+    onValueChange?.(name, newValue);
   };
 
   return (
@@ -63,45 +64,50 @@ const FastSelect = memo(({
       >
         {label} {required && <span style={{ color: colors['brand-salmon'] }}>*</span>}
       </Text>
-      <Select.Root
-        size="2"
+      <select
         value={value}
-        onValueChange={handleValueChange}
+        onChange={handleChange}
         disabled={disabled}
         required={required}
+        style={{
+          width: '100%',
+          height: '48px',
+          padding: '12px 40px 12px 16px',
+          color: value === '' ? '#888' : colors.ink,
+          backgroundColor: 'transparent',
+          border: `2px solid ${colors.ink}`,
+          borderRadius: radii.md,
+          boxShadow: shadows.input,
+          boxSizing: 'border-box',
+          fontFamily: typography['body-md'].font,
+          fontSize: typography['body-md'].size,
+          cursor: disabled ? 'default' : 'pointer',
+          outline: 'none',
+          appearance: 'none',
+          WebkitAppearance: 'none',
+          MozAppearance: 'none',
+          backgroundImage: `url("${CHEVRON}")`,
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'right 16px center',
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.borderColor = colors['brand-cyan'];
+          e.currentTarget.style.boxShadow = `3px 3px 0px ${colors['brand-cyan']}`;
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.borderColor = colors.ink;
+          e.currentTarget.style.boxShadow = shadows.input;
+        }}
       >
-        <Select.Trigger
-          style={{
-            backgroundColor: 'transparent',
-            color: colors.ink,
-            border: `2px solid ${colors.ink}`,
-            borderRadius: radii.md,
-            boxShadow: shadows.input,
-            height: '48px',
-            padding: '12px 16px',
-            fontFamily: typography['body-md'].font,
-            fontSize: typography['body-md'].size,
-            width: '100%',
-            outline: 'none',
-          }}
-        />
-        <Select.Content
-          style={{
-            border: `2px solid ${colors.ink}`,
-            borderRadius: radii.md,
-            boxShadow: shadows.card,
-          }}
-        >
-          <Select.Group>
-            <Select.Item value="placeholder">Selecione</Select.Item>
-            {options.map(option => (
-              <Select.Item key={option.value} value={option.value}>
-                {option.label}
-              </Select.Item>
-            ))}
-          </Select.Group>
-        </Select.Content>
-      </Select.Root>
+        <option value="" disabled>
+          Selecione
+        </option>
+        {options.map((option) => (
+          <option key={option.value} value={option.value} style={{ color: colors.ink }}>
+            {option.label}
+          </option>
+        ))}
+      </select>
     </div>
   );
 });

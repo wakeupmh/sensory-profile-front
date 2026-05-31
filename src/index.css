@@ -195,3 +195,61 @@ a {
     print-color-adjust: exact !important;
   }
 }
+
+/* --- Modal / bottom-sheet animations --- */
+@keyframes modal-overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes modal-sheet-in {
+  from { transform: translateY(40px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* staggered reveal for the list items inside a sheet */
+@keyframes modal-item-in {
+  from { transform: translateY(10px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.modal-overlay {
+  animation: modal-overlay-in 0.18s ease-out;
+  /* accent: lavender-tinted scrim instead of flat navy */
+  background-color: rgba(46, 28, 84, 0.45) !important;
+  backdrop-filter: blur(2px);
+}
+
+.modal-sheet {
+  animation: modal-sheet-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  /* accent stripe at the top edge */
+  border-top: 6px solid var(--color-brand-lavender) !important;
+}
+
+.modal-sheet .modal-stagger {
+  opacity: 0;
+  animation: modal-item-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(var(--i, 0) * 45ms + 80ms);
+}
+
+/* micro-interaction: list rows lift on hover */
+.modal-row {
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.modal-row:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px var(--color-ink);
+}
+.modal-row:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px var(--color-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay,
+  .modal-sheet,
+  .modal-sheet .modal-stagger {
+    animation: none;
+  }
+  .modal-sheet .modal-stagger { opacity: 1; }
+}

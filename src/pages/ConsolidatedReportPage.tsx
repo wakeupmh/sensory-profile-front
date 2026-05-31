@@ -76,7 +76,7 @@ const ConsolidatedReportPage = () => {
       <div style={{ marginBottom: spacing.lg }}>
         <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
           Relatório Consolidado
-          {summary && ` — ${summary.child.name}`}
+          {summary?.child?.name && ` — ${summary.child.name}`}
         </GumroadHeading>
         {summary && (
           <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>

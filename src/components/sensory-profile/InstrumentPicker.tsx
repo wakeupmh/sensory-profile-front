@@ -10,6 +10,9 @@ interface InstrumentPickerProps {
 }
 
 const formatAgeRange = (minMonths: number, maxMonths: number): string => {
+  if (maxMonths >= 9000) {
+    return minMonths <= 0 ? 'Todas as idades' : `${minMonths}m+`;
+  }
   const toLabel = (m: number) => (m >= 12 ? `${Math.floor(m / 12)}a` : `${m}m`);
   return `${toLabel(minMonths)}–${toLabel(maxMonths)}`;
 };

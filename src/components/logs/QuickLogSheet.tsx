@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Flex, Box } from '@radix-ui/themes';
 import { Cross2Icon } from '@radix-ui/react-icons';
-import { colors, shadows, radii, fonts, spacing } from '../../theme/tokens';
+import { colors, shadows, radii, fonts, spacing, zIndex } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
 import GumroadHeading from '../design-system/GumroadHeading';
 import LogTypeSelector from './LogTypeSelector';
@@ -131,7 +131,7 @@ export default function QuickLogSheet({
     position: 'fixed',
     inset: 0,
     backgroundColor: 'rgba(10,10,26,0.5)',
-    zIndex: 200,
+    zIndex: zIndex.modal,
     display: 'flex',
     alignItems: 'flex-end',
     justifyContent: 'center',
@@ -152,8 +152,8 @@ export default function QuickLogSheet({
   };
 
   return (
-    <div style={overlayStyle} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div ref={sheetRef} style={sheetStyle}>
+    <div className="modal-overlay" style={overlayStyle} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div ref={sheetRef} className="modal-sheet" style={sheetStyle}>
         <Flex justify="between" align="center" mb="4">
           <GumroadHeading level="title-lg" as="h2">
             {step === 'form' && selectedType ? LOG_TYPE_LABELS[selectedType] : 'Registrar'}

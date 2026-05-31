@@ -151,14 +151,14 @@ export const childApi = {
     authRequest<any>('delete', token, `/api/children/${id}`),
 
   getProfile: (id: string, token: string | null, periodDays = 30): Promise<import('../types/child').ChildProfile> =>
-    authRequest<any>('get', token, `/api/children/${id}/profile`, undefined, { params: { periodDays } }),
+    authRequest<any>('get', token, `/api/children/${id}/profile`, undefined, { params: { periodDays } }).then((r) => r.data),
 
   getTimeline: (
     id: string,
     token: string | null,
     params: { page?: number; limit?: number; from?: string; to?: string } = {}
   ): Promise<import('../types/child').PaginatedTimeline> =>
-    authRequest<any>('get', token, `/api/children/${id}/timeline`, undefined, { params }),
+    authRequest<any>('get', token, `/api/children/${id}/timeline`, undefined, { params }).then((r) => r.data),
 };
 
 import type { CreateLogPayload, DailyLog, LogType } from '../types/logs';
@@ -543,14 +543,15 @@ export const consolidatedReportApi = {
       params: { childId, periodDays },
       signal,
     });
-    return response.data;
+    // Backend wraps payloads as { success, data, timestamp }; unwrap (tolerate already-unwrapped).
+    return response.data?.data ?? response.data;
   },
 
   createShare: async (token: string | null, payload: CreateSharePayload): Promise<CreateShareResponse> => {
         const response = await api.post('/api/consolidated/shares', payload, {
       headers: getAuthHeaders(token),
     });
-    return response.data;
+    return response.data?.data ?? response.data;
   },
 
   listShares: async (token: string | null, childId: string): Promise<{ shares: ReportShare[] }> => {
@@ -558,7 +559,7 @@ export const consolidatedReportApi = {
       headers: getAuthHeaders(token),
       params: { childId },
     });
-    return response.data;
+    return response.data?.data ?? response.data;
   },
 
   deleteShare: async (token: string | null, id: string): Promise<void> => {
@@ -570,14 +571,15 @@ export const consolidatedReportApi = {
   // Public endpoint — intentionally omits Authorization header.
   getShared: async (shareToken: string): Promise<ConsolidatedSummary> => {
         const response = await api.get(`/api/consolidated/shared/${shareToken}`);
-    return response.data;
+    // Backend wraps payloads as { success, data, timestamp }; unwrap (tolerate already-unwrapped).
+    return response.data?.data ?? response.data;
   },
 
   generateAISummary: async (token: string | null, payload: GenerateAISummaryPayload): Promise<{ summary: string }> => {
         const response = await api.post('/api/consolidated/ai-summary', payload, {
       headers: getAuthHeaders(token),
     });
-    return response.data;
+    return response.data?.data ?? response.data;
   },
 };
 
