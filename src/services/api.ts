@@ -158,7 +158,12 @@ export const childApi = {
     token: string | null,
     params: { page?: number; limit?: number; from?: string; to?: string } = {}
   ): Promise<import('../types/child').PaginatedTimeline> =>
-    authRequest<any>('get', token, `/api/children/${id}/timeline`, undefined, { params }).then((r) => r.data),
+    authRequest<any>('get', token, `/api/children/${id}/timeline`, undefined, { params }).then((r) => ({
+      data: r.data,
+      total: r.total,
+      page: r.page,
+      limit: r.limit,
+    })),
 };
 
 import type { CreateLogPayload, DailyLog, LogType } from '../types/logs';

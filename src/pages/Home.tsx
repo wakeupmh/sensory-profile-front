@@ -89,6 +89,10 @@ const Home = () => {
     try {
       const token = await getTokenRef.current();
       await draftApi.deleteDraft(formType, token);
+      // Also clear localStorage so /assessment/new doesn't restore from cache
+      if (session?.user?.id) {
+        localStorage.removeItem(`draft:${formType}:${session.user.id}`);
+      }
       if (formType === 'sensory_assessment') setAssessmentDraft(null);
       else setAnamneseDraft(null);
     } catch (err) {
