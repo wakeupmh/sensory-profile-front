@@ -522,6 +522,7 @@ const SensoryProfileForm: React.FC = () => {
               sectionKey={section.key}
               items={items}
               comments={comments}
+              scale={instrument.scale}
               updateItemResponse={updateItemResponse}
               updateComments={(sectionKey, value) => updateFormData(`sections.${sectionKey}.comments`, value)}
               disabled={false}
