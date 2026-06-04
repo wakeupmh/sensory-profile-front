@@ -18,6 +18,8 @@ interface FastRadioCardsProps {
   onValueChange?: (name: string, value: string) => void;
   /** When provided, overrides the hardcoded SP-2 options with scale.options */
   scale?: ResponseScale;
+  /** Subset of option values to display. Useful when a section uses a narrower range than the instrument's full scale. */
+  allowedValues?: string[];
   /** Per-value color overrides; keys match option.value. Falls back to frequencyBg when absent. */
   theme?: Record<string, { bg: string; text?: string }>;
 }
@@ -39,21 +41,26 @@ const FastRadioCards = memo(({
   required = false,
   onValueChange,
   scale,
+  allowedValues,
   theme,
 }: FastRadioCardsProps) => {
   const [value, setValue] = useState(initialValue);
   const [focusedIndex, setFocusedIndex] = useState(0);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
+  const rawOpts = scale ? scale.options : options;
+  const visibleOpts = allowedValues && allowedValues.length > 0
+    ? rawOpts.filter((o) => allowedValues.includes(o.value))
+    : rawOpts;
+
   useEffect(() => {
     setValue(initialValue);
   }, [initialValue]);
 
   useEffect(() => {
-    const opts = scale ? scale.options : options;
-    const idx = opts.findIndex(o => o.value === value);
+    const idx = visibleOpts.findIndex(o => o.value === value);
     if (idx >= 0) setFocusedIndex(idx);
-  }, [value, scale, options]);
+  }, [value, visibleOpts]);
 
   const handleClick = (optionValue: string) => {
     if (disabled) return;
@@ -62,17 +69,16 @@ const FastRadioCards = memo(({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
-    const opts = scale ? scale.options : options;
     let newIndex = index;
     if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
       e.preventDefault();
-      newIndex = (index + 1) % opts.length;
+      newIndex = (index + 1) % visibleOpts.length;
     } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
       e.preventDefault();
-      newIndex = (index - 1 + opts.length) % opts.length;
+      newIndex = (index - 1 + visibleOpts.length) % visibleOpts.length;
     } else if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      handleClick(opts[index].value);
+      handleClick(visibleOpts[index].value);
       return;
     } else {
       return;
@@ -88,7 +94,7 @@ const FastRadioCards = memo(({
         aria-label={name}
         style={{ display: 'grid', gap: '8px', width: '100%' }}
       >
-        {(scale ? scale.options : options).map((option, index) => {
+        {visibleOpts.map((option, index) => {
           const isSelected = value === option.value;
           const colorEntry = theme
             ? theme[option.value]

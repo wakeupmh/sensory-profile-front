@@ -9,6 +9,7 @@ export const mchatR: Instrument = {
   ageRange: { minMonths: 16, maxMonths: 30 },
   description:
     'Instrumento de triagem para autismo em crianças de 16 a 30 meses. Composto por 20 perguntas sim/não respondidas pelo cuidador.',
+  citation: 'M-CHAT-R — Robins, D. L., et al. (2014). Validation of the Modified Checklist for Autism in Toddlers, Revised (M-CHAT-R). Pediatrics, 133(1), 37–45.',
   disclaimer:
     'O M-CHAT-R é uma ferramenta de triagem, não um instrumento diagnóstico. Resultado de risco médio ou alto indica necessidade de avaliação clínica especializada.',
   hasNormalCurve: false,

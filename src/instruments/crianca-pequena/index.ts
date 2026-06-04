@@ -21,6 +21,7 @@ export const criancaPequena: Instrument = {
   ageRange: { minMonths: 7, maxMonths: 36 },
   description:
     'Triagem de processamento sensorial para crianças pequenas (7 a 36 meses), organizada em 6 áreas e 48 itens. Cada item representa um dos quatro quadrantes de processamento sensorial (Busca, Evitação, Sensibilidade, Registro).',
+  citation: 'Perfil Sensorial 2 — Criança Pequena (SP-2 Infant) — Dunn, W. (2014). Sensory Profile 2. Pearson.',
   disclaimer:
     'Triagem interna inspirada no modelo de processamento sensorial dos quatro quadrantes (Dunn). Não substitui instrumentos normativos padronizados — o resultado deve ser interpretado como apoio à observação clínica.',
   hasNormalCurve: false,

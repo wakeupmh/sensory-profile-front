@@ -26,6 +26,9 @@ export const crianca3a14: Instrument = {
   ageRange: { minMonths: 36, maxMonths: 168 },
   description:
     'Questionário de processamento sensorial para crianças de 3 a 14 anos, organizado em 9 áreas de processamento e respostas.',
+  disclaimer:
+    'Este instrumento é uma ferramenta de triagem e avaliação de processamento sensorial, não um instrumento diagnóstico. Os resultados devem ser interpretados por um profissional qualificado e nunca substituem uma avaliação clínica especializada.',
+  citation: 'Perfil Sensorial 2 (SP-2) — Dunn, W. (2014). Sensory Profile 2. Pearson.',
   hasNormalCurve: true,
   hasQuadrants: true,
   scale: {

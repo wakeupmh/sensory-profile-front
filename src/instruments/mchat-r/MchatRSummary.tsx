@@ -25,6 +25,15 @@ const RISK_LABELS: Record<string, string> = {
   alto: 'Alto Risco',
 };
 
+const RISK_EXPLANATIONS: Record<string, string> = {
+  baixo:
+    'Resultado de baixo risco: poucas ou nenhuma sinalização de autismo. Continue acompanhando o desenvolvimento da criança e mantenha as consultas pediátricas de rotina.',
+  medio:
+    'Resultado de risco médio: recomenda-se a realização da Entrevista de Acompanhamento (M-CHAT-R/F) para investigar mais detalhadamente os itens reprovados. Se o risco for confirmado, procure uma avaliação especializada.',
+  alto:
+    'Resultado de alto risco: indica necessidade de avaliação diagnóstica especializada o mais breve possível. Agende uma consulta com um profissional capacitado em desenvolvimento infantil (neuropediatra, psiquiatra infantil ou equipe multidisciplinar).',
+};
+
 export function MchatRSummary({ scores, instrument, assessmentId }: MchatRSummaryProps) {
   const navigate = useNavigate();
   const data = scores as MchatRScores;
@@ -130,6 +139,17 @@ export function MchatRSummary({ scores, instrument, assessmentId }: MchatRSummar
           </button>
         </div>
       )}
+
+      <p
+        style={{
+          margin: '0 0 16px',
+          fontSize: '14px',
+          lineHeight: 1.5,
+          color: '#333',
+        }}
+      >
+        {RISK_EXPLANATIONS[risk]}
+      </p>
 
       {failedPositions.length > 0 ? (
         <div>

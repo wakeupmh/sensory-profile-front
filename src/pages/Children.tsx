@@ -328,7 +328,7 @@ const Children = () => {
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <LoadingSpinner size="large" text="Carregando crianças..." />
         </GumroadCard>
-      ) : children.length === 0 && !adding ? (
+      ) : !error && children.length === 0 && !adding ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">
             <InfoCircledIcon width={40} height={40} />

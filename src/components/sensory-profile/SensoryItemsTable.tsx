@@ -10,6 +10,7 @@ interface SensoryItemsTableProps {
   onResponseChange: (itemId: number, response: FrequencyResponse) => void;
   disabled?: boolean;
   scale?: ResponseScale;
+  allowedValues?: string[];
 }
 
 const frequencyOptions = [
@@ -28,7 +29,7 @@ const descriptionStyle: React.CSSProperties = {
   color: colors.ink,
 };
 
-const SensoryItemsTable: React.FC<SensoryItemsTableProps> = memo(({ items, onResponseChange, disabled, scale }) => {
+const SensoryItemsTable: React.FC<SensoryItemsTableProps> = memo(({ items, onResponseChange, disabled, scale, allowedValues }) => {
   return (
     <>
       {/* Mobile: card list */}
@@ -74,6 +75,7 @@ const SensoryItemsTable: React.FC<SensoryItemsTableProps> = memo(({ items, onRes
               name={`item-${item.id}`}
               options={frequencyOptions}
               scale={scale}
+              allowedValues={allowedValues}
               initialValue={item.response || ""}
               onValueChange={(_, value) => onResponseChange(item.id, value as FrequencyResponse)}
               disabled={disabled}
@@ -107,6 +109,7 @@ const SensoryItemsTable: React.FC<SensoryItemsTableProps> = memo(({ items, onRes
                     name={`item-${item.id}-desktop`}
                     options={frequencyOptions}
                     scale={scale}
+                    allowedValues={allowedValues}
                     initialValue={item.response || ""}
                     onValueChange={(_, value) => onResponseChange(item.id, value as FrequencyResponse)}
                     disabled={disabled}

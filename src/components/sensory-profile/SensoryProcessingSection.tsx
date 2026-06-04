@@ -21,6 +21,7 @@ const SensorySection = memo(({
   items,
   comments,
   scale,
+  allowedValues,
   updateItemResponse,
   updateComments,
   disabled,
@@ -30,6 +31,7 @@ const SensorySection = memo(({
   items: SensoryItem[];
   comments: string;
   scale?: ResponseScale;
+  allowedValues?: string[];
   updateItemResponse: (section: string, itemId: number, response: FrequencyResponse) => void;
   updateComments: (section: string, comments: string) => void;
   disabled?: boolean;
@@ -43,6 +45,7 @@ const SensorySection = memo(({
       <SensoryItemsTable
         items={items}
         scale={scale}
+        allowedValues={allowedValues}
         onResponseChange={(itemId, response) =>
           updateItemResponse(sectionKey, itemId, response)
         }
@@ -106,6 +109,7 @@ const SensoryProcessingSection: React.FC<SensoryProcessingSectionProps> = memo((
             items={items}
             comments={comments}
             scale={instrument.scale}
+            allowedValues={section.allowedValues}
             updateItemResponse={updateItemResponse}
             updateComments={handleCommentsChange}
             disabled={disabled}

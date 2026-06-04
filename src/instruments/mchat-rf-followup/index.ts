@@ -32,6 +32,7 @@ export const mchatRFFollowup: Instrument = {
   ageRange: { minMonths: 16, maxMonths: 30 },
   description:
     'Entrevista de acompanhamento para crianças com resultado de risco médio no M-CHAT-R. Sondagem estruturada para reclassificar itens reprovados como passou ou falhou.',
+  citation: 'M-CHAT-R/F — Robins, D. L., et al. (2014). Validation of the Modified Checklist for Autism in Toddlers, Revised, with Follow-Up (M-CHAT-R/F). Pediatrics, 133(1), 37–45.',
   disclaimer:
     'A entrevista de acompanhamento M-CHAT-R/F deve ser conduzida por um profissional treinado. O resultado não é diagnóstico — risco alto indica necessidade de avaliação clínica especializada.',
   hasNormalCurve: false,

@@ -50,6 +50,8 @@ export interface Instrument {
   ageRange: { minMonths: number; maxMonths: number };
   description: string;
   disclaimer?: string;
+  /** Academic / clinical citation rendered in the report header for trust/provenance. */
+  citation?: string;
   sections: InstrumentSection[];
   defaultBands: ClassificationBand[];
   /**

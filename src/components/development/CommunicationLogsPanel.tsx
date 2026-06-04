@@ -81,6 +81,7 @@ const CommunicationLogsPanel: React.FC<CommunicationLogsPanelProps> = ({
     setDeletingId,
     isLoading,
     setIsLoading,
+    error,
     view,
     setView,
     fetchItems: fetchLogs,
@@ -171,7 +172,13 @@ const CommunicationLogsPanel: React.FC<CommunicationLogsPanelProps> = ({
               </Flex>
             </GumroadButton>
 
-            {logs.length === 0 ? (
+            {error && (
+              <GumroadCard color="salmon" padding="md" style={{ marginBottom: '16px' }}>
+                <GumroadText level="body-md">{error}</GumroadText>
+              </GumroadCard>
+            )}
+
+            {!error && logs.length === 0 ? (
               <GumroadCard color="cream" padding="lg" style={{ textAlign: 'center' }}>
                 <GumroadText level="body-md" style={{ opacity: 0.7 }}>
                   Nenhum registro de comunicação

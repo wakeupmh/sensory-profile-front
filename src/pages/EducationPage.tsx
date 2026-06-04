@@ -117,9 +117,14 @@ export default function EducationPage() {
         </GumroadCard>
       ) : error ? (
         <GumroadCard color="salmon" shadow="md" padding="lg">
-          <Flex align="center" gap="2">
-            <ExclamationTriangleIcon />
-            <GumroadText level="body-md" as="p">{error}</GumroadText>
+          <Flex align="center" gap="2" justify="between" wrap="wrap">
+            <Flex align="center" gap="2">
+              <ExclamationTriangleIcon />
+              <GumroadText level="body-md" as="p">{error}</GumroadText>
+            </Flex>
+            <GumroadButton variant="primary" size="sm" onClick={fetchAll}>
+              Tentar novamente
+            </GumroadButton>
           </Flex>
         </GumroadCard>
       ) : (

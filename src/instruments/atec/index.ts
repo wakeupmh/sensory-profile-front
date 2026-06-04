@@ -56,6 +56,7 @@ export const atec: Instrument = {
   ageRange: { minMonths: 0, maxMonths: 9999 },
   description:
     'Lista de verificação para avaliar o tratamento do autismo, composta por 77 itens distribuídos em 4 subescalas.',
+  citation: 'ATEC — Rimland, B., & Edelson, S. M. (1999). Autism Treatment Evaluation Checklist. Autism Research Institute.',
   disclaimer:
     'O ATEC é um instrumento de avaliação e não deve ser usado como ferramenta de diagnóstico. ' +
     'Pontuações mais altas indicam maior severidade de sintomas.',

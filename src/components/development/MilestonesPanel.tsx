@@ -69,6 +69,7 @@ const MilestonesPanel: React.FC<MilestonesPanelProps> = ({
     setDeletingId,
     isLoading,
     setIsLoading,
+    error,
     view,
     setView,
     fetchItems: fetchMilestones,
@@ -160,7 +161,13 @@ const MilestonesPanel: React.FC<MilestonesPanelProps> = ({
               </Flex>
             </GumroadButton>
 
-            {milestones.length === 0 ? (
+            {error && (
+              <GumroadCard color="salmon" padding="md" style={{ marginBottom: '16px' }}>
+                <GumroadText level="body-md">{error}</GumroadText>
+              </GumroadCard>
+            )}
+
+            {!error && milestones.length === 0 ? (
               <GumroadCard color="cream" padding="lg" style={{ textAlign: 'center' }}>
                 <GumroadText level="body-md" style={{ opacity: 0.7 }}>
                   Nenhum marco cadastrado

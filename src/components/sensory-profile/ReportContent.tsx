@@ -178,6 +178,11 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
       <div style={headerStyle}>
         <h1 style={{ fontSize: "24px", margin: "0 0 5px 0" }}>{instrument.name}</h1>
         <h2 style={{ fontSize: "18px", fontWeight: "normal", margin: "0" }}>Relatório de Avaliação</h2>
+        {instrument.citation && (
+          <p style={{ fontSize: "12px", color: "#666", marginTop: "6px", fontStyle: "italic" }}>
+            Fonte: {instrument.citation}
+          </p>
+        )}
       </div>
 
       <div style={{ borderTop: "1px solid #6a994e", marginBottom: "20px" }}></div>

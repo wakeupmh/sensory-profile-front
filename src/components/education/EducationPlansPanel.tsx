@@ -67,6 +67,7 @@ const EducationPlansPanel: React.FC<EducationPlansPanelProps> = ({
     setEditingItem: setEditingPlan,
     isLoading,
     setIsLoading,
+    error,
     view,
     setView,
     fetchItems: fetchPlans,
@@ -154,7 +155,13 @@ const EducationPlansPanel: React.FC<EducationPlansPanelProps> = ({
               </Flex>
             </GumroadButton>
 
-            {plans.length === 0 ? (
+            {error && (
+              <GumroadCard color="salmon" padding="md" style={{ marginBottom: '16px' }}>
+                <GumroadText level="body-md">{error}</GumroadText>
+              </GumroadCard>
+            )}
+
+            {!error && plans.length === 0 ? (
               <GumroadCard color="cream" padding="lg" style={{ textAlign: 'center' }}>
                 <GumroadText level="body-md" style={{ opacity: 0.7 }}>
                   Nenhum plano cadastrado
