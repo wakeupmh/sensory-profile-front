@@ -11,28 +11,25 @@ import {
   attentionResponsesItems,
 } from './items';
 
-const bands = (veryLow: number, low: number, average: number, high: number): ClassificationBand[] => [
-  { label: 'Muito menos que outros(as)', maxScoreAbs: veryLow, color: '#4361ee' },
-  { label: 'Menos que outros(as)', maxScoreAbs: low, color: '#4895ef' },
-  { label: 'Exatamente como a maioria dos(as) outros(as)', maxScoreAbs: average, color: '#6a994e' },
-  { label: 'Mais que outros(as)', maxScoreAbs: high, color: '#f4a261' },
-  { label: 'Muito mais que outros(as)', maxScoreAbs: Number.POSITIVE_INFINITY, color: '#d62828' },
+const proportionalBands: ClassificationBand[] = [
+  { label: 'Típico', maxScorePct: 0.4, color: '#2f7a3d' },
+  { label: 'Atípico leve', maxScorePct: 0.7, color: '#e08e0b' },
+  { label: 'Atípico marcado', maxScorePct: 1.01, color: '#d62828' },
 ];
 
 export const crianca3a14: Instrument = {
   id: 'crianca-3-14',
-  name: '🧒 Perfil Sensorial — Criança (3 a 14 anos)',
+  name: 'Triagem Sensorial — Criança (3 a 14 anos)',
   shortName: 'Criança (3–14)',
   ageRange: { minMonths: 36, maxMonths: 168 },
   description:
-    'Questionário de processamento sensorial para crianças de 3 a 14 anos, organizado em 9 áreas de processamento e respostas.',
+    'Triagem de processamento sensorial para crianças de 3 a 14 anos, organizada em 9 áreas e classificada pelos quatro quadrantes de processamento sensorial (Busca, Evitação, Sensibilidade, Registro).',
   disclaimer:
-    'Este instrumento é uma ferramenta de triagem e avaliação de processamento sensorial, não um instrumento diagnóstico. Os resultados devem ser interpretados por um profissional qualificado e nunca substituem uma avaliação clínica especializada.',
-  citation: 'Perfil Sensorial 2 (SP-2) — Dunn, W. (2014). Sensory Profile 2. Pearson.',
-  hasNormalCurve: true,
+    'Triagem interna inspirada no modelo de processamento sensorial dos quatro quadrantes (Dunn). Não substitui instrumentos normativos padronizados — o resultado deve ser interpretado como apoio à observação clínica.',
+  hasNormalCurve: false,
   hasQuadrants: true,
   scale: {
-    id: 'sp2-likert-5',
+    id: 'sensory-likert-5',
     options: [
       { value: 'quase sempre',    label: 'Quase Sempre',     numeric: 5 },
       { value: 'frequentemente',  label: 'Frequentemente',   numeric: 4 },
@@ -42,61 +39,16 @@ export const crianca3a14: Instrument = {
       { value: 'não se aplica',   label: 'Não Se Aplica',    numeric: 0 },
     ],
   },
-  defaultBands: bands(0, 0, 0, 0),
+  defaultBands: proportionalBands,
   sections: [
-    {
-      key: 'auditoryProcessing',
-      title: 'Processamento Auditivo',
-      items: auditoryProcessingItems,
-      bands: bands(8, 16, 24, 32),
-    },
-    {
-      key: 'visualProcessing',
-      title: 'Processamento Visual',
-      items: visualProcessingItems,
-      bands: bands(11, 22, 33, 44),
-    },
-    {
-      key: 'tactileProcessing',
-      title: 'Processamento Tátil',
-      items: tactileProcessingItems,
-      bands: bands(18, 36, 54, 72),
-    },
-    {
-      key: 'movementProcessing',
-      title: 'Processamento de Movimento',
-      items: movementProcessingItems,
-      bands: bands(16, 32, 48, 64),
-    },
-    {
-      key: 'bodyPositionProcessing',
-      title: 'Processamento de Posição do Corpo',
-      items: bodyPositionProcessingItems,
-      bands: bands(12, 24, 36, 48),
-    },
-    {
-      key: 'oralSensitivityProcessing',
-      title: 'Processamento de Sensibilidade Oral',
-      items: oralSensitivityProcessingItems,
-      bands: bands(12, 24, 36, 48),
-    },
-    {
-      key: 'behavioralResponses',
-      title: 'Conduta associada ao processamento sensorial',
-      items: behavioralResponsesItems,
-      bands: bands(9, 18, 27, 36),
-    },
-    {
-      key: 'socialEmotionalResponses',
-      title: 'Respostas Socioemocionais',
-      items: socialEmotionalResponsesItems,
-      bands: bands(8, 16, 24, 32),
-    },
-    {
-      key: 'attentionResponses',
-      title: 'Respostas de Atenção',
-      items: attentionResponsesItems,
-      bands: bands(7, 14, 21, 28),
-    },
+    { key: 'auditoryProcessing',       title: 'Processamento Auditivo',                       items: auditoryProcessingItems },
+    { key: 'visualProcessing',         title: 'Processamento Visual',                         items: visualProcessingItems },
+    { key: 'tactileProcessing',        title: 'Processamento Tátil',                          items: tactileProcessingItems },
+    { key: 'movementProcessing',       title: 'Processamento de Movimento',                   items: movementProcessingItems },
+    { key: 'bodyPositionProcessing',   title: 'Processamento de Posição do Corpo',            items: bodyPositionProcessingItems },
+    { key: 'oralSensitivityProcessing', title: 'Processamento de Sensibilidade Oral',         items: oralSensitivityProcessingItems },
+    { key: 'behavioralResponses',      title: 'Respostas Comportamentais',                    items: behavioralResponsesItems },
+    { key: 'socialEmotionalResponses', title: 'Respostas Socioemocionais',                    items: socialEmotionalResponsesItems },
+    { key: 'attentionResponses',       title: 'Respostas de Atenção',                         items: attentionResponsesItems },
   ],
 };
