@@ -16,7 +16,7 @@ const proportionalBands: ClassificationBand[] = [
 
 export const criancaPequena: Instrument = {
   id: 'crianca-pequena',
-  name: 'Perfil Sensorial — Criança Pequena (7 a 36 meses)',
+  name: 'Triagem Sensorial — Criança Pequena (7 a 36 meses)',
   shortName: 'Criança Pequena (7–36m)',
   ageRange: { minMonths: 7, maxMonths: 36 },
   description:

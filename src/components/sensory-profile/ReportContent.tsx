@@ -9,10 +9,10 @@ interface ReportContentProps {
 }
 
 const quadrants = {
-  exploration: { title: "Exploração/Criança exploradora", color: "#f4a261" },
-  avoidance:   { title: "Esquiva/Criança que se esquiva", color: "#4361ee" },
-  sensitivity: { title: "Sensibilidade/Criança sensível", color: "#6a994e" },
-  observation: { title: "Observação/Criança observadora", color: "#d62828" },
+  seeking:     { title: "Busca Sensorial",        color: "#f4a261" },
+  avoiding:    { title: "Evitação Sensorial",     color: "#4361ee" },
+  sensitivity: { title: "Sensibilidade Sensorial", color: "#6a994e" },
+  registration:{ title: "Registro Sensorial",     color: "#d62828" },
 };
 
 const responseValueMap: Record<string, number> = {
@@ -244,29 +244,29 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData }) => {
       <div style={sectionStyle} className="avoid-break section-container">
         <h3 style={subHeaderStyle}>Quadrantes de Processamento Sensorial</h3>
         <p style={{ fontStyle: "italic", marginBottom: "15px" }}>
-          Os quatro quadrantes descrevem como a criança processa estímulos sensoriais no cotidiano.
+          Os quatro quadrantes descrevem padrões de como a criança processa estímulos sensoriais no cotidiano.
         </p>
         <div style={{ marginTop: "15px" }}>
-          <div style={colorBarStyle(quadrants.exploration.color)}>
-            <div style={{ fontWeight: "bold", color: quadrants.exploration.color }}>Exploração/Criança exploradora</div>
+          <div style={colorBarStyle(quadrants.seeking.color)}>
+            <div style={{ fontWeight: "bold", color: quadrants.seeking.color }}>{quadrants.seeking.title} (EX)</div>
             <div style={{ fontSize: "14px" }}>
-              Busca ativamente experiências sensoriais, demonstrando comportamentos de busca sensorial.
+              Busca ativamente mais experiências sensoriais do que o típico para a idade.
             </div>
           </div>
-          <div style={colorBarStyle(quadrants.avoidance.color)}>
-            <div style={{ fontWeight: "bold", color: quadrants.avoidance.color }}>Esquiva/Criança que se esquiva</div>
+          <div style={colorBarStyle(quadrants.avoiding.color)}>
+            <div style={{ fontWeight: "bold", color: quadrants.avoiding.color }}>{quadrants.avoiding.title} (EV)</div>
             <div style={{ fontSize: "14px" }}>
-              Evita experiências sensoriais, demonstrando comportamentos de esquiva sensorial.
+              Procura reduzir o contato com estímulos sensoriais que considera desagradáveis.
             </div>
           </div>
           <div style={colorBarStyle(quadrants.sensitivity.color)}>
-            <div style={{ fontWeight: "bold", color: quadrants.sensitivity.color }}>Sensibilidade/Criança sensível</div>
+            <div style={{ fontWeight: "bold", color: quadrants.sensitivity.color }}>{quadrants.sensitivity.title} (SN)</div>
             <div style={{ fontSize: "14px" }}>
-              Nota e reage com maior intensidade a estímulos sensoriais.
+              Nota e reage com maior intensidade a estímulos que outras crianças mal percebem.
             </div>
           </div>
-          <div style={colorBarStyle(quadrants.observation.color)}>
-            <div style={{ fontWeight: "bold", color: quadrants.observation.color }}>Observação/Criança observadora</div>
+          <div style={colorBarStyle(quadrants.registration.color)}>
+            <div style={{ fontWeight: "bold", color: quadrants.registration.color }}>{quadrants.registration.title} (OB)</div>
             <div style={{ fontSize: "14px" }}>
               Tende a não perceber estímulos que outras crianças notam; registro sensorial reduzido.
             </div>
