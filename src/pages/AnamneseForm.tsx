@@ -12,6 +12,7 @@ import ChildPicker from '../components/sensory-profile/ChildPicker';
 import CaregiverSection from '../components/anamnese/CaregiverSection';
 import ClinicalHistorySection from '../components/anamnese/ClinicalHistorySection';
 import ShareLinkBox from '../components/anamnese/ShareLinkBox';
+import ProfessionalSharePanel from '../components/sharing/ProfessionalSharePanel';
 import { emptyClinicalHistory } from '../components/anamnese/types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import NotFound from '../components/NotFound';
@@ -298,13 +299,16 @@ const AnamneseForm: React.FC = () => {
         )}
 
         {isViewMode && id && (
-          <GumroadCard color="mint" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
-            <ShareLinkBox
-              anamneseId={id}
-              shareToken={shareToken}
-              onTokenChange={setShareToken}
-            />
-          </GumroadCard>
+          <>
+            <GumroadCard color="mint" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+              <ShareLinkBox
+                anamneseId={id}
+                shareToken={shareToken}
+                onTokenChange={setShareToken}
+              />
+            </GumroadCard>
+            <ProfessionalSharePanel resourceType="anamnese" resourceId={id} />
+          </>
         )}
 
         {/* New-mode: one section at a time */}
