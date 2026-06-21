@@ -14,6 +14,9 @@ import {
   BarChartIcon,
   ReaderIcon,
   ChevronDownIcon,
+  Share1Icon,
+  EnvelopeOpenIcon,
+  EyeOpenIcon,
 } from '@radix-ui/react-icons';
 import { colors, typography, zIndex, shadows } from '../theme/tokens';
 import GumroadButton from './design-system/GumroadButton';
@@ -34,6 +37,9 @@ const SECONDARY: NavItem[] = [
   { path: '/therapy', match: '/therapy', label: 'Terapia', icon: HeartIcon },
   { path: '/development', match: '/development', label: 'Desenvolvimento', icon: BarChartIcon },
   { path: '/education', match: '/education', label: 'Educação', icon: ReaderIcon },
+  { path: '/professionals', match: '/professionals', label: 'Profissionais', icon: Share1Icon },
+  { path: '/shared', match: '/shared', label: 'Compartilhados comigo', icon: EyeOpenIcon },
+  { path: '/invite/accept', match: '/invite', label: 'Aceitar convite', icon: EnvelopeOpenIcon },
 ];
 
 const Menu: React.FC = () => {

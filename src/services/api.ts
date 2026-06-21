@@ -588,6 +588,88 @@ export const consolidatedReportApi = {
   },
 };
 
+// ─── Professionals (owner-side directory) ──────────────────────────
+import type {
+  Professional,
+  ProfessionalPayload,
+  ResourceShare,
+  AcceptedIdentity,
+  SharedAnamneseSummary,
+  SharedAssessmentSummary,
+} from '../types/professionals';
+
+const unwrap = <T,>(payload: any): T => (payload?.data ?? payload) as T;
+
+export const professionalApi = {
+  list: (token: string | null): Promise<Professional[]> =>
+    authRequest<any>('get', token, '/api/professionals').then(unwrap<Professional[]>),
+
+  get: (id: string, token: string | null): Promise<Professional> =>
+    authRequest<any>('get', token, `/api/professionals/${id}`).then(unwrap<Professional>),
+
+  create: (payload: ProfessionalPayload, token: string | null): Promise<Professional> =>
+    authRequest<any>('post', token, '/api/professionals', payload).then(unwrap<Professional>),
+
+  update: (id: string, payload: Partial<ProfessionalPayload>, token: string | null): Promise<Professional> =>
+    authRequest<any>('put', token, `/api/professionals/${id}`, payload).then(unwrap<Professional>),
+
+  remove: (id: string, token: string | null): Promise<void> =>
+    authRequest<any>('delete', token, `/api/professionals/${id}`),
+
+  rotateToken: (id: string, token: string | null): Promise<Professional> =>
+    authRequest<any>('post', token, `/api/professionals/${id}/rotate-token`).then(unwrap<Professional>),
+
+  myIdentities: (token: string | null): Promise<AcceptedIdentity[]> =>
+    authRequest<any>('get', token, '/api/professionals/me/identities').then(unwrap<AcceptedIdentity[]>),
+
+  acceptInvite: (inviteToken: string, token: string | null): Promise<Professional> =>
+    authRequest<any>('post', token, '/api/professional-invites/accept', { token: inviteToken }).then(
+      unwrap<Professional>,
+    ),
+};
+
+// ─── Per-resource sharing ─────────────────────────────────────────
+export const anamneseSharesApi = {
+  list: (anamneseId: string, token: string | null): Promise<ResourceShare[]> =>
+    authRequest<any>('get', token, `/api/anamneses/${anamneseId}/shares`).then(unwrap<ResourceShare[]>),
+
+  grant: (anamneseId: string, professionalId: string, token: string | null): Promise<ResourceShare> =>
+    authRequest<any>('post', token, `/api/anamneses/${anamneseId}/shares`, { professionalId }).then(
+      unwrap<ResourceShare>,
+    ),
+
+  revoke: (anamneseId: string, professionalId: string, token: string | null): Promise<void> =>
+    authRequest<any>('delete', token, `/api/anamneses/${anamneseId}/shares/${professionalId}`),
+};
+
+export const assessmentSharesApi = {
+  list: (assessmentId: string, token: string | null): Promise<ResourceShare[]> =>
+    authRequest<any>('get', token, `/api/assessments/${assessmentId}/shares`).then(unwrap<ResourceShare[]>),
+
+  grant: (assessmentId: string, professionalId: string, token: string | null): Promise<ResourceShare> =>
+    authRequest<any>('post', token, `/api/assessments/${assessmentId}/shares`, { professionalId }).then(
+      unwrap<ResourceShare>,
+    ),
+
+  revoke: (assessmentId: string, professionalId: string, token: string | null): Promise<void> =>
+    authRequest<any>('delete', token, `/api/assessments/${assessmentId}/shares/${professionalId}`),
+};
+
+// ─── Professional read-only access (records shared with me) ──────────
+export const sharedApi = {
+  listAnamneses: (token: string | null): Promise<SharedAnamneseSummary[]> =>
+    authRequest<any>('get', token, '/api/shared/anamneses').then(unwrap<SharedAnamneseSummary[]>),
+
+  getAnamnese: (id: string, token: string | null): Promise<any> =>
+    authRequest<any>('get', token, `/api/shared/anamneses/${id}`).then(unwrap<any>),
+
+  listAssessments: (token: string | null): Promise<SharedAssessmentSummary[]> =>
+    authRequest<any>('get', token, '/api/shared/assessments').then(unwrap<SharedAssessmentSummary[]>),
+
+  getAssessment: (id: string, token: string | null): Promise<any> =>
+    authRequest<any>('get', token, `/api/shared/assessments/${id}`).then(unwrap<any>),
+};
+
 export default api;
 
 

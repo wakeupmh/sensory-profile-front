@@ -18,6 +18,12 @@ import DevelopmentPage from './pages/DevelopmentPage';
 import EducationPage from './pages/EducationPage';
 import ConsolidatedReportPage from './pages/ConsolidatedReportPage';
 import ConsolidatedReportSharedView from './pages/ConsolidatedReportSharedView';
+import ProfessionalsList from './pages/ProfessionalsList';
+import ProfessionalForm from './pages/ProfessionalForm';
+import InviteAcceptPage from './pages/InviteAcceptPage';
+import SharedRecordsList from './pages/SharedRecordsList';
+import SharedAnamneseView from './pages/SharedAnamneseView';
+import SharedAssessmentView from './pages/SharedAssessmentView';
 import SignIn from './pages/SignIn';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useAuthContext } from './context/AuthContext';
@@ -59,6 +65,18 @@ function App() {
             <Route path="/development" element={<ProtectedRoute><DevelopmentPage /></ProtectedRoute>} />
             <Route path="/education" element={<ProtectedRoute><EducationPage /></ProtectedRoute>} />
             <Route path="/consolidated/:childId" element={<ProtectedRoute><ConsolidatedReportPage /></ProtectedRoute>} />
+
+            {/* Professional directory (owner manages people who can be granted access) */}
+            <Route path="/professionals" element={<ProtectedRoute><ProfessionalsList /></ProtectedRoute>} />
+            <Route path="/professionals/new" element={<ProtectedRoute><ProfessionalForm /></ProtectedRoute>} />
+            <Route path="/professionals/:id" element={<ProtectedRoute><ProfessionalForm /></ProtectedRoute>} />
+            <Route path="/professionals/:id/edit" element={<ProtectedRoute><ProfessionalForm /></ProtectedRoute>} />
+
+            {/* Invitation acceptance + professional read-only access */}
+            <Route path="/invite/accept" element={<ProtectedRoute><InviteAcceptPage /></ProtectedRoute>} />
+            <Route path="/shared" element={<ProtectedRoute><SharedRecordsList /></ProtectedRoute>} />
+            <Route path="/shared/anamnese/:id" element={<ProtectedRoute><SharedAnamneseView /></ProtectedRoute>} />
+            <Route path="/shared/assessment/:id" element={<ProtectedRoute><SharedAssessmentView /></ProtectedRoute>} />
           </Route>
         </Routes>
       </BrowserRouter>

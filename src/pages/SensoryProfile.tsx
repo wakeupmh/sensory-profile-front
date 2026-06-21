@@ -14,6 +14,7 @@ import SensoryProcessingSection, { SensorySection } from '../components/sensory-
 import InstrumentPicker from '../components/sensory-profile/InstrumentPicker';
 import useFormData from '../components/sensory-profile/useFormData';
 import AnamneseSelector from '../components/anamnese/AnamneseSelector';
+import ProfessionalSharePanel from '../components/sharing/ProfessionalSharePanel';
 import type { Anamnese } from '../components/anamnese/types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import NotFound from '../components/NotFound';
@@ -606,6 +607,10 @@ const SensoryProfileForm: React.FC = () => {
                 Erros de validação: {validationError}
               </GumroadText>
             </GumroadCard>
+          )}
+
+          {isViewMode && id && (
+            <ProfessionalSharePanel resourceType="assessment" resourceId={id} />
           )}
 
           {/* NEW MODE: stepper + one section at a time */}
