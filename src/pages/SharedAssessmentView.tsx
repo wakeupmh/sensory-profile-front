@@ -1,18 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Box, Flex, Separator } from '@radix-ui/themes';
 import { ChevronLeftIcon, ExclamationTriangleIcon, FileTextIcon } from '@radix-ui/react-icons';
 import { useAuthContext } from '../context/AuthContext';
 import { sharedApi } from '../services/api';
 import ReportContent from '../components/sensory-profile/ReportContent';
-import type { FormData, SensoryItem, SensorySection } from '../components/sensory-profile/types';
-import {
-  DEFAULT_INSTRUMENT_ID,
-  findSectionByItemId,
-  getInstrument,
-} from '../instruments';
-import { toSensoryItems } from '../instruments/types';
+import { normalizeAssessmentPayload } from '../components/sensory-profile/normalizeAssessment';
+import type { FormData } from '../components/sensory-profile/types';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadBadge from '../components/design-system/GumroadBadge';
@@ -24,7 +19,6 @@ const SharedAssessmentView: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { getToken } = useAuthContext();
-  const fetchedRef = useRef(false);
 
   const [formData, setFormData] = useState<FormData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,79 +26,18 @@ const SharedAssessmentView: React.FC = () => {
 
   useEffect(() => {
     if (!id) return;
-    if (fetchedRef.current) return;
+    let cancelled = false;
 
     const run = async () => {
       try {
         setLoading(true);
         setError(null);
         const token = await getToken();
-        const response = await sharedApi.getAssessment(id, token);
-
-        // The backend may return either `{ assessment, responses }` or a flatter shape.
-        const assessment = response.assessment ?? response;
-        const responses = response.responses ?? assessment.responses ?? [];
-
-        const instrumentId: string = assessment.instrumentId || DEFAULT_INSTRUMENT_ID;
-        const instrument = getInstrument(instrumentId);
-
-        const sections: Record<string, SensorySection> = Object.fromEntries(
-          instrument.sections.map((s) => [
-            s.key,
-            { items: toSensoryItems(s.items) as SensoryItem[], rawScore: 0, comments: '' },
-          ]),
-        );
-
-        if (Array.isArray(responses)) {
-          responses.forEach((r: { itemId: number; response: string; id?: string }) => {
-            const sectionKey = findSectionByItemId(instrument, r.itemId);
-            if (!sectionKey) return;
-            const target = sections[sectionKey].items.find((it) => it.id === r.itemId);
-            if (target) {
-              target.response = r.response as SensoryItem['response'];
-              if (r.id) target.responseId = r.id;
-            }
-          });
-        }
-
-        instrument.sections.forEach((s) => {
-          const scoreField = `${s.key}RawScore`;
-          if (assessment[scoreField] !== undefined && assessment[scoreField] !== null) {
-            sections[s.key].rawScore = assessment[scoreField];
-          }
-        });
-
-        if (Array.isArray(assessment.sectionComments)) {
-          assessment.sectionComments.forEach((c: { section: string; comments: string }) => {
-            if (sections[c.section]) sections[c.section].comments = c.comments || '';
-          });
-        }
-
-        setFormData({
-          instrumentId,
-          child: {
-            name: assessment.childName || '',
-            birthDate: assessment.childBirthDate || '',
-            gender: assessment.childGender || 'male',
-            nationalIdentity: assessment.childNationalIdentity || '',
-            otherInfo: assessment.childOtherInfo || '',
-            age: assessment.childAge || 0,
-          },
-          examiner: {
-            name: assessment.examinerName || '',
-            profession: assessment.examinerProfession || '',
-            contact: assessment.examinerContact || '',
-          },
-          caregiver: {
-            name: assessment.caregiverName || '',
-            relationship: assessment.caregiverRelationship || '',
-            contact: assessment.caregiverContact || '',
-          },
-          sections,
-          createdAt: assessment.createdAt,
-        });
-        fetchedRef.current = true;
+        const response = await sharedApi.get('assessment', id, token);
+        if (cancelled) return;
+        setFormData(normalizeAssessmentPayload(response));
       } catch (err: any) {
+        if (cancelled) return;
         console.error(err);
         const status = err?.response?.status;
         setError(
@@ -113,11 +46,12 @@ const SharedAssessmentView: React.FC = () => {
             : 'Não foi possível carregar a avaliação.',
         );
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     run();
+    return () => { cancelled = true; };
   }, [id, getToken]);
 
   return (

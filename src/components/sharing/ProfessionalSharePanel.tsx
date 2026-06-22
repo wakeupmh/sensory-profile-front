@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Flex, Select } from '@radix-ui/themes';
 import {
@@ -10,8 +10,8 @@ import {
 import { useAuthContext } from '../../context/AuthContext';
 import {
   professionalApi,
-  anamneseSharesApi,
-  assessmentSharesApi,
+  resourceSharesApi,
+  type ShareableResource,
 } from '../../services/api';
 import type { Professional, ResourceShare } from '../../types/professionals';
 import GumroadCard from '../design-system/GumroadCard';
@@ -20,20 +20,15 @@ import GumroadBadge from '../design-system/GumroadBadge';
 import GumroadHeading, { GumroadText } from '../design-system/GumroadHeading';
 import { colors, spacing, radii, shadows } from '../../theme/tokens';
 
-type ResourceType = 'anamnese' | 'assessment';
-
 interface ProfessionalSharePanelProps {
-  resourceType: ResourceType;
+  resourceType: ShareableResource;
   resourceId: string;
 }
 
-const apiFor = (resourceType: ResourceType) =>
-  resourceType === 'anamnese' ? anamneseSharesApi : assessmentSharesApi;
-
 const ProfessionalSharePanel: React.FC<ProfessionalSharePanelProps> = ({ resourceType, resourceId }) => {
   const { getToken } = useAuthContext();
-  const getTokenRef = useRef(getToken);
-  getTokenRef.current = getToken;
+
+  const sharesApi = useMemo(() => resourceSharesApi(resourceType), [resourceType]);
 
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [shares, setShares] = useState<ResourceShare[]>([]);
@@ -43,14 +38,12 @@ const ProfessionalSharePanel: React.FC<ProfessionalSharePanelProps> = ({ resourc
   const [selectedId, setSelectedId] = useState<string>('');
   const [granting, setGranting] = useState(false);
 
-  const sharesApi = apiFor(resourceType);
-
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
       try {
         setLoading(true);
-        const token = await getTokenRef.current();
+        const token = await getToken();
         const [pros, shareList] = await Promise.all([
           professionalApi.list(token),
           sharesApi.list(resourceId, token),
@@ -71,9 +64,8 @@ const ProfessionalSharePanel: React.FC<ProfessionalSharePanelProps> = ({ resourc
     return () => {
       cancelled = true;
     };
-  }, [resourceId, sharesApi]);
+  }, [resourceId, sharesApi, getToken]);
 
-  const proById = useMemo(() => new Map(professionals.map((p) => [p.id, p])), [professionals]);
   const sharedIds = useMemo(() => new Set(shares.map((s) => s.professionalId)), [shares]);
   const availableProfessionals = useMemo(
     () => professionals.filter((p) => !sharedIds.has(p.id)),
@@ -154,7 +146,7 @@ const ProfessionalSharePanel: React.FC<ProfessionalSharePanelProps> = ({ resourc
           ) : (
             <Flex direction="column" gap="2">
               {shares.map((share) => {
-                const pro = proById.get(share.professionalId);
+                const pro = professionals.find((p) => p.id === share.professionalId);
                 return (
                   <Flex
                     key={share.id}

@@ -629,45 +629,55 @@ export const professionalApi = {
 };
 
 // ─── Per-resource sharing ─────────────────────────────────────────
-export const anamneseSharesApi = {
-  list: (anamneseId: string, token: string | null): Promise<ResourceShare[]> =>
-    authRequest<any>('get', token, `/api/anamneses/${anamneseId}/shares`).then(unwrap<ResourceShare[]>),
+/** Resource kinds the backend supports for per-professional sharing. */
+export type ShareableResource = 'anamnese' | 'assessment';
 
-  grant: (anamneseId: string, professionalId: string, token: string | null): Promise<ResourceShare> =>
-    authRequest<any>('post', token, `/api/anamneses/${anamneseId}/shares`, { professionalId }).then(
-      unwrap<ResourceShare>,
-    ),
-
-  revoke: (anamneseId: string, professionalId: string, token: string | null): Promise<void> =>
-    authRequest<any>('delete', token, `/api/anamneses/${anamneseId}/shares/${professionalId}`),
+const resourceBasePath: Record<ShareableResource, string> = {
+  anamnese: '/api/anamneses',
+  assessment: '/api/assessments',
 };
 
-export const assessmentSharesApi = {
-  list: (assessmentId: string, token: string | null): Promise<ResourceShare[]> =>
-    authRequest<any>('get', token, `/api/assessments/${assessmentId}/shares`).then(unwrap<ResourceShare[]>),
+/**
+ * Factory for `/api/{resource}s/:id/shares` endpoints. Same shape on both
+ * sides — anamnese and assessment — so the two call sites stay in lockstep.
+ */
+export const resourceSharesApi = (resourceType: ShareableResource) => {
+  const base = resourceBasePath[resourceType];
+  return {
+    list: (resourceId: string, token: string | null): Promise<ResourceShare[]> =>
+      authRequest<any>('get', token, `${base}/${resourceId}/shares`).then(unwrap<ResourceShare[]>),
 
-  grant: (assessmentId: string, professionalId: string, token: string | null): Promise<ResourceShare> =>
-    authRequest<any>('post', token, `/api/assessments/${assessmentId}/shares`, { professionalId }).then(
-      unwrap<ResourceShare>,
-    ),
+    grant: (resourceId: string, professionalId: string, token: string | null): Promise<ResourceShare> =>
+      authRequest<any>('post', token, `${base}/${resourceId}/shares`, { professionalId }).then(
+        unwrap<ResourceShare>,
+      ),
 
-  revoke: (assessmentId: string, professionalId: string, token: string | null): Promise<void> =>
-    authRequest<any>('delete', token, `/api/assessments/${assessmentId}/shares/${professionalId}`),
+    revoke: (resourceId: string, professionalId: string, token: string | null): Promise<void> =>
+      authRequest<any>('delete', token, `${base}/${resourceId}/shares/${professionalId}`),
+  };
 };
 
-// ─── Professional read-only access (records shared with me) ──────────
+/**
+ * Professional read-only access. The summary type is parameterised on
+ * resource: `list('anamnese')` → SharedAnamneseSummary[],
+ * `list('assessment')` → SharedAssessmentSummary[].
+ */
+type SharedSummaryByResource = {
+  anamnese: SharedAnamneseSummary;
+  assessment: SharedAssessmentSummary;
+};
+
 export const sharedApi = {
-  listAnamneses: (token: string | null): Promise<SharedAnamneseSummary[]> =>
-    authRequest<any>('get', token, '/api/shared/anamneses').then(unwrap<SharedAnamneseSummary[]>),
+  list: <R extends ShareableResource>(
+    resourceType: R,
+    token: string | null,
+  ): Promise<SharedSummaryByResource[R][]> =>
+    authRequest<any>('get', token, `/api/shared/${resourceType}s`).then(
+      unwrap<SharedSummaryByResource[R][]>,
+    ),
 
-  getAnamnese: (id: string, token: string | null): Promise<any> =>
-    authRequest<any>('get', token, `/api/shared/anamneses/${id}`).then(unwrap<any>),
-
-  listAssessments: (token: string | null): Promise<SharedAssessmentSummary[]> =>
-    authRequest<any>('get', token, '/api/shared/assessments').then(unwrap<SharedAssessmentSummary[]>),
-
-  getAssessment: (id: string, token: string | null): Promise<any> =>
-    authRequest<any>('get', token, `/api/shared/assessments/${id}`).then(unwrap<any>),
+  get: (resourceType: ShareableResource, id: string, token: string | null): Promise<any> =>
+    authRequest<any>('get', token, `/api/shared/${resourceType}s/${id}`).then(unwrap<any>),
 };
 
 export default api;

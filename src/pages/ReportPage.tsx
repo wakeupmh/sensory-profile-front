@@ -4,17 +4,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Flex } from '@radix-ui/themes';
 import PDFGenerator from '../components/sensory-profile/PDFGenerator';
 import ReportContent from '../components/sensory-profile/ReportContent';
-import { FormData, SensoryItem, SensorySection } from '../components/sensory-profile/types';
+import { FormData } from '../components/sensory-profile/types';
+import { normalizeAssessmentPayload } from '../components/sensory-profile/normalizeAssessment';
 import LoadingSpinner from '../components/LoadingSpinner';
 import NotFound from '../components/NotFound';
 import { useAuthContext } from '../context/AuthContext';
 import { assessmentApi } from '../services/api';
-import {
-  DEFAULT_INSTRUMENT_ID,
-  findSectionByItemId,
-  getInstrument,
-} from '../instruments';
-import { toSensoryItems } from '../instruments/types';
+import { DEFAULT_INSTRUMENT_ID } from '../instruments';
 
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
@@ -43,62 +39,7 @@ const ReportPage: React.FC = () => {
         if (cancelled) return;
 
         if (response.assessment && response.responses) {
-          const instrumentId: string = response.assessment.instrumentId || DEFAULT_INSTRUMENT_ID;
-          const instrument = getInstrument(instrumentId);
-
-          const sections: Record<string, SensorySection> = Object.fromEntries(
-            instrument.sections.map((s) => [
-              s.key,
-              { items: toSensoryItems(s.items) as SensoryItem[], rawScore: 0, comments: '' },
-            ]),
-          );
-
-          response.responses.forEach((r: { itemId: number; response: string; id?: string }) => {
-            const sectionKey = findSectionByItemId(instrument, r.itemId);
-            if (!sectionKey) return;
-            const target = sections[sectionKey].items.find((it) => it.id === r.itemId);
-            if (target) {
-              target.response = r.response as SensoryItem['response'];
-              if (r.id) target.responseId = r.id;
-            }
-          });
-
-          instrument.sections.forEach((s) => {
-            const scoreField = `${s.key}RawScore`;
-            if (response.assessment[scoreField] !== undefined && response.assessment[scoreField] !== null) {
-              sections[s.key].rawScore = response.assessment[scoreField];
-            }
-          });
-
-          if (Array.isArray(response.assessment.sectionComments)) {
-            response.assessment.sectionComments.forEach((c: { section: string; comments: string }) => {
-              if (sections[c.section]) sections[c.section].comments = c.comments || '';
-            });
-          }
-
-          setFormData({
-            instrumentId,
-            child: {
-              name: response.assessment.childName || '',
-              birthDate: response.assessment.childBirthDate || '',
-              gender: response.assessment.childGender || 'male',
-              nationalIdentity: response.assessment.childNationalIdentity || '',
-              otherInfo: response.assessment.childOtherInfo || '',
-              age: response.assessment.childAge || 0,
-            },
-            examiner: {
-              name: response.assessment.examinerName || '',
-              profession: response.assessment.examinerProfession || '',
-              contact: response.assessment.examinerContact || '',
-            },
-            caregiver: {
-              name: response.assessment.caregiverName || '',
-              relationship: response.assessment.caregiverRelationship || '',
-              contact: response.assessment.caregiverContact || '',
-            },
-            sections,
-            createdAt: response.assessment.createdAt,
-          });
+          setFormData(normalizeAssessmentPayload(response));
         } else {
           setFormData({
             instrumentId: response.instrumentId || DEFAULT_INSTRUMENT_ID,

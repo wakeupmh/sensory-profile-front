@@ -19,7 +19,6 @@ const InviteAcceptPage: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{ professionalName?: string } | null>(null);
-  const [autoSubmitted, setAutoSubmitted] = useState(false);
 
   const submit = async (rawToken: string) => {
     const cleaned = rawToken.trim();
@@ -43,15 +42,14 @@ const InviteAcceptPage: React.FC = () => {
     }
   };
 
-  // Auto-submit if a token was passed via URL
+  // One-shot auto-submit when arriving with ?token=... in the URL. We don't
+  // re-attempt on subsequent renders or retries — if it fails, the user gets
+  // the manual form below to fix it.
   useEffect(() => {
     const urlToken = searchParams.get('token');
-    if (urlToken && !autoSubmitted && !success && !error) {
-      setAutoSubmitted(true);
-      submit(urlToken);
-    }
+    if (urlToken) submit(urlToken);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, []);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();

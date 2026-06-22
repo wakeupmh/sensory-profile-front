@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Box, Flex } from '@radix-ui/themes';
 import { ChevronLeftIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
@@ -21,7 +21,6 @@ const ProfessionalForm: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { getToken } = useAuthContext();
-  const fetchedRef = useRef(false);
 
   const isNewMode = !id;
   const isEditMode = !!id && location.pathname.endsWith('/edit');
@@ -34,30 +33,36 @@ const ProfessionalForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
-  const [justCreated, setJustCreated] = useState<Professional | null>(null);
+
+  // After a successful create the page stays mounted and shows the invitation
+  // token, so `justCreated` is exactly "I am the new form and now have a
+  // professional in hand" — no extra state needed.
+  const justCreated = isNewMode && professional;
 
   useEffect(() => {
     if (!id) return;
-    if (fetchedRef.current) return;
+    let cancelled = false;
     const run = async () => {
       try {
         setLoading(true);
         setNotFound(false);
         const token = await getToken();
         const p = await professionalApi.get(id, token);
+        if (cancelled) return;
         setProfessional(p);
         setForm({ name: p.name, email: p.email ?? '', profession: p.profession ?? '' });
-        fetchedRef.current = true;
       } catch (err: unknown) {
+        if (cancelled) return;
         const status = (err as { response?: { status?: number } }).response?.status;
         if (status === 404) setNotFound(true);
         else setError('Não foi possível carregar o profissional.');
         console.error(err);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
     run();
+    return () => { cancelled = true; };
   }, [id, getToken]);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -79,7 +84,6 @@ const ProfessionalForm: React.FC = () => {
       const token = await getToken();
       if (isNewMode) {
         const created = await professionalApi.create(payload, token);
-        setJustCreated(created);
         setProfessional(created);
         return;
       }

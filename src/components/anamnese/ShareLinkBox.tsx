@@ -3,6 +3,7 @@ import { Box, Flex, TextField } from '@radix-ui/themes';
 import { CopyIcon, Link2Icon, Share1Icon } from '@radix-ui/react-icons';
 import { useAuthContext } from '../../context/AuthContext';
 import { anamneseApi } from '../../services/api';
+import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 import { colors, shadows, radii, typography } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
 import GumroadHeading, { GumroadText } from '../design-system/GumroadHeading';
@@ -20,20 +21,22 @@ const buildShareUrl = (token: string): string => {
 
 const ShareLinkBox: React.FC<ShareLinkBoxProps> = ({ anamneseId, shareToken, onTokenChange }) => {
   const { getToken } = useAuthContext();
+  const { copied, error: copyError, copy } = useCopyToClipboard();
   const [loading, setLoading] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [opError, setOpError] = useState<string | null>(null);
+
+  const error = opError ?? copyError;
 
   const handleGenerate = async () => {
     try {
       setLoading(true);
-      setError(null);
+      setOpError(null);
       const token = await getToken();
       const result = await anamneseApi.generateShareLink(anamneseId, token);
       onTokenChange(result.shareToken);
     } catch (err) {
       console.error(err);
-      setError('Erro ao gerar link de compartilhamento.');
+      setOpError('Erro ao gerar link de compartilhamento.');
     } finally {
       setLoading(false);
     }
@@ -42,33 +45,20 @@ const ShareLinkBox: React.FC<ShareLinkBoxProps> = ({ anamneseId, shareToken, onT
   const handleRevoke = async () => {
     try {
       setLoading(true);
-      setError(null);
+      setOpError(null);
       const token = await getToken();
       await anamneseApi.revokeShareLink(anamneseId, token);
       onTokenChange(null);
-      setCopied(false);
     } catch (err) {
       console.error(err);
-      setError('Erro ao revogar link.');
+      setOpError('Erro ao revogar link.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCopy = async () => {
-    if (!shareToken) return;
-    const url = buildShareUrl(shareToken);
-    try {
-      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
-        await navigator.clipboard.writeText(url);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      } else {
-        setError('Copie o link manualmente (clipboard indisponível).');
-      }
-    } catch {
-      setError('Copie o link manualmente.');
-    }
+  const handleCopy = () => {
+    if (shareToken) copy(buildShareUrl(shareToken));
   };
 
   return (

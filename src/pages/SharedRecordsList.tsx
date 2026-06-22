@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Flex, Separator, Tabs } from '@radix-ui/themes';
 import {
@@ -24,8 +24,6 @@ import { colors, spacing } from '../theme/tokens';
 
 const SharedRecordsList: React.FC = () => {
   const { getToken, isLoaded, session } = useAuthContext();
-  const getTokenRef = useRef(getToken);
-  getTokenRef.current = getToken;
 
   const [anamneses, setAnamneses] = useState<SharedAnamneseSummary[]>([]);
   const [assessments, setAssessments] = useState<SharedAssessmentSummary[]>([]);
@@ -35,10 +33,10 @@ const SharedRecordsList: React.FC = () => {
   const fetchAll = useCallback(async () => {
     try {
       setLoading(true);
-      const token = await getTokenRef.current();
+      const token = await getToken();
       const [a, b] = await Promise.all([
-        sharedApi.listAnamneses(token).catch(() => [] as SharedAnamneseSummary[]),
-        sharedApi.listAssessments(token).catch(() => [] as SharedAssessmentSummary[]),
+        sharedApi.list('anamnese', token),
+        sharedApi.list('assessment', token),
       ]);
       setAnamneses(a);
       setAssessments(b);
@@ -49,7 +47,7 @@ const SharedRecordsList: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [getToken]);
 
   useEffect(() => {
     if (isLoaded && session) fetchAll();

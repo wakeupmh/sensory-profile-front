@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Box, Flex, Separator } from '@radix-ui/themes';
 import { ChevronLeftIcon, ExclamationTriangleIcon, ClipboardIcon } from '@radix-ui/react-icons';
@@ -23,6 +23,8 @@ const emptyFormData: AnamneseFormData = {
   clinicalHistory: emptyClinicalHistory(),
 };
 
+const noop = () => {};
+
 const SharedAnamneseView: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -31,17 +33,17 @@ const SharedAnamneseView: React.FC = () => {
   const [createdAt, setCreatedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const fetchedRef = useRef(false);
 
   useEffect(() => {
     if (!id) return;
-    if (fetchedRef.current) return;
+    let cancelled = false;
     const run = async () => {
       try {
         setLoading(true);
         setError(null);
         const token = await getToken();
-        const payload = await sharedApi.getAnamnese(id, token);
+        const payload = await sharedApi.get('anamnese', id, token);
+        if (cancelled) return;
         const responses = payload.responses ?? {};
         setData({
           child: responses.child ?? payload.child ?? emptyFormData.child,
@@ -49,8 +51,8 @@ const SharedAnamneseView: React.FC = () => {
           clinicalHistory: responses.clinicalHistory ?? payload.clinicalHistory ?? emptyClinicalHistory(),
         });
         setCreatedAt(payload.createdAt ?? null);
-        fetchedRef.current = true;
       } catch (err: any) {
+        if (cancelled) return;
         console.error(err);
         const status = err?.response?.status;
         setError(
@@ -59,13 +61,12 @@ const SharedAnamneseView: React.FC = () => {
             : 'Não foi possível carregar a anamnese.',
         );
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
     run();
+    return () => { cancelled = true; };
   }, [id, getToken]);
-
-  const noop = () => {};
 
   return (
     <Box style={{ maxWidth: 960, margin: '0 auto' }}>

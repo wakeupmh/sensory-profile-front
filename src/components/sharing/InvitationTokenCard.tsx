@@ -4,6 +4,7 @@ import { CopyIcon, CheckIcon, ClipboardIcon } from '@radix-ui/react-icons';
 import GumroadCard from '../design-system/GumroadCard';
 import GumroadButton from '../design-system/GumroadButton';
 import GumroadHeading, { GumroadText } from '../design-system/GumroadHeading';
+import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 import { colors, spacing } from '../../theme/tokens';
 
 interface InvitationTokenCardProps {
@@ -14,20 +15,8 @@ interface InvitationTokenCardProps {
 }
 
 const InvitationTokenCard: React.FC<InvitationTokenCardProps> = ({ token, professionalName, onRotate }) => {
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyToClipboard();
   const [rotating, setRotating] = useState(false);
-
-  const handleCopy = async () => {
-    try {
-      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
-        await navigator.clipboard.writeText(token);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      }
-    } catch {
-      // Fallback handled by user selecting manually.
-    }
-  };
 
   const handleRotate = async () => {
     if (!onRotate) return;
@@ -73,7 +62,7 @@ const InvitationTokenCard: React.FC<InvitationTokenCardProps> = ({ token, profes
         />
 
         <Flex gap="2" wrap="wrap">
-          <GumroadButton variant="primary" size="sm" onClick={handleCopy}>
+          <GumroadButton variant="primary" size="sm" onClick={() => copy(token)}>
             {copied ? <CheckIcon /> : <CopyIcon />}
             {copied ? 'Copiado!' : 'Copiar código'}
           </GumroadButton>
