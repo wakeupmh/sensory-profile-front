@@ -670,6 +670,30 @@ export const sharedApi = {
     authRequest<any>('get', token, `/api/shared/assessments/${id}`).then(unwrap<any>),
 };
 
+// ─── Behavior (ABC) insights ────────────────────────────────────────
+import type { BehaviorInsights } from '../types/behaviorInsights';
+
+export const behaviorInsightsApi = {
+  get: async (token: string | null, childId: string, days = 30): Promise<BehaviorInsights> => {
+    const response = await api.get('/api/logs/insights/behavior', {
+      headers: getAuthHeaders(token),
+      params: { childId, days },
+    });
+    const raw = response.data?.data ?? response.data ?? {};
+    return {
+      totalCount: raw.totalCount ?? 0,
+      previousCount: raw.previousCount ?? 0,
+      percentChange: raw.percentChange ?? null,
+      averageIntensity: raw.averageIntensity ?? null,
+      byWeekday: raw.byWeekday ?? {},
+      byHour: raw.byHour ?? {},
+      topAntecedents: raw.topAntecedents ?? [],
+      topBehaviors: raw.topBehaviors ?? [],
+      recent: raw.recent ?? raw.recentOccurrences ?? [],
+    };
+  },
+};
+
 export default api;
 
 

@@ -11,6 +11,7 @@ import GumroadHeading, { GumroadText } from '../components/design-system/Gumroad
 import LoadingSpinner from '../components/LoadingSpinner';
 import DomainStatsCard from '../components/child-profile/DomainStatsCard';
 import UnifiedTimeline from '../components/child-profile/UnifiedTimeline';
+import BehaviorInsightsPanel from '../components/behavior-insights/BehaviorInsightsPanel';
 import ChildForm, { ChildFormValue } from '../components/sensory-profile/ChildForm';
 import type { ChildProfile } from '../types/child';
 
@@ -302,6 +303,13 @@ const ChildProfilePage = () => {
               </Link>
             </GumroadButton>
           </Flex>
+
+          {/* Behavior insights */}
+          {childId && (
+            <Box style={{ marginBottom: spacing.xl }}>
+              <BehaviorInsightsPanel childId={childId} />
+            </Box>
+          )}
 
           {/* Timeline */}
           <Box>
