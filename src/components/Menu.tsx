@@ -19,6 +19,7 @@ import {
   EyeOpenIcon,
   TargetIcon,
   ArchiveIcon,
+  GroupIcon,
 } from '@radix-ui/react-icons';
 import { colors, typography, zIndex, shadows } from '../theme/tokens';
 import GumroadButton from './design-system/GumroadButton';
@@ -43,6 +44,7 @@ const SECONDARY: NavItem[] = [
   { path: '/documents', match: '/documents', label: 'Documentos', icon: ArchiveIcon },
   { path: '/professionals', match: '/professionals', label: 'Profissionais', icon: Share1Icon },
   { path: '/shared', match: '/shared', label: 'Compartilhados comigo', icon: EyeOpenIcon },
+  { path: '/shared/children', match: '/shared/children', label: 'Crianças compartilhadas', icon: GroupIcon },
   { path: '/invite/accept', match: '/invite', label: 'Aceitar convite', icon: EnvelopeOpenIcon },
 ];
 

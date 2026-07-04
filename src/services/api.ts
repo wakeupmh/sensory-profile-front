@@ -837,6 +837,47 @@ export const documentApi = {
       .then(() => undefined),
 };
 
+// ─── Whole-child domain sharing with professionals ──────────────────
+import type { ChildShare, GrantChildSharePayload, SharedChildSummary } from '../types/childSharing';
+import type {
+  ConsolidatedAssessments,
+  ConsolidatedLogs,
+  ConsolidatedTherapy,
+  ConsolidatedMedical,
+  ConsolidatedDevelopment,
+} from '../types/consolidatedReport';
+
+export const childSharesApi = {
+  list: (token: string | null, childId: string): Promise<ChildShare[]> =>
+    authRequest<any>('get', token, `/api/children/${childId}/shares`).then(unwrap<ChildShare[]>),
+
+  grant: (token: string | null, childId: string, payload: GrantChildSharePayload): Promise<ChildShare> =>
+    authRequest<any>('post', token, `/api/children/${childId}/shares`, payload).then(unwrap<ChildShare>),
+
+  revoke: (token: string | null, childId: string, professionalId: string): Promise<void> =>
+    authRequest<any>('delete', token, `/api/children/${childId}/shares/${professionalId}`),
+};
+
+export const sharedChildrenApi = {
+  list: (token: string | null): Promise<SharedChildSummary[]> =>
+    authRequest<any>('get', token, '/api/shared/children').then(unwrap<SharedChildSummary[]>),
+
+  getAssessments: (token: string | null, childId: string): Promise<ConsolidatedAssessments> =>
+    authRequest<any>('get', token, `/api/shared/children/${childId}/assessments`).then(unwrap<ConsolidatedAssessments>),
+
+  getDailyLogs: (token: string | null, childId: string): Promise<ConsolidatedLogs> =>
+    authRequest<any>('get', token, `/api/shared/children/${childId}/daily-logs`).then(unwrap<ConsolidatedLogs>),
+
+  getTherapy: (token: string | null, childId: string): Promise<ConsolidatedTherapy> =>
+    authRequest<any>('get', token, `/api/shared/children/${childId}/therapy`).then(unwrap<ConsolidatedTherapy>),
+
+  getMedical: (token: string | null, childId: string): Promise<ConsolidatedMedical> =>
+    authRequest<any>('get', token, `/api/shared/children/${childId}/medical`).then(unwrap<ConsolidatedMedical>),
+
+  getDevelopment: (token: string | null, childId: string): Promise<ConsolidatedDevelopment> =>
+    authRequest<any>('get', token, `/api/shared/children/${childId}/development`).then(unwrap<ConsolidatedDevelopment>),
+};
+
 export default api;
 
 
