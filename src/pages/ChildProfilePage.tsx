@@ -315,6 +315,11 @@ const ChildProfilePage = () => {
                 🎯 Metas Terapêuticas
               </Link>
             </GumroadButton>
+            <GumroadButton variant="secondary" size="md" asChild>
+              <Link to={`/documents?childId=${childId}`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                🗂️ Documentos
+              </Link>
+            </GumroadButton>
           </Flex>
 
           {/* Behavior insights */}

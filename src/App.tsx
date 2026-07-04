@@ -18,6 +18,7 @@ import DevelopmentPage from './pages/DevelopmentPage';
 import EducationPage from './pages/EducationPage';
 import GoalsPage from './pages/GoalsPage';
 import GoalDetailPage from './pages/GoalDetailPage';
+import DocumentsPage from './pages/DocumentsPage';
 import ConsolidatedReportPage from './pages/ConsolidatedReportPage';
 import ConsolidatedReportSharedView from './pages/ConsolidatedReportSharedView';
 import ProfessionalsList from './pages/ProfessionalsList';
@@ -68,6 +69,7 @@ function App() {
             <Route path="/education" element={<ProtectedRoute><EducationPage /></ProtectedRoute>} />
             <Route path="/goals" element={<ProtectedRoute><GoalsPage /></ProtectedRoute>} />
             <Route path="/goals/:id" element={<ProtectedRoute><GoalDetailPage /></ProtectedRoute>} />
+            <Route path="/documents" element={<ProtectedRoute><DocumentsPage /></ProtectedRoute>} />
             <Route path="/consolidated/:childId" element={<ProtectedRoute><ConsolidatedReportPage /></ProtectedRoute>} />
 
             {/* Professional directory (owner manages people who can be granted access) */}

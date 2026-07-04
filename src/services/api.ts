@@ -794,6 +794,49 @@ export const goalProgressApi = {
   },
 };
 
+// ─── Documents (S3 presigned upload/download) ───────────────────────
+import type {
+  DocumentRecord,
+  CreateUploadUrlPayload,
+  CreateUploadUrlResponse,
+  DownloadUrlResponse,
+} from '../types/documents';
+
+export const documentApi = {
+  list: async (
+    token: string | null,
+    params?: { childId?: string; resourceType?: string; resourceId?: string },
+  ): Promise<DocumentRecord[]> => {
+    const response = await api.get('/api/documents', { headers: getAuthHeaders(token), params });
+    return response.data?.data ?? response.data ?? [];
+  },
+
+  createUploadUrl: async (token: string | null, payload: CreateUploadUrlPayload): Promise<CreateUploadUrlResponse> => {
+    const response = await api.post('/api/documents/upload-url', payload, { headers: getAuthHeaders(token) });
+    return response.data?.data ?? response.data;
+  },
+
+  getDownloadUrl: async (token: string | null, id: string): Promise<DownloadUrlResponse> => {
+    const response = await api.get(`/api/documents/${id}/download-url`, { headers: getAuthHeaders(token) });
+    return response.data?.data ?? response.data;
+  },
+
+  delete: async (token: string | null, id: string): Promise<void> => {
+    await api.delete(`/api/documents/${id}`, { headers: getAuthHeaders(token) });
+  },
+
+  /** Uploads the raw file bytes directly to the presigned S3 URL (no auth header — the URL itself is the credential). */
+  uploadToPresignedUrl: (uploadUrl: string, file: File, onProgress?: (percent: number) => void): Promise<void> =>
+    axios
+      .put(uploadUrl, file, {
+        headers: { 'Content-Type': file.type || 'application/octet-stream' },
+        onUploadProgress: (evt) => {
+          if (onProgress && evt.total) onProgress(Math.round((evt.loaded / evt.total) * 100));
+        },
+      })
+      .then(() => undefined),
+};
+
 export default api;
 
 

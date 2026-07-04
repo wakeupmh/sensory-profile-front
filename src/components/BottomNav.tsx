@@ -16,6 +16,7 @@ import {
   DotsHorizontalIcon,
   Cross2Icon,
   TargetIcon,
+  ArchiveIcon,
 } from '@radix-ui/react-icons';
 import { colors, zIndex, typography, shadows } from '../theme/tokens';
 
@@ -42,6 +43,7 @@ const BottomNav: React.FC = () => {
     { path: '/development', label: 'Desenvolvimento', icon: BarChartIcon },
     { path: '/education', label: 'Educação', icon: ReaderIcon },
     { path: '/goals', label: 'Metas', icon: TargetIcon },
+    { path: '/documents', label: 'Documentos', icon: ArchiveIcon },
     { path: '/assessment/new', label: 'Nova Avaliação', icon: PlusIcon },
     { path: '/anamneses', label: 'Anamneses', icon: ClipboardIcon },
   ];
