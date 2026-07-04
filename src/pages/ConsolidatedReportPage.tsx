@@ -7,6 +7,7 @@ import type { ConsolidatedSummary } from '../types/consolidatedReport';
 import { useAuthContext } from '../context/AuthContext';
 import { colors, fonts, spacing } from '../theme/tokens';
 import LoadingSpinner from '../components/LoadingSpinner';
+import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
 import SectionCard from '../components/consolidated-report/SectionCard';
@@ -17,7 +18,8 @@ import MedicalSection from '../components/consolidated-report/MedicalSection';
 import DevelopmentSection from '../components/consolidated-report/DevelopmentSection';
 import EducationSection from '../components/consolidated-report/EducationSection';
 import SharePanel from '../components/consolidated-report/SharePanel';
-import AISummaryPanel from '../components/consolidated-report/AISummaryPanel';
+import AISummaryHistoryPanel from '../components/consolidated-report/AISummaryHistoryPanel';
+import AIQuestionChat from '../components/consolidated-report/AIQuestionChat';
 
 const PERIOD_OPTIONS = [
   { label: '30 dias', value: 30 },
@@ -161,7 +163,12 @@ const ConsolidatedReportPage = () => {
           {childId && (
             <>
               <SharePanel childId={childId} periodDays={periodDays} />
-              <AISummaryPanel childId={childId} />
+              <GumroadCard color="cream" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+                <AISummaryHistoryPanel childId={childId} />
+              </GumroadCard>
+              <GumroadCard color="white" shadow="md" padding="lg">
+                <AIQuestionChat childId={childId} periodDays={periodDays} />
+              </GumroadCard>
             </>
           )}
         </>

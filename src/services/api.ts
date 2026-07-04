@@ -538,7 +538,6 @@ import type {
   ReportShare,
   CreateSharePayload,
   CreateShareResponse,
-  GenerateAISummaryPayload,
 } from '../types/consolidatedReport';
 
 export const consolidatedReportApi = {
@@ -577,13 +576,6 @@ export const consolidatedReportApi = {
   getShared: async (shareToken: string): Promise<ConsolidatedSummary> => {
         const response = await api.get(`/api/consolidated/shared/${shareToken}`);
     // Backend wraps payloads as { success, data, timestamp }; unwrap (tolerate already-unwrapped).
-    return response.data?.data ?? response.data;
-  },
-
-  generateAISummary: async (token: string | null, payload: GenerateAISummaryPayload): Promise<{ summary: string }> => {
-        const response = await api.post('/api/consolidated/ai-summary', payload, {
-      headers: getAuthHeaders(token),
-    });
     return response.data?.data ?? response.data;
   },
 };
@@ -876,6 +868,75 @@ export const sharedChildrenApi = {
 
   getDevelopment: (token: string | null, childId: string): Promise<ConsolidatedDevelopment> =>
     authRequest<any>('get', token, `/api/shared/children/${childId}/development`).then(unwrap<ConsolidatedDevelopment>),
+};
+
+// ─── AI summaries history + Q&A chat (SP-13) ────────────────────────
+import type {
+  AISummaryRecord,
+  GenerateAISummaryPayload,
+  AIQuestionPayload,
+  AIQuestionResponse,
+  AIRateLimitInfo,
+} from '../types/aiSummaries';
+
+export class AIRateLimitError extends Error {
+  info: AIRateLimitInfo;
+  constructor(info: AIRateLimitInfo) {
+    super('Limite de uso da IA atingido.');
+    this.name = 'AIRateLimitError';
+    this.info = info;
+  }
+}
+
+function parseRateLimitInfo(headers: Record<string, unknown>): AIRateLimitInfo {
+  const remaining = headers['x-ratelimit-remaining'];
+  const limit = headers['x-ratelimit-limit'];
+  const retryAfter = headers['retry-after'];
+  return {
+    limit: limit ? Number(limit) : 5,
+    remaining: remaining !== undefined ? Number(remaining) : null,
+    retryAfterSeconds: retryAfter ? Number(retryAfter) : null,
+  };
+}
+
+async function aiRequest<T>(method: 'get' | 'post', token: string | null, url: string, data?: unknown, params?: unknown): Promise<{ data: T; rateLimit: AIRateLimitInfo }> {
+  const authHeaders = getAuthHeaders(token);
+  try {
+    const response = method === 'get'
+      ? await api.get(url, { headers: authHeaders, params })
+      : await api.post(url, data, { headers: authHeaders });
+    return { data: (response.data?.data ?? response.data) as T, rateLimit: parseRateLimitInfo(response.headers as Record<string, unknown>) };
+  } catch (err) {
+    if (axios.isAxiosError(err) && err.response?.status === 429) {
+      const body = err.response.data ?? {};
+      const info = parseRateLimitInfo(err.response.headers as Record<string, unknown>);
+      throw new AIRateLimitError({
+        limit: info.limit,
+        remaining: 0,
+        retryAfterSeconds: info.retryAfterSeconds ?? body.retryAfterSeconds ?? body.retryAfter ?? null,
+      });
+    }
+    throw err;
+  }
+}
+
+export const aiSummaryApi = {
+  list: async (token: string | null, childId: string): Promise<AISummaryRecord[]> => {
+    const { data } = await aiRequest<AISummaryRecord[]>('get', token, '/api/consolidated/ai-summaries', undefined, { childId });
+    return data ?? [];
+  },
+
+  generate: async (token: string | null, payload: GenerateAISummaryPayload): Promise<{ record: AISummaryRecord; rateLimit: AIRateLimitInfo }> => {
+    const { data, rateLimit } = await aiRequest<AISummaryRecord>('post', token, '/api/consolidated/ai-summaries', payload);
+    return { record: data, rateLimit };
+  },
+};
+
+export const aiQuestionApi = {
+  ask: async (token: string | null, payload: AIQuestionPayload): Promise<{ answer: string; rateLimit: AIRateLimitInfo }> => {
+    const { data, rateLimit } = await aiRequest<AIQuestionResponse>('post', token, '/api/consolidated/ai-question', payload);
+    return { answer: data.answer, rateLimit };
+  },
 };
 
 export default api;
