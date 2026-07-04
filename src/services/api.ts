@@ -694,6 +694,52 @@ export const behaviorInsightsApi = {
   },
 };
 
+// ─── Reminders feed (manual + derived) ──────────────────────────────
+import type {
+  UpcomingReminder,
+  Reminder,
+  CreateReminderPayload,
+  UpdateReminderPayload,
+} from '../types/reminders';
+
+export const reminderApi = {
+  getUpcoming: async (token: string | null, childId: string, days = 14): Promise<UpcomingReminder[]> => {
+    const response = await api.get('/api/reminders/upcoming', {
+      headers: getAuthHeaders(token),
+      params: { childId, days },
+    });
+    return response.data?.data ?? response.data ?? [];
+  },
+
+  list: async (token: string | null, params?: { childId?: string }): Promise<Reminder[]> => {
+    const response = await api.get('/api/reminders', {
+      headers: getAuthHeaders(token),
+      params,
+    });
+    return response.data?.data ?? response.data ?? [];
+  },
+
+  create: async (token: string | null, payload: CreateReminderPayload): Promise<Reminder> => {
+    const response = await api.post('/api/reminders', payload, {
+      headers: getAuthHeaders(token),
+    });
+    return response.data?.data ?? response.data;
+  },
+
+  update: async (token: string | null, id: string, payload: UpdateReminderPayload): Promise<Reminder> => {
+    const response = await api.patch(`/api/reminders/${id}`, payload, {
+      headers: getAuthHeaders(token),
+    });
+    return response.data?.data ?? response.data;
+  },
+
+  delete: async (token: string | null, id: string): Promise<void> => {
+    await api.delete(`/api/reminders/${id}`, {
+      headers: getAuthHeaders(token),
+    });
+  },
+};
+
 export default api;
 
 
