@@ -740,6 +740,60 @@ export const reminderApi = {
   },
 };
 
+// ─── Therapeutic goals / PEI with progress tracking ─────────────────
+import type {
+  Goal,
+  CreateGoalPayload,
+  UpdateGoalPayload,
+  GoalQueryParams,
+  GoalProgressEntry,
+  CreateGoalProgressPayload,
+  GoalProgressSummary,
+} from '../types/goals';
+
+export const goalApi = {
+  list: async (token: string | null, params?: GoalQueryParams): Promise<Goal[]> => {
+    const response = await api.get('/api/goals', { headers: getAuthHeaders(token), params });
+    return response.data?.data ?? response.data ?? [];
+  },
+
+  get: async (token: string | null, id: string): Promise<Goal> => {
+    const response = await api.get(`/api/goals/${id}`, { headers: getAuthHeaders(token) });
+    return response.data?.data ?? response.data;
+  },
+
+  create: async (token: string | null, payload: CreateGoalPayload): Promise<Goal> => {
+    const response = await api.post('/api/goals', payload, { headers: getAuthHeaders(token) });
+    return response.data?.data ?? response.data;
+  },
+
+  update: async (token: string | null, id: string, payload: UpdateGoalPayload): Promise<Goal> => {
+    const response = await api.patch(`/api/goals/${id}`, payload, { headers: getAuthHeaders(token) });
+    return response.data?.data ?? response.data;
+  },
+
+  delete: async (token: string | null, id: string): Promise<void> => {
+    await api.delete(`/api/goals/${id}`, { headers: getAuthHeaders(token) });
+  },
+};
+
+export const goalProgressApi = {
+  list: async (token: string | null, goalId: string): Promise<GoalProgressEntry[]> => {
+    const response = await api.get(`/api/goals/${goalId}/progress`, { headers: getAuthHeaders(token) });
+    return response.data?.data ?? response.data ?? [];
+  },
+
+  create: async (token: string | null, goalId: string, payload: CreateGoalProgressPayload): Promise<GoalProgressEntry> => {
+    const response = await api.post(`/api/goals/${goalId}/progress`, payload, { headers: getAuthHeaders(token) });
+    return response.data?.data ?? response.data;
+  },
+
+  summary: async (token: string | null, goalId: string): Promise<GoalProgressSummary> => {
+    const response = await api.get(`/api/goals/${goalId}/progress/summary`, { headers: getAuthHeaders(token) });
+    return response.data?.data ?? response.data;
+  },
+};
+
 export default api;
 
 

@@ -16,6 +16,8 @@ import TherapyPage from './pages/TherapyPage';
 import MedicalPage from './pages/MedicalPage';
 import DevelopmentPage from './pages/DevelopmentPage';
 import EducationPage from './pages/EducationPage';
+import GoalsPage from './pages/GoalsPage';
+import GoalDetailPage from './pages/GoalDetailPage';
 import ConsolidatedReportPage from './pages/ConsolidatedReportPage';
 import ConsolidatedReportSharedView from './pages/ConsolidatedReportSharedView';
 import ProfessionalsList from './pages/ProfessionalsList';
@@ -64,6 +66,8 @@ function App() {
             <Route path="/medical" element={<ProtectedRoute><MedicalPage /></ProtectedRoute>} />
             <Route path="/development" element={<ProtectedRoute><DevelopmentPage /></ProtectedRoute>} />
             <Route path="/education" element={<ProtectedRoute><EducationPage /></ProtectedRoute>} />
+            <Route path="/goals" element={<ProtectedRoute><GoalsPage /></ProtectedRoute>} />
+            <Route path="/goals/:id" element={<ProtectedRoute><GoalDetailPage /></ProtectedRoute>} />
             <Route path="/consolidated/:childId" element={<ProtectedRoute><ConsolidatedReportPage /></ProtectedRoute>} />
 
             {/* Professional directory (owner manages people who can be granted access) */}
