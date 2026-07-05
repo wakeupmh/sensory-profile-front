@@ -70,7 +70,6 @@ const SensorySection = memo(({
             padding: '12px 16px',
             fontFamily: typography['body-md'].font,
             fontSize: typography['body-md'].size,
-            outline: 'none',
           }}
         />
       </Box>

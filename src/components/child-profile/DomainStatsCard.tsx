@@ -28,7 +28,6 @@ const DomainStatsCard: React.FC<DomainStatsCardProps> = ({ label, count, icon, h
         boxShadow: shadows.card,
         padding: '16px',
         cursor: 'pointer',
-        outline: 'none',
       }}
     >
       <Flex align="center" gap="2" style={{ marginBottom: '8px' }}>

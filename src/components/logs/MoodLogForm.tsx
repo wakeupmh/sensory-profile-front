@@ -50,7 +50,7 @@ export default function MoodLogForm({ onSubmit, isLoading }: MoodLogFormProps) {
           <label style={labelStyle}>Como estava? <span style={{ color: colors.error }} aria-hidden="true">*</span></label>
           <Flex gap="2">
             {MOOD_LEVELS.map(({ value, emoji, label }) => (
-              <button
+              <button className="press-in"
                 key={value}
                 type="button"
                 onClick={() => setLevel(value)}
@@ -86,7 +86,7 @@ export default function MoodLogForm({ onSubmit, isLoading }: MoodLogFormProps) {
             {MOOD_TAGS.map(tag => {
               const isSelected = tags.includes(tag);
               return (
-                <button
+                <button className="press-in"
                   key={tag}
                   type="button"
                   onClick={() => toggleTag(tag)}

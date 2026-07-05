@@ -14,7 +14,6 @@ const inputStyle: React.CSSProperties = {
   fontFamily: fonts.body,
   fontSize: '15px',
   color: colors.ink,
-  outline: 'none',
   boxSizing: 'border-box',
 };
 
@@ -67,7 +66,7 @@ export default function FoodLogForm({ onSubmit, isLoading }: FoodLogFormProps) {
           <label style={labelStyle}>Refeição</label>
           <Flex gap="2" wrap="wrap">
             {MEAL_OPTIONS.map(({ value, label }) => (
-              <button
+              <button className="press-in"
                 key={value}
                 type="button"
                 onClick={() => setMeal(meal === value ? null : value)}

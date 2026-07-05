@@ -14,7 +14,6 @@ const inputStyle: React.CSSProperties = {
   fontFamily: fonts.body,
   fontSize: '15px',
   color: colors.ink,
-  outline: 'none',
   boxSizing: 'border-box',
 };
 
@@ -96,7 +95,7 @@ export default function SleepLogForm({ onSubmit, isLoading }: SleepLogFormProps)
           <label style={labelStyle}>Qualidade</label>
           <Flex gap="2">
             {QUALITY_OPTIONS.map(({ value, label }) => (
-              <button
+              <button className="press-in"
                 key={value}
                 type="button"
                 onClick={() => setQuality(quality === value ? null : value)}

@@ -370,10 +370,17 @@ const Home = () => {
             gap: '20px',
           }}
         >
-          {filteredAssessments.map((assessment) => {
+          {filteredAssessments.map((assessment, i) => {
             const instrument = getInstrument(assessment.instrumentId);
             return (
-              <GumroadCard key={assessment.id} color="white" shadow="md" padding="lg">
+              <GumroadCard
+                key={assessment.id}
+                color="white"
+                shadow="md"
+                padding="lg"
+                className="stagger-item"
+                style={{ ['--i' as string]: Math.min(i, 8) }}
+              >
                 <Flex direction="column" gap="3" style={{ height: '100%' }}>
                   {/* Top row */}
                   <Flex justify="between" align="start" gap="2">

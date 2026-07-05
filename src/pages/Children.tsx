@@ -302,9 +302,16 @@ const Children = () => {
             gap: '20px',
           }}
         >
-          {children.map((child) => {
+          {children.map((child, i) => {
             return (
-              <GumroadCard key={child.id} color="white" shadow="md" padding="lg">
+              <GumroadCard
+                key={child.id}
+                color="white"
+                shadow="md"
+                padding="lg"
+                className="stagger-item"
+                style={{ ['--i' as string]: Math.min(i, 8) }}
+              >
                 <Flex direction="column" gap="3" style={{ height: '100%' }}>
                   {(
                     <>

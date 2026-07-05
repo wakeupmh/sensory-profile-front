@@ -118,7 +118,6 @@ const FastRadioCards = memo(({
             textAlign: 'center',
             transition: 'box-shadow 0.15s ease, transform 0.1s ease, background-color 0.15s ease',
             transform: isSelected ? 'translate(2px, 2px)' : 'none',
-            outline: 'none',
           };
 
           return (

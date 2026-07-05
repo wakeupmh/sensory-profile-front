@@ -173,7 +173,6 @@ const ChildPicker: React.FC<ChildPickerProps> = ({ selectedId, onSelect }) => {
                 cursor: 'pointer',
                 textAlign: 'left',
                 transition: 'transform 0.1s ease, box-shadow 0.1s ease',
-                outline: 'none',
               }}
               onMouseEnter={(e) => {
                 if (!isSelected) {
@@ -254,7 +253,6 @@ const ChildPicker: React.FC<ChildPickerProps> = ({ selectedId, onSelect }) => {
             cursor: 'pointer',
             textAlign: 'center',
             transition: 'transform 0.1s ease, box-shadow 0.1s ease',
-            outline: 'none',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',

@@ -44,7 +44,7 @@ export default function ToiletingLogForm({ onSubmit, isLoading }: ToiletingLogFo
           <label style={labelStyle}>Tipo</label>
           <Flex gap="2">
             {TYPE_OPTIONS.map(({ value, label }) => (
-              <button
+              <button className="press-in"
                 key={value}
                 type="button"
                 onClick={() => setType(type === value ? null : value)}
@@ -71,7 +71,7 @@ export default function ToiletingLogForm({ onSubmit, isLoading }: ToiletingLogFo
         </Box>
 
         <Box>
-          <button
+          <button className="press-in"
             type="button"
             onClick={() => setIndependent(prev => !prev)}
             style={{

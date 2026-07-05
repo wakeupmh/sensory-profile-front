@@ -16,7 +16,6 @@ const inputStyle: React.CSSProperties = {
   color: colors.ink,
   resize: 'vertical',
   minHeight: '72px',
-  outline: 'none',
   boxSizing: 'border-box',
 };
 
@@ -100,7 +99,7 @@ export default function AbcLogForm({ onSubmit, isLoading }: AbcLogFormProps) {
           <label style={labelStyle}>Intensidade</label>
           <Flex gap="2">
             {([1, 2, 3, 4, 5] as const).map(n => (
-              <button
+              <button className="press-in"
                 key={n}
                 type="button"
                 onClick={() => setIntensity(intensity === n ? null : n)}

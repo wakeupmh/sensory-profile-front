@@ -50,28 +50,33 @@ const GumroadCard = React.forwardRef<HTMLDivElement, GumroadCardProps>(
       borderRadius: radii.xl,
       boxShadow: shadowMap[shadow],
       padding: paddingMap[padding],
-      transition: 'transform 0.15s ease, box-shadow 0.15s ease',
       cursor: onClick ? 'pointer' : 'default',
       ...style,
     };
 
+    // Hover/focus lift via CSS (.gumroad-card-interactive) — responde
+    // também ao foco de teclado, ao contrário do antigo onMouseEnter
+    const interactiveClass = shadow !== 'none' ? 'gumroad-card-interactive' : '';
+    const mergedClassName = [interactiveClass, className].filter(Boolean).join(' ') || undefined;
+
     return (
       <Box
         ref={ref}
-        className={className}
+        className={mergedClassName}
         style={baseStyle}
         onClick={onClick}
-        role={role}
-        onMouseEnter={(e) => {
-          if (shadow !== 'none') {
-            (e.currentTarget as HTMLDivElement).style.transform = 'translate(-2px, -2px)';
-            (e.currentTarget as HTMLDivElement).style.boxShadow = shadowMap.lg;
-          }
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLDivElement).style.transform = 'translate(0, 0)';
-          (e.currentTarget as HTMLDivElement).style.boxShadow = shadowMap[shadow];
-        }}
+        role={role ?? (onClick ? 'button' : undefined)}
+        tabIndex={onClick ? 0 : undefined}
+        onKeyDown={
+          onClick
+            ? (e: React.KeyboardEvent) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onClick();
+                }
+              }
+            : undefined
+        }
       >
         {children}
       </Box>

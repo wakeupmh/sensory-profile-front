@@ -330,10 +330,11 @@ a {
   animation-delay: calc(var(--i, 0) * 45ms + 80ms);
 }
 
-/* Stagger genérico para grids/listas fora de modais */
+/* Stagger genérico para grids/listas fora de modais.
+   fill-mode backwards (não forwards): cobre o atraso com o keyframe
+   inicial e libera o transform ao terminar, sem bloquear o hover-lift */
 .stagger-item {
-  opacity: 0;
-  animation: modal-item-in 0.32s var(--ease-spring) forwards;
+  animation: modal-item-in 0.32s var(--ease-spring) backwards;
   animation-delay: calc(var(--i, 0) * 45ms);
 }
 

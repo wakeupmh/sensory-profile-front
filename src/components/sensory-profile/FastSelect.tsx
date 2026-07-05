@@ -82,7 +82,6 @@ const FastSelect = memo(({
           fontFamily: typography['body-md'].font,
           fontSize: typography['body-md'].size,
           cursor: disabled ? 'default' : 'pointer',
-          outline: 'none',
           appearance: 'none',
           WebkitAppearance: 'none',
           MozAppearance: 'none',
