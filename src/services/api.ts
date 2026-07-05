@@ -939,6 +939,27 @@ export const aiQuestionApi = {
   },
 };
 
+// ─── AI consultation brief (SP-22) ───────────────────────────────────
+import type { ConsultationBrief, GenerateConsultationBriefPayload } from '../types/consultationBrief';
+
+export const consultationBriefApi = {
+  generate: async (token: string | null, payload: GenerateConsultationBriefPayload): Promise<{ brief: ConsultationBrief; rateLimit: AIRateLimitInfo }> => {
+    const { data, rateLimit } = await aiRequest<any>('post', token, '/api/consolidated/consultation-brief', payload);
+    const raw = data?.brief ?? data ?? {};
+    const rawQuestions = raw.suggestedQuestions ?? raw.questions;
+    const brief: ConsultationBrief = {
+      whatChanged: raw.whatChanged ?? raw.changesSinceLastVisit ?? raw.changes ?? '',
+      currentTreatments: raw.currentTreatments ?? raw.medications ?? raw.treatments ?? '',
+      suggestedQuestions: Array.isArray(rawQuestions)
+        ? rawQuestions
+        : typeof rawQuestions === 'string' && rawQuestions
+          ? [rawQuestions]
+          : [],
+    };
+    return { brief, rateLimit };
+  },
+};
+
 export default api;
 
 

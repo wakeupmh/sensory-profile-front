@@ -13,6 +13,7 @@ import DomainStatsCard from '../components/child-profile/DomainStatsCard';
 import UnifiedTimeline from '../components/child-profile/UnifiedTimeline';
 import BehaviorInsightsPanel from '../components/behavior-insights/BehaviorInsightsPanel';
 import RemindersWidget from '../components/reminders/RemindersWidget';
+import ConsultationBriefModal from '../components/consolidated-report/ConsultationBriefModal';
 import ChildForm, { ChildFormValue } from '../components/sensory-profile/ChildForm';
 import type { ChildProfile } from '../types/child';
 
@@ -49,6 +50,7 @@ const ChildProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [periodDays, setPeriodDays] = useState(30);
+  const [briefModalOpen, setBriefModalOpen] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editFormValue, setEditFormValue] = useState<ChildFormValue>({ name: '', birthDate: '', gender: '', nationalIdentity: '', otherInfo: '' });
@@ -328,6 +330,9 @@ const ChildProfilePage = () => {
                 🗂️ Documentos
               </Link>
             </GumroadButton>
+            <GumroadButton variant="secondary" size="md" onClick={() => setBriefModalOpen(true)}>
+              🩺 Preparar consulta
+            </GumroadButton>
           </Flex>
 
           {/* Behavior insights */}
@@ -352,6 +357,15 @@ const ChildProfilePage = () => {
           </GumroadText>
         </GumroadCard>
       ) : null}
+
+      {childId && (
+        <ConsultationBriefModal
+          isOpen={briefModalOpen}
+          onClose={() => setBriefModalOpen(false)}
+          childId={childId}
+          childName={profile?.child?.name}
+        />
+      )}
     </Box>
   );
 };
