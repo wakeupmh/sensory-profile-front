@@ -310,6 +310,11 @@ const ChildProfilePage = () => {
                 📊 Ver Relatório Consolidado
               </Link>
             </GumroadButton>
+            <GumroadButton variant="secondary" size="md" asChild>
+              <Link to={`/goals?childId=${childId}`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                🎯 Metas Terapêuticas
+              </Link>
+            </GumroadButton>
           </Flex>
 
           {/* Behavior insights */}
