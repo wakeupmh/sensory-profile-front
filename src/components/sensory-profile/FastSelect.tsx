@@ -62,7 +62,7 @@ const FastSelect = memo(({
           marginBottom: '6px',
         }}
       >
-        {label} {required && <span style={{ color: colors['brand-salmon'] }}>*</span>}
+        {label} {required && <span style={{ color: colors.error }} aria-hidden="true">*</span>}
       </Text>
       <select
         value={value}
@@ -82,7 +82,6 @@ const FastSelect = memo(({
           fontFamily: typography['body-md'].font,
           fontSize: typography['body-md'].size,
           cursor: disabled ? 'default' : 'pointer',
-          outline: 'none',
           appearance: 'none',
           WebkitAppearance: 'none',
           MozAppearance: 'none',

@@ -99,10 +99,10 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
     <form onSubmit={handleSubmit}>
       <Flex direction="column" gap="3">
         <div>
-          <label style={labelStyle}>
-            Data e hora da consulta <span style={{ color: colors['brand-salmon'] }}>*</span>
+          <label style={labelStyle} htmlFor="appt-data-e">
+            Data e hora da consulta <span style={{ color: colors.error }} aria-hidden="true">*</span>
           </label>
-          <input
+          <input id="appt-data-e"
             type="datetime-local"
             value={occurredAt}
             onChange={(e) => setOccurredAt(e.target.value)}
@@ -113,8 +113,8 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
 
         <Flex gap="3">
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Médico</label>
-            <input
+            <label style={labelStyle} htmlFor="appt-medico">Médico</label>
+            <input id="appt-medico"
               type="text"
               maxLength={255}
               value={doctorName}
@@ -124,8 +124,8 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
             />
           </div>
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Especialidade</label>
-            <input
+            <label style={labelStyle} htmlFor="appt-especialidade">Especialidade</label>
+            <input id="appt-especialidade"
               type="text"
               maxLength={100}
               value={specialty}
@@ -137,8 +137,8 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
         </Flex>
 
         <div>
-          <label style={labelStyle}>Clínica / Hospital</label>
-          <input
+          <label style={labelStyle} htmlFor="appt-clinica-hospital">Clínica / Hospital</label>
+          <input id="appt-clinica-hospital"
             type="text"
             maxLength={255}
             value={clinicName}
@@ -149,8 +149,8 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
         </div>
 
         <div>
-          <label style={labelStyle}>Resumo da consulta</label>
-          <textarea
+          <label style={labelStyle} htmlFor="appt-resumo-da">Resumo da consulta</label>
+          <textarea id="appt-resumo-da"
             maxLength={2000}
             rows={3}
             value={summary}
@@ -161,8 +161,8 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
         </div>
 
         <div>
-          <label style={labelStyle}>Data de retorno</label>
-          <input
+          <label style={labelStyle} htmlFor="appt-data-de">Data de retorno</label>
+          <input id="appt-data-de"
             type="date"
             value={followUpDate}
             onChange={(e) => setFollowUpDate(e.target.value)}
@@ -171,8 +171,8 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
         </div>
 
         <div>
-          <label style={labelStyle}>Observações internas</label>
-          <textarea
+          <label style={labelStyle} htmlFor="appt-observacoes-internas">Observações internas</label>
+          <textarea id="appt-observacoes-internas"
             maxLength={2000}
             rows={2}
             value={notes}

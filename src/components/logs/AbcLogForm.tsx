@@ -16,7 +16,6 @@ const inputStyle: React.CSSProperties = {
   color: colors.ink,
   resize: 'vertical',
   minHeight: '72px',
-  outline: 'none',
   boxSizing: 'border-box',
 };
 
@@ -64,7 +63,7 @@ export default function AbcLogForm({ onSubmit, isLoading }: AbcLogFormProps) {
     <form onSubmit={handleSubmit}>
       <Flex direction="column" gap="4">
         <Box>
-          <label style={labelStyle}>O que aconteceu antes? <span style={{ color: colors['brand-salmon'] }}>*</span></label>
+          <label style={labelStyle}>O que aconteceu antes? <span style={{ color: colors.error }} aria-hidden="true">*</span></label>
           <textarea
             style={inputStyle}
             value={antecedent}
@@ -75,7 +74,7 @@ export default function AbcLogForm({ onSubmit, isLoading }: AbcLogFormProps) {
         </Box>
 
         <Box>
-          <label style={labelStyle}>Qual foi o comportamento? <span style={{ color: colors['brand-salmon'] }}>*</span></label>
+          <label style={labelStyle}>Qual foi o comportamento? <span style={{ color: colors.error }} aria-hidden="true">*</span></label>
           <textarea
             style={inputStyle}
             value={behavior}
@@ -86,7 +85,7 @@ export default function AbcLogForm({ onSubmit, isLoading }: AbcLogFormProps) {
         </Box>
 
         <Box>
-          <label style={labelStyle}>O que aconteceu depois? <span style={{ color: colors['brand-salmon'] }}>*</span></label>
+          <label style={labelStyle}>O que aconteceu depois? <span style={{ color: colors.error }} aria-hidden="true">*</span></label>
           <textarea
             style={inputStyle}
             value={consequence}
@@ -100,7 +99,7 @@ export default function AbcLogForm({ onSubmit, isLoading }: AbcLogFormProps) {
           <label style={labelStyle}>Intensidade</label>
           <Flex gap="2">
             {([1, 2, 3, 4, 5] as const).map(n => (
-              <button
+              <button className="press-in"
                 key={n}
                 type="button"
                 onClick={() => setIntensity(intensity === n ? null : n)}

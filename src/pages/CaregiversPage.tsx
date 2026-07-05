@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Flex, AlertDialog } from '@radix-ui/themes';
 import { ArrowLeftIcon, ExclamationTriangleIcon, GroupIcon, PersonIcon, PlusIcon } from '@radix-ui/react-icons';
 import { useAuthContext } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { caregiverApi, childApi } from '../services/api';
 import type { Caregiver } from '../types/caregivers';
 import GumroadCard from '../components/design-system/GumroadCard';
@@ -18,6 +19,7 @@ export default function CaregiversPage() {
   const { childId } = useParams<{ childId: string }>();
   const navigate = useNavigate();
   const { getToken } = useAuthContext();
+  const toast = useToast();
 
   const [childName, setChildName] = useState('');
   const [caregivers, setCaregivers] = useState<Caregiver[]>([]);
@@ -60,6 +62,7 @@ export default function CaregiversPage() {
       const created = await caregiverApi.invite(token, childId, { caregiverName: nameInput.trim() });
       setCaregivers((prev) => [created, ...prev]);
       setNameInput('');
+      toast.success('Convite criado');
     } catch {
       setError('Não foi possível convidar o cuidador. Tente novamente.');
     } finally {
@@ -74,6 +77,7 @@ export default function CaregiversPage() {
       const token = await getToken();
       await caregiverApi.revoke(token, childId, id);
       setCaregivers((prev) => prev.filter((c) => c.id !== id));
+      toast.success('Acesso revogado');
     } catch {
       setError('Não foi possível revogar o acesso do cuidador.');
     } finally {
@@ -120,7 +124,7 @@ export default function CaregiversPage() {
       </GumroadCard>
 
       {error && (
-        <GumroadCard color="salmon" shadow="sm" padding="md" style={{ marginBottom: spacing.md }}>
+        <GumroadCard role="alert" color="salmon" shadow="sm" padding="md" style={{ marginBottom: spacing.md }}>
           <Flex align="center" gap="2">
             <ExclamationTriangleIcon />
             <GumroadText level="body-sm" as="span">{error}</GumroadText>

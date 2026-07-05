@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
-import { CheckIcon, CopyIcon, Cross2Icon, FileTextIcon, InfoCircledIcon } from '@radix-ui/react-icons';
+import { CheckIcon, CopyIcon, FileTextIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { consultationBriefApi, AIRateLimitError } from '../../services/api';
 import { useAuthContext } from '../../context/AuthContext';
 import type { ConsultationBrief } from '../../types/consultationBrief';
-import { colors, shadows, radii, fonts, spacing, zIndex } from '../../theme/tokens';
+import { colors, radii, fonts, spacing } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
 import GumroadHeading, { GumroadText } from '../design-system/GumroadHeading';
+import GumroadModal from '../design-system/GumroadModal';
 
 interface ConsultationBriefModalProps {
   isOpen: boolean;
@@ -48,29 +49,6 @@ function buildPlainText(brief: ConsultationBrief, childName?: string): string {
   return lines.join('\n');
 }
 
-const overlayStyle: React.CSSProperties = {
-  position: 'fixed',
-  inset: 0,
-  backgroundColor: 'rgba(10,10,26,0.5)',
-  zIndex: zIndex.modal,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: spacing.md,
-};
-
-const cardStyle: React.CSSProperties = {
-  backgroundColor: colors.canvas,
-  border: `2px solid ${colors.ink}`,
-  borderRadius: radii.xl,
-  boxShadow: shadows['card-hover'],
-  width: '100%',
-  maxWidth: '560px',
-  maxHeight: '90vh',
-  overflowY: 'auto',
-  padding: spacing.xl,
-};
-
 const sectionTitleStyle: React.CSSProperties = {
   fontFamily: fonts.display,
   fontWeight: 700,
@@ -101,8 +79,6 @@ const ConsultationBriefModal: React.FC<ConsultationBriefModalProps> = ({ isOpen,
       setCopied(false);
     }
   }, [isOpen]);
-
-  if (!isOpen) return null;
 
   const handleGenerate = async () => {
     setGenerating(true);
@@ -161,18 +137,13 @@ const ConsultationBriefModal: React.FC<ConsultationBriefModalProps> = ({ isOpen,
   };
 
   return (
-    <div style={overlayStyle} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div style={cardStyle}>
-        <Flex justify="between" align="center" mb="4">
-          <GumroadHeading level="title-md" as="h3">Preparar consulta</GumroadHeading>
-          <button
-            onClick={onClose}
-            style={{ width: '36px', height: '36px', border: `2px solid ${colors.ink}`, borderRadius: radii.md, backgroundColor: colors.canvas, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          >
-            <Cross2Icon />
-          </button>
-        </Flex>
-
+    <GumroadModal
+      open={isOpen}
+      onClose={onClose}
+      title="Preparar consulta"
+      variant="center"
+      maxWidth="560px"
+    >
         {!brief && (
           <>
             <GumroadText level="body-sm" as="p" style={{ opacity: 0.75, marginBottom: spacing.md }}>
@@ -181,7 +152,7 @@ const ConsultationBriefModal: React.FC<ConsultationBriefModalProps> = ({ isOpen,
             </GumroadText>
 
             <Flex align="center" gap="2" wrap="wrap" mb="4">
-              <GumroadText level="caption" as="span" style={{ opacity: 0.65 }}>Período:</GumroadText>
+              <GumroadText level="caption" as="span" style={{ color: colors['ink-muted'] }}>Período:</GumroadText>
               {PERIOD_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
@@ -203,7 +174,7 @@ const ConsultationBriefModal: React.FC<ConsultationBriefModalProps> = ({ isOpen,
             </Flex>
 
             {error && (
-              <GumroadText level="body-sm" as="p" style={{ color: colors['brand-salmon'], marginBottom: spacing.sm }}>
+              <GumroadText level="body-sm" as="p" style={{ color: colors.error, marginBottom: spacing.sm }}>
                 {error}
               </GumroadText>
             )}
@@ -275,7 +246,7 @@ const ConsultationBriefModal: React.FC<ConsultationBriefModalProps> = ({ isOpen,
               </Box>
             </Box>
 
-            <Flex align="center" gap="2" mt="3" style={{ opacity: 0.65 }}>
+            <Flex align="center" gap="2" mt="3" style={{ color: colors['ink-muted'] }}>
               <InfoCircledIcon />
               <GumroadText level="caption" as="span">
                 Gerado por IA a partir dos seus dados — revise antes de usar na consulta.
@@ -283,8 +254,7 @@ const ConsultationBriefModal: React.FC<ConsultationBriefModalProps> = ({ isOpen,
             </Flex>
           </>
         )}
-      </div>
-    </div>
+    </GumroadModal>
   );
 };
 

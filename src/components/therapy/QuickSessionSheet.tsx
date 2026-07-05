@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Flex } from '@radix-ui/themes';
-import { Cross2Icon } from '@radix-ui/react-icons';
-import { colors, shadows, radii, fonts, spacing, zIndex } from '../../theme/tokens';
+import { colors, shadows, radii, fonts, spacing } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
+import GumroadModal from '../design-system/GumroadModal';
 import TherapyTypeSelector from './TherapyTypeSelector';
 import type { TherapyType, Therapist, CreateSessionPayload } from '../../types/therapy';
 
@@ -21,30 +21,6 @@ const THERAPY_TYPE_LABELS: Record<TherapyType, string> = {
   fonoaudiologia: 'Fonoaudiologia',
   psicologia: 'Psicologia',
   fisioterapia: 'Fisioterapia',
-};
-
-const overlayStyle: React.CSSProperties = {
-  position: 'fixed',
-  inset: 0,
-  backgroundColor: 'rgba(10,10,26,0.5)',
-  zIndex: zIndex.modal,
-  display: 'flex',
-  alignItems: 'flex-end',
-  justifyContent: 'center',
-};
-
-const sheetStyle: React.CSSProperties = {
-  backgroundColor: colors.canvas,
-  border: `2px solid ${colors.ink}`,
-  borderBottom: 'none',
-  borderRadius: `${radii.xl} ${radii.xl} 0 0`,
-  boxShadow: shadows['card-hover'],
-  width: '100%',
-  maxWidth: '600px',
-  maxHeight: '90vh',
-  overflowY: 'auto',
-  padding: spacing.xl,
-  paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)',
 };
 
 const inputStyle: React.CSSProperties = {
@@ -86,66 +62,22 @@ const QuickSessionSheet: React.FC<QuickSessionSheetProps> = ({
   const [notes, setNotes] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const sheetRef = useRef<HTMLDivElement>(null);
-  const previousFocus = useRef<HTMLElement | null>(null);
 
+  // Reinicia o formulário a cada abertura (foco/trap/Escape são do GumroadModal)
   useEffect(() => {
-    if (isOpen) {
-      previousFocus.current = document.activeElement as HTMLElement;
-      const now = new Date();
-      const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-        .toISOString()
-        .slice(0, 16);
-      setOccurredAt(local);
-      setStep(defaultTherapyType ? 'form' : 'type');
-      setSelectedType(defaultTherapyType ?? null);
-      setTherapistId('');
-      setDurationMinutes('');
-      setNotes('');
-      setError(null);
-    } else if (previousFocus.current) {
-      previousFocus.current.focus();
-      previousFocus.current = null;
-    }
+    if (!isOpen) return;
+    const now = new Date();
+    const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 16);
+    setOccurredAt(local);
+    setStep(defaultTherapyType ? 'form' : 'type');
+    setSelectedType(defaultTherapyType ?? null);
+    setTherapistId('');
+    setDurationMinutes('');
+    setNotes('');
+    setError(null);
   }, [isOpen, defaultTherapyType]);
-
-  useEffect(() => {
-    if (!isOpen || !sheetRef.current) return;
-
-    const sheet = sheetRef.current;
-
-    // Auto-focus first focusable element
-    const focusables = sheet.querySelectorAll<HTMLElement>(
-      'button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    if (focusables.length > 0) focusables[0].focus();
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-        return;
-      }
-
-      if (e.key !== 'Tab') return;
-      const focusableEls = sheet.querySelectorAll<HTMLElement>(
-        'button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
-      );
-      if (focusableEls.length === 0) return;
-      const first = focusableEls[0];
-      const last = focusableEls[focusableEls.length - 1];
-
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
 
   const handleSubmit = async () => {
     if (!selectedType) return;
@@ -169,45 +101,16 @@ const QuickSessionSheet: React.FC<QuickSessionSheetProps> = ({
     }
   };
 
-  if (!isOpen) return null;
-
   const title = step === 'form' && selectedType
     ? THERAPY_TYPE_LABELS[selectedType]
     : 'Nova Sessão';
 
   return (
-    <div
-      style={overlayStyle}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div ref={sheetRef} style={sheetStyle}>
-        {/* Header */}
-        <Flex justify="between" align="center" mb="4">
-          <span style={{ fontFamily: fonts.display, fontWeight: 700, fontSize: '18px', color: colors.ink }}>
-            {title}
-          </span>
-          <button
-            onClick={onClose}
-            style={{
-              width: '36px',
-              height: '36px',
-              border: `2px solid ${colors.ink}`,
-              borderRadius: radii.md,
-              backgroundColor: colors.canvas,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Cross2Icon />
-          </button>
-        </Flex>
-
+    <GumroadModal open={isOpen} onClose={onClose} title={title}>
         {/* DateTime Picker (shown on both steps) */}
         <div style={{ marginBottom: spacing.md }}>
-          <label style={labelStyle}>Data e hora</label>
-          <input
+          <label style={labelStyle} htmlFor="session-data-e">Data e hora</label>
+          <input id="session-data-e"
             type="datetime-local"
             value={occurredAt}
             onChange={(e) => setOccurredAt(e.target.value)}
@@ -226,8 +129,8 @@ const QuickSessionSheet: React.FC<QuickSessionSheetProps> = ({
           <Flex direction="column" gap="3">
             {/* Therapist select */}
             <div>
-              <label style={labelStyle}>Terapeuta</label>
-              <select
+              <label style={labelStyle} htmlFor="session-terapeuta">Terapeuta</label>
+              <select id="session-terapeuta"
                 value={therapistId}
                 onChange={(e) => setTherapistId(e.target.value)}
                 style={{
@@ -253,8 +156,8 @@ const QuickSessionSheet: React.FC<QuickSessionSheetProps> = ({
 
             {/* Duration */}
             <div>
-              <label style={labelStyle}>Duração (minutos)</label>
-              <input
+              <label style={labelStyle} htmlFor="session-duracao-minutos">Duração (minutos)</label>
+              <input id="session-duracao-minutos"
                 type="number"
                 min="1"
                 max="480"
@@ -267,8 +170,8 @@ const QuickSessionSheet: React.FC<QuickSessionSheetProps> = ({
 
             {/* Notes */}
             <div>
-              <label style={labelStyle}>Observações</label>
-              <textarea
+              <label style={labelStyle} htmlFor="session-observacoes">Observações</label>
+              <textarea id="session-observacoes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 maxLength={500}
@@ -288,14 +191,14 @@ const QuickSessionSheet: React.FC<QuickSessionSheetProps> = ({
                   resize: 'vertical',
                 }}
               />
-              <div style={{ fontFamily: fonts.body, fontSize: '11px', color: colors.ink, opacity: 0.5, textAlign: 'right' }}>
+              <div style={{ fontFamily: fonts.body, fontSize: '11px', color: colors['ink-muted'], textAlign: 'right' }}>
                 {notes.length}/500
               </div>
             </div>
 
             {/* Error */}
             {error && (
-              <div style={{
+              <div role="alert" style={{
                 padding: '10px 14px',
                 backgroundColor: colors['brand-salmon'],
                 border: `2px solid ${colors.ink}`,
@@ -338,8 +241,7 @@ const QuickSessionSheet: React.FC<QuickSessionSheetProps> = ({
             </button>
           </Flex>
         )}
-      </div>
-    </div>
+    </GumroadModal>
   );
 };
 

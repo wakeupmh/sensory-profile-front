@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Flex } from '@radix-ui/themes';
-import { Cross2Icon, DownloadIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
-import { colors, shadows, radii, spacing, zIndex } from '../../theme/tokens';
+import { DownloadIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import { colors, radii } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
-import GumroadHeading, { GumroadText } from '../design-system/GumroadHeading';
+import { GumroadText } from '../design-system/GumroadHeading';
+import GumroadModal from '../design-system/GumroadModal';
 import LoadingSpinner from '../LoadingSpinner';
 import { documentApi } from '../../services/api';
 import { useAuthContext } from '../../context/AuthContext';
@@ -14,29 +15,6 @@ interface DocumentPreviewModalProps {
   document: DocumentRecord | null;
   onClose: () => void;
 }
-
-const overlayStyle: React.CSSProperties = {
-  position: 'fixed',
-  inset: 0,
-  backgroundColor: 'rgba(10,10,26,0.6)',
-  zIndex: zIndex.modal,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: spacing.md,
-};
-
-const cardStyle: React.CSSProperties = {
-  backgroundColor: colors.canvas,
-  border: `2px solid ${colors.ink}`,
-  borderRadius: radii.xl,
-  boxShadow: shadows['card-hover'],
-  width: '100%',
-  maxWidth: '720px',
-  maxHeight: '90vh',
-  overflowY: 'auto',
-  padding: spacing.lg,
-};
 
 const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({ document, onClose }) => {
   const { getToken } = useAuthContext();
@@ -77,29 +55,23 @@ const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({ document, o
   };
 
   return (
-    <div style={overlayStyle} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div style={cardStyle}>
-        <Flex justify="between" align="center" mb="4" gap="2">
-          <GumroadHeading level="title-md" as="h3" style={{ wordBreak: 'break-word' }}>
-            {document.fileName}
-          </GumroadHeading>
-          <Flex gap="2" style={{ flexShrink: 0 }}>
-            <GumroadButton variant="secondary" size="sm" onClick={handleDownload}>
-              <DownloadIcon /> Baixar
-            </GumroadButton>
-            <button
-              onClick={onClose}
-              style={{ width: '36px', height: '36px', border: `2px solid ${colors.ink}`, borderRadius: radii.md, backgroundColor: colors.canvas, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            >
-              <Cross2Icon />
-            </button>
-          </Flex>
+    <GumroadModal
+      open={document !== null}
+      onClose={onClose}
+      title={document.fileName}
+      variant="center"
+      maxWidth="720px"
+    >
+        <Flex justify="end" mb="3">
+          <GumroadButton variant="secondary" size="sm" onClick={handleDownload}>
+            <DownloadIcon /> Baixar
+          </GumroadButton>
         </Flex>
 
         {loading ? (
           <Flex justify="center" py="6"><LoadingSpinner size="large" text="Carregando preview..." /></Flex>
         ) : error ? (
-          <Flex align="center" gap="2" style={{ color: colors['brand-salmon'] }}>
+          <Flex align="center" gap="2" style={{ color: colors.error }}>
             <ExclamationTriangleIcon />
             <GumroadText level="body-md" as="span">{error}</GumroadText>
           </Flex>
@@ -116,8 +88,7 @@ const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({ document, o
             </GumroadText>
           )
         ) : null}
-      </div>
-    </div>
+    </GumroadModal>
   );
 };
 

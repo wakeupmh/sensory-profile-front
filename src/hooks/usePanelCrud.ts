@@ -4,7 +4,8 @@ type PanelView = 'list' | 'add' | 'edit';
 
 interface UsePanelCrudOptions<T> {
   isOpen: boolean;
-  onClose: () => void;
+  /** Aceito por compatibilidade; o fechamento (Escape/backdrop) é do GumroadModal */
+  onClose?: () => void;
   /** When provided, triggers refetch on isOpen/childId change */
   childId?: string;
   /** Async function to fetch items. If omitted, items must be set externally via setItems or passed as props. */
@@ -26,7 +27,6 @@ export function usePanelCrud<
   E extends { id: string } = T,
 >({
   isOpen,
-  onClose,
   childId,
   fetchFn,
   onReset,
@@ -62,16 +62,6 @@ export function usePanelCrud<
     fetchItems();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, childId, fetchItems]);
-
-  // Escape key closes panel
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
 
   const startEdit = useCallback((item: E) => {
     setEditingItem(item);

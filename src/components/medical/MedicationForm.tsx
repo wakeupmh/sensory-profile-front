@@ -93,10 +93,10 @@ const MedicationForm: React.FC<MedicationFormProps> = ({
     <form onSubmit={handleSubmit}>
       <Flex direction="column" gap="3">
         <div>
-          <label style={labelStyle}>
-            Nome <span style={{ color: colors['brand-salmon'] }}>*</span>
+          <label style={labelStyle} htmlFor="med-nome">
+            Nome <span style={{ color: colors.error }} aria-hidden="true">*</span>
           </label>
-          <input
+          <input id="med-nome"
             type="text"
             maxLength={255}
             value={name}
@@ -109,8 +109,8 @@ const MedicationForm: React.FC<MedicationFormProps> = ({
 
         <Flex gap="3">
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Dosagem</label>
-            <input
+            <label style={labelStyle} htmlFor="med-dosagem">Dosagem</label>
+            <input id="med-dosagem"
               type="text"
               maxLength={100}
               value={dosage}
@@ -120,8 +120,8 @@ const MedicationForm: React.FC<MedicationFormProps> = ({
             />
           </div>
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Frequência</label>
-            <input
+            <label style={labelStyle} htmlFor="med-frequencia">Frequência</label>
+            <input id="med-frequencia"
               type="text"
               maxLength={100}
               value={frequency}
@@ -134,8 +134,8 @@ const MedicationForm: React.FC<MedicationFormProps> = ({
 
         <Flex gap="3">
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Data de início</label>
-            <input
+            <label style={labelStyle} htmlFor="med-data-de">Data de início</label>
+            <input id="med-data-de"
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
@@ -143,8 +143,8 @@ const MedicationForm: React.FC<MedicationFormProps> = ({
             />
           </div>
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Data de término</label>
-            <input
+            <label style={labelStyle} htmlFor="med-data-de-2">Data de término</label>
+            <input id="med-data-de-2"
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
@@ -154,8 +154,8 @@ const MedicationForm: React.FC<MedicationFormProps> = ({
         </Flex>
 
         <div>
-          <label style={labelStyle}>Médico prescritor</label>
-          <input
+          <label style={labelStyle} htmlFor="med-medico-prescritor">Médico prescritor</label>
+          <input id="med-medico-prescritor"
             type="text"
             maxLength={255}
             value={prescribingDoctor}
@@ -178,13 +178,13 @@ const MedicationForm: React.FC<MedicationFormProps> = ({
         </div>
 
         <div>
-          <label style={labelStyle}>
+          <label style={labelStyle} htmlFor="med-observacoes-2000">
             Observações
-            <span style={{ fontWeight: 400, opacity: 0.6, marginLeft: '6px' }}>
+            <span style={{ fontWeight: 400, color: colors['ink-muted'], marginLeft: '6px' }}>
               ({notes.length}/2000)
             </span>
           </label>
-          <textarea
+          <textarea id="med-observacoes-2000"
             maxLength={2000}
             rows={3}
             value={notes}

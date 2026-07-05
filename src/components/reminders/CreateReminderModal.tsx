@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { Flex } from '@radix-ui/themes';
-import { Cross2Icon } from '@radix-ui/react-icons';
-import { colors, shadows, radii, fonts, spacing, zIndex } from '../../theme/tokens';
+import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
-import GumroadHeading from '../design-system/GumroadHeading';
+import GumroadModal from '../design-system/GumroadModal';
 import type { CreateReminderPayload } from '../../types/reminders';
 
 interface CreateReminderModalProps {
@@ -44,36 +43,11 @@ const labelStyle: React.CSSProperties = {
   display: 'block',
 };
 
-const overlayStyle: React.CSSProperties = {
-  position: 'fixed',
-  inset: 0,
-  backgroundColor: 'rgba(10,10,26,0.5)',
-  zIndex: zIndex.modal,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: spacing.md,
-};
-
-const cardStyle: React.CSSProperties = {
-  backgroundColor: colors.canvas,
-  border: `2px solid ${colors.ink}`,
-  borderRadius: radii.xl,
-  boxShadow: shadows['card-hover'],
-  width: '100%',
-  maxWidth: '440px',
-  maxHeight: '90vh',
-  overflowY: 'auto',
-  padding: spacing.xl,
-};
-
 const CreateReminderModal: React.FC<CreateReminderModalProps> = ({ isOpen, onClose, childId, onSubmit }) => {
   const [title, setTitle] = useState('');
   const [dueAt, setDueAt] = useState('');
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
-
-  if (!isOpen) return null;
 
   const reset = () => {
     setTitle('');
@@ -105,34 +79,20 @@ const CreateReminderModal: React.FC<CreateReminderModalProps> = ({ isOpen, onClo
   };
 
   return (
-    <div style={overlayStyle} onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
-      <div style={cardStyle}>
-        <Flex justify="between" align="center" mb="4">
-          <GumroadHeading level="title-md" as="h3">Novo lembrete</GumroadHeading>
-          <button
-            onClick={handleClose}
-            style={{
-              width: '36px',
-              height: '36px',
-              border: `2px solid ${colors.ink}`,
-              borderRadius: radii.md,
-              backgroundColor: colors.canvas,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Cross2Icon />
-          </button>
-        </Flex>
+    <GumroadModal
+      open={isOpen}
+      onClose={handleClose}
+      title="Novo lembrete"
+      variant="center"
+      maxWidth="440px"
+    >
         <form onSubmit={handleSubmit}>
           <Flex direction="column" gap="3">
             <div>
-              <label style={labelStyle}>
-                Título <span style={{ color: colors['brand-salmon'] }}>*</span>
+              <label style={labelStyle} htmlFor="reminder-titulo">
+                Título <span style={{ color: colors.error }} aria-hidden="true">*</span>
               </label>
-              <input
+              <input id="reminder-titulo"
                 type="text"
                 maxLength={255}
                 value={title}
@@ -143,10 +103,10 @@ const CreateReminderModal: React.FC<CreateReminderModalProps> = ({ isOpen, onClo
               />
             </div>
             <div>
-              <label style={labelStyle}>
-                Data <span style={{ color: colors['brand-salmon'] }}>*</span>
+              <label style={labelStyle} htmlFor="reminder-data">
+                Data <span style={{ color: colors.error }} aria-hidden="true">*</span>
               </label>
-              <input
+              <input id="reminder-data"
                 type="date"
                 value={dueAt}
                 onChange={(e) => setDueAt(e.target.value)}
@@ -155,13 +115,13 @@ const CreateReminderModal: React.FC<CreateReminderModalProps> = ({ isOpen, onClo
               />
             </div>
             <div>
-              <label style={labelStyle}>
+              <label style={labelStyle} htmlFor="reminder-observacoes-500">
                 Observações
-                <span style={{ fontWeight: 400, opacity: 0.6, marginLeft: '6px' }}>
+                <span style={{ fontWeight: 400, color: colors['ink-muted'], marginLeft: '6px' }}>
                   ({notes.length}/500)
                 </span>
               </label>
-              <textarea
+              <textarea id="reminder-observacoes-500"
                 maxLength={500}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
@@ -179,8 +139,7 @@ const CreateReminderModal: React.FC<CreateReminderModalProps> = ({ isOpen, onClo
             </Flex>
           </Flex>
         </form>
-      </div>
-    </div>
+    </GumroadModal>
   );
 };
 

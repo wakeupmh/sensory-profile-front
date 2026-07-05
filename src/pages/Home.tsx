@@ -14,13 +14,13 @@ import {
   ExclamationTriangleIcon,
   BarChartIcon,
 } from '@radix-ui/react-icons';
-import LoadingSpinner from '../components/LoadingSpinner';
 import { useAuthContext } from '../context/AuthContext';
 import { colors, spacing } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadBadge from '../components/design-system/GumroadBadge';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
+import { DashboardSkeleton } from '../components/skeletons/PageSkeletons';
 
 interface Assessment {
   id: string;
@@ -319,11 +319,9 @@ const Home = () => {
       )}
 
       {loading ? (
-        <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
-          <LoadingSpinner size="large" text="Carregando avaliações..." />
-        </GumroadCard>
+        <DashboardSkeleton />
       ) : error ? (
-        <GumroadCard color="salmon" shadow="md" padding="lg">
+        <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
           <Flex align="center" gap="2">
             <ExclamationTriangleIcon />
             <GumroadText level="body-md" as="p">
@@ -372,10 +370,17 @@ const Home = () => {
             gap: '20px',
           }}
         >
-          {filteredAssessments.map((assessment) => {
+          {filteredAssessments.map((assessment, i) => {
             const instrument = getInstrument(assessment.instrumentId);
             return (
-              <GumroadCard key={assessment.id} color="white" shadow="md" padding="lg">
+              <GumroadCard
+                key={assessment.id}
+                color="white"
+                shadow="md"
+                padding="lg"
+                className="stagger-item"
+                style={{ ['--i' as string]: Math.min(i, 8) }}
+              >
                 <Flex direction="column" gap="3" style={{ height: '100%' }}>
                   {/* Top row */}
                   <Flex justify="between" align="start" gap="2">

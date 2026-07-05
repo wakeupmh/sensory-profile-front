@@ -26,7 +26,7 @@ export default function LogTypeSelector({ selected, onSelect }: LogTypeSelectorP
             key={type}
             type="button"
             onClick={() => onSelect(type)}
-            className="modal-stagger"
+            className="modal-stagger press-in"
             style={{
               ['--i' as string]: i,
               display: 'flex',

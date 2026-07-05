@@ -8,6 +8,9 @@ import { colors } from '../theme/tokens';
 const Layout = () => {
   return (
     <Box style={{ minHeight: '100vh', backgroundColor: colors.canvas }}>
+      <a href="#main-content" className="skip-link">
+        Pular para o conteúdo
+      </a>
       <DelegationBanner />
       <Menu />
       <Container
@@ -18,9 +21,11 @@ const Layout = () => {
           maxWidth: '1200px',
         }}
       >
-        <div style={{ paddingBottom: '80px' }}>
+        {/* outline suprimido: o alvo do skip link recebe foco programático,
+            não precisa de anel em volta do conteúdo inteiro */}
+        <main id="main-content" tabIndex={-1} style={{ paddingBottom: '80px', outline: 'none' }}>
           <Outlet />
-        </div>
+        </main>
       </Container>
       <BottomNav />
     </Box>

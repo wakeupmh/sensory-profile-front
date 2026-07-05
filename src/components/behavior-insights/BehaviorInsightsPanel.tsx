@@ -142,7 +142,7 @@ const BehaviorInsightsPanel: React.FC<BehaviorInsightsPanelProps> = ({ childId }
           <LoadingSpinner size="large" text="Carregando insights..." />
         </GumroadCard>
       ) : error ? (
-        <GumroadCard color="salmon" shadow="md" padding="lg">
+        <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
           <Flex align="center" gap="2">
             <ExclamationTriangleIcon />
             <GumroadText level="body-md" as="p">{error}</GumroadText>

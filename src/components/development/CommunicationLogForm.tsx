@@ -103,7 +103,7 @@ const CommunicationLogForm: React.FC<CommunicationLogFormProps> = ({
         <Flex gap="3">
           <div style={{ flex: 1 }}>
             <label style={labelStyle}>
-              Data e hora <span style={{ color: colors['brand-salmon'] }}>*</span>
+              Data e hora <span style={{ color: colors.error }} aria-hidden="true">*</span>
             </label>
             <input
               type="datetime-local"
@@ -116,7 +116,7 @@ const CommunicationLogForm: React.FC<CommunicationLogFormProps> = ({
 
           <div style={{ flex: 1 }}>
             <label style={labelStyle}>
-              Tipo <span style={{ color: colors['brand-salmon'] }}>*</span>
+              Tipo <span style={{ color: colors.error }} aria-hidden="true">*</span>
             </label>
             <select
               value={entryType}
@@ -153,7 +153,7 @@ const CommunicationLogForm: React.FC<CommunicationLogFormProps> = ({
         <div>
           <label style={labelStyle}>
             Descrição / Observações
-            <span style={{ fontWeight: 400, opacity: 0.6, marginLeft: '6px' }}>
+            <span style={{ fontWeight: 400, color: colors['ink-muted'], marginLeft: '6px' }}>
               ({(description ?? '').length}/1000)
             </span>
           </label>
@@ -170,7 +170,7 @@ const CommunicationLogForm: React.FC<CommunicationLogFormProps> = ({
         <div>
           <label style={labelStyle}>
             Notas adicionais
-            <span style={{ fontWeight: 400, opacity: 0.6, marginLeft: '6px' }}>
+            <span style={{ fontWeight: 400, color: colors['ink-muted'], marginLeft: '6px' }}>
               ({(notes ?? '').length}/2000)
             </span>
           </label>

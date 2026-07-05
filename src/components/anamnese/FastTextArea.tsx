@@ -51,7 +51,7 @@ const FastTextArea = memo(({
             marginBottom: '6px',
           }}
         >
-          {label} {required && <span style={{ color: colors['brand-salmon'] }}>*</span>}
+          {label} {required && <span style={{ color: colors.error }} aria-hidden="true">*</span>}
         </label>
       )}
       <TextArea
@@ -72,7 +72,6 @@ const FastTextArea = memo(({
           fontFamily: typography['body-md'].font,
           fontSize: typography['body-md'].size,
           width: '100%',
-          outline: 'none',
           transition: 'box-shadow 0.15s ease, border-color 0.15s ease',
           minHeight: '80px',
         }}

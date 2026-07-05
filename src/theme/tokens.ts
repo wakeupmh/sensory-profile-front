@@ -7,6 +7,8 @@
 export const colors = {
   canvas: '#FFFEF5',
   ink: '#0A0A1A',
+  // Texto secundário com contraste AA garantido (substitui ink + opacity baixa)
+  'ink-muted': '#55556A',
   surface: '#FFFFFF',
   'surface-cream': '#FFF8E1',
 
@@ -19,7 +21,7 @@ export const colors = {
 
   success: '#22c55e',
   warning: '#f59e0b',
-  error: '#ef4444',
+  error: '#dc2626',
 } as const;
 
 // ─── Shadows ──────────────────────────────────────────────
@@ -99,6 +101,23 @@ export const zIndex = {
   menu: 1000,
   bottomNav: 999,
   modal: 1100,
+  toast: 1200,
+} as const;
+
+// ─── Motion ───────────────────────────────────────────────
+export const motion = {
+  duration: {
+    instant: '80ms',
+    fast: '120ms',
+    base: '180ms',
+    slow: '300ms',
+    slower: '450ms',
+  },
+  easing: {
+    standard: 'ease',
+    out: 'ease-out',
+    spring: 'cubic-bezier(0.16, 1, 0.3, 1)',
+  },
 } as const;
 
 // ─── Helper: apply typography token to style object ───────

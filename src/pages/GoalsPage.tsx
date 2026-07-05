@@ -12,9 +12,9 @@ import { colors, spacing } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
-import LoadingSpinner from '../components/LoadingSpinner';
 import GoalCard from '../components/goals/GoalCard';
 import GoalFormPanel from '../components/goals/GoalFormPanel';
+import { GoalsListSkeleton } from '../components/skeletons/PageSkeletons';
 
 type DomainFilter = 'all' | GoalDomain;
 type StatusFilter = 'all' | GoalStatus;
@@ -107,11 +107,9 @@ export default function GoalsPage() {
       </Flex>
 
       {loading ? (
-        <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
-          <LoadingSpinner size="large" text="Carregando metas..." />
-        </GumroadCard>
+        <GoalsListSkeleton />
       ) : error ? (
-        <GumroadCard color="salmon" shadow="md" padding="lg">
+        <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
           <Flex align="center" gap="2">
             <ExclamationTriangleIcon />
             <GumroadText level="body-md" as="p">{error}</GumroadText>

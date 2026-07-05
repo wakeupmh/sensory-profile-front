@@ -90,10 +90,10 @@ const TherapistForm: React.FC<TherapistFormProps> = ({
       <Flex direction="column" gap="3">
         {/* Nome */}
         <div>
-          <label style={labelStyle}>
-            Nome <span style={{ color: colors['brand-salmon'] }}>*</span>
+          <label style={labelStyle} htmlFor="therapist-nome">
+            Nome <span style={{ color: colors.error }} aria-hidden="true">*</span>
           </label>
-          <input
+          <input id="therapist-nome"
             type="text"
             maxLength={255}
             value={name}
@@ -106,10 +106,10 @@ const TherapistForm: React.FC<TherapistFormProps> = ({
 
         {/* Especialidade */}
         <div>
-          <label style={labelStyle}>
-            Especialidade <span style={{ color: colors['brand-salmon'] }}>*</span>
+          <label style={labelStyle} htmlFor="therapist-especialidade">
+            Especialidade <span style={{ color: colors.error }} aria-hidden="true">*</span>
           </label>
-          <select
+          <select id="therapist-especialidade"
             value={specialty}
             onChange={(e) => setSpecialty(e.target.value)}
             style={selectStyle}
@@ -126,8 +126,8 @@ const TherapistForm: React.FC<TherapistFormProps> = ({
 
         {/* Telefone */}
         <div>
-          <label style={labelStyle}>Telefone</label>
-          <input
+          <label style={labelStyle} htmlFor="therapist-telefone">Telefone</label>
+          <input id="therapist-telefone"
             type="tel"
             maxLength={50}
             value={phone ?? ''}
@@ -139,8 +139,8 @@ const TherapistForm: React.FC<TherapistFormProps> = ({
 
         {/* Email */}
         <div>
-          <label style={labelStyle}>E-mail</label>
-          <input
+          <label style={labelStyle} htmlFor="therapist-e-mail">E-mail</label>
+          <input id="therapist-e-mail"
             type="email"
             maxLength={255}
             value={email ?? ''}
@@ -152,8 +152,8 @@ const TherapistForm: React.FC<TherapistFormProps> = ({
 
         {/* Observações */}
         <div>
-          <label style={labelStyle}>Observações</label>
-          <textarea
+          <label style={labelStyle} htmlFor="therapist-observacoes">Observações</label>
+          <textarea id="therapist-observacoes"
             maxLength={500}
             rows={2}
             value={notes ?? ''}

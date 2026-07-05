@@ -148,7 +148,7 @@ const SharedAssessmentView: React.FC = () => {
           </Flex>
         </GumroadCard>
       ) : error ? (
-        <GumroadCard color="salmon" shadow="md" padding="md">
+        <GumroadCard role="alert" color="salmon" shadow="md" padding="md">
           <Flex align="center" gap="2">
             <ExclamationTriangleIcon />
             <GumroadText level="body-md" as="span">

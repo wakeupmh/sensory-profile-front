@@ -116,7 +116,7 @@ export default function EducationPage() {
           <LoadingSpinner size="large" text="Carregando..." />
         </GumroadCard>
       ) : error ? (
-        <GumroadCard color="salmon" shadow="md" padding="lg">
+        <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
           <Flex align="center" gap="2" justify="between" wrap="wrap">
             <Flex align="center" gap="2">
               <ExclamationTriangleIcon />

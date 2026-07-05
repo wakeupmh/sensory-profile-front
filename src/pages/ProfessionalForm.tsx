@@ -145,7 +145,7 @@ const ProfessionalForm: React.FC = () => {
       </GumroadHeading>
 
       {error && (
-        <GumroadCard color="salmon" shadow="sm" padding="sm" style={{ marginBottom: spacing.md }}>
+        <GumroadCard role="alert" color="salmon" shadow="sm" padding="sm" style={{ marginBottom: spacing.md }}>
           <Flex align="center" gap="2">
             <ExclamationTriangleIcon />
             <GumroadText level="body-sm" as="span">

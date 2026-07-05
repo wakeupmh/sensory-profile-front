@@ -100,10 +100,10 @@ const EducationPlanForm: React.FC<EducationPlanFormProps> = ({
     <form onSubmit={handleSubmit}>
       <Flex direction="column" gap="3">
         <div>
-          <label style={labelStyle}>
-            Nome da escola <span style={{ color: colors['brand-salmon'] }}>*</span>
+          <label style={labelStyle} htmlFor="eduplan-nome-da">
+            Nome da escola <span style={{ color: colors.error }} aria-hidden="true">*</span>
           </label>
-          <input
+          <input id="eduplan-nome-da"
             type="text"
             value={schoolName}
             onChange={(e) => setSchoolName(e.target.value)}
@@ -115,10 +115,10 @@ const EducationPlanForm: React.FC<EducationPlanFormProps> = ({
 
         <Flex gap="3">
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>
-              Ano letivo <span style={{ color: colors['brand-salmon'] }}>*</span>
+            <label style={labelStyle} htmlFor="eduplan-ano-letivo">
+              Ano letivo <span style={{ color: colors.error }} aria-hidden="true">*</span>
             </label>
-            <input
+            <input id="eduplan-ano-letivo"
               type="text"
               value={academicYear}
               onChange={(e) => setAcademicYear(e.target.value)}
@@ -129,10 +129,10 @@ const EducationPlanForm: React.FC<EducationPlanFormProps> = ({
           </div>
 
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>
-              Tipo de plano <span style={{ color: colors['brand-salmon'] }}>*</span>
+            <label style={labelStyle} htmlFor="eduplan-tipo-de">
+              Tipo de plano <span style={{ color: colors.error }} aria-hidden="true">*</span>
             </label>
-            <select
+            <select id="eduplan-tipo-de"
               value={planType}
               onChange={(e) => setPlanType(e.target.value as EducationPlanType)}
               style={{ ...inputStyle, cursor: 'pointer' }}
@@ -152,10 +152,10 @@ const EducationPlanForm: React.FC<EducationPlanFormProps> = ({
 
         <Flex gap="3">
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>
-              Data de início <span style={{ color: colors['brand-salmon'] }}>*</span>
+            <label style={labelStyle} htmlFor="eduplan-data-de">
+              Data de início <span style={{ color: colors.error }} aria-hidden="true">*</span>
             </label>
-            <input
+            <input id="eduplan-data-de"
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
@@ -164,8 +164,8 @@ const EducationPlanForm: React.FC<EducationPlanFormProps> = ({
             />
           </div>
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Data de revisão</label>
-            <input
+            <label style={labelStyle} htmlFor="eduplan-data-de-2">Data de revisão</label>
+            <input id="eduplan-data-de-2"
               type="date"
               value={reviewDate ?? ''}
               onChange={(e) => setReviewDate(e.target.value)}
@@ -173,8 +173,8 @@ const EducationPlanForm: React.FC<EducationPlanFormProps> = ({
             />
           </div>
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Data de encerramento</label>
-            <input
+            <label style={labelStyle} htmlFor="eduplan-data-de-3">Data de encerramento</label>
+            <input id="eduplan-data-de-3"
               type="date"
               value={endDate ?? ''}
               onChange={(e) => setEndDate(e.target.value)}
@@ -184,13 +184,13 @@ const EducationPlanForm: React.FC<EducationPlanFormProps> = ({
         </Flex>
 
         <div>
-          <label style={labelStyle}>
+          <label style={labelStyle} htmlFor="eduplan-objetivos-e">
             Objetivos e metas
-            <span style={{ fontWeight: 400, opacity: 0.6, marginLeft: '6px' }}>
+            <span style={{ fontWeight: 400, color: colors['ink-muted'], marginLeft: '6px' }}>
               ({(goals ?? '').length}/5000)
             </span>
           </label>
-          <textarea
+          <textarea id="eduplan-objetivos-e"
             maxLength={5000}
             rows={4}
             value={goals ?? ''}
@@ -201,13 +201,13 @@ const EducationPlanForm: React.FC<EducationPlanFormProps> = ({
         </div>
 
         <div>
-          <label style={labelStyle}>
+          <label style={labelStyle} htmlFor="eduplan-adaptacoes-e">
             Adaptações e acomodações
-            <span style={{ fontWeight: 400, opacity: 0.6, marginLeft: '6px' }}>
+            <span style={{ fontWeight: 400, color: colors['ink-muted'], marginLeft: '6px' }}>
               ({(accommodations ?? '').length}/5000)
             </span>
           </label>
-          <textarea
+          <textarea id="eduplan-adaptacoes-e"
             maxLength={5000}
             rows={4}
             value={accommodations ?? ''}
@@ -218,13 +218,13 @@ const EducationPlanForm: React.FC<EducationPlanFormProps> = ({
         </div>
 
         <div>
-          <label style={labelStyle}>
+          <label style={labelStyle} htmlFor="eduplan-observacoes-2000">
             Observações
-            <span style={{ fontWeight: 400, opacity: 0.6, marginLeft: '6px' }}>
+            <span style={{ fontWeight: 400, color: colors['ink-muted'], marginLeft: '6px' }}>
               ({(notes ?? '').length}/2000)
             </span>
           </label>
-          <textarea
+          <textarea id="eduplan-observacoes-2000"
             maxLength={2000}
             rows={3}
             value={notes ?? ''}

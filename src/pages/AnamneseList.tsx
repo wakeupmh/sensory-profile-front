@@ -94,7 +94,7 @@ const AnamneseList = () => {
           <LoadingSpinner size="large" text="Carregando anamneses..." />
         </GumroadCard>
       ) : error ? (
-        <GumroadCard color="salmon" shadow="md" padding="lg">
+        <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
           <Flex align="center" gap="2">
             <ExclamationTriangleIcon />
             <GumroadText level="body-md" as="p">{error}</GumroadText>

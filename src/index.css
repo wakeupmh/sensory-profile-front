@@ -6,6 +6,7 @@
   /* Colors */
   --color-canvas: #FFFEF5;
   --color-ink: #0A0A1A;
+  --color-ink-muted: #55556A;
   --color-surface: #FFFFFF;
   --color-surface-cream: #FFF8E1;
 
@@ -18,7 +19,7 @@
 
   --color-success: #22c55e;
   --color-warning: #f59e0b;
-  --color-error: #ef4444;
+  --color-error: #dc2626;
 
   /* Shadows */
   --shadow-card: 6px 6px 0px #0A0A1A;
@@ -44,6 +45,59 @@
   --z-menu: 1000;
   --z-bottom-nav: 999;
   --z-modal: 1100;
+  --z-toast: 1200;
+
+  /* Motion */
+  --duration-instant: 80ms;
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --duration-slow: 300ms;
+  --duration-slower: 450ms;
+  --ease-standard: ease;
+  --ease-out: ease-out;
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ─── Focus & screen-reader utilities ─────────────────────── */
+
+/* Anel de foco global — visível sobre qualquer fundo graças ao offset */
+:focus-visible {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+/* Conteúdo apenas para leitores de tela */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Link "pular para o conteúdo" — fora da tela até receber foco */
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  transform: translateY(-200%);
+  z-index: calc(var(--z-menu) + 10);
+  background: var(--color-ink);
+  color: var(--color-canvas);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px 16px;
+  border: 2px solid var(--color-canvas);
+  border-radius: var(--radius-sm);
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+.skip-link:focus {
+  transform: translateY(0);
 }
 
 * {
@@ -124,7 +178,7 @@ a {
   padding: 12px 16px !important;
   font-family: var(--font-display) !important;
   font-weight: 500 !important;
-  transition: all 0.15s ease !important;
+  transition: all var(--duration-base) var(--ease-standard) !important;
 }
 
 .rt-RadioCardsItem[data-state="checked"] {
@@ -153,10 +207,36 @@ a {
   background-color: var(--color-surface-cream) !important;
 }
 
-/* GumroadButton — CSS :active press state */
+/* GumroadButton — hover lift + CSS :active press state */
+.gumroad-btn:hover:not(:disabled) {
+  transform: translate(-1px, -1px) !important;
+  box-shadow: 4px 4px 0px #0A0A1A !important;
+}
 .gumroad-btn:active:not(:disabled) {
   transform: translate(2px, 2px) !important;
   box-shadow: 1px 1px 0px #0A0A1A !important;
+}
+
+/* Padrão "press-in" compartilhado — substitui as cópias inline */
+.press-in {
+  transition: transform var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard);
+}
+.press-in:active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 1px 1px 0px var(--color-ink) !important;
+}
+
+/* GumroadCard — hover/focus lift (também por teclado) */
+.gumroad-card-interactive {
+  transition: transform var(--duration-base) var(--ease-standard),
+    box-shadow var(--duration-base) var(--ease-standard);
+}
+.gumroad-card-interactive:hover,
+.gumroad-card-interactive:focus-visible {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-card-hover) !important;
 }
 
 /* Spin animation (used by loading spinners) */
@@ -168,7 +248,7 @@ a {
 
 /* DomainStatsCard — keyboard-accessible hover/focus */
 .domain-stats-card {
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  transition: transform var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
 }
 .domain-stats-card:hover,
 .domain-stats-card:focus-visible {
@@ -202,9 +282,19 @@ a {
   to   { opacity: 1; }
 }
 
+@keyframes modal-overlay-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
 @keyframes modal-sheet-in {
   from { transform: translateY(40px); opacity: 0; }
   to   { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes modal-sheet-out {
+  from { transform: translateY(0);    opacity: 1; }
+  to   { transform: translateY(40px); opacity: 0; }
 }
 
 /* staggered reveal for the list items inside a sheet */
@@ -214,27 +304,43 @@ a {
 }
 
 .modal-overlay {
-  animation: modal-overlay-in 0.18s ease-out;
+  animation: modal-overlay-in var(--duration-base) var(--ease-out);
   /* accent: lavender-tinted scrim instead of flat navy */
   background-color: rgba(46, 28, 84, 0.45) !important;
   backdrop-filter: blur(2px);
 }
 
 .modal-sheet {
-  animation: modal-sheet-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: modal-sheet-in var(--duration-slow) var(--ease-spring);
   /* accent stripe at the top edge */
   border-top: 6px solid var(--color-brand-lavender) !important;
 }
 
+/* Radix Dialog exit — o unmount espera a animação terminar */
+.modal-overlay[data-state="closed"] {
+  animation: modal-overlay-out var(--duration-base) var(--ease-out) forwards;
+}
+.modal-sheet[data-state="closed"] {
+  animation: modal-sheet-out var(--duration-base) var(--ease-out) forwards;
+}
+
 .modal-sheet .modal-stagger {
   opacity: 0;
-  animation: modal-item-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: modal-item-in 0.32s var(--ease-spring) forwards;
   animation-delay: calc(var(--i, 0) * 45ms + 80ms);
+}
+
+/* Stagger genérico para grids/listas fora de modais.
+   fill-mode backwards (não forwards): cobre o atraso com o keyframe
+   inicial e libera o transform ao terminar, sem bloquear o hover-lift */
+.stagger-item {
+  animation: modal-item-in 0.32s var(--ease-spring) backwards;
+  animation-delay: calc(var(--i, 0) * 45ms);
 }
 
 /* micro-interaction: list rows lift on hover */
 .modal-row {
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  transition: transform var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
 }
 .modal-row:hover {
   transform: translate(-1px, -1px);
@@ -245,11 +351,131 @@ a {
   box-shadow: 1px 1px 0px var(--color-ink);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .modal-overlay,
-  .modal-sheet,
-  .modal-sheet .modal-stagger {
-    animation: none;
+/* --- Dropdown --- */
+@keyframes dropdown-in {
+  from { transform: scale(0.96); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+.dropdown-menu {
+  transform-origin: top left;
+  animation: dropdown-in var(--duration-fast) var(--ease-out);
+}
+
+/* --- Skeleton shimmer --- */
+@keyframes skeleton-shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(100deg, #EDEBDD 40%, #F7F5E8 50%, #EDEBDD 60%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.6s linear infinite;
+}
+
+/* --- Toasts --- */
+@keyframes toast-in {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes toast-out {
+  from { transform: translateY(0);    opacity: 1; }
+  to   { transform: translateY(16px); opacity: 0; }
+}
+
+@keyframes toast-swipe-out {
+  from { transform: translateX(var(--radix-toast-swipe-end-x)); }
+  to   { transform: translateX(calc(100% + 24px)); }
+}
+
+.toast-viewport {
+  position: fixed;
+  bottom: 80px; /* acima da BottomNav no mobile */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(400px, calc(100vw - 24px));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  outline: none;
+}
+
+@media (min-width: 768px) {
+  .toast-viewport {
+    bottom: 24px;
+    left: auto;
+    right: 24px;
+    transform: none;
   }
-  .modal-sheet .modal-stagger { opacity: 1; }
+}
+
+.toast-root {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--color-surface);
+  border: 2px solid var(--color-ink);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card-sm);
+  color: var(--color-ink);
+  font-family: var(--font-display);
+}
+
+.toast-root[data-kind="success"] { background: var(--color-brand-mint); }
+.toast-root[data-kind="error"]   { background: var(--color-brand-salmon); }
+
+.toast-root[data-state="open"]   { animation: toast-in var(--duration-base) var(--ease-spring); }
+.toast-root[data-state="closed"] { animation: toast-out var(--duration-base) var(--ease-out) forwards; }
+.toast-root[data-swipe="move"]   { transform: translateX(var(--radix-toast-swipe-move-x)); }
+.toast-root[data-swipe="cancel"] { transform: translateX(0); transition: transform var(--duration-base) var(--ease-out); }
+.toast-root[data-swipe="end"]    { animation: toast-swipe-out var(--duration-base) var(--ease-out) forwards; }
+
+.toast-copy { flex: 1; min-width: 0; }
+
+.toast-title {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.toast-description {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 2px 0 0;
+  overflow-wrap: break-word;
+}
+
+.toast-close {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1.5px solid var(--color-ink);
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  color: var(--color-ink);
+}
+
+/* --- Reduced motion: guarda global --- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

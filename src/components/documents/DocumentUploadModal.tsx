@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Flex } from '@radix-ui/themes';
-import { Cross2Icon } from '@radix-ui/react-icons';
-import { colors, shadows, radii, fonts, spacing, zIndex } from '../../theme/tokens';
+import { colors, shadows, radii, fonts, spacing } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
-import GumroadHeading, { GumroadText } from '../design-system/GumroadHeading';
+import { GumroadText } from '../design-system/GumroadHeading';
+import GumroadModal from '../design-system/GumroadModal';
 import DocumentTypeIcon from './DocumentTypeIcon';
 import { documentApi, appointmentApi, therapyApi, educationPlanApi, schoolCommApi } from '../../services/api';
 import { useAuthContext } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import type { DocumentRecord, DocumentResourceType } from '../../types/documents';
 import { DOCUMENT_RESOURCE_TYPE_LABELS, formatFileSize } from '../../types/documents';
 
@@ -86,31 +87,9 @@ async function fetchOptions(
   }
 }
 
-const overlayStyle: React.CSSProperties = {
-  position: 'fixed',
-  inset: 0,
-  backgroundColor: 'rgba(10,10,26,0.5)',
-  zIndex: zIndex.modal,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: spacing.md,
-};
-
-const cardStyle: React.CSSProperties = {
-  backgroundColor: colors.canvas,
-  border: `2px solid ${colors.ink}`,
-  borderRadius: radii.xl,
-  boxShadow: shadows['card-hover'],
-  width: '100%',
-  maxWidth: '460px',
-  maxHeight: '90vh',
-  overflowY: 'auto',
-  padding: spacing.xl,
-};
-
 const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file, childId, onClose, onUploaded }) => {
   const { getToken } = useAuthContext();
+  const toast = useToast();
   const [resourceType, setResourceType] = useState<DocumentResourceType | ''>('');
   const [resourceId, setResourceId] = useState('');
   const [options, setOptions] = useState<ResourceOption[]>([]);
@@ -145,7 +124,7 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file,
     return () => { cancelled = true; };
   }, [resourceType, childId, getToken]);
 
-  if (!isOpen || !file) return null;
+  if (!file) return null;
 
   const handleUpload = async () => {
     setUploading(true);
@@ -162,6 +141,7 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file,
       });
       await documentApi.uploadToPresignedUrl(uploadUrl, file, setProgress);
       setSuccess(true);
+      toast.success('Documento enviado');
       onUploaded(document);
       window.setTimeout(onClose, 700);
     } catch {
@@ -172,19 +152,14 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file,
   };
 
   return (
-    <div style={overlayStyle} onClick={(e) => { if (e.target === e.currentTarget && !uploading) onClose(); }}>
-      <div style={cardStyle}>
-        <Flex justify="between" align="center" mb="4">
-          <GumroadHeading level="title-md" as="h3">Enviar documento</GumroadHeading>
-          <button
-            onClick={onClose}
-            disabled={uploading}
-            style={{ width: '36px', height: '36px', border: `2px solid ${colors.ink}`, borderRadius: radii.md, backgroundColor: colors.canvas, cursor: uploading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          >
-            <Cross2Icon />
-          </button>
-        </Flex>
-
+    <GumroadModal
+      open={isOpen}
+      onClose={onClose}
+      title="Enviar documento"
+      variant="center"
+      maxWidth="460px"
+      closeDisabled={uploading}
+    >
         <Flex align="center" gap="3" mb="4" style={{ padding: '12px', border: `2px solid ${colors.ink}`, borderRadius: radii.md, backgroundColor: colors.surface }}>
           <DocumentTypeIcon mimeType={file.type} size={28} />
           <Flex direction="column" style={{ minWidth: 0 }}>
@@ -195,8 +170,8 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file,
 
         <Flex direction="column" gap="3" mb="4">
           <div>
-            <label style={labelStyle}>Vincular a um registro (opcional)</label>
-            <select
+            <label style={labelStyle} htmlFor="docupload-vincular-a">Vincular a um registro (opcional)</label>
+            <select id="docupload-vincular-a"
               value={resourceType}
               onChange={(e) => { setResourceType(e.target.value as DocumentResourceType | ''); setResourceId(''); }}
               style={inputStyle}
@@ -211,8 +186,8 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file,
 
           {resourceType && (
             <div>
-              <label style={labelStyle}>Selecione o registro</label>
-              <select value={resourceId} onChange={(e) => setResourceId(e.target.value)} style={inputStyle} disabled={uploading}>
+              <label style={labelStyle} htmlFor="docupload-selecione-o">Selecione o registro</label>
+              <select id="docupload-selecione-o" value={resourceId} onChange={(e) => setResourceId(e.target.value)} style={inputStyle} disabled={uploading}>
                 <option value="">Selecione...</option>
                 {options.map((opt) => (
                   <option key={opt.id} value={opt.id}>{opt.label}</option>
@@ -239,7 +214,7 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file,
         )}
 
         {error && (
-          <GumroadText level="body-sm" as="p" style={{ color: colors['brand-salmon'], marginBottom: spacing.sm }}>
+          <GumroadText level="body-sm" as="p" style={{ color: colors.error, marginBottom: spacing.sm }}>
             {error}
           </GumroadText>
         )}
@@ -252,8 +227,7 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file,
             Cancelar
           </GumroadButton>
         </Flex>
-      </div>
-    </div>
+    </GumroadModal>
   );
 };
 
