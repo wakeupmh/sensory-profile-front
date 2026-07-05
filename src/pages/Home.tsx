@@ -14,13 +14,13 @@ import {
   ExclamationTriangleIcon,
   BarChartIcon,
 } from '@radix-ui/react-icons';
-import LoadingSpinner from '../components/LoadingSpinner';
 import { useAuthContext } from '../context/AuthContext';
 import { colors, spacing } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadBadge from '../components/design-system/GumroadBadge';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
+import { DashboardSkeleton } from '../components/skeletons/PageSkeletons';
 
 interface Assessment {
   id: string;
@@ -319,9 +319,7 @@ const Home = () => {
       )}
 
       {loading ? (
-        <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
-          <LoadingSpinner size="large" text="Carregando avaliações..." />
-        </GumroadCard>
+        <DashboardSkeleton />
       ) : error ? (
         <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
           <Flex align="center" gap="2">

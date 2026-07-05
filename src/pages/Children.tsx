@@ -12,7 +12,7 @@ import GumroadBadge from '../components/design-system/GumroadBadge';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
 import GumroadModal from '../components/design-system/GumroadModal';
 import ChildForm, { ChildFormValue } from '../components/sensory-profile/ChildForm';
-import LoadingSpinner from '../components/LoadingSpinner';
+import { ChildrenListSkeleton } from '../components/skeletons/PageSkeletons';
 import axios from 'axios';
 
 function calculateAge(birthDate: string): string {
@@ -279,9 +279,7 @@ const Children = () => {
 
       {/* Content */}
       {loading ? (
-        <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
-          <LoadingSpinner size="large" text="Carregando crianças..." />
-        </GumroadCard>
+        <ChildrenListSkeleton />
       ) : !error && children.length === 0 && !adding ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">

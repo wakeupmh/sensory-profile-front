@@ -16,13 +16,13 @@ import { colors, spacing } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
-import LoadingSpinner from '../components/LoadingSpinner';
 import DomainStatsCard from '../components/child-profile/DomainStatsCard';
 import UnifiedTimeline from '../components/child-profile/UnifiedTimeline';
 import BehaviorInsightsPanel from '../components/behavior-insights/BehaviorInsightsPanel';
 import RemindersWidget from '../components/reminders/RemindersWidget';
 import ConsultationBriefModal from '../components/consolidated-report/ConsultationBriefModal';
 import ChildForm, { ChildFormValue } from '../components/sensory-profile/ChildForm';
+import { ChildProfileSkeleton } from '../components/skeletons/PageSkeletons';
 import type { ChildProfile } from '../types/child';
 
 const PERIOD_OPTIONS = [
@@ -153,9 +153,7 @@ const ChildProfilePage = () => {
       )}
 
       {loading ? (
-        <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
-          <LoadingSpinner size="large" text="Carregando perfil..." />
-        </GumroadCard>
+        <ChildProfileSkeleton />
       ) : profile && child ? (
         <>
           {/* Header card */}
