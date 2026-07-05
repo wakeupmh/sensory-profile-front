@@ -23,6 +23,7 @@ import {
 } from '@radix-ui/react-icons';
 import { colors, typography, zIndex, shadows } from '../theme/tokens';
 import GumroadButton from './design-system/GumroadButton';
+import DelegationSwitcher from './DelegationSwitcher';
 
 type NavItem = { path: string; match: string; label: string; icon: React.ComponentType<{ width?: number; height?: number }> };
 
@@ -201,6 +202,8 @@ const Menu: React.FC = () => {
             </div>
           </Flex>
         </Flex>
+
+        <DelegationSwitcher />
 
         <Flex align="center" display={{ initial: 'none', md: 'flex' }}>
           {session ? (

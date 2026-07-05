@@ -25,6 +25,24 @@ api.interceptors.response.use(
   },
 );
 
+// ─── Caregiver delegation (SP-21) ────────────────────────────────────
+// When a caregiver is "acting as" one of their delegated children, every
+// request must carry X-Delegate-Child-Id so the backend treats it as if
+// it came from that child's owner. Set via DelegationContext.
+let delegateChildId: string | null = null;
+
+export function setDelegateChildId(childId: string | null): void {
+  delegateChildId = childId;
+}
+
+api.interceptors.request.use((config) => {
+  if (delegateChildId) {
+    config.headers = config.headers ?? {};
+    config.headers['X-Delegate-Child-Id'] = delegateChildId;
+  }
+  return config;
+});
+
 function getAuthHeaders(token: string | null): { Authorization: string } {
   if (!token) {
     throw new Error('Sessão expirada. Por favor, faça login novamente.');
@@ -958,6 +976,25 @@ export const consultationBriefApi = {
     };
     return { brief, rateLimit };
   },
+};
+
+// ─── Co-caregivers with read-write delegation (SP-21) ────────────────
+import type { Caregiver, CreateCaregiverPayload, AcceptCaregiverInviteResponse } from '../types/caregivers';
+
+export const caregiverApi = {
+  list: (token: string | null, childId: string): Promise<Caregiver[]> =>
+    authRequest<any>('get', token, `/api/children/${childId}/caregivers`).then(unwrap<Caregiver[]>),
+
+  invite: (token: string | null, childId: string, payload: CreateCaregiverPayload): Promise<Caregiver> =>
+    authRequest<any>('post', token, `/api/children/${childId}/caregivers`, payload).then(unwrap<Caregiver>),
+
+  revoke: (token: string | null, childId: string, id: string): Promise<void> =>
+    authRequest<any>('delete', token, `/api/children/${childId}/caregivers/${id}`),
+
+  acceptInvite: (token: string | null, inviteToken: string): Promise<AcceptCaregiverInviteResponse> =>
+    authRequest<any>('post', token, '/api/caregiver-invites/accept', { token: inviteToken }).then(
+      unwrap<AcceptCaregiverInviteResponse>,
+    ),
 };
 
 export default api;
