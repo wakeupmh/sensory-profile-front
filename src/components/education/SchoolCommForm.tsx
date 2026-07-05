@@ -102,10 +102,10 @@ const SchoolCommForm: React.FC<SchoolCommFormProps> = ({
       <Flex direction="column" gap="3">
         <Flex gap="3">
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>
-              Data e hora <span style={{ color: colors['brand-salmon'] }}>*</span>
+            <label style={labelStyle} htmlFor="schoolcomm-data-e">
+              Data e hora <span style={{ color: colors.error }} aria-hidden="true">*</span>
             </label>
-            <input
+            <input id="schoolcomm-data-e"
               type="datetime-local"
               value={occurredAt}
               onChange={(e) => setOccurredAt(e.target.value)}
@@ -115,10 +115,10 @@ const SchoolCommForm: React.FC<SchoolCommFormProps> = ({
           </div>
 
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>
-              Tipo de comunicação <span style={{ color: colors['brand-salmon'] }}>*</span>
+            <label style={labelStyle} htmlFor="schoolcomm-tipo-de">
+              Tipo de comunicação <span style={{ color: colors.error }} aria-hidden="true">*</span>
             </label>
-            <select
+            <select id="schoolcomm-tipo-de"
               value={commType}
               onChange={(e) => setCommType(e.target.value as SchoolCommType)}
               style={{ ...inputStyle, cursor: 'pointer' }}
@@ -137,10 +137,10 @@ const SchoolCommForm: React.FC<SchoolCommFormProps> = ({
         </Flex>
 
         <div>
-          <label style={labelStyle}>
-            Assunto <span style={{ color: colors['brand-salmon'] }}>*</span>
+          <label style={labelStyle} htmlFor="schoolcomm-assunto">
+            Assunto <span style={{ color: colors.error }} aria-hidden="true">*</span>
           </label>
-          <input
+          <input id="schoolcomm-assunto"
             type="text"
             maxLength={255}
             value={subject}
@@ -152,13 +152,13 @@ const SchoolCommForm: React.FC<SchoolCommFormProps> = ({
         </div>
 
         <div>
-          <label style={labelStyle}>
+          <label style={labelStyle} htmlFor="schoolcomm-descricao-5000">
             Descrição
-            <span style={{ fontWeight: 400, opacity: 0.6, marginLeft: '6px' }}>
+            <span style={{ fontWeight: 400, color: colors['ink-muted'], marginLeft: '6px' }}>
               ({(description ?? '').length}/5000)
             </span>
           </label>
-          <textarea
+          <textarea id="schoolcomm-descricao-5000"
             maxLength={5000}
             rows={4}
             value={description ?? ''}
@@ -169,8 +169,8 @@ const SchoolCommForm: React.FC<SchoolCommFormProps> = ({
         </div>
 
         <div>
-          <label style={labelStyle}>Participantes</label>
-          <input
+          <label style={labelStyle} htmlFor="schoolcomm-participantes">Participantes</label>
+          <input id="schoolcomm-participantes"
             type="text"
             maxLength={500}
             value={attendees ?? ''}
@@ -181,8 +181,8 @@ const SchoolCommForm: React.FC<SchoolCommFormProps> = ({
         </div>
 
         <div>
-          <label style={labelStyle}>Data de retorno</label>
-          <input
+          <label style={labelStyle} htmlFor="schoolcomm-data-de">Data de retorno</label>
+          <input id="schoolcomm-data-de"
             type="date"
             value={followUpDate ?? ''}
             onChange={(e) => setFollowUpDate(e.target.value)}
@@ -191,13 +191,13 @@ const SchoolCommForm: React.FC<SchoolCommFormProps> = ({
         </div>
 
         <div>
-          <label style={labelStyle}>
+          <label style={labelStyle} htmlFor="schoolcomm-observacoes-2000">
             Observações
-            <span style={{ fontWeight: 400, opacity: 0.6, marginLeft: '6px' }}>
+            <span style={{ fontWeight: 400, color: colors['ink-muted'], marginLeft: '6px' }}>
               ({(notes ?? '').length}/2000)
             </span>
           </label>
-          <textarea
+          <textarea id="schoolcomm-observacoes-2000"
             maxLength={2000}
             rows={3}
             value={notes ?? ''}

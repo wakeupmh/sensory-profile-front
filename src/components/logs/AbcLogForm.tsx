@@ -64,7 +64,7 @@ export default function AbcLogForm({ onSubmit, isLoading }: AbcLogFormProps) {
     <form onSubmit={handleSubmit}>
       <Flex direction="column" gap="4">
         <Box>
-          <label style={labelStyle}>O que aconteceu antes? <span style={{ color: colors['brand-salmon'] }}>*</span></label>
+          <label style={labelStyle}>O que aconteceu antes? <span style={{ color: colors.error }} aria-hidden="true">*</span></label>
           <textarea
             style={inputStyle}
             value={antecedent}
@@ -75,7 +75,7 @@ export default function AbcLogForm({ onSubmit, isLoading }: AbcLogFormProps) {
         </Box>
 
         <Box>
-          <label style={labelStyle}>Qual foi o comportamento? <span style={{ color: colors['brand-salmon'] }}>*</span></label>
+          <label style={labelStyle}>Qual foi o comportamento? <span style={{ color: colors.error }} aria-hidden="true">*</span></label>
           <textarea
             style={inputStyle}
             value={behavior}
@@ -86,7 +86,7 @@ export default function AbcLogForm({ onSubmit, isLoading }: AbcLogFormProps) {
         </Box>
 
         <Box>
-          <label style={labelStyle}>O que aconteceu depois? <span style={{ color: colors['brand-salmon'] }}>*</span></label>
+          <label style={labelStyle}>O que aconteceu depois? <span style={{ color: colors.error }} aria-hidden="true">*</span></label>
           <textarea
             style={inputStyle}
             value={consequence}

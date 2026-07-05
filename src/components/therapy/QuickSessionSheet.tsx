@@ -109,8 +109,8 @@ const QuickSessionSheet: React.FC<QuickSessionSheetProps> = ({
     <GumroadModal open={isOpen} onClose={onClose} title={title}>
         {/* DateTime Picker (shown on both steps) */}
         <div style={{ marginBottom: spacing.md }}>
-          <label style={labelStyle}>Data e hora</label>
-          <input
+          <label style={labelStyle} htmlFor="session-data-e">Data e hora</label>
+          <input id="session-data-e"
             type="datetime-local"
             value={occurredAt}
             onChange={(e) => setOccurredAt(e.target.value)}
@@ -129,8 +129,8 @@ const QuickSessionSheet: React.FC<QuickSessionSheetProps> = ({
           <Flex direction="column" gap="3">
             {/* Therapist select */}
             <div>
-              <label style={labelStyle}>Terapeuta</label>
-              <select
+              <label style={labelStyle} htmlFor="session-terapeuta">Terapeuta</label>
+              <select id="session-terapeuta"
                 value={therapistId}
                 onChange={(e) => setTherapistId(e.target.value)}
                 style={{
@@ -156,8 +156,8 @@ const QuickSessionSheet: React.FC<QuickSessionSheetProps> = ({
 
             {/* Duration */}
             <div>
-              <label style={labelStyle}>Duração (minutos)</label>
-              <input
+              <label style={labelStyle} htmlFor="session-duracao-minutos">Duração (minutos)</label>
+              <input id="session-duracao-minutos"
                 type="number"
                 min="1"
                 max="480"
@@ -170,8 +170,8 @@ const QuickSessionSheet: React.FC<QuickSessionSheetProps> = ({
 
             {/* Notes */}
             <div>
-              <label style={labelStyle}>Observações</label>
-              <textarea
+              <label style={labelStyle} htmlFor="session-observacoes">Observações</label>
+              <textarea id="session-observacoes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 maxLength={500}
@@ -191,7 +191,7 @@ const QuickSessionSheet: React.FC<QuickSessionSheetProps> = ({
                   resize: 'vertical',
                 }}
               />
-              <div style={{ fontFamily: fonts.body, fontSize: '11px', color: colors.ink, opacity: 0.5, textAlign: 'right' }}>
+              <div style={{ fontFamily: fonts.body, fontSize: '11px', color: colors['ink-muted'], textAlign: 'right' }}>
                 {notes.length}/500
               </div>
             </div>

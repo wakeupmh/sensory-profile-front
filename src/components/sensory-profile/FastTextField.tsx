@@ -67,7 +67,7 @@ const FastTextField = memo(({
             marginBottom: '6px',
           }}
         >
-          {label} {required && <span style={{ color: colors['brand-salmon'] }}>*</span>}
+          {label} {required && <span style={{ color: colors.error }} aria-hidden="true">*</span>}
         </Text>
       )}
       <RadixTextField.Root

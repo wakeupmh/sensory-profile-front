@@ -35,7 +35,6 @@ const inputStyle: React.CSSProperties = {
   fontFamily: typography['body-md'].font,
   fontSize: typography['body-md'].size,
   color: colors.ink,
-  outline: 'none',
   boxSizing: 'border-box',
 };
 
@@ -63,10 +62,10 @@ const ChildForm: React.FC<ChildFormProps> = ({ value, onChange, disabled }) => {
     <Flex direction="column" gap="3">
       <Flex gap="4" direction={{ initial: 'column', sm: 'row' }}>
         <Box style={{ flex: 1 }}>
-          <label style={labelStyle}>
-            Nome da Criança: <span style={{ color: colors['brand-salmon'] }}>*</span>
+          <label style={labelStyle} htmlFor="child-nome-da">
+            Nome da Criança: <span style={{ color: colors.error }} aria-hidden="true">*</span>
           </label>
-          <input
+          <input id="child-nome-da"
             type="text"
             value={value.name}
             onChange={(e) => onChange('name', e.target.value)}
@@ -77,10 +76,10 @@ const ChildForm: React.FC<ChildFormProps> = ({ value, onChange, disabled }) => {
           />
         </Box>
         <Box style={{ flex: 1 }}>
-          <label style={labelStyle}>
-            Data de Nascimento: <span style={{ color: colors['brand-salmon'] }}>*</span>
+          <label style={labelStyle} htmlFor="child-data-de">
+            Data de Nascimento: <span style={{ color: colors.error }} aria-hidden="true">*</span>
           </label>
-          <input
+          <input id="child-data-de"
             type="date"
             value={value.birthDate}
             onChange={(e) => onChange('birthDate', e.target.value)}
@@ -93,8 +92,8 @@ const ChildForm: React.FC<ChildFormProps> = ({ value, onChange, disabled }) => {
 
       <Flex gap="4" direction={{ initial: 'column', sm: 'row' }}>
         <Box style={{ flex: 1 }}>
-          <label style={labelStyle}>Gênero:</label>
-          <select
+          <label style={labelStyle} htmlFor="child-genero">Gênero:</label>
+          <select id="child-genero"
             value={value.gender ?? ''}
             onChange={(e) => onChange('gender', e.target.value)}
             disabled={disabled}
@@ -108,8 +107,8 @@ const ChildForm: React.FC<ChildFormProps> = ({ value, onChange, disabled }) => {
           </select>
         </Box>
         <Box style={{ flex: 1 }}>
-          <label style={labelStyle}>Identidade Nacional (RG/CPF):</label>
-          <input
+          <label style={labelStyle} htmlFor="child-identidade-nacional">Identidade Nacional (RG/CPF):</label>
+          <input id="child-identidade-nacional"
             type="text"
             value={value.nationalIdentity ?? ''}
             onChange={(e) => onChange('nationalIdentity', e.target.value)}
@@ -121,8 +120,8 @@ const ChildForm: React.FC<ChildFormProps> = ({ value, onChange, disabled }) => {
       </Flex>
 
       <Box>
-        <label style={labelStyle}>Outras Informações:</label>
-        <textarea
+        <label style={labelStyle} htmlFor="child-outras-informacoes">Outras Informações:</label>
+        <textarea id="child-outras-informacoes"
           value={value.otherInfo ?? ''}
           onChange={(e) => onChange('otherInfo', e.target.value)}
           placeholder="Informações adicionais relevantes"

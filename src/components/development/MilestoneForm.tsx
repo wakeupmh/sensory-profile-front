@@ -92,10 +92,10 @@ const MilestoneForm: React.FC<MilestoneFormProps> = ({
     <form onSubmit={handleSubmit}>
       <Flex direction="column" gap="3">
         <div>
-          <label style={labelStyle}>
-            Nome <span style={{ color: colors['brand-salmon'] }}>*</span>
+          <label style={labelStyle} htmlFor="milestone-nome">
+            Nome <span style={{ color: colors.error }} aria-hidden="true">*</span>
           </label>
-          <input
+          <input id="milestone-nome"
             type="text"
             maxLength={255}
             value={title}
@@ -108,10 +108,10 @@ const MilestoneForm: React.FC<MilestoneFormProps> = ({
 
         <Flex gap="3">
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>
-              Categoria <span style={{ color: colors['brand-salmon'] }}>*</span>
+            <label style={labelStyle} htmlFor="milestone-categoria">
+              Categoria <span style={{ color: colors.error }} aria-hidden="true">*</span>
             </label>
-            <select
+            <select id="milestone-categoria"
               value={category}
               onChange={(e) => setCategory(e.target.value as MilestoneCategory)}
               style={{ ...inputStyle, cursor: 'pointer' }}
@@ -129,8 +129,8 @@ const MilestoneForm: React.FC<MilestoneFormProps> = ({
           </div>
 
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Status</label>
-            <select
+            <label style={labelStyle} htmlFor="milestone-status">Status</label>
+            <select id="milestone-status"
               value={status}
               onChange={(e) => setStatus(e.target.value as MilestoneStatus)}
               style={{ ...inputStyle, cursor: 'pointer' }}
@@ -148,8 +148,8 @@ const MilestoneForm: React.FC<MilestoneFormProps> = ({
 
         <Flex gap="3">
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Data de conquista</label>
-            <input
+            <label style={labelStyle} htmlFor="milestone-data-de">Data de conquista</label>
+            <input id="milestone-data-de"
               type="date"
               value={achievedDate ?? ''}
               onChange={(e) => setAchievedDate(e.target.value)}
@@ -157,8 +157,8 @@ const MilestoneForm: React.FC<MilestoneFormProps> = ({
             />
           </div>
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Data meta</label>
-            <input
+            <label style={labelStyle} htmlFor="milestone-data-meta">Data meta</label>
+            <input id="milestone-data-meta"
               type="date"
               value={targetDate ?? ''}
               onChange={(e) => setTargetDate(e.target.value)}
@@ -168,13 +168,13 @@ const MilestoneForm: React.FC<MilestoneFormProps> = ({
         </Flex>
 
         <div>
-          <label style={labelStyle}>
+          <label style={labelStyle} htmlFor="milestone-notas-2000">
             Notas
-            <span style={{ fontWeight: 400, opacity: 0.6, marginLeft: '6px' }}>
+            <span style={{ fontWeight: 400, color: colors['ink-muted'], marginLeft: '6px' }}>
               ({(notes ?? '').length}/2000)
             </span>
           </label>
-          <textarea
+          <textarea id="milestone-notas-2000"
             maxLength={2000}
             rows={3}
             value={notes ?? ''}

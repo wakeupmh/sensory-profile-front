@@ -99,7 +99,7 @@ const RemindersWidget: React.FC<RemindersWidgetProps> = ({ childId, days = 14 })
       {loading ? (
         <LoadingSpinner size="medium" text="Carregando..." />
       ) : error ? (
-        <Flex align="center" gap="2" style={{ color: colors['brand-salmon'] }}>
+        <Flex align="center" gap="2" style={{ color: colors.error }}>
           <ExclamationTriangleIcon />
           <GumroadText level="body-sm" as="span">{error}</GumroadText>
         </Flex>

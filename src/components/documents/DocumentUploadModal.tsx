@@ -167,8 +167,8 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file,
 
         <Flex direction="column" gap="3" mb="4">
           <div>
-            <label style={labelStyle}>Vincular a um registro (opcional)</label>
-            <select
+            <label style={labelStyle} htmlFor="docupload-vincular-a">Vincular a um registro (opcional)</label>
+            <select id="docupload-vincular-a"
               value={resourceType}
               onChange={(e) => { setResourceType(e.target.value as DocumentResourceType | ''); setResourceId(''); }}
               style={inputStyle}
@@ -183,8 +183,8 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file,
 
           {resourceType && (
             <div>
-              <label style={labelStyle}>Selecione o registro</label>
-              <select value={resourceId} onChange={(e) => setResourceId(e.target.value)} style={inputStyle} disabled={uploading}>
+              <label style={labelStyle} htmlFor="docupload-selecione-o">Selecione o registro</label>
+              <select id="docupload-selecione-o" value={resourceId} onChange={(e) => setResourceId(e.target.value)} style={inputStyle} disabled={uploading}>
                 <option value="">Selecione...</option>
                 {options.map((opt) => (
                   <option key={opt.id} value={opt.id}>{opt.label}</option>
@@ -211,7 +211,7 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file,
         )}
 
         {error && (
-          <GumroadText level="body-sm" as="p" style={{ color: colors['brand-salmon'], marginBottom: spacing.sm }}>
+          <GumroadText level="body-sm" as="p" style={{ color: colors.error, marginBottom: spacing.sm }}>
             {error}
           </GumroadText>
         )}

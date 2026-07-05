@@ -152,7 +152,7 @@ const ConsultationBriefModal: React.FC<ConsultationBriefModalProps> = ({ isOpen,
             </GumroadText>
 
             <Flex align="center" gap="2" wrap="wrap" mb="4">
-              <GumroadText level="caption" as="span" style={{ opacity: 0.65 }}>Período:</GumroadText>
+              <GumroadText level="caption" as="span" style={{ color: colors['ink-muted'] }}>Período:</GumroadText>
               {PERIOD_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
@@ -174,7 +174,7 @@ const ConsultationBriefModal: React.FC<ConsultationBriefModalProps> = ({ isOpen,
             </Flex>
 
             {error && (
-              <GumroadText level="body-sm" as="p" style={{ color: colors['brand-salmon'], marginBottom: spacing.sm }}>
+              <GumroadText level="body-sm" as="p" style={{ color: colors.error, marginBottom: spacing.sm }}>
                 {error}
               </GumroadText>
             )}
@@ -246,7 +246,7 @@ const ConsultationBriefModal: React.FC<ConsultationBriefModalProps> = ({ isOpen,
               </Box>
             </Box>
 
-            <Flex align="center" gap="2" mt="3" style={{ opacity: 0.65 }}>
+            <Flex align="center" gap="2" mt="3" style={{ color: colors['ink-muted'] }}>
               <InfoCircledIcon />
               <GumroadText level="caption" as="span">
                 Gerado por IA a partir dos seus dados — revise antes de usar na consulta.

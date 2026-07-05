@@ -114,19 +114,19 @@ const GoalProgressForm: React.FC<GoalProgressFormProps> = ({ isOpen, onClose, ch
       <form onSubmit={handleSubmit}>
           <Flex direction="column" gap="3">
             <div>
-              <label style={labelStyle}>
-                Valor {unit ? `(${unit})` : ''} <span style={{ color: colors['brand-salmon'] }}>*</span>
+              <label style={labelStyle} htmlFor="goalprog-valor">
+                Valor {unit ? `(${unit})` : ''} <span style={{ color: colors.error }} aria-hidden="true">*</span>
               </label>
-              <input type="number" step="any" value={value} onChange={(e) => setValue(e.target.value)} style={inputStyle} required />
+              <input id="goalprog-valor" type="number" step="any" value={value} onChange={(e) => setValue(e.target.value)} style={inputStyle} required />
             </div>
             <div>
-              <label style={labelStyle}>Data <span style={{ color: colors['brand-salmon'] }}>*</span></label>
-              <input type="date" value={occurredAt} onChange={(e) => setOccurredAt(e.target.value)} style={inputStyle} required />
+              <label style={labelStyle} htmlFor="goalprog-data">Data <span style={{ color: colors.error }} aria-hidden="true">*</span></label>
+              <input id="goalprog-data" type="date" value={occurredAt} onChange={(e) => setOccurredAt(e.target.value)} style={inputStyle} required />
             </div>
             {sessions.length > 0 && (
               <div>
-                <label style={labelStyle}>Vincular à sessão de terapia (opcional)</label>
-                <select value={therapySessionId} onChange={(e) => setTherapySessionId(e.target.value)} style={inputStyle}>
+                <label style={labelStyle} htmlFor="goalprog-vincular-a">Vincular à sessão de terapia (opcional)</label>
+                <select id="goalprog-vincular-a" value={therapySessionId} onChange={(e) => setTherapySessionId(e.target.value)} style={inputStyle}>
                   <option value="">Nenhuma</option>
                   {sessions.map((s) => (
                     <option key={s.id} value={s.id}>
@@ -137,11 +137,11 @@ const GoalProgressForm: React.FC<GoalProgressFormProps> = ({ isOpen, onClose, ch
               </div>
             )}
             <div>
-              <label style={labelStyle}>
+              <label style={labelStyle} htmlFor="goalprog-observacao-500">
                 Observação
-                <span style={{ fontWeight: 400, opacity: 0.6, marginLeft: '6px' }}>({notes.length}/500)</span>
+                <span style={{ fontWeight: 400, color: colors['ink-muted'], marginLeft: '6px' }}>({notes.length}/500)</span>
               </label>
-              <textarea maxLength={500} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Contexto do registro..." style={textareaStyle} />
+              <textarea id="goalprog-observacao-500" maxLength={500} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Contexto do registro..." style={textareaStyle} />
             </div>
             <Flex gap="2" mt="2">
               <GumroadButton variant="primary" size="md" type="submit" disabled={submitting || value === ''}>

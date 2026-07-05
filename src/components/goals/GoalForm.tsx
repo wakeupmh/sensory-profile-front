@@ -89,10 +89,10 @@ const GoalForm: React.FC<GoalFormProps> = ({ childId, initialValues = {}, onSubm
     <form onSubmit={handleSubmit}>
       <Flex direction="column" gap="3">
         <div>
-          <label style={labelStyle}>
-            Título da meta <span style={{ color: colors['brand-salmon'] }}>*</span>
+          <label style={labelStyle} htmlFor="goal-titulo-da">
+            Título da meta <span style={{ color: colors.error }} aria-hidden="true">*</span>
           </label>
-          <input
+          <input id="goal-titulo-da"
             type="text"
             maxLength={255}
             value={title}
@@ -105,16 +105,16 @@ const GoalForm: React.FC<GoalFormProps> = ({ childId, initialValues = {}, onSubm
 
         <Flex gap="3">
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Domínio</label>
-            <select value={domain} onChange={(e) => setDomain(e.target.value as GoalDomain)} style={inputStyle}>
+            <label style={labelStyle} htmlFor="goal-dominio">Domínio</label>
+            <select id="goal-dominio" value={domain} onChange={(e) => setDomain(e.target.value as GoalDomain)} style={inputStyle}>
               {domainOptions.map(([value, label]) => (
                 <option key={value} value={value}>{label}</option>
               ))}
             </select>
           </div>
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Status</label>
-            <select value={status} onChange={(e) => setStatus(e.target.value as GoalStatus)} style={inputStyle}>
+            <label style={labelStyle} htmlFor="goal-status">Status</label>
+            <select id="goal-status" value={status} onChange={(e) => setStatus(e.target.value as GoalStatus)} style={inputStyle}>
               {statusOptions.map(([value, label]) => (
                 <option key={value} value={value}>{label}</option>
               ))}
@@ -123,8 +123,8 @@ const GoalForm: React.FC<GoalFormProps> = ({ childId, initialValues = {}, onSubm
         </Flex>
 
         <div>
-          <label style={labelStyle}>Critério de domínio</label>
-          <textarea
+          <label style={labelStyle} htmlFor="goal-criterio-de">Critério de domínio</label>
+          <textarea id="goal-criterio-de"
             maxLength={1000}
             value={criteria}
             onChange={(e) => setCriteria(e.target.value)}
@@ -134,8 +134,8 @@ const GoalForm: React.FC<GoalFormProps> = ({ childId, initialValues = {}, onSubm
         </div>
 
         <div>
-          <label style={labelStyle}>Descrição</label>
-          <textarea
+          <label style={labelStyle} htmlFor="goal-descricao">Descrição</label>
+          <textarea id="goal-descricao"
             maxLength={1000}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -146,8 +146,8 @@ const GoalForm: React.FC<GoalFormProps> = ({ childId, initialValues = {}, onSubm
 
         <Flex gap="3">
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Baseline</label>
-            <input
+            <label style={labelStyle} htmlFor="goal-baseline">Baseline</label>
+            <input id="goal-baseline"
               type="number"
               step="any"
               value={baseline}
@@ -156,10 +156,10 @@ const GoalForm: React.FC<GoalFormProps> = ({ childId, initialValues = {}, onSubm
             />
           </div>
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>
-              Meta <span style={{ color: colors['brand-salmon'] }}>*</span>
+            <label style={labelStyle} htmlFor="goal-meta">
+              Meta <span style={{ color: colors.error }} aria-hidden="true">*</span>
             </label>
-            <input
+            <input id="goal-meta"
               type="number"
               step="any"
               value={target}
@@ -169,8 +169,8 @@ const GoalForm: React.FC<GoalFormProps> = ({ childId, initialValues = {}, onSubm
             />
           </div>
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Unidade</label>
-            <input
+            <label style={labelStyle} htmlFor="goal-unidade">Unidade</label>
+            <input id="goal-unidade"
               type="text"
               maxLength={30}
               value={unit}
@@ -183,12 +183,12 @@ const GoalForm: React.FC<GoalFormProps> = ({ childId, initialValues = {}, onSubm
 
         <Flex gap="3">
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Data de início</label>
-            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} style={inputStyle} />
+            <label style={labelStyle} htmlFor="goal-data-de">Data de início</label>
+            <input id="goal-data-de" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} style={inputStyle} />
           </div>
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Data alvo</label>
-            <input type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} style={inputStyle} />
+            <label style={labelStyle} htmlFor="goal-data-alvo">Data alvo</label>
+            <input id="goal-data-alvo" type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} style={inputStyle} />
           </div>
         </Flex>
 

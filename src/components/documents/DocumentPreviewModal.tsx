@@ -71,7 +71,7 @@ const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({ document, o
         {loading ? (
           <Flex justify="center" py="6"><LoadingSpinner size="large" text="Carregando preview..." /></Flex>
         ) : error ? (
-          <Flex align="center" gap="2" style={{ color: colors['brand-salmon'] }}>
+          <Flex align="center" gap="2" style={{ color: colors.error }}>
             <ExclamationTriangleIcon />
             <GumroadText level="body-md" as="span">{error}</GumroadText>
           </Flex>

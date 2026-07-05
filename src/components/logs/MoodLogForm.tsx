@@ -47,7 +47,7 @@ export default function MoodLogForm({ onSubmit, isLoading }: MoodLogFormProps) {
     <form onSubmit={handleSubmit}>
       <Flex direction="column" gap="4">
         <Box>
-          <label style={labelStyle}>Como estava? <span style={{ color: colors['brand-salmon'] }}>*</span></label>
+          <label style={labelStyle}>Como estava? <span style={{ color: colors.error }} aria-hidden="true">*</span></label>
           <Flex gap="2">
             {MOOD_LEVELS.map(({ value, emoji, label }) => (
               <button

@@ -87,6 +87,7 @@ export default function QuickLogSheet({
     >
         <Box mb="4">
           <label
+            htmlFor="quicklog-data-hora"
             style={{
               display: 'block',
               fontFamily: fonts.display,
@@ -96,9 +97,10 @@ export default function QuickLogSheet({
               marginBottom: '6px',
             }}
           >
-            Data e hora <span style={{ color: colors['brand-salmon'] }}>*</span>
+            Data e hora <span style={{ color: colors.error }} aria-hidden="true">*</span>
           </label>
           <input
+            id="quicklog-data-hora"
             type="datetime-local"
             value={occurredAt}
             onChange={(e) => setOccurredAt(e.target.value)}
@@ -131,6 +133,7 @@ export default function QuickLogSheet({
             {selectedType === 'toileting' && <ToiletingLogForm onSubmit={handleDataSubmit} isLoading={isLoading} />}
             <Box mt="3">
               <label
+                htmlFor="quicklog-observacoes"
                 style={{
                   display: 'block',
                   fontFamily: fonts.display,
@@ -143,6 +146,7 @@ export default function QuickLogSheet({
                 Observações
               </label>
               <textarea
+                id="quicklog-observacoes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value.slice(0, 200))}
                 maxLength={200}
@@ -160,10 +164,9 @@ export default function QuickLogSheet({
                   resize: 'vertical',
                   boxSizing: 'border-box',
                   boxShadow: shadows.input,
-                  outline: 'none',
                 }}
               />
-              <div style={{ fontFamily: fonts.display, fontSize: '11px', color: colors.ink, opacity: 0.5, textAlign: 'right', marginTop: '4px' }}>
+              <div style={{ fontFamily: fonts.display, fontSize: '11px', color: colors['ink-muted'], textAlign: 'right', marginTop: '4px' }}>
                 {notes.length}/200
               </div>
             </Box>

@@ -87,10 +87,10 @@ const ComorbidityForm: React.FC<ComorbidityFormProps> = ({
     <form onSubmit={handleSubmit}>
       <Flex direction="column" gap="3">
         <div>
-          <label style={labelStyle}>
-            Condição / Diagnóstico <span style={{ color: colors['brand-salmon'] }}>*</span>
+          <label style={labelStyle} htmlFor="comorb-condicao-diagnostico">
+            Condição / Diagnóstico <span style={{ color: colors.error }} aria-hidden="true">*</span>
           </label>
-          <input
+          <input id="comorb-condicao-diagnostico"
             type="text"
             maxLength={255}
             value={conditionName}
@@ -102,8 +102,8 @@ const ComorbidityForm: React.FC<ComorbidityFormProps> = ({
         </div>
 
         <div>
-          <label style={labelStyle}>Código CID</label>
-          <input
+          <label style={labelStyle} htmlFor="comorb-codigo-cid">Código CID</label>
+          <input id="comorb-codigo-cid"
             type="text"
             maxLength={20}
             value={icdCode}
@@ -115,8 +115,8 @@ const ComorbidityForm: React.FC<ComorbidityFormProps> = ({
 
         <Flex gap="3">
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Data do diagnóstico</label>
-            <input
+            <label style={labelStyle} htmlFor="comorb-data-do">Data do diagnóstico</label>
+            <input id="comorb-data-do"
               type="date"
               value={diagnosisDate}
               onChange={(e) => setDiagnosisDate(e.target.value)}
@@ -124,8 +124,8 @@ const ComorbidityForm: React.FC<ComorbidityFormProps> = ({
             />
           </div>
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Médico diagnosticador</label>
-            <input
+            <label style={labelStyle} htmlFor="comorb-medico-diagnosticador">Médico diagnosticador</label>
+            <input id="comorb-medico-diagnosticador"
               type="text"
               maxLength={255}
               value={diagnosingDoctor}
@@ -137,8 +137,8 @@ const ComorbidityForm: React.FC<ComorbidityFormProps> = ({
         </Flex>
 
         <div>
-          <label style={labelStyle}>Observações</label>
-          <textarea
+          <label style={labelStyle} htmlFor="comorb-observacoes">Observações</label>
+          <textarea id="comorb-observacoes"
             maxLength={2000}
             rows={3}
             value={notes}

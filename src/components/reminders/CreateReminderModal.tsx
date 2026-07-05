@@ -89,10 +89,10 @@ const CreateReminderModal: React.FC<CreateReminderModalProps> = ({ isOpen, onClo
         <form onSubmit={handleSubmit}>
           <Flex direction="column" gap="3">
             <div>
-              <label style={labelStyle}>
-                Título <span style={{ color: colors['brand-salmon'] }}>*</span>
+              <label style={labelStyle} htmlFor="reminder-titulo">
+                Título <span style={{ color: colors.error }} aria-hidden="true">*</span>
               </label>
-              <input
+              <input id="reminder-titulo"
                 type="text"
                 maxLength={255}
                 value={title}
@@ -103,10 +103,10 @@ const CreateReminderModal: React.FC<CreateReminderModalProps> = ({ isOpen, onClo
               />
             </div>
             <div>
-              <label style={labelStyle}>
-                Data <span style={{ color: colors['brand-salmon'] }}>*</span>
+              <label style={labelStyle} htmlFor="reminder-data">
+                Data <span style={{ color: colors.error }} aria-hidden="true">*</span>
               </label>
-              <input
+              <input id="reminder-data"
                 type="date"
                 value={dueAt}
                 onChange={(e) => setDueAt(e.target.value)}
@@ -115,13 +115,13 @@ const CreateReminderModal: React.FC<CreateReminderModalProps> = ({ isOpen, onClo
               />
             </div>
             <div>
-              <label style={labelStyle}>
+              <label style={labelStyle} htmlFor="reminder-observacoes-500">
                 Observações
-                <span style={{ fontWeight: 400, opacity: 0.6, marginLeft: '6px' }}>
+                <span style={{ fontWeight: 400, color: colors['ink-muted'], marginLeft: '6px' }}>
                   ({notes.length}/500)
                 </span>
               </label>
-              <textarea
+              <textarea id="reminder-observacoes-500"
                 maxLength={500}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
