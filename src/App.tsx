@@ -20,6 +20,8 @@ import GoalsPage from './pages/GoalsPage';
 import GoalDetailPage from './pages/GoalDetailPage';
 import DocumentsPage from './pages/DocumentsPage';
 import ShareChildPage from './pages/ShareChildPage';
+import CaregiversPage from './pages/CaregiversPage';
+import CaregiverInviteAcceptPage from './pages/CaregiverInviteAcceptPage';
 import SharedChildrenList from './pages/SharedChildrenList';
 import SharedChildDetailPage from './pages/SharedChildDetailPage';
 import ConsolidatedReportPage from './pages/ConsolidatedReportPage';
@@ -66,6 +68,7 @@ function App() {
             <Route path="/children" element={<ProtectedRoute><Children /></ProtectedRoute>} />
             <Route path="/children/:childId" element={<ProtectedRoute><ChildProfilePage /></ProtectedRoute>} />
             <Route path="/children/:childId/share" element={<ProtectedRoute><ShareChildPage /></ProtectedRoute>} />
+            <Route path="/children/:childId/caregivers" element={<ProtectedRoute><CaregiversPage /></ProtectedRoute>} />
             <Route path="/logs" element={<ProtectedRoute><LogsPage /></ProtectedRoute>} />
             <Route path="/therapy" element={<ProtectedRoute><TherapyPage /></ProtectedRoute>} />
             <Route path="/medical" element={<ProtectedRoute><MedicalPage /></ProtectedRoute>} />
@@ -84,6 +87,7 @@ function App() {
 
             {/* Invitation acceptance + professional read-only access */}
             <Route path="/invite/accept" element={<ProtectedRoute><InviteAcceptPage /></ProtectedRoute>} />
+            <Route path="/caregiver-invite/accept" element={<ProtectedRoute><CaregiverInviteAcceptPage /></ProtectedRoute>} />
             <Route path="/shared" element={<ProtectedRoute><SharedRecordsList /></ProtectedRoute>} />
             <Route path="/shared/anamnese/:id" element={<ProtectedRoute><SharedAnamneseView /></ProtectedRoute>} />
             <Route path="/shared/assessment/:id" element={<ProtectedRoute><SharedAssessmentView /></ProtectedRoute>} />
