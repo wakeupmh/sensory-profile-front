@@ -55,6 +55,7 @@ const Menu: React.FC = () => {
   const { signOut, session } = useAuthContext();
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
+  const moreButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleSignOut = () => signOut().then(() => navigate('/sign-in', { replace: true }));
 
@@ -76,6 +77,19 @@ const Menu: React.FC = () => {
     };
     document.addEventListener('mousedown', onClick);
     return () => document.removeEventListener('mousedown', onClick);
+  }, [moreOpen]);
+
+  // Escape fecha o dropdown e devolve o foco ao botão "Mais"
+  useEffect(() => {
+    if (!moreOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMoreOpen(false);
+        moreButtonRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
   }, [moreOpen]);
 
   const navLinkStyle = (active: boolean): React.CSSProperties => ({
@@ -117,6 +131,7 @@ const Menu: React.FC = () => {
 
   return (
     <Box
+      asChild
       position="sticky"
       top="0"
       style={{
@@ -125,99 +140,115 @@ const Menu: React.FC = () => {
         borderBottom: `2px solid ${colors.ink}`,
       }}
     >
-      <Flex
-        justify="between"
-        align="center"
-        py="3"
-        px={{ initial: '4', sm: '6' }}
-        style={{ maxWidth: '1200px', margin: '0 auto' }}
-      >
-        <Flex align="center" gap="5">
-          <Link to="/dashboard" style={{ textDecoration: 'none' }}>
-            <span
-              style={{
-                fontFamily: typography['display-sm'].font,
-                fontSize: '20px',
-                fontWeight: 700,
-                color: colors.ink,
-                letterSpacing: '-0.02em',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Perfil Sensorial
-            </span>
-          </Link>
-
-          {/* Desktop nav links */}
-          <Flex gap="2" align="center" display={{ initial: 'none', md: 'flex' }}>
-            {PRIMARY.map(({ path, match, label, icon: Icon }) => (
-              <Link key={path} to={path} style={navLinkStyle(isActive(match))}>
-                <Icon width={16} height={16} />
-                {label}
-              </Link>
-            ))}
-
-            {/* "Mais" dropdown — destinos secundários */}
-            <div ref={moreRef} style={{ position: 'relative' }}>
-              <button
-                onClick={() => setMoreOpen((v) => !v)}
-                style={navLinkStyle(isSecondaryActive || moreOpen)}
-                aria-haspopup="menu"
-                aria-expanded={moreOpen}
+      <header>
+        <Flex
+          justify="between"
+          align="center"
+          py="3"
+          px={{ initial: '4', sm: '6' }}
+          style={{ maxWidth: '1200px', margin: '0 auto' }}
+        >
+          <Flex align="center" gap="5">
+            <Link to="/dashboard" style={{ textDecoration: 'none' }}>
+              <span
+                style={{
+                  fontFamily: typography['display-sm'].font,
+                  fontSize: '20px',
+                  fontWeight: 700,
+                  color: colors.ink,
+                  letterSpacing: '-0.02em',
+                  whiteSpace: 'nowrap',
+                }}
               >
-                Mais
-                <ChevronDownIcon
-                  width={16}
-                  height={16}
-                  style={{ transform: moreOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }}
-                />
-              </button>
+                Perfil Sensorial
+              </span>
+            </Link>
 
-              {moreOpen && (
-                <div
-                  role="menu"
-                  style={{
-                    position: 'absolute',
-                    top: 'calc(100% + 10px)',
-                    left: 0,
-                    minWidth: '220px',
-                    background: '#fff',
-                    border: `2px solid ${colors.ink}`,
-                    borderRadius: '14px',
-                    boxShadow: shadows.card,
-                    padding: '6px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '2px',
-                  }}
-                >
-                  {SECONDARY.map(({ path, match, label, icon: Icon }) => (
-                    <Link key={path} to={path} role="menuitem" style={moreItemStyle(isActive(match))}>
-                      <Icon width={18} height={18} />
-                      {label}
-                    </Link>
-                  ))}
+            {/* Desktop nav links */}
+            <Flex asChild gap="2" align="center" display={{ initial: 'none', md: 'flex' }}>
+              <nav aria-label="Navegação principal">
+                {PRIMARY.map(({ path, match, label, icon: Icon }) => (
+                  <Link
+                    key={path}
+                    to={path}
+                    style={navLinkStyle(isActive(match))}
+                    aria-current={isActive(match) ? 'page' : undefined}
+                  >
+                    <Icon width={16} height={16} />
+                    {label}
+                  </Link>
+                ))}
+
+                {/* "Mais" — padrão de navegação com disclosure (WAI), sem roles de menu */}
+                <div ref={moreRef} style={{ position: 'relative' }}>
+                  <button
+                    ref={moreButtonRef}
+                    onClick={() => setMoreOpen((v) => !v)}
+                    style={navLinkStyle(isSecondaryActive || moreOpen)}
+                    aria-expanded={moreOpen}
+                    aria-controls="menu-mais"
+                  >
+                    Mais
+                    <ChevronDownIcon
+                      width={16}
+                      height={16}
+                      style={{ transform: moreOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }}
+                    />
+                  </button>
+
+                  {moreOpen && (
+                    <div
+                      id="menu-mais"
+                      className="dropdown-menu"
+                      style={{
+                        position: 'absolute',
+                        top: 'calc(100% + 10px)',
+                        left: 0,
+                        minWidth: '220px',
+                        background: '#fff',
+                        border: `2px solid ${colors.ink}`,
+                        borderRadius: '14px',
+                        boxShadow: shadows.card,
+                        padding: '6px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '2px',
+                      }}
+                    >
+                      {SECONDARY.map(({ path, match, label, icon: Icon }) => (
+                        <Link
+                          key={path}
+                          to={path}
+                          style={moreItemStyle(isActive(match))}
+                          aria-current={isActive(match) ? 'page' : undefined}
+                        >
+                          <Icon width={18} height={18} />
+                          {label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </nav>
+            </Flex>
+          </Flex>
+
+          <DelegationSwitcher />
+
+          <Flex align="center" display={{ initial: 'none', md: 'flex' }}>
+            {session ? (
+              <GumroadButton variant="secondary" size="sm" onClick={handleSignOut}>
+                <ExitIcon />
+                Sair
+              </GumroadButton>
+            ) : (
+              <GumroadButton variant="primary" size="sm" onClick={() => navigate('/sign-in')}>
+                Entrar
+              </GumroadButton>
+            )}
           </Flex>
         </Flex>
-
-        <DelegationSwitcher />
-
-        <Flex align="center" display={{ initial: 'none', md: 'flex' }}>
-          {session ? (
-            <GumroadButton variant="secondary" size="sm" onClick={handleSignOut}>
-              <ExitIcon />
-              Sair
-            </GumroadButton>
-          ) : (
-            <GumroadButton variant="primary" size="sm" onClick={() => navigate('/sign-in')}>
-              Entrar
-            </GumroadButton>
-          )}
-        </Flex>
-      </Flex>
+      </header>
     </Box>
   );
 };

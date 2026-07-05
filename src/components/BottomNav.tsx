@@ -162,6 +162,7 @@ const BottomNav: React.FC = () => {
       </Dialog.Root>
 
       <Box
+        asChild
         position="fixed"
         bottom="0"
         left="0"
@@ -174,42 +175,46 @@ const BottomNav: React.FC = () => {
         }}
         className="bottom-nav"
       >
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-around',
-            alignItems: 'center',
-            height: '64px',
-            paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-            paddingLeft: '16px',
-            paddingRight: '16px',
-            maxWidth: '500px',
-            margin: '0 auto',
-          }}
-        >
-          {primaryTabs.map((tab) => {
-            const active = isActive(tab.path.split('?')[0]);
-            const Icon = tab.icon;
-            return (
-              <Link
-                key={tab.path}
-                to={tab.path}
-                style={tabStyle(active)}
-              >
-                <Icon width={22} height={22} style={{ flexShrink: 0 }} />
-                <span>{tab.label}</span>
-              </Link>
-            );
-          })}
-
-          <button
-            onClick={() => setMoreOpen((v) => !v)}
-            style={tabStyle(isMoreActive || moreOpen)}
+        <nav aria-label="Navegação inferior">
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-around',
+              alignItems: 'center',
+              height: '64px',
+              paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+              paddingLeft: '16px',
+              paddingRight: '16px',
+              maxWidth: '500px',
+              margin: '0 auto',
+            }}
           >
-            <DotsHorizontalIcon width={22} height={22} style={{ flexShrink: 0 }} />
-            <span>Mais</span>
-          </button>
-        </div>
+            {primaryTabs.map((tab) => {
+              const active = isActive(tab.path.split('?')[0]);
+              const Icon = tab.icon;
+              return (
+                <Link
+                  key={tab.path}
+                  to={tab.path}
+                  style={tabStyle(active)}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  <Icon width={22} height={22} style={{ flexShrink: 0 }} />
+                  <span>{tab.label}</span>
+                </Link>
+              );
+            })}
+
+            <button
+              onClick={() => setMoreOpen((v) => !v)}
+              style={tabStyle(isMoreActive || moreOpen)}
+              aria-expanded={moreOpen}
+            >
+              <DotsHorizontalIcon width={22} height={22} style={{ flexShrink: 0 }} />
+              <span>Mais</span>
+            </button>
+          </div>
+        </nav>
       </Box>
     </>
   );
