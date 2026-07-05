@@ -1,14 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
 import { Link } from 'react-router-dom';
-import { PlusIcon, Pencil1Icon, TrashIcon, InfoCircledIcon, ExclamationTriangleIcon, Cross2Icon } from '@radix-ui/react-icons';
+import { PlusIcon, Pencil1Icon, TrashIcon, InfoCircledIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { childApi, ChildData } from '../services/api';
 import { useAuthContext } from '../context/AuthContext';
-import { colors, spacing, zIndex, shadows, radii } from '../theme/tokens';
+import { colors, spacing } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadBadge from '../components/design-system/GumroadBadge';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
+import GumroadModal from '../components/design-system/GumroadModal';
 import ChildForm, { ChildFormValue } from '../components/sensory-profile/ChildForm';
 import LoadingSpinner from '../components/LoadingSpinner';
 import axios from 'axios';
@@ -51,6 +52,7 @@ function childDataToFormValue(child: ChildData): ChildFormValue {
 }
 
 interface ChildFormModalProps {
+  open: boolean;
   title: string;
   value: ChildFormValue;
   onChange: (field: keyof ChildFormValue, value: string) => void;
@@ -60,74 +62,23 @@ interface ChildFormModalProps {
 }
 
 // Bottom-sheet modal compartilhado por adicionar/editar criança
-const ChildFormModal = ({ title, value, onChange, onSave, onCancel, saving }: ChildFormModalProps) => (
-  <div
-    className="modal-overlay"
-    style={{
-      position: 'fixed',
-      inset: 0,
-      zIndex: zIndex.modal,
-      display: 'flex',
-      alignItems: 'flex-end',
-      justifyContent: 'center',
-    }}
-    onClick={(e) => { if (e.target === e.currentTarget && !saving) onCancel(); }}
-  >
-    <div
-      className="modal-sheet"
-      style={{
-        backgroundColor: colors.canvas,
-        border: `2px solid ${colors.ink}`,
-        borderBottom: 'none',
-        borderRadius: `${radii.xl} ${radii.xl} 0 0`,
-        boxShadow: shadows['card-hover'],
-        width: '100%',
-        maxWidth: '600px',
-        maxHeight: '90vh',
-        overflowY: 'auto',
-        padding: spacing.xl,
-        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)',
-      }}
-    >
-      <Flex justify="between" align="center" mb="4">
-        <GumroadHeading level="title-lg" as="h3">{title}</GumroadHeading>
-        <button
-          type="button"
-          onClick={onCancel}
-          disabled={saving}
-          aria-label="Fechar"
-          style={{
-            background: 'none',
-            border: `2px solid ${colors.ink}`,
-            borderRadius: radii.md,
-            width: '36px',
-            height: '36px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            boxShadow: shadows.button,
-          }}
-        >
-          <Cross2Icon width={16} height={16} />
-        </button>
-      </Flex>
-      <ChildForm value={value} onChange={onChange} disabled={saving} />
-      <Flex gap="3" mt="4">
-        <GumroadButton
-          variant="primary"
-          size="sm"
-          onClick={onSave}
-          disabled={saving || !value.name || !value.birthDate}
-        >
-          {saving ? 'Salvando...' : 'Salvar'}
-        </GumroadButton>
-        <GumroadButton variant="secondary" size="sm" onClick={onCancel} disabled={saving}>
-          Cancelar
-        </GumroadButton>
-      </Flex>
-    </div>
-  </div>
+const ChildFormModal = ({ open, title, value, onChange, onSave, onCancel, saving }: ChildFormModalProps) => (
+  <GumroadModal open={open} onClose={onCancel} title={title} closeDisabled={saving}>
+    <ChildForm value={value} onChange={onChange} disabled={saving} />
+    <Flex gap="3" mt="4">
+      <GumroadButton
+        variant="primary"
+        size="sm"
+        onClick={onSave}
+        disabled={saving || !value.name || !value.birthDate}
+      >
+        {saving ? 'Salvando...' : 'Salvar'}
+      </GumroadButton>
+      <GumroadButton variant="secondary" size="sm" onClick={onCancel} disabled={saving}>
+        Cancelar
+      </GumroadButton>
+    </Flex>
+  </GumroadModal>
 );
 
 const Children = () => {
@@ -300,28 +251,26 @@ const Children = () => {
       )}
 
       {/* Add form — bottom-sheet modal */}
-      {adding && (
-        <ChildFormModal
-          title="Nova Criança"
-          value={addFormValue}
-          onChange={(field, value) => setAddFormValue((prev) => ({ ...prev, [field]: value }))}
-          onSave={handleSaveAdd}
-          onCancel={handleCancelAdd}
-          saving={addSaving}
-        />
-      )}
+      <ChildFormModal
+        open={adding}
+        title="Nova Criança"
+        value={addFormValue}
+        onChange={(field, value) => setAddFormValue((prev) => ({ ...prev, [field]: value }))}
+        onSave={handleSaveAdd}
+        onCancel={handleCancelAdd}
+        saving={addSaving}
+      />
 
       {/* Edit form — bottom-sheet modal */}
-      {editingId && (
-        <ChildFormModal
-          title="Editar Criança"
-          value={editFormValue}
-          onChange={(field, value) => setEditFormValue((prev) => ({ ...prev, [field]: value }))}
-          onSave={handleSaveEdit}
-          onCancel={handleCancelEdit}
-          saving={editSaving}
-        />
-      )}
+      <ChildFormModal
+        open={editingId !== null}
+        title="Editar Criança"
+        value={editFormValue}
+        onChange={(field, value) => setEditFormValue((prev) => ({ ...prev, [field]: value }))}
+        onSave={handleSaveEdit}
+        onCancel={handleCancelEdit}
+        saving={editSaving}
+      />
 
       {/* Content */}
       {loading ? (

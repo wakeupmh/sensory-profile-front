@@ -1,9 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Flex, Box } from '@radix-ui/themes';
-import { Cross2Icon } from '@radix-ui/react-icons';
-import { colors, shadows, radii, fonts, spacing, zIndex } from '../../theme/tokens';
-import GumroadButton from '../design-system/GumroadButton';
-import GumroadHeading from '../design-system/GumroadHeading';
+import { useState, useEffect } from 'react';
+import { Box } from '@radix-ui/themes';
+import { colors, shadows, radii, fonts, spacing } from '../../theme/tokens';
+import GumroadModal from '../design-system/GumroadModal';
 import LogTypeSelector from './LogTypeSelector';
 import AbcLogForm from './AbcLogForm';
 import MoodLogForm from './MoodLogForm';
@@ -41,64 +39,20 @@ export default function QuickLogSheet({
   const [notes, setNotes] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const sheetRef = useRef<HTMLDivElement>(null);
-  const previousFocus = useRef<HTMLElement | null>(null);
 
+  // Reinicia o formulário a cada abertura (foco/trap/Escape são do GumroadModal)
   useEffect(() => {
-    if (isOpen) {
-      previousFocus.current = document.activeElement as HTMLElement;
-      const now = new Date();
-      const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-        .toISOString()
-        .slice(0, 16);
-      setOccurredAt(local);
-      setStep(defaultLogType ? 'form' : 'type');
-      setSelectedType(defaultLogType ?? null);
-      setNotes('');
-      setError(null);
-    } else if (previousFocus.current) {
-      previousFocus.current.focus();
-      previousFocus.current = null;
-    }
+    if (!isOpen) return;
+    const now = new Date();
+    const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 16);
+    setOccurredAt(local);
+    setStep(defaultLogType ? 'form' : 'type');
+    setSelectedType(defaultLogType ?? null);
+    setNotes('');
+    setError(null);
   }, [isOpen, defaultLogType]);
-
-  useEffect(() => {
-    if (!isOpen || !sheetRef.current) return;
-
-    const sheet = sheetRef.current;
-
-    // Auto-focus first focusable element
-    const focusables = sheet.querySelectorAll<HTMLElement>(
-      'button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    if (focusables.length > 0) focusables[0].focus();
-
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-        return;
-      }
-
-      if (e.key !== 'Tab') return;
-      const focusableEls = sheet.querySelectorAll<HTMLElement>(
-        'button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
-      );
-      if (focusableEls.length === 0) return;
-      const first = focusableEls[0];
-      const last = focusableEls[focusableEls.length - 1];
-
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    };
-
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [isOpen, onClose]);
 
   const handleTypeSelect = (type: LogType) => {
     setSelectedType(type);
@@ -125,59 +79,12 @@ export default function QuickLogSheet({
     }
   };
 
-  if (!isOpen) return null;
-
-  const overlayStyle: React.CSSProperties = {
-    position: 'fixed',
-    inset: 0,
-    backgroundColor: 'rgba(10,10,26,0.5)',
-    zIndex: zIndex.modal,
-    display: 'flex',
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-  };
-
-  const sheetStyle: React.CSSProperties = {
-    backgroundColor: colors.canvas,
-    border: `2px solid ${colors.ink}`,
-    borderBottom: 'none',
-    borderRadius: `${radii.xl} ${radii.xl} 0 0`,
-    boxShadow: shadows['card-hover'],
-    width: '100%',
-    maxWidth: '600px',
-    maxHeight: '90vh',
-    overflowY: 'auto',
-    padding: spacing.xl,
-    paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)',
-  };
-
   return (
-    <div className="modal-overlay" style={overlayStyle} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div ref={sheetRef} className="modal-sheet" style={sheetStyle}>
-        <Flex justify="between" align="center" mb="4">
-          <GumroadHeading level="title-lg" as="h2">
-            {step === 'form' && selectedType ? LOG_TYPE_LABELS[selectedType] : 'Registrar'}
-          </GumroadHeading>
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              background: 'none',
-              border: `2px solid ${colors.ink}`,
-              borderRadius: radii.md,
-              width: '36px',
-              height: '36px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              boxShadow: shadows.button,
-            }}
-          >
-            <Cross2Icon width={16} height={16} />
-          </button>
-        </Flex>
-
+    <GumroadModal
+      open={isOpen}
+      onClose={onClose}
+      title={step === 'form' && selectedType ? LOG_TYPE_LABELS[selectedType] : 'Registrar'}
+    >
         <Box mb="4">
           <label
             style={{
@@ -300,7 +207,6 @@ export default function QuickLogSheet({
             </p>
           </Box>
         )}
-      </div>
-    </div>
+    </GumroadModal>
   );
 }

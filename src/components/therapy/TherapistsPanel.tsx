@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Flex } from '@radix-ui/themes';
-import { Cross2Icon, PlusIcon } from '@radix-ui/react-icons';
-import { colors, shadows, radii, fonts, spacing, zIndex } from '../../theme/tokens';
+import { PlusIcon } from '@radix-ui/react-icons';
 import GumroadButton from '../design-system/GumroadButton';
 import GumroadCard from '../design-system/GumroadCard';
 import GumroadHeading from '../design-system/GumroadHeading';
 import { GumroadText } from '../design-system/GumroadHeading';
+import GumroadModal from '../design-system/GumroadModal';
 import TherapistCard from './TherapistCard';
 import TherapistForm from './TherapistForm';
 import type { Therapist, CreateTherapistPayload } from '../../types/therapy';
@@ -20,30 +20,6 @@ interface TherapistsPanelProps {
 }
 
 type PanelView = 'list' | 'add' | 'edit';
-
-const overlayStyle: React.CSSProperties = {
-  position: 'fixed',
-  inset: 0,
-  backgroundColor: 'rgba(10,10,26,0.5)',
-  zIndex: zIndex.modal,
-  display: 'flex',
-  alignItems: 'flex-end',
-  justifyContent: 'center',
-};
-
-const sheetStyle: React.CSSProperties = {
-  backgroundColor: colors.canvas,
-  border: `2px solid ${colors.ink}`,
-  borderBottom: 'none',
-  borderRadius: `${radii.xl} ${radii.xl} 0 0`,
-  boxShadow: shadows['card-hover'],
-  width: '100%',
-  maxWidth: '600px',
-  maxHeight: '90vh',
-  overflowY: 'auto',
-  padding: spacing.xl,
-  paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)',
-};
 
 const TherapistsPanel: React.FC<TherapistsPanelProps> = ({
   isOpen,
@@ -65,14 +41,6 @@ const TherapistsPanel: React.FC<TherapistsPanelProps> = ({
       setDeletingId(null);
     }
   }, [isOpen]);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    if (isOpen) document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
 
   const handleAdd = async (payload: CreateTherapistPayload) => {
     setIsLoading(true);
@@ -107,36 +75,9 @@ const TherapistsPanel: React.FC<TherapistsPanelProps> = ({
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div
-      style={overlayStyle}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div style={sheetStyle}>
-        {/* Header */}
-        <Flex justify="between" align="center" mb="4">
-          <span style={{ fontFamily: fonts.display, fontWeight: 700, fontSize: '18px', color: colors.ink }}>
-            Terapeutas
-          </span>
-          <button
-            onClick={onClose}
-            style={{
-              width: '36px',
-              height: '36px',
-              border: `2px solid ${colors.ink}`,
-              borderRadius: radii.md,
-              backgroundColor: colors.canvas,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Cross2Icon />
-          </button>
-        </Flex>
+    <GumroadModal open={isOpen} onClose={onClose} title="Terapeutas">
+      <>
 
         {/* List view */}
         {view === 'list' && (
@@ -231,8 +172,8 @@ const TherapistsPanel: React.FC<TherapistsPanelProps> = ({
             />
           </>
         )}
-      </div>
-    </div>
+      </>
+    </GumroadModal>
   );
 };
 

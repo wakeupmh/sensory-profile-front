@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import * as Dialog from '@radix-ui/react-dialog';
 import { useAuthContext } from '../context/AuthContext';
 import { Box } from '@radix-ui/themes';
 import {
@@ -92,22 +93,24 @@ const BottomNav: React.FC = () => {
 
   return (
     <>
-      {moreOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: zIndex.bottomNav + 1,
-            background: 'rgba(0,0,0,0.3)',
-          }}
-          onClick={() => setMoreOpen(false)}
-        >
-          <div
+      <Dialog.Root open={moreOpen} onOpenChange={setMoreOpen}>
+        <Dialog.Portal>
+          <Dialog.Overlay
             style={{
-              position: 'absolute',
+              position: 'fixed',
+              inset: 0,
+              zIndex: zIndex.bottomNav + 1,
+              background: 'rgba(0,0,0,0.3)',
+            }}
+          />
+          <Dialog.Content
+            aria-describedby={undefined}
+            style={{
+              position: 'fixed',
               bottom: '72px',
               left: '8px',
               right: '8px',
+              zIndex: zIndex.bottomNav + 2,
               maxWidth: '400px',
               margin: '0 auto',
               background: '#fff',
@@ -116,16 +119,19 @@ const BottomNav: React.FC = () => {
               boxShadow: shadows.card,
               padding: '8px',
             }}
-            onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 12px 8px' }}>
-              <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Mais opções</span>
-              <button
-                onClick={() => setMoreOpen(false)}
-                style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: '4px' }}
-              >
-                <Cross2Icon width={18} height={18} />
-              </button>
+              <Dialog.Title asChild>
+                <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Mais opções</span>
+              </Dialog.Title>
+              <Dialog.Close asChild>
+                <button
+                  aria-label="Fechar"
+                  style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: '4px' }}
+                >
+                  <Cross2Icon width={18} height={18} />
+                </button>
+              </Dialog.Close>
             </div>
             {moreTabs.map((tab) => {
               const Icon = tab.icon;
@@ -151,9 +157,9 @@ const BottomNav: React.FC = () => {
                 <span>Sair</span>
               </button>
             )}
-          </div>
-        </div>
-      )}
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
 
       <Box
         position="fixed"

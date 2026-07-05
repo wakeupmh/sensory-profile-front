@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Flex } from '@radix-ui/themes';
-import { Cross2Icon } from '@radix-ui/react-icons';
-import { colors, shadows, radii, fonts, spacing, zIndex } from '../../theme/tokens';
+import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
-import GumroadHeading from '../design-system/GumroadHeading';
+import GumroadModal from '../design-system/GumroadModal';
 import { therapyApi } from '../../services/api';
 import { useAuthContext } from '../../context/AuthContext';
 import type { TherapySessionSummary, TherapyType } from '../../types/therapy';
@@ -50,29 +49,6 @@ const labelStyle: React.CSSProperties = {
   display: 'block',
 };
 
-const overlayStyle: React.CSSProperties = {
-  position: 'fixed',
-  inset: 0,
-  backgroundColor: 'rgba(10,10,26,0.5)',
-  zIndex: zIndex.modal,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: spacing.md,
-};
-
-const cardStyle: React.CSSProperties = {
-  backgroundColor: colors.canvas,
-  border: `2px solid ${colors.ink}`,
-  borderRadius: radii.xl,
-  boxShadow: shadows['card-hover'],
-  width: '100%',
-  maxWidth: '440px',
-  maxHeight: '90vh',
-  overflowY: 'auto',
-  padding: spacing.xl,
-};
-
 const GoalProgressForm: React.FC<GoalProgressFormProps> = ({ isOpen, onClose, childId, unit, onSubmit }) => {
   const { getToken } = useAuthContext();
   const [value, setValue] = useState('');
@@ -96,8 +72,6 @@ const GoalProgressForm: React.FC<GoalProgressFormProps> = ({ isOpen, onClose, ch
     })();
     return () => { cancelled = true; };
   }, [isOpen, childId, getToken]);
-
-  if (!isOpen) return null;
 
   const reset = () => {
     setValue('');
@@ -130,18 +104,14 @@ const GoalProgressForm: React.FC<GoalProgressFormProps> = ({ isOpen, onClose, ch
   };
 
   return (
-    <div style={overlayStyle} onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
-      <div style={cardStyle}>
-        <Flex justify="between" align="center" mb="4">
-          <GumroadHeading level="title-md" as="h3">Registrar progresso</GumroadHeading>
-          <button
-            onClick={handleClose}
-            style={{ width: '36px', height: '36px', border: `2px solid ${colors.ink}`, borderRadius: radii.md, backgroundColor: colors.canvas, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          >
-            <Cross2Icon />
-          </button>
-        </Flex>
-        <form onSubmit={handleSubmit}>
+    <GumroadModal
+      open={isOpen}
+      onClose={handleClose}
+      title="Registrar progresso"
+      variant="center"
+      maxWidth="440px"
+    >
+      <form onSubmit={handleSubmit}>
           <Flex direction="column" gap="3">
             <div>
               <label style={labelStyle}>
@@ -183,8 +153,7 @@ const GoalProgressForm: React.FC<GoalProgressFormProps> = ({ isOpen, onClose, ch
             </Flex>
           </Flex>
         </form>
-      </div>
-    </div>
+    </GumroadModal>
   );
 };
 

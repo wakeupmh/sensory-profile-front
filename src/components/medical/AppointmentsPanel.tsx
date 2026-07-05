@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Flex } from '@radix-ui/themes';
-import { Cross2Icon, PlusIcon } from '@radix-ui/react-icons';
-import { colors, shadows, radii, fonts, spacing, zIndex } from '../../theme/tokens';
+import { PlusIcon } from '@radix-ui/react-icons';
 import GumroadButton from '../design-system/GumroadButton';
 import GumroadCard from '../design-system/GumroadCard';
 import GumroadHeading from '../design-system/GumroadHeading';
 import { GumroadText } from '../design-system/GumroadHeading';
+import GumroadModal from '../design-system/GumroadModal';
 import AppointmentCard from './AppointmentCard';
 import AppointmentForm from './AppointmentForm';
 import type {
@@ -25,30 +25,6 @@ interface AppointmentsPanelProps {
 }
 
 type PanelView = 'list' | 'add' | 'edit';
-
-const overlayStyle: React.CSSProperties = {
-  position: 'fixed',
-  inset: 0,
-  backgroundColor: 'rgba(10,10,26,0.5)',
-  zIndex: zIndex.modal,
-  display: 'flex',
-  alignItems: 'flex-end',
-  justifyContent: 'center',
-};
-
-const sheetStyle: React.CSSProperties = {
-  backgroundColor: colors.canvas,
-  border: `2px solid ${colors.ink}`,
-  borderBottom: 'none',
-  borderRadius: `${radii.xl} ${radii.xl} 0 0`,
-  boxShadow: shadows['card-hover'],
-  width: '100%',
-  maxWidth: '600px',
-  maxHeight: '90vh',
-  overflowY: 'auto',
-  padding: spacing.xl,
-  paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)',
-};
 
 const AppointmentsPanel: React.FC<AppointmentsPanelProps> = ({
   isOpen,
@@ -71,15 +47,6 @@ const AppointmentsPanel: React.FC<AppointmentsPanelProps> = ({
       setDeletingId(null);
     }
   }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
 
   const handleAdd = async (payload: CreateAppointmentPayload | Omit<CreateAppointmentPayload, 'childId'>) => {
     setIsLoading(true);
@@ -116,35 +83,9 @@ const AppointmentsPanel: React.FC<AppointmentsPanelProps> = ({
 
   const deletingAppointment = appointments.find((a) => a.id === deletingId);
 
-  if (!isOpen) return null;
-
   return (
-    <div
-      style={overlayStyle}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div style={sheetStyle}>
-        <Flex justify="between" align="center" mb="4">
-          <span style={{ fontFamily: fonts.display, fontWeight: 700, fontSize: '18px', color: colors.ink }}>
-            Consultas
-          </span>
-          <button
-            onClick={onClose}
-            style={{
-              width: '36px',
-              height: '36px',
-              border: `2px solid ${colors.ink}`,
-              borderRadius: radii.md,
-              backgroundColor: colors.canvas,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Cross2Icon />
-          </button>
-        </Flex>
+    <GumroadModal open={isOpen} onClose={onClose} title="Consultas">
+      <>
 
         {view === 'list' && (
           <>
@@ -240,8 +181,8 @@ const AppointmentsPanel: React.FC<AppointmentsPanelProps> = ({
             />
           </>
         )}
-      </div>
-    </div>
+      </>
+    </GumroadModal>
   );
 };
 
