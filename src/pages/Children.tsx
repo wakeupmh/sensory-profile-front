@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { PlusIcon, Pencil1Icon, TrashIcon, InfoCircledIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { childApi, ChildData } from '../services/api';
 import { useAuthContext } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { colors, spacing } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
@@ -99,6 +100,7 @@ const Children = () => {
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
 
   const { getToken, isLoaded, session } = useAuthContext();
+  const toast = useToast();
   const getTokenRef = useRef(getToken);
   getTokenRef.current = getToken;
 
@@ -149,6 +151,7 @@ const Children = () => {
       await fetchChildren();
       setEditingId(null);
       setEditFormValue(emptyFormValue());
+      toast.success('Alterações salvas');
     } catch {
       setError('Erro ao salvar criança. Por favor, tente novamente.');
     } finally {
@@ -182,6 +185,7 @@ const Children = () => {
       await fetchChildren();
       setAdding(false);
       setAddFormValue(emptyFormValue());
+      toast.success('Criança adicionada');
     } catch {
       setError('Erro ao criar criança. Por favor, tente novamente.');
     } finally {
@@ -200,6 +204,7 @@ const Children = () => {
       const token = await getTokenRef.current();
       await childApi.delete(child.id, token);
       setChildren((prev) => prev.filter((c) => c.id !== child.id));
+      toast.success('Criança excluída');
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.status === 409) {
         alert('Esta criança possui avaliações e não pode ser excluída.');

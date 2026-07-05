@@ -7,6 +7,7 @@ import GumroadModal from '../design-system/GumroadModal';
 import DocumentTypeIcon from './DocumentTypeIcon';
 import { documentApi, appointmentApi, therapyApi, educationPlanApi, schoolCommApi } from '../../services/api';
 import { useAuthContext } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import type { DocumentRecord, DocumentResourceType } from '../../types/documents';
 import { DOCUMENT_RESOURCE_TYPE_LABELS, formatFileSize } from '../../types/documents';
 
@@ -88,6 +89,7 @@ async function fetchOptions(
 
 const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file, childId, onClose, onUploaded }) => {
   const { getToken } = useAuthContext();
+  const toast = useToast();
   const [resourceType, setResourceType] = useState<DocumentResourceType | ''>('');
   const [resourceId, setResourceId] = useState('');
   const [options, setOptions] = useState<ResourceOption[]>([]);
@@ -139,6 +141,7 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file,
       });
       await documentApi.uploadToPresignedUrl(uploadUrl, file, setProgress);
       setSuccess(true);
+      toast.success('Documento enviado');
       onUploaded(document);
       window.setTimeout(onClose, 700);
     } catch {

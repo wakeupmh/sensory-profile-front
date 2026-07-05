@@ -10,6 +10,7 @@ import MedicationCard from './MedicationCard';
 import MedicationForm from './MedicationForm';
 import type { Medication, CreateMedicationPayload, UpdateMedicationPayload } from '../../types/medical';
 import { usePanelCrud } from '../../hooks/usePanelCrud';
+import { useToast } from '../../context/ToastContext';
 
 interface MedicationsPanelProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ const MedicationsPanel: React.FC<MedicationsPanelProps> = ({
   onEdit,
   onDelete,
 }) => {
+  const toast = useToast();
   const {
     editingItem: editingMedication,
     setEditingItem: setEditingMedication,
@@ -47,6 +49,7 @@ const MedicationsPanel: React.FC<MedicationsPanelProps> = ({
     try {
       await onAdd(payload as CreateMedicationPayload);
       setView('list');
+      toast.success('Medicamento adicionado');
     } finally {
       setIsLoading(false);
     }
@@ -59,6 +62,7 @@ const MedicationsPanel: React.FC<MedicationsPanelProps> = ({
       await onEdit(editingMedication.id, payload as UpdateMedicationPayload);
       setView('list');
       setEditingMedication(null);
+      toast.success('Alterações salvas');
     } finally {
       setIsLoading(false);
     }
@@ -70,6 +74,7 @@ const MedicationsPanel: React.FC<MedicationsPanelProps> = ({
     try {
       await onDelete(deletingId);
       setDeletingId(null);
+      toast.success('Medicamento removido');
     } finally {
       setIsLoading(false);
     }

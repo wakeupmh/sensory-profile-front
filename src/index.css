@@ -389,6 +389,84 @@ a {
   to   { transform: translateX(calc(100% + 24px)); }
 }
 
+.toast-viewport {
+  position: fixed;
+  bottom: 80px; /* acima da BottomNav no mobile */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(400px, calc(100vw - 24px));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  outline: none;
+}
+
+@media (min-width: 768px) {
+  .toast-viewport {
+    bottom: 24px;
+    left: auto;
+    right: 24px;
+    transform: none;
+  }
+}
+
+.toast-root {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--color-surface);
+  border: 2px solid var(--color-ink);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card-sm);
+  color: var(--color-ink);
+  font-family: var(--font-display);
+}
+
+.toast-root[data-kind="success"] { background: var(--color-brand-mint); }
+.toast-root[data-kind="error"]   { background: var(--color-brand-salmon); }
+
+.toast-root[data-state="open"]   { animation: toast-in var(--duration-base) var(--ease-spring); }
+.toast-root[data-state="closed"] { animation: toast-out var(--duration-base) var(--ease-out) forwards; }
+.toast-root[data-swipe="move"]   { transform: translateX(var(--radix-toast-swipe-move-x)); }
+.toast-root[data-swipe="cancel"] { transform: translateX(0); transition: transform var(--duration-base) var(--ease-out); }
+.toast-root[data-swipe="end"]    { animation: toast-swipe-out var(--duration-base) var(--ease-out) forwards; }
+
+.toast-copy { flex: 1; min-width: 0; }
+
+.toast-title {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.toast-description {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 2px 0 0;
+  overflow-wrap: break-word;
+}
+
+.toast-close {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1.5px solid var(--color-ink);
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  color: var(--color-ink);
+}
+
 /* --- Reduced motion: guarda global --- */
 @media (prefers-reduced-motion: reduce) {
   *,

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Box } from '@radix-ui/themes';
 import { colors, shadows, radii, fonts, spacing } from '../../theme/tokens';
 import GumroadModal from '../design-system/GumroadModal';
+import { useToast } from '../../context/ToastContext';
 import LogTypeSelector from './LogTypeSelector';
 import AbcLogForm from './AbcLogForm';
 import MoodLogForm from './MoodLogForm';
@@ -39,6 +40,7 @@ export default function QuickLogSheet({
   const [notes, setNotes] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
 
   // Reinicia o formulário a cada abertura (foco/trap/Escape são do GumroadModal)
   useEffect(() => {
@@ -71,6 +73,7 @@ export default function QuickLogSheet({
         data,
         notes: notes.trim() || null,
       });
+      toast.success('Registro salvo');
       onClose();
     } catch {
       setError('Erro ao salvar registro. Tente novamente.');
