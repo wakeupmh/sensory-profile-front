@@ -997,6 +997,41 @@ export const caregiverApi = {
     ),
 };
 
+// ─── Professional notes on shared children + owner access audit (SP-20) ──
+import type {
+  ProfessionalNote,
+  CreateProfessionalNotePayload,
+  UpdateProfessionalNotePayload,
+} from '../types/professionalNotes';
+import type { PaginatedAccessLogs, AccessLogQueryParams } from '../types/accessLog';
+
+// Professional-side: my own notes on a child shared with me.
+export const sharedNotesApi = {
+  list: (token: string | null, childId: string): Promise<ProfessionalNote[]> =>
+    authRequest<any>('get', token, `/api/shared/children/${childId}/notes`).then(unwrap<ProfessionalNote[]>),
+
+  create: (token: string | null, childId: string, payload: CreateProfessionalNotePayload): Promise<ProfessionalNote> =>
+    authRequest<any>('post', token, `/api/shared/children/${childId}/notes`, payload).then(unwrap<ProfessionalNote>),
+
+  update: (token: string | null, id: string, payload: UpdateProfessionalNotePayload): Promise<ProfessionalNote> =>
+    authRequest<any>('patch', token, `/api/shared/notes/${id}`, payload).then(unwrap<ProfessionalNote>),
+
+  delete: (token: string | null, id: string): Promise<void> =>
+    authRequest<any>('delete', token, `/api/shared/notes/${id}`),
+};
+
+// Owner-side: read-only view of every professional's notes on my child.
+export const childNotesApi = {
+  list: (token: string | null, childId: string): Promise<ProfessionalNote[]> =>
+    authRequest<any>('get', token, `/api/children/${childId}/notes`).then(unwrap<ProfessionalNote[]>),
+};
+
+// Owner-side: paginated data-access audit trail for my child.
+export const accessLogApi = {
+  list: (token: string | null, childId: string, params?: AccessLogQueryParams): Promise<PaginatedAccessLogs> =>
+    authRequest<PaginatedAccessLogs>('get', token, `/api/children/${childId}/access-logs`, undefined, { params }),
+};
+
 export default api;
 
 

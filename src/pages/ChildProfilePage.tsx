@@ -1,7 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Box, Flex } from '@radix-ui/themes';
-import { ArrowLeftIcon, ExclamationTriangleIcon, Pencil1Icon, Share1Icon, GroupIcon } from '@radix-ui/react-icons';
+import {
+  ArrowLeftIcon,
+  ExclamationTriangleIcon,
+  Pencil1Icon,
+  Share1Icon,
+  GroupIcon,
+  ChatBubbleIcon,
+  ActivityLogIcon,
+} from '@radix-ui/react-icons';
 import { childApi } from '../services/api';
 import { useAuthContext } from '../context/AuthContext';
 import { colors, spacing } from '../theme/tokens';
@@ -175,6 +183,18 @@ const ChildProfilePage = () => {
                     <Link to={`/children/${childId}/caregivers`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                       <GroupIcon />
                       Cuidadores
+                    </Link>
+                  </GumroadButton>
+                  <GumroadButton variant="secondary" size="sm" asChild>
+                    <Link to={`/children/${childId}/team-notes`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <ChatBubbleIcon />
+                      Notas da equipe
+                    </Link>
+                  </GumroadButton>
+                  <GumroadButton variant="secondary" size="sm" asChild>
+                    <Link to={`/children/${childId}/access-log`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <ActivityLogIcon />
+                      Histórico de acesso
                     </Link>
                   </GumroadButton>
                   <GumroadButton variant="secondary" size="sm" onClick={handleStartEdit}>

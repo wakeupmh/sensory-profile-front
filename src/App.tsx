@@ -24,6 +24,8 @@ import CaregiversPage from './pages/CaregiversPage';
 import CaregiverInviteAcceptPage from './pages/CaregiverInviteAcceptPage';
 import SharedChildrenList from './pages/SharedChildrenList';
 import SharedChildDetailPage from './pages/SharedChildDetailPage';
+import TeamNotesPage from './pages/TeamNotesPage';
+import AccessLogPage from './pages/AccessLogPage';
 import ConsolidatedReportPage from './pages/ConsolidatedReportPage';
 import ConsolidatedReportSharedView from './pages/ConsolidatedReportSharedView';
 import ProfessionalsList from './pages/ProfessionalsList';
@@ -69,6 +71,8 @@ function App() {
             <Route path="/children/:childId" element={<ProtectedRoute><ChildProfilePage /></ProtectedRoute>} />
             <Route path="/children/:childId/share" element={<ProtectedRoute><ShareChildPage /></ProtectedRoute>} />
             <Route path="/children/:childId/caregivers" element={<ProtectedRoute><CaregiversPage /></ProtectedRoute>} />
+            <Route path="/children/:childId/team-notes" element={<ProtectedRoute><TeamNotesPage /></ProtectedRoute>} />
+            <Route path="/children/:childId/access-log" element={<ProtectedRoute><AccessLogPage /></ProtectedRoute>} />
             <Route path="/logs" element={<ProtectedRoute><LogsPage /></ProtectedRoute>} />
             <Route path="/therapy" element={<ProtectedRoute><TherapyPage /></ProtectedRoute>} />
             <Route path="/medical" element={<ProtectedRoute><MedicalPage /></ProtectedRoute>} />

@@ -24,6 +24,7 @@ import LogsSummary from '../components/consolidated-report/LogsSummary';
 import TherapySection from '../components/consolidated-report/TherapySection';
 import MedicalSection from '../components/consolidated-report/MedicalSection';
 import DevelopmentSection from '../components/consolidated-report/DevelopmentSection';
+import MyNotesPanel from '../components/notes/MyNotesPanel';
 
 interface DomainData {
   assessments?: ConsolidatedAssessments;
@@ -220,6 +221,10 @@ export default function SharedChildDetailPage() {
               )}
             </Box>
           </Tabs.Root>
+
+          <Box style={{ marginTop: spacing.xl }}>
+            <MyNotesPanel childId={child.id} therapySessions={domainData.therapy?.recentSessions} />
+          </Box>
         </>
       ) : null}
     </Box>
