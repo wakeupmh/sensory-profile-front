@@ -12,6 +12,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import DomainStatsCard from '../components/child-profile/DomainStatsCard';
 import UnifiedTimeline from '../components/child-profile/UnifiedTimeline';
 import BehaviorInsightsPanel from '../components/behavior-insights/BehaviorInsightsPanel';
+import RemindersWidget from '../components/reminders/RemindersWidget';
 import ChildForm, { ChildFormValue } from '../components/sensory-profile/ChildForm';
 import type { ChildProfile } from '../types/child';
 
@@ -206,6 +207,13 @@ const ChildProfilePage = () => {
               </Box>
             )}
           </GumroadCard>
+
+          {/* Reminders */}
+          {childId && (
+            <Box style={{ marginBottom: spacing.lg }}>
+              <RemindersWidget childId={childId} />
+            </Box>
+          )}
 
           {/* Period selector */}
           <Box style={{ marginBottom: spacing.lg }}>
