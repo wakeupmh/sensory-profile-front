@@ -19,6 +19,9 @@ import EducationPage from './pages/EducationPage';
 import GoalsPage from './pages/GoalsPage';
 import GoalDetailPage from './pages/GoalDetailPage';
 import DocumentsPage from './pages/DocumentsPage';
+import ShareChildPage from './pages/ShareChildPage';
+import SharedChildrenList from './pages/SharedChildrenList';
+import SharedChildDetailPage from './pages/SharedChildDetailPage';
 import ConsolidatedReportPage from './pages/ConsolidatedReportPage';
 import ConsolidatedReportSharedView from './pages/ConsolidatedReportSharedView';
 import ProfessionalsList from './pages/ProfessionalsList';
@@ -62,6 +65,7 @@ function App() {
             <Route path="/anamnese/:id/edit" element={<ProtectedRoute><AnamneseForm /></ProtectedRoute>} />
             <Route path="/children" element={<ProtectedRoute><Children /></ProtectedRoute>} />
             <Route path="/children/:childId" element={<ProtectedRoute><ChildProfilePage /></ProtectedRoute>} />
+            <Route path="/children/:childId/share" element={<ProtectedRoute><ShareChildPage /></ProtectedRoute>} />
             <Route path="/logs" element={<ProtectedRoute><LogsPage /></ProtectedRoute>} />
             <Route path="/therapy" element={<ProtectedRoute><TherapyPage /></ProtectedRoute>} />
             <Route path="/medical" element={<ProtectedRoute><MedicalPage /></ProtectedRoute>} />
@@ -83,6 +87,8 @@ function App() {
             <Route path="/shared" element={<ProtectedRoute><SharedRecordsList /></ProtectedRoute>} />
             <Route path="/shared/anamnese/:id" element={<ProtectedRoute><SharedAnamneseView /></ProtectedRoute>} />
             <Route path="/shared/assessment/:id" element={<ProtectedRoute><SharedAssessmentView /></ProtectedRoute>} />
+            <Route path="/shared/children" element={<ProtectedRoute><SharedChildrenList /></ProtectedRoute>} />
+            <Route path="/shared/children/:childId" element={<ProtectedRoute><SharedChildDetailPage /></ProtectedRoute>} />
           </Route>
         </Routes>
       </BrowserRouter>

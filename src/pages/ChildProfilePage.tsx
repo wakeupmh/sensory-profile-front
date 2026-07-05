@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Box, Flex } from '@radix-ui/themes';
-import { ArrowLeftIcon, ExclamationTriangleIcon, Pencil1Icon } from '@radix-ui/react-icons';
+import { ArrowLeftIcon, ExclamationTriangleIcon, Pencil1Icon, Share1Icon } from '@radix-ui/react-icons';
 import { childApi } from '../services/api';
 import { useAuthContext } from '../context/AuthContext';
 import { colors, spacing } from '../theme/tokens';
@@ -162,10 +162,18 @@ const ChildProfilePage = () => {
                 )}
               </Box>
               {!isEditing && (
-                <GumroadButton variant="secondary" size="sm" onClick={handleStartEdit}>
-                  <Pencil1Icon />
-                  Editar
-                </GumroadButton>
+                <Flex gap="2">
+                  <GumroadButton variant="secondary" size="sm" asChild>
+                    <Link to={`/children/${childId}/share`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <Share1Icon />
+                      Compartilhar
+                    </Link>
+                  </GumroadButton>
+                  <GumroadButton variant="secondary" size="sm" onClick={handleStartEdit}>
+                    <Pencil1Icon />
+                    Editar
+                  </GumroadButton>
+                </Flex>
               )}
             </Flex>
 
