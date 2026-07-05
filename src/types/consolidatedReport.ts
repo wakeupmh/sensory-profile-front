@@ -150,11 +150,6 @@ export interface CreateShareResponse {
   shareUrl: string;
 }
 
-export interface GenerateAISummaryPayload {
-  childId: string;
-  periodDays?: number;
-}
-
 // Label maps
 
 export const THERAPY_TYPE_LABELS: Record<string, string> = {
