@@ -38,12 +38,14 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   text,
 }) => {
   return (
-    <Flex direction="column" align="center" justify="center" gap="3">
-      <SpinnerContainer size={size} color={color} />
-      {text && (
+    <Flex direction="column" align="center" justify="center" gap="3" role="status">
+      <SpinnerContainer size={size} color={color} aria-hidden="true" />
+      {text ? (
         <Text size="2" color="gray">
           {text}
         </Text>
+      ) : (
+        <span className="sr-only">Carregando…</span>
       )}
     </Flex>
   );

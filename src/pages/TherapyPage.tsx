@@ -196,7 +196,7 @@ export default function TherapyPage() {
           <LoadingSpinner size="large" text="Carregando sessões..." />
         </GumroadCard>
       ) : error ? (
-        <GumroadCard color="salmon" shadow="md" padding="lg">
+        <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
           <Flex align="center" gap="2">
             <ExclamationTriangleIcon />
             <GumroadText level="body-md" as="p">{error}</GumroadText>

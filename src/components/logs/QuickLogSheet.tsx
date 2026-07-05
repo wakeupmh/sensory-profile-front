@@ -198,6 +198,7 @@ export default function QuickLogSheet({
         {error && (
           <Box
             mt="3"
+            role="alert"
             style={{
               padding: `${spacing.sm} ${spacing.md}`,
               backgroundColor: colors['brand-salmon'],

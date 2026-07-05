@@ -198,7 +198,7 @@ const QuickSessionSheet: React.FC<QuickSessionSheetProps> = ({
 
             {/* Error */}
             {error && (
-              <div style={{
+              <div role="alert" style={{
                 padding: '10px 14px',
                 backgroundColor: colors['brand-salmon'],
                 border: `2px solid ${colors.ink}`,

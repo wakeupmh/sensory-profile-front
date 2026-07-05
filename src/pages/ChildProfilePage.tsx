@@ -144,7 +144,7 @@ const ChildProfilePage = () => {
 
       {/* Error */}
       {error && (
-        <GumroadCard color="salmon" shadow="md" padding="md" style={{ marginBottom: spacing.lg }}>
+        <GumroadCard role="alert" color="salmon" shadow="md" padding="md" style={{ marginBottom: spacing.lg }}>
           <Flex align="center" gap="2">
             <ExclamationTriangleIcon />
             <GumroadText level="body-md" as="p">{error}</GumroadText>

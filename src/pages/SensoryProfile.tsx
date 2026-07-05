@@ -549,7 +549,7 @@ const SensoryProfileForm: React.FC = () => {
           message="A avaliação que você está procurando não existe ou foi removida."
         />
       ) : error ? (
-        <GumroadCard color="salmon" shadow="md" padding="xl">
+        <GumroadCard role="alert" color="salmon" shadow="md" padding="xl">
           <Flex align="center" justify="center" direction="column" gap="3" py="9">
             <GumroadText level="body-md" as="p">{error}</GumroadText>
             <GumroadButton variant="secondary" size="md" onClick={() => navigate('/dashboard')}>

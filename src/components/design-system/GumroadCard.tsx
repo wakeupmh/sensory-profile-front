@@ -13,6 +13,8 @@ interface GumroadCardProps {
   className?: string;
   style?: React.CSSProperties;
   onClick?: () => void;
+  /** Papel ARIA opcional (ex.: "alert" para banners de erro) */
+  role?: React.AriaRole;
 }
 
 const colorMap: Record<CardColor, string> = {
@@ -41,7 +43,7 @@ const paddingMap: Record<string, string> = {
 };
 
 const GumroadCard = React.forwardRef<HTMLDivElement, GumroadCardProps>(
-  ({ children, color = 'white', shadow = 'md', padding = 'lg', className, style, onClick }, ref) => {
+  ({ children, color = 'white', shadow = 'md', padding = 'lg', className, style, onClick, role }, ref) => {
     const baseStyle: React.CSSProperties = {
       backgroundColor: colorMap[color],
       border: `2px solid ${colors.ink}`,
@@ -59,6 +61,7 @@ const GumroadCard = React.forwardRef<HTMLDivElement, GumroadCardProps>(
         className={className}
         style={baseStyle}
         onClick={onClick}
+        role={role}
         onMouseEnter={(e) => {
           if (shadow !== 'none') {
             (e.currentTarget as HTMLDivElement).style.transform = 'translate(-2px, -2px)';

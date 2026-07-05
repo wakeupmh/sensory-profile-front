@@ -115,7 +115,7 @@ const MilestonesPanel: React.FC<MilestonesPanelProps> = ({
             </GumroadButton>
 
             {error && (
-              <GumroadCard color="salmon" padding="md" style={{ marginBottom: '16px' }}>
+              <GumroadCard role="alert" color="salmon" padding="md" style={{ marginBottom: '16px' }}>
                 <GumroadText level="body-md">{error}</GumroadText>
               </GumroadCard>
             )}
