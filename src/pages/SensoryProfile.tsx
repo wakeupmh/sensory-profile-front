@@ -174,7 +174,7 @@ const SensoryProfileForm: React.FC = () => {
     };
 
     if (step === 0) {
-      if (!formData.child?.id) return fail('Selecione ou cadastre uma criança para continuar.');
+      if (!formData.child?.selectedChildId) return fail('Selecione ou cadastre uma criança para continuar.');
     } else if (step === 1) {
       if (!formData.examiner?.name) return fail('Nome do examinador é obrigatório');
       if (!formData.examiner?.profession) return fail('Cargo/Função do examinador é obrigatório');
@@ -467,10 +467,10 @@ const SensoryProfileForm: React.FC = () => {
             </GumroadCard>
             <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
               <ChildPicker
-                selectedId={formData.child?.id ?? null}
+                selectedId={formData.child?.selectedChildId ?? null}
                 onSelect={(child: ChildData) => {
                   updateFormData('child', {
-                    id: child.id,
+                    selectedChildId: child.id,
                     name: child.name,
                     birthDate: child.birthDate,
                     gender: child.gender ?? '',
