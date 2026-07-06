@@ -16,6 +16,7 @@ import type {
 } from '../../types/education';
 import { useAuthContext } from '../../context/AuthContext';
 import { usePanelCrud } from '../../hooks/usePanelCrud';
+import { useToast } from '../../context/ToastContext';
 
 interface EducationPlansPanelProps {
   isOpen: boolean;
@@ -31,6 +32,7 @@ const EducationPlansPanel: React.FC<EducationPlansPanelProps> = ({
   onMutate,
 }) => {
   const { getToken } = useAuthContext();
+  const toast = useToast();
 
   const fetchFn = useCallback(async () => {
     const token = await getToken();
@@ -41,7 +43,6 @@ const EducationPlansPanel: React.FC<EducationPlansPanelProps> = ({
     items: plans,
     editingItem: editingPlan,
     setEditingItem: setEditingPlan,
-    isLoading,
     setIsLoading,
     error,
     view,
@@ -58,6 +59,7 @@ const EducationPlansPanel: React.FC<EducationPlansPanelProps> = ({
       await fetchPlans();
       onMutate?.();
       setView('list');
+      toast.success('Plano adicionado');
     } finally {
       setIsLoading(false);
     }
@@ -73,6 +75,7 @@ const EducationPlansPanel: React.FC<EducationPlansPanelProps> = ({
       onMutate?.();
       setView('list');
       setEditingPlan(null);
+      toast.success('Alterações salvas');
     } finally {
       setIsLoading(false);
     }
@@ -85,6 +88,7 @@ const EducationPlansPanel: React.FC<EducationPlansPanelProps> = ({
       await educationPlanApi.delete(token, id);
       await fetchPlans();
       onMutate?.();
+      toast.success('Plano removido');
     } finally {
       setIsLoading(false);
     }

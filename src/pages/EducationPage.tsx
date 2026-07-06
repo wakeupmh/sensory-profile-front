@@ -18,9 +18,9 @@ import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadBadge from '../components/design-system/GumroadBadge';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
-import LoadingSpinner from '../components/LoadingSpinner';
 import EducationPlansPanel from '../components/education/EducationPlansPanel';
 import SchoolCommsPanel from '../components/education/SchoolCommsPanel';
+import { DomainListSkeleton } from '../components/skeletons/PageSkeletons';
 
 function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString('pt-BR', {
@@ -112,9 +112,7 @@ export default function EducationPage() {
 
       {/* Loading state */}
       {loading ? (
-        <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
-          <LoadingSpinner size="large" text="Carregando..." />
-        </GumroadCard>
+        <DomainListSkeleton />
       ) : error ? (
         <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
           <Flex align="center" gap="2" justify="between" wrap="wrap">

@@ -10,6 +10,7 @@ import ComorbidityCard from './ComorbidityCard';
 import ComorbidityForm from './ComorbidityForm';
 import type { Comorbidity, CreateComorbidityPayload } from '../../types/medical';
 import { usePanelCrud } from '../../hooks/usePanelCrud';
+import { useToast } from '../../context/ToastContext';
 
 interface ComorbiditiesPanelProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ const ComorbiditiesPanel: React.FC<ComorbiditiesPanelProps> = ({
   onEdit,
   onDelete,
 }) => {
+  const toast = useToast();
   const {
     editingItem: editingComorbidity,
     setEditingItem: setEditingComorbidity,
@@ -47,6 +49,7 @@ const ComorbiditiesPanel: React.FC<ComorbiditiesPanelProps> = ({
     try {
       await onAdd(payload as CreateComorbidityPayload);
       setView('list');
+      toast.success('Diagnóstico adicionado');
     } finally {
       setIsLoading(false);
     }
@@ -59,6 +62,7 @@ const ComorbiditiesPanel: React.FC<ComorbiditiesPanelProps> = ({
       await onEdit(editingComorbidity.id, payload as Omit<CreateComorbidityPayload, 'childId'>);
       setView('list');
       setEditingComorbidity(null);
+      toast.success('Alterações salvas');
     } finally {
       setIsLoading(false);
     }
@@ -70,6 +74,7 @@ const ComorbiditiesPanel: React.FC<ComorbiditiesPanelProps> = ({
     try {
       await onDelete(deletingId);
       setDeletingId(null);
+      toast.success('Diagnóstico removido');
     } finally {
       setIsLoading(false);
     }
@@ -129,10 +134,7 @@ const ComorbiditiesPanel: React.FC<ComorbiditiesPanelProps> = ({
                     <ComorbidityCard
                       key={c.id}
                       comorbidity={c}
-                      onEdit={(comorbidity) => {
-                        setEditingComorbidity(comorbidity);
-                        setView('edit');
-                      }}
+                      onEdit={startEdit}
                       onDelete={(id) => setDeletingId(id)}
                     />
                   )

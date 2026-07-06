@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@radix-ui/themes';
 import { colors, shadows, radii, typography } from '../../theme/tokens';
 
-type ButtonVariant = 'primary' | 'secondary' | 'on-color' | 'danger';
+type ButtonVariant = 'primary' | 'secondary' | 'on-color' | 'danger' | 'ghost';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface GumroadButtonProps {
@@ -44,6 +44,11 @@ const variantMap: Record<ButtonVariant, React.CSSProperties> = {
     color: colors.ink,
     border: `2px solid ${colors.ink}`,
   },
+  ghost: {
+    backgroundColor: 'transparent',
+    color: colors.ink,
+    border: '2px solid transparent',
+  },
 };
 
 const GumroadButton = React.forwardRef<HTMLButtonElement, GumroadButtonProps>(
@@ -52,7 +57,7 @@ const GumroadButton = React.forwardRef<HTMLButtonElement, GumroadButtonProps>(
       ...variantMap[variant],
       ...sizeMap[size],
       borderRadius: radii.pill,
-      boxShadow: disabled ? shadows.none : shadows.button,
+      boxShadow: disabled || variant === 'ghost' ? shadows.none : shadows.button,
       fontFamily: typography.button.font,
       fontWeight: typography.button.weight,
       lineHeight: typography.button.lh,

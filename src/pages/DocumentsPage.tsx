@@ -10,7 +10,7 @@ import { colors, spacing } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
-import LoadingSpinner from '../components/LoadingSpinner';
+import { DocumentsGridSkeleton } from '../components/skeletons/PageSkeletons';
 import UploadDropzone from '../components/documents/UploadDropzone';
 import DocumentUploadModal from '../components/documents/DocumentUploadModal';
 import DocumentCard from '../components/documents/DocumentCard';
@@ -111,9 +111,7 @@ export default function DocumentsPage() {
           </Box>
 
           {loading ? (
-            <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
-              <LoadingSpinner size="large" text="Carregando documentos..." />
-            </GumroadCard>
+            <DocumentsGridSkeleton />
           ) : error ? (
             <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
               <Flex align="center" gap="2">

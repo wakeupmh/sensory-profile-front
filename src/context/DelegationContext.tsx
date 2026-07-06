@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
-import { setDelegateChildId } from '../services/api';
+import { setDelegateChildId } from '../services/delegateChild';
 import type { DelegateChild } from '../types/caregivers';
 
 interface DelegationContextValue {

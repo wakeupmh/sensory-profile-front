@@ -16,6 +16,7 @@ import type {
 } from '../../types/development';
 import { MILESTONE_STATUS_LABELS } from '../../types/development';
 import { usePanelCrud } from '../../hooks/usePanelCrud';
+import { useToast } from '../../context/ToastContext';
 
 interface MilestonesPanelProps {
   isOpen: boolean;
@@ -32,6 +33,8 @@ const MilestonesPanel: React.FC<MilestonesPanelProps> = ({
   onMutate,
   getToken,
 }) => {
+  const toast = useToast();
+
   const fetchFn = useCallback(async () => {
     const token = await getToken();
     return milestoneApi.list(token, { childId: childId || undefined });
@@ -60,6 +63,7 @@ const MilestonesPanel: React.FC<MilestonesPanelProps> = ({
       await fetchMilestones();
       onMutate?.();
       setView('list');
+      toast.success('Marco adicionado');
     } finally {
       setIsLoading(false);
     }
@@ -75,6 +79,7 @@ const MilestonesPanel: React.FC<MilestonesPanelProps> = ({
       onMutate?.();
       setView('list');
       setEditingMilestone(null);
+      toast.success('Alterações salvas');
     } finally {
       setIsLoading(false);
     }
@@ -85,10 +90,11 @@ const MilestonesPanel: React.FC<MilestonesPanelProps> = ({
     setIsLoading(true);
     try {
       const token = await getToken();
-      await milestoneApi.remove(token, deletingId);
+      await milestoneApi.delete(token, deletingId);
       await fetchMilestones();
       onMutate?.();
       setDeletingId(null);
+      toast.success('Marco removido');
     } finally {
       setIsLoading(false);
     }

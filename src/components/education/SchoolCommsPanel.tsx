@@ -17,6 +17,7 @@ import type {
 } from '../../types/education';
 import { useAuthContext } from '../../context/AuthContext';
 import { usePanelCrud } from '../../hooks/usePanelCrud';
+import { useToast } from '../../context/ToastContext';
 
 interface SchoolCommsPanelProps {
   isOpen: boolean;
@@ -34,6 +35,7 @@ const SchoolCommsPanel: React.FC<SchoolCommsPanelProps> = ({
   onMutate,
 }) => {
   const { getToken } = useAuthContext();
+  const toast = useToast();
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
 
@@ -92,6 +94,7 @@ const SchoolCommsPanel: React.FC<SchoolCommsPanelProps> = ({
       await fetchComms();
       onMutate?.();
       setView('list');
+      toast.success('Comunicação adicionada');
     } finally {
       setIsLoading(false);
     }
@@ -107,6 +110,7 @@ const SchoolCommsPanel: React.FC<SchoolCommsPanelProps> = ({
       onMutate?.();
       setView('list');
       setEditingComm(null);
+      toast.success('Alterações salvas');
     } finally {
       setIsLoading(false);
     }
@@ -119,6 +123,7 @@ const SchoolCommsPanel: React.FC<SchoolCommsPanelProps> = ({
       await schoolCommApi.delete(token, id);
       await fetchComms();
       onMutate?.();
+      toast.success('Comunicação removida');
     } finally {
       setIsLoading(false);
     }

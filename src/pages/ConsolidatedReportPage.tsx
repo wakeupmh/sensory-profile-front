@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box } from '@radix-ui/themes';
 import { ArrowLeftIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
@@ -40,26 +40,29 @@ const ConsolidatedReportPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [periodDays, setPeriodDays] = useState(90);
 
-  useEffect(() => {
+  const fetchSummary = useCallback((period: number, signal?: AbortSignal) => {
     if (!childId) return;
-    const ctrl = new AbortController();
-    const run = async () => {
+    (async () => {
       try {
         setLoading(true);
         setError(null);
         const token = await getTokenRef.current();
-        const data = await consolidatedReportApi.getSummary(token, childId, periodDays, ctrl.signal);
-        if (!ctrl.signal.aborted) setSummary(data);
-      } catch (err) {
-        if (ctrl.signal.aborted) return;
+        const data = await consolidatedReportApi.getSummary(token, childId, period, signal);
+        if (!signal?.aborted) setSummary(data);
+      } catch {
+        if (signal?.aborted) return;
         setError('Erro ao carregar o relatório consolidado. Tente novamente.');
       } finally {
-        if (!ctrl.signal.aborted) setLoading(false);
+        if (!signal?.aborted) setLoading(false);
       }
-    };
-    run();
+    })();
+  }, [childId]);
+
+  useEffect(() => {
+    const ctrl = new AbortController();
+    fetchSummary(periodDays, ctrl.signal);
     return () => ctrl.abort();
-  }, [childId, periodDays]);
+  }, [fetchSummary, periodDays]);
 
   const handlePeriodChange = (period: number) => {
     setPeriodDays(period);

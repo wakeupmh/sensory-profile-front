@@ -17,6 +17,7 @@ import type {
 } from '../../types/development';
 import { COMMUNICATION_ENTRY_TYPE_LABELS } from '../../types/development';
 import { usePanelCrud } from '../../hooks/usePanelCrud';
+import { useToast } from '../../context/ToastContext';
 
 interface CommunicationLogsPanelProps {
   isOpen: boolean;
@@ -43,6 +44,8 @@ const CommunicationLogsPanel: React.FC<CommunicationLogsPanelProps> = ({
   onMutate,
   getToken,
 }) => {
+  const toast = useToast();
+
   const fetchFn = useCallback(async () => {
     const token = await getToken();
     const result = await communicationLogApi.list(token, { childId: childId || undefined, limit: 20, page: 1 });
@@ -71,6 +74,7 @@ const CommunicationLogsPanel: React.FC<CommunicationLogsPanelProps> = ({
       await fetchLogs();
       onMutate?.();
       setView('list');
+      toast.success('Registro adicionado');
     } finally {
       setIsLoading(false);
     }
@@ -86,6 +90,7 @@ const CommunicationLogsPanel: React.FC<CommunicationLogsPanelProps> = ({
       onMutate?.();
       setView('list');
       setEditingLog(null);
+      toast.success('Alterações salvas');
     } finally {
       setIsLoading(false);
     }
@@ -96,10 +101,11 @@ const CommunicationLogsPanel: React.FC<CommunicationLogsPanelProps> = ({
     setIsLoading(true);
     try {
       const token = await getToken();
-      await communicationLogApi.remove(token, deletingId);
+      await communicationLogApi.delete(token, deletingId);
       await fetchLogs();
       onMutate?.();
       setDeletingId(null);
+      toast.success('Registro removido');
     } finally {
       setIsLoading(false);
     }
