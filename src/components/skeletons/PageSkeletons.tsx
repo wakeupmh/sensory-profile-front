@@ -147,6 +147,53 @@ export const LogsListSkeleton: React.FC = () => (
   </Status>
 );
 
+/**
+ * Lista vertical genérica (sessões de terapia, medicamentos/consultas,
+ * planos educacionais, marcos do desenvolvimento). Sem barra de pílulas
+ * fake: essas páginas já renderizam ChildSelector/FilterPill reais acima
+ * da condicional de carregamento.
+ */
+export const DomainListSkeleton: React.FC<{ rows?: number }> = ({ rows = 4 }) => (
+  <Status>
+    <Flex direction="column" gap="3">
+      {Array.from({ length: rows }).map((_, i) => (
+        <CardShell key={i}>
+          <Flex justify="between" align="center" gap="3">
+            <Flex direction="column" gap="2" style={{ flex: 1 }}>
+              <GumroadSkeleton variant="text" height="18px" width="40%" />
+              <GumroadSkeleton variant="text" width="65%" />
+            </Flex>
+            <GumroadSkeleton height="32px" width="80px" />
+          </Flex>
+        </CardShell>
+      ))}
+    </Flex>
+  </Status>
+);
+
+/** Grade de cartões compactos (biblioteca de documentos). */
+export const DocumentsGridSkeleton: React.FC = () => (
+  <Status>
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+        gap: '16px',
+      }}
+    >
+      {Array.from({ length: 8 }).map((_, i) => (
+        <GumroadCard key={i} color="white" shadow="sm" padding="md">
+          <Flex direction="column" gap="2" align="center">
+            <GumroadSkeleton variant="circle" width="32px" />
+            <GumroadSkeleton variant="text" width="80%" />
+            <GumroadSkeleton variant="text" width="50%" />
+          </Flex>
+        </GumroadCard>
+      ))}
+    </div>
+  </Status>
+);
+
 export const GoalsListSkeleton: React.FC = () => (
   <Status>
     <Flex direction="column" gap="4">
