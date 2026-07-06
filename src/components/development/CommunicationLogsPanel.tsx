@@ -101,7 +101,7 @@ const CommunicationLogsPanel: React.FC<CommunicationLogsPanelProps> = ({
     setIsLoading(true);
     try {
       const token = await getToken();
-      await communicationLogApi.remove(token, deletingId);
+      await communicationLogApi.delete(token, deletingId);
       await fetchLogs();
       onMutate?.();
       setDeletingId(null);

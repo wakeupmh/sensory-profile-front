@@ -109,7 +109,6 @@ export default function SignIn() {
                 password_input_placeholder: 'Sua senha',
                 button_label: 'Entrar',
                 link_text: 'Não tem uma conta? Cadastre-se',
-                forgot_password: 'Esqueceu sua senha?',
               },
               sign_up: {
                 email_label: 'Email',
@@ -123,7 +122,10 @@ export default function SignIn() {
                 email_label: 'Email',
                 email_input_placeholder: 'Seu endereço de e-mail',
                 button_label: 'Enviar instruções',
-                link_text: 'Lembrou a senha? Entre',
+                // Exibido na tela de login como o link "esqueci minha senha"
+                // (é assim que a lib nomeia essa variável, não é sobre a
+                // própria tela de recuperação)
+                link_text: 'Esqueceu sua senha?',
               },
             },
           }}

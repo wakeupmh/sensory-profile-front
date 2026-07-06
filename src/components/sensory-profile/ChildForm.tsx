@@ -12,7 +12,7 @@ export interface ChildFormValue {
 
 interface ChildFormProps {
   value: ChildFormValue;
-  onChange: (field: string, value: string) => void;
+  onChange: (field: keyof ChildFormValue, value: string) => void;
   disabled?: boolean;
 }
 

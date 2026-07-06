@@ -134,10 +134,7 @@ const ComorbiditiesPanel: React.FC<ComorbiditiesPanelProps> = ({
                     <ComorbidityCard
                       key={c.id}
                       comorbidity={c}
-                      onEdit={(comorbidity) => {
-                        setEditingComorbidity(comorbidity);
-                        setView('edit');
-                      }}
+                      onEdit={startEdit}
                       onDelete={(id) => setDeletingId(id)}
                     />
                   )

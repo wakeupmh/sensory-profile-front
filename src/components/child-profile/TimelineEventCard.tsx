@@ -1,7 +1,7 @@
 import React from 'react';
-import { Flex, Box } from '@radix-ui/themes';
-import { colors, spacing, radii } from '../../theme/tokens';
-import GumroadHeading, { GumroadText } from '../design-system/GumroadHeading';
+import { Flex } from '@radix-ui/themes';
+import { colors, spacing, radii, applyTypography } from '../../theme/tokens';
+import { GumroadText } from '../design-system/GumroadHeading';
 import type { TimelineEvent } from '../../types/child';
 import { TIMELINE_TYPE_LABELS, TIMELINE_TYPE_COLORS } from '../../types/child';
 
@@ -65,9 +65,11 @@ const TimelineEventCard: React.FC<TimelineEventCardProps> = ({ event }) => {
           </GumroadText>
         </Flex>
 
-        <GumroadHeading level="title-sm" as="p" style={{ fontWeight: 700, wordBreak: 'break-word' }}>
+        {/* Não é um GumroadHeading: cada card da timeline não é uma seção —
+            evita poluir a navegação por headings dos leitores de tela */}
+        <p style={{ ...applyTypography('title-sm'), fontWeight: 700, wordBreak: 'break-word', margin: 0 }}>
           {event.title}
-        </GumroadHeading>
+        </p>
 
         {event.subtitle && (
           <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, wordBreak: 'break-word' }}>

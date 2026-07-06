@@ -43,7 +43,6 @@ const EducationPlansPanel: React.FC<EducationPlansPanelProps> = ({
     items: plans,
     editingItem: editingPlan,
     setEditingItem: setEditingPlan,
-    isLoading,
     setIsLoading,
     error,
     view,

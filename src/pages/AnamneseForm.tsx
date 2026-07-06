@@ -54,7 +54,7 @@ const AnamneseForm: React.FC = () => {
 
   const { loadDraft, clearDraft, saveOnStepChange } = useDraftPersistence({
     formType: 'anamnese',
-    formData: formData as Record<string, unknown>,
+    formData: formData as unknown as Record<string, unknown>,
     currentStep,
     enabled: isNewMode,
   });

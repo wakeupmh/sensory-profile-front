@@ -90,7 +90,7 @@ const MilestonesPanel: React.FC<MilestonesPanelProps> = ({
     setIsLoading(true);
     try {
       const token = await getToken();
-      await milestoneApi.remove(token, deletingId);
+      await milestoneApi.delete(token, deletingId);
       await fetchMilestones();
       onMutate?.();
       setDeletingId(null);
