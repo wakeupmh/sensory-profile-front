@@ -6,6 +6,7 @@ import GumroadCard from '../design-system/GumroadCard';
 import GumroadHeading from '../design-system/GumroadHeading';
 import { GumroadText } from '../design-system/GumroadHeading';
 import GumroadModal from '../design-system/GumroadModal';
+import { useToast } from '../../context/ToastContext';
 import AppointmentCard from './AppointmentCard';
 import AppointmentForm from './AppointmentForm';
 import type {
@@ -35,6 +36,7 @@ const AppointmentsPanel: React.FC<AppointmentsPanelProps> = ({
   onEdit,
   onDelete,
 }) => {
+  const toast = useToast();
   const [view, setView] = useState<PanelView>('list');
   const [editingAppointment, setEditingAppointment] = useState<MedicalAppointmentSummary | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -53,6 +55,7 @@ const AppointmentsPanel: React.FC<AppointmentsPanelProps> = ({
     try {
       await onAdd(payload as CreateAppointmentPayload);
       setView('list');
+      toast.success('Consulta adicionada');
     } finally {
       setIsLoading(false);
     }
@@ -65,6 +68,7 @@ const AppointmentsPanel: React.FC<AppointmentsPanelProps> = ({
       await onEdit(editingAppointment.id, payload as Omit<CreateAppointmentPayload, 'childId'>);
       setView('list');
       setEditingAppointment(null);
+      toast.success('Alterações salvas');
     } finally {
       setIsLoading(false);
     }
@@ -76,6 +80,7 @@ const AppointmentsPanel: React.FC<AppointmentsPanelProps> = ({
     try {
       await onDelete(deletingId);
       setDeletingId(null);
+      toast.success('Consulta removida');
     } finally {
       setIsLoading(false);
     }

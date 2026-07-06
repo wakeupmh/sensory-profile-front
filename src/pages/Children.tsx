@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Box, Flex } from '@radix-ui/themes';
+import { Box, Flex, AlertDialog } from '@radix-ui/themes';
 import { Link } from 'react-router-dom';
 import { PlusIcon, Pencil1Icon, TrashIcon, InfoCircledIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { childApi, ChildData } from '../services/api';
@@ -194,11 +194,6 @@ const Children = () => {
   };
 
   const handleDelete = async (child: ChildData) => {
-    const confirmed = window.confirm(
-      `Excluir ${child.name}? Esta ação não pode ser desfeita.`
-    );
-    if (!confirmed) return;
-
     setDeleteLoading(child.id);
     try {
       const token = await getTokenRef.current();
@@ -207,7 +202,7 @@ const Children = () => {
       toast.success('Criança excluída');
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.status === 409) {
-        alert('Esta criança possui avaliações e não pode ser excluída.');
+        toast.error('Esta criança possui avaliações e não pode ser excluída.');
       } else {
         setError('Erro ao excluir criança. Por favor, tente novamente.');
       }
@@ -369,16 +364,35 @@ const Children = () => {
                           <Pencil1Icon />
                           Editar
                         </GumroadButton>
-                        <GumroadButton
-                          variant="danger"
-                          size="sm"
-                          onClick={() => handleDelete(child)}
-                          disabled={deleteLoading === child.id}
-                          style={{ flex: 1 }}
-                        >
-                          <TrashIcon />
-                          {deleteLoading === child.id ? 'Excluindo...' : 'Excluir'}
-                        </GumroadButton>
+                        <AlertDialog.Root>
+                          <AlertDialog.Trigger>
+                            <GumroadButton
+                              variant="danger"
+                              size="sm"
+                              disabled={deleteLoading === child.id}
+                              style={{ flex: 1 }}
+                            >
+                              <TrashIcon />
+                              {deleteLoading === child.id ? 'Excluindo...' : 'Excluir'}
+                            </GumroadButton>
+                          </AlertDialog.Trigger>
+                          <AlertDialog.Content size="2">
+                            <AlertDialog.Title>Excluir criança</AlertDialog.Title>
+                            <AlertDialog.Description size="2">
+                              Excluir {child.name}? Esta ação não pode ser desfeita.
+                            </AlertDialog.Description>
+                            <Flex gap="3" mt="4" justify="end">
+                              <AlertDialog.Cancel>
+                                <GumroadButton variant="secondary" size="sm">Cancelar</GumroadButton>
+                              </AlertDialog.Cancel>
+                              <AlertDialog.Action>
+                                <GumroadButton variant="danger" size="sm" onClick={() => handleDelete(child)}>
+                                  Excluir
+                                </GumroadButton>
+                              </AlertDialog.Action>
+                            </Flex>
+                          </AlertDialog.Content>
+                        </AlertDialog.Root>
                       </Flex>
                     </>
                   )}
