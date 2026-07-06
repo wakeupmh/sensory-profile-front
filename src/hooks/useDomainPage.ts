@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import axios from 'axios';
 import { childApi, type ChildData } from '../services/api';
 import { useAuthContext } from '../context/AuthContext';
 
@@ -18,8 +19,8 @@ export function useDomainPage() {
       if (!token) return;
       const list = await childApi.list(token);
       setChildren(list);
-    } catch (err: any) {
-      if (err.response?.status === 401) {
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.status === 401) {
         window.location.href = '/sign-in';
       }
     }

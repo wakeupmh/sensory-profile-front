@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios';
+import { getDelegateChildId } from './delegateChild';
 
 const baseURL = import.meta.env.VITE_API_URL;
 if (!baseURL && import.meta.env.PROD) {
@@ -28,14 +29,10 @@ api.interceptors.response.use(
 // ─── Caregiver delegation (SP-21) ────────────────────────────────────
 // When a caregiver is "acting as" one of their delegated children, every
 // request must carry X-Delegate-Child-Id so the backend treats it as if
-// it came from that child's owner. Set via DelegationContext.
-let delegateChildId: string | null = null;
-
-export function setDelegateChildId(childId: string | null): void {
-  delegateChildId = childId;
-}
-
+// it came from that child's owner. State lives in ./delegateChild, set
+// via DelegationContext.
 api.interceptors.request.use((config) => {
+  const delegateChildId = getDelegateChildId();
   if (delegateChildId) {
     config.headers = config.headers ?? {};
     config.headers['X-Delegate-Child-Id'] = delegateChildId;
