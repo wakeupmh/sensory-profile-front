@@ -9,9 +9,11 @@ import {
   GroupIcon,
   ChatBubbleIcon,
   ActivityLogIcon,
+  DownloadIcon,
 } from '@radix-ui/react-icons';
-import { childApi } from '../services/api';
+import { childApi, dataExportApi } from '../services/api';
 import { useAuthContext } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { colors, spacing } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
@@ -51,6 +53,7 @@ const ChildProfilePage = () => {
   const { childId } = useParams<{ childId: string }>();
   const navigate = useNavigate();
   const { getToken } = useAuthContext();
+  const toast = useToast();
   const getTokenRef = useRef(getToken);
   getTokenRef.current = getToken;
 
@@ -59,6 +62,22 @@ const ChildProfilePage = () => {
   const [error, setError] = useState<string | null>(null);
   const [periodDays, setPeriodDays] = useState(30);
   const [briefModalOpen, setBriefModalOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportData = async () => {
+    if (!childId) return;
+    setExporting(true);
+    try {
+      const token = await getTokenRef.current();
+      const { downloadUrl } = await dataExportApi.request(token, childId);
+      window.open(downloadUrl, '_blank', 'noopener,noreferrer');
+      toast.success('Exportação pronta', 'O download foi aberto em uma nova aba');
+    } catch {
+      toast.error('Não foi possível gerar a exportação. Tente novamente.');
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const [isEditing, setIsEditing] = useState(false);
   const [editFormValue, setEditFormValue] = useState<ChildFormValue>({ name: '', birthDate: '', gender: '', nationalIdentity: '', otherInfo: '' });
@@ -356,6 +375,10 @@ const ChildProfilePage = () => {
             </GumroadButton>
             <GumroadButton variant="secondary" size="md" onClick={() => setBriefModalOpen(true)}>
               🩺 Preparar consulta
+            </GumroadButton>
+            <GumroadButton variant="secondary" size="md" onClick={handleExportData} disabled={exporting}>
+              <DownloadIcon />
+              {exporting ? 'Gerando exportação...' : 'Exportar meus dados'}
             </GumroadButton>
           </Flex>
 

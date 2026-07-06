@@ -1,10 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
-import { ExclamationTriangleIcon, InfoCircledIcon, PlusIcon } from '@radix-ui/react-icons';
+import { ExclamationTriangleIcon, InfoCircledIcon, PlusIcon, UpdateIcon } from '@radix-ui/react-icons';
 import { logApi } from '../services/api';
 import type { CreateLogPayload, DailyLog, LogType } from '../types/logs';
 import { useAuthContext } from '../context/AuthContext';
 import { useDomainPage } from '../hooks/useDomainPage';
+import { useOfflineLogQueue } from '../hooks/useOfflineLogQueue';
+import { queueLog, isNetworkError } from '../services/offlineLogQueue';
+import { useToast } from '../context/ToastContext';
 import { ChildSelector } from '../components/domain/ChildSelector';
 import { FilterPill } from '../components/domain/FilterPill';
 import { colors, spacing, shadows } from '../theme/tokens';
@@ -57,6 +60,8 @@ function formatOccurredAt(iso: string): string {
 export default function LogsPage() {
   const { isLoaded, session } = useAuthContext();
   const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
+  const { queuedCount, syncing, flush } = useOfflineLogQueue();
+  const toast = useToast();
 
   const [logs, setLogs] = useState<DailyLog[]>([]);
   const [filter, setFilter] = useState<FilterType>('all');
@@ -88,10 +93,32 @@ export default function LogsPage() {
     }
   }, [fetchLogs, isLoaded, session]);
 
+  // Registros pendentes acabaram de sincronizar — atualiza a lista para
+  // mostrá-los sem exigir um refresh manual.
+  const previousQueuedCount = useRef(queuedCount);
+  useEffect(() => {
+    if (previousQueuedCount.current > queuedCount) {
+      fetchLogs();
+    }
+    previousQueuedCount.current = queuedCount;
+  }, [queuedCount, fetchLogs]);
+
   const handleCreateLog = async (payload: CreateLogPayload) => {
     const token = await getTokenRef.current();
-    await logApi.createLog(token, payload);
-    await fetchLogs();
+    try {
+      await logApi.createLog(token, payload);
+      await fetchLogs();
+    } catch (err) {
+      // Sem conexão: guarda localmente em vez de perder o registro. Não
+      // relança o erro — para o usuário, o registro "foi salvo" (fica
+      // pendente de sincronização, não bloqueia o fluxo).
+      if (isNetworkError(err)) {
+        queueLog(payload);
+        toast.info('Sem conexão — registro salvo no aparelho e será enviado ao reconectar');
+        return;
+      }
+      throw err;
+    }
   };
 
   return (
@@ -112,6 +139,22 @@ export default function LogsPage() {
           </GumroadText>
         </Box>
       </Flex>
+
+      {queuedCount > 0 && (
+        <GumroadCard color="yellow" shadow="sm" padding="md" style={{ marginBottom: spacing.md }}>
+          <Flex align="center" justify="between" gap="3" wrap="wrap">
+            <GumroadText level="body-sm" as="p">
+              {queuedCount === 1
+                ? '1 registro pendente de sincronização'
+                : `${queuedCount} registros pendentes de sincronização`}
+            </GumroadText>
+            <GumroadButton variant="secondary" size="sm" onClick={flush} disabled={syncing}>
+              <UpdateIcon />
+              {syncing ? 'Sincronizando...' : 'Sincronizar agora'}
+            </GumroadButton>
+          </Flex>
+        </GumroadCard>
+      )}
 
       <ChildSelector
         children={children}

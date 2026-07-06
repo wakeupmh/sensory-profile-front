@@ -1032,6 +1032,14 @@ export const accessLogApi = {
     authRequest<PaginatedAccessLogs>('get', token, `/api/children/${childId}/access-logs`, undefined, { params }),
 };
 
+// Owner-side: full data export (LGPD, direito à portabilidade dos dados).
+import type { DataExportResponse } from '../types/dataExport';
+
+export const dataExportApi = {
+  request: (token: string | null, childId: string): Promise<DataExportResponse> =>
+    authRequest<any>('get', token, `/api/children/${childId}/export`).then(unwrap<DataExportResponse>),
+};
+
 export default api;
 
 
