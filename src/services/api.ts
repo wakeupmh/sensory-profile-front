@@ -280,7 +280,7 @@ export const therapistApi = {
 };
 
 import type {
-  Medication, Comorbidity, MedicalAppointment, MedicalAppointmentSummary,
+  Medication, Comorbidity, MedicalAppointment,
   CreateMedicationPayload, UpdateMedicationPayload, MedicationQueryParams,
   CreateComorbidityPayload, UpdateComorbidityPayload,
   CreateAppointmentPayload, UpdateAppointmentPayload,
@@ -387,7 +387,7 @@ export const appointmentApi = {
 };
 
 import type {
-  DevelopmentalMilestone, CommunicationLog, CommunicationLogSummary,
+  DevelopmentalMilestone, CommunicationLog,
   CreateMilestonePayload, UpdateMilestonePayload, MilestoneQueryParams,
   CreateCommunicationLogPayload, UpdateCommunicationLogPayload,
   CommunicationLogQueryParams, PaginatedCommunicationLogs,

@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Box, Card, Flex, Heading, Text } from '@radix-ui/themes';
+import { Card, Flex, Heading, Text } from '@radix-ui/themes';
 import { listInstruments } from '../../instruments';
 import { colors, radii, shadows } from '../../theme/tokens';
 

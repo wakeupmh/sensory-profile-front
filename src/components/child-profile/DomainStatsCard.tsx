@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Flex } from '@radix-ui/themes';
-import { colors, radii, shadows } from '../../theme/tokens';
-import GumroadHeading, { GumroadText } from '../design-system/GumroadHeading';
+import { colors, radii, shadows, applyTypography } from '../../theme/tokens';
+import { GumroadText } from '../design-system/GumroadHeading';
 
 interface DomainStatsCardProps {
   label: string;
@@ -36,9 +36,11 @@ const DomainStatsCard: React.FC<DomainStatsCardProps> = ({ label, count, icon, h
           {label}
         </GumroadText>
       </Flex>
-      <GumroadHeading level="display-sm" as="p" style={{ color: colors.ink, lineHeight: 1 }}>
+      {/* Não é um GumroadHeading: é uma contagem, não um título de seção —
+          evita poluir a navegação por headings dos leitores de tela */}
+      <p style={{ ...applyTypography('display-sm'), color: colors.ink, lineHeight: 1, margin: 0 }}>
         {count}
-      </GumroadHeading>
+      </p>
     </Link>
   );
 };
