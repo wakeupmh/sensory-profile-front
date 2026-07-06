@@ -9,6 +9,7 @@ import GumroadModal from '../design-system/GumroadModal';
 import TherapistCard from './TherapistCard';
 import TherapistForm from './TherapistForm';
 import type { Therapist, CreateTherapistPayload } from '../../types/therapy';
+import { useToast } from '../../context/ToastContext';
 
 interface TherapistsPanelProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ const TherapistsPanel: React.FC<TherapistsPanelProps> = ({
   onUpdate,
   onDelete,
 }) => {
+  const toast = useToast();
   const [view, setView] = useState<PanelView>('list');
   const [editingTherapist, setEditingTherapist] = useState<Therapist | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -47,6 +49,7 @@ const TherapistsPanel: React.FC<TherapistsPanelProps> = ({
     try {
       await onAdd(payload);
       setView('list');
+      toast.success('Terapeuta adicionado');
     } finally {
       setIsLoading(false);
     }
@@ -59,6 +62,7 @@ const TherapistsPanel: React.FC<TherapistsPanelProps> = ({
       await onUpdate(editingTherapist.id, payload);
       setEditingTherapist(null);
       setView('list');
+      toast.success('Alterações salvas');
     } finally {
       setIsLoading(false);
     }
@@ -70,6 +74,7 @@ const TherapistsPanel: React.FC<TherapistsPanelProps> = ({
     try {
       await onDelete(deletingId);
       setDeletingId(null);
+      toast.success('Terapeuta removido');
     } finally {
       setIsLoading(false);
     }
