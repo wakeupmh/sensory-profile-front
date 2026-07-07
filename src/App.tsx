@@ -29,6 +29,7 @@ const GoalDetailPage = lazy(() => import('./pages/GoalDetailPage'));
 const DocumentsPage = lazy(() => import('./pages/DocumentsPage'));
 const MonthlyRecapPage = lazy(() => import('./pages/MonthlyRecapPage'));
 const FichaCriancaPage = lazy(() => import('./pages/FichaCriancaPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const ShareChildPage = lazy(() => import('./pages/ShareChildPage'));
 const CaregiversPage = lazy(() => import('./pages/CaregiversPage'));
 const CaregiverInviteAcceptPage = lazy(() => import('./pages/CaregiverInviteAcceptPage'));
@@ -97,6 +98,7 @@ function App() {
               <Route path="/goals/:id" element={<ProtectedRoute><GoalDetailPage /></ProtectedRoute>} />
               <Route path="/documents" element={<ProtectedRoute><DocumentsPage /></ProtectedRoute>} />
               <Route path="/monthly-recap" element={<ProtectedRoute><MonthlyRecapPage /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="/consolidated/:childId" element={<ProtectedRoute><ConsolidatedReportPage /></ProtectedRoute>} />
 
               {/* Professional directory (owner manages people who can be granted access) */}

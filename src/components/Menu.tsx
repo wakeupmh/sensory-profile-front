@@ -21,6 +21,7 @@ import {
   ArchiveIcon,
   GroupIcon,
   CalendarIcon,
+  GearIcon,
 } from '@radix-ui/react-icons';
 import { colors, typography, zIndex, shadows } from '../theme/tokens';
 import GumroadButton from './design-system/GumroadButton';
@@ -49,6 +50,7 @@ const SECONDARY: NavItem[] = [
   { path: '/shared', match: '/shared', label: 'Compartilhados comigo', icon: EyeOpenIcon },
   { path: '/shared/children', match: '/shared/children', label: 'Crianças compartilhadas', icon: GroupIcon },
   { path: '/invite/accept', match: '/invite', label: 'Aceitar convite', icon: EnvelopeOpenIcon },
+  { path: '/settings', match: '/settings', label: 'Configurações', icon: GearIcon },
 ];
 
 const Menu: React.FC = () => {

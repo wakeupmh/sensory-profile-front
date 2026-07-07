@@ -19,6 +19,7 @@ import {
   TargetIcon,
   ArchiveIcon,
   CalendarIcon,
+  GearIcon,
 } from '@radix-ui/react-icons';
 import { colors, zIndex, typography, shadows } from '../theme/tokens';
 
@@ -49,6 +50,7 @@ const BottomNav: React.FC = () => {
     { path: '/monthly-recap', label: 'Resumo do mês', icon: CalendarIcon },
     { path: '/assessment/new', label: 'Nova Avaliação', icon: PlusIcon },
     { path: '/anamneses', label: 'Anamneses', icon: ClipboardIcon },
+    { path: '/settings', label: 'Configurações', icon: GearIcon },
   ];
 
   const handleSignOut = () => signOut().then(() => navigate('/sign-in', { replace: true }));
