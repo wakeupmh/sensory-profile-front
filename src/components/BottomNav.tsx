@@ -18,6 +18,7 @@ import {
   Cross2Icon,
   TargetIcon,
   ArchiveIcon,
+  CalendarIcon,
 } from '@radix-ui/react-icons';
 import { colors, zIndex, typography, shadows } from '../theme/tokens';
 
@@ -45,6 +46,7 @@ const BottomNav: React.FC = () => {
     { path: '/education', label: 'Educação', icon: ReaderIcon },
     { path: '/goals', label: 'Metas', icon: TargetIcon },
     { path: '/documents', label: 'Documentos', icon: ArchiveIcon },
+    { path: '/monthly-recap', label: 'Resumo do mês', icon: CalendarIcon },
     { path: '/assessment/new', label: 'Nova Avaliação', icon: PlusIcon },
     { path: '/anamneses', label: 'Anamneses', icon: ClipboardIcon },
   ];
