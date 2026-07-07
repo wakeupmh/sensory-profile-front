@@ -142,6 +142,9 @@ export interface ChildData {
   gender?: 'male' | 'female' | 'other';
   nationalIdentity?: string;
   otherInfo?: string;
+  sensoryTriggers?: string | null;
+  calmingStrategies?: string | null;
+  emergencyContact?: string | null;
   createdAt: string;
   updatedAt: string;
 }

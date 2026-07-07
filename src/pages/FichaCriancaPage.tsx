@@ -12,26 +12,16 @@ import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
 import LoadingSpinner from '../components/LoadingSpinner';
 
-interface FichaNotes {
-  triggers: string;
+interface CareNotes {
+  sensoryTriggers: string;
   calmingStrategies: string;
   emergencyContact: string;
 }
 
-const EMPTY_NOTES: FichaNotes = { triggers: '', calmingStrategies: '', emergencyContact: '' };
+const EMPTY_NOTES: CareNotes = { sensoryTriggers: '', calmingStrategies: '', emergencyContact: '' };
+const SAVE_DEBOUNCE_MS = 600;
 
-function notesKey(childId: string): string {
-  return `ficha-crianca-notes-${childId}`;
-}
-
-function loadNotes(childId: string): FichaNotes {
-  try {
-    const raw = localStorage.getItem(notesKey(childId));
-    return raw ? { ...EMPTY_NOTES, ...JSON.parse(raw) } : EMPTY_NOTES;
-  } catch {
-    return EMPTY_NOTES;
-  }
-}
+type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 function calculateAge(birthDate: string): string {
   const birth = new Date(`${birthDate}T00:00:00`);
@@ -71,6 +61,13 @@ const printLabelStyle: React.CSSProperties = {
   display: 'block',
 };
 
+const SAVE_STATUS_LABELS: Record<SaveStatus, string> = {
+  idle: '',
+  saving: 'Salvando...',
+  saved: 'Sincronizado entre dispositivos',
+  error: 'Não foi possível salvar. Tente novamente.',
+};
+
 export default function FichaCriancaPage() {
   const { childId } = useParams<{ childId: string }>();
   const navigate = useNavigate();
@@ -81,14 +78,11 @@ export default function FichaCriancaPage() {
   const [child, setChild] = useState<ChildData | null>(null);
   const [comorbidities, setComorbidities] = useState<Comorbidity[]>([]);
   const [medications, setMedications] = useState<Medication[]>([]);
-  const [notes, setNotes] = useState<FichaNotes>(EMPTY_NOTES);
+  const [notes, setNotes] = useState<CareNotes>(EMPTY_NOTES);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!childId) return;
-    setNotes(loadNotes(childId));
-  }, [childId]);
+  const saveTimeoutRef = useRef<number | undefined>(undefined);
 
   const fetchData = useCallback(async () => {
     if (!childId) return;
@@ -104,6 +98,11 @@ export default function FichaCriancaPage() {
       setChild(childData);
       setComorbidities(comorbidityList);
       setMedications(medicationList);
+      setNotes({
+        sensoryTriggers: childData.sensoryTriggers ?? '',
+        calmingStrategies: childData.calmingStrategies ?? '',
+        emergencyContact: childData.emergencyContact ?? '',
+      });
     } catch {
       setError('Erro ao carregar a ficha. Por favor, tente novamente.');
     } finally {
@@ -115,15 +114,29 @@ export default function FichaCriancaPage() {
     fetchData();
   }, [fetchData]);
 
-  const updateNotes = (patch: Partial<FichaNotes>) => {
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) window.clearTimeout(saveTimeoutRef.current);
+    };
+  }, []);
+
+  const saveNotes = useCallback(async (snapshot: CareNotes) => {
     if (!childId) return;
+    setSaveStatus('saving');
+    try {
+      const token = await getTokenRef.current();
+      await childApi.update(childId, snapshot, token);
+      setSaveStatus('saved');
+    } catch {
+      setSaveStatus('error');
+    }
+  }, [childId]);
+
+  const updateNotes = (patch: Partial<CareNotes>) => {
     setNotes((prev) => {
       const next = { ...prev, ...patch };
-      try {
-        localStorage.setItem(notesKey(childId), JSON.stringify(next));
-      } catch {
-        // localStorage indisponível (modo privado, quota) — mantém em memória só nesta sessão
-      }
+      if (saveTimeoutRef.current) window.clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = window.setTimeout(() => saveNotes(next), SAVE_DEBOUNCE_MS);
       return next;
     });
   };
@@ -246,8 +259,8 @@ export default function FichaCriancaPage() {
           <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.md }}>
             <span style={printLabelStyle}>Gatilhos sensoriais conhecidos</span>
             <textarea
-              value={notes.triggers}
-              onChange={(e) => updateNotes({ triggers: e.target.value })}
+              value={notes.sensoryTriggers}
+              onChange={(e) => updateNotes({ sensoryTriggers: e.target.value })}
               placeholder="Ex.: barulhos altos e inesperados, luzes fluorescentes, aglomerações..."
               style={textareaStyle}
               aria-label="Gatilhos sensoriais conhecidos"
@@ -276,9 +289,21 @@ export default function FichaCriancaPage() {
             />
           </GumroadCard>
 
-          <GumroadText level="caption" as="p" style={{ opacity: 0.6, marginTop: spacing.sm }} className="screen-only">
-            Os campos de texto acima são salvos apenas neste aparelho (não sincronizam entre dispositivos). Imprima ou exporte após preencher.
-          </GumroadText>
+          {saveStatus !== 'idle' && (
+            <p
+              role="status"
+              className="screen-only"
+              style={{
+                fontFamily: fonts.display,
+                fontSize: '12px',
+                opacity: 0.6,
+                marginTop: spacing.sm,
+                color: saveStatus === 'error' ? colors.error : colors.ink,
+              }}
+            >
+              {SAVE_STATUS_LABELS[saveStatus]}
+            </p>
+          )}
 
           <GumroadText level="caption" as="p" style={{ opacity: 0.5, marginTop: spacing.md }}>
             Gerado em {new Date().toLocaleString('pt-BR')}
