@@ -181,7 +181,14 @@ export const childApi = {
     })),
 };
 
-import type { CreateLogPayload, DailyLog, LogType } from '../types/logs';
+import type {
+  CreateLogPayload,
+  DailyLog,
+  LogType,
+  LogAttachment,
+  CreateLogAttachmentPayload,
+  CreateLogAttachmentResponse,
+} from '../types/logs';
 
 export interface PaginatedLogs {
   data: DailyLog[];
@@ -203,17 +210,59 @@ export const logApi = {
   getLogs: (token: string | null, params?: LogQueryParams): Promise<PaginatedLogs> =>
     authRequest<PaginatedLogs>('get', token, '/api/logs', undefined, { params }),
 
-  getLog: (token: string | null, id: string): Promise<DailyLog> =>
-    authRequest<DailyLog>('get', token, `/api/logs/${id}`),
+  // getLog/createLog/updateLog unwrap response.data.data explicitly (unlike
+  // getLogs above): jsonResponse always nests the payload under `data`, and
+  // for a single object — unlike the list response, whose meta fields sit
+  // alongside `data` at the top level and happen to match PaginatedLogs'
+  // shape — that nesting means authRequest<DailyLog> would return the whole
+  // {success, data, timestamp} envelope typed as DailyLog, silently making
+  // every field (including `id`) undefined.
+  getLog: async (token: string | null, id: string): Promise<DailyLog> => {
+    const response = await api.get(`/api/logs/${id}`, { headers: getAuthHeaders(token) });
+    return response.data?.data ?? response.data;
+  },
 
-  createLog: (token: string | null, payload: CreateLogPayload): Promise<DailyLog> =>
-    authRequest<DailyLog>('post', token, '/api/logs', payload),
+  createLog: async (token: string | null, payload: CreateLogPayload): Promise<DailyLog> => {
+    const response = await api.post('/api/logs', payload, { headers: getAuthHeaders(token) });
+    return response.data?.data ?? response.data;
+  },
 
-  updateLog: (token: string | null, id: string, payload: Partial<CreateLogPayload>): Promise<DailyLog> =>
-    authRequest<DailyLog>('patch', token, `/api/logs/${id}`, payload),
+  updateLog: async (token: string | null, id: string, payload: Partial<CreateLogPayload>): Promise<DailyLog> => {
+    const response = await api.patch(`/api/logs/${id}`, payload, { headers: getAuthHeaders(token) });
+    return response.data?.data ?? response.data;
+  },
 
   deleteLog: (token: string | null, id: string): Promise<void> =>
     authRequest<any>('delete', token, `/api/logs/${id}`),
+
+  requestAttachmentUpload: async (
+    token: string | null,
+    logId: string,
+    payload: CreateLogAttachmentPayload,
+  ): Promise<CreateLogAttachmentResponse> => {
+    const response = await api.post(`/api/logs/${logId}/attachments`, payload, { headers: getAuthHeaders(token) });
+    return response.data?.data ?? response.data;
+  },
+
+  listAttachments: async (token: string | null, logId: string): Promise<LogAttachment[]> => {
+    const response = await api.get(`/api/logs/${logId}/attachments`, { headers: getAuthHeaders(token) });
+    return response.data?.data ?? response.data ?? [];
+  },
+
+  deleteAttachment: async (token: string | null, logId: string, attachmentId: string): Promise<void> => {
+    await api.delete(`/api/logs/${logId}/attachments/${attachmentId}`, { headers: getAuthHeaders(token) });
+  },
+
+  /** Uploads the raw file bytes directly to the presigned S3 URL (same generic PUT as documentApi). */
+  uploadAttachmentToPresignedUrl: (uploadUrl: string, file: File, onProgress?: (percent: number) => void): Promise<void> =>
+    axios
+      .put(uploadUrl, file, {
+        headers: { 'Content-Type': file.type || 'application/octet-stream' },
+        onUploadProgress: (evt) => {
+          if (onProgress && evt.total) onProgress(Math.round((evt.loaded / evt.total) * 100));
+        },
+      })
+      .then(() => undefined),
 };
 
 import type { CreateSessionPayload, CreateTherapistPayload, PaginatedSessions, TherapySession, Therapist, TherapyType } from '../types/therapy';
