@@ -756,7 +756,47 @@ import type {
   Reminder,
   CreateReminderPayload,
   UpdateReminderPayload,
+  ReminderOrigin,
 } from '../types/reminders';
+
+// A "custom" item is a real Reminder row (already filtered to status='pending'
+// server-side); a "derived" item is computed on the fly from another domain's
+// date field and has no status concept at all — both are always renderable
+// as 'pending' here.
+interface RawUpcomingReminderItem {
+  source: 'custom' | 'derived';
+  type: string;
+  id: string;
+  childId: string;
+  title: string;
+  dueAt: string;
+  resourceType: string | null;
+  resourceId: string | null;
+}
+
+// Maps GET /api/reminders/upcoming's `type` (UpcomingReminderService.DerivedReminderType)
+// to the origin the UI actually renders against. Two backend types collapse into
+// 'school' since the frontend has no separate "education plan" origin/icon.
+const DERIVED_TYPE_TO_ORIGIN: Record<string, ReminderOrigin> = {
+  medical_followup: 'medical',
+  education_review: 'school',
+  education_plan_end: 'school',
+  school_followup: 'school',
+  milestone_target: 'milestone',
+  medication_ending: 'medication',
+  document_expiring: 'document',
+};
+
+function toUpcomingReminder(raw: RawUpcomingReminderItem): UpcomingReminder {
+  return {
+    id: raw.id,
+    childId: raw.childId,
+    title: raw.title,
+    dueAt: raw.dueAt,
+    origin: raw.source === 'custom' ? 'manual' : (DERIVED_TYPE_TO_ORIGIN[raw.type] ?? 'manual'),
+    status: 'pending',
+  };
+}
 
 export const reminderApi = {
   getUpcoming: async (token: string | null, childId: string, days = 14): Promise<UpcomingReminder[]> => {
@@ -764,7 +804,8 @@ export const reminderApi = {
       headers: getAuthHeaders(token),
       params: { childId, days },
     });
-    return response.data?.data ?? response.data ?? [];
+    const raw: RawUpcomingReminderItem[] = response.data?.data ?? response.data ?? [];
+    return raw.map(toUpcomingReminder);
   },
 
   list: async (token: string | null, params?: { childId?: string }): Promise<Reminder[]> => {
