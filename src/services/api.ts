@@ -766,7 +766,7 @@ import type {
 // server-side); a "derived" item is computed on the fly from another domain's
 // date field and has no status concept at all — both are always renderable
 // as 'pending' here.
-interface RawUpcomingReminderItem {
+export interface RawUpcomingReminderItem {
   source: 'custom' | 'derived';
   type: string;
   id: string;
@@ -790,7 +790,7 @@ const DERIVED_TYPE_TO_ORIGIN: Record<string, ReminderOrigin> = {
   document_expiring: 'document',
 };
 
-function toUpcomingReminder(raw: RawUpcomingReminderItem): UpcomingReminder {
+export function toUpcomingReminder(raw: RawUpcomingReminderItem): UpcomingReminder {
   return {
     id: raw.id,
     childId: raw.childId,
