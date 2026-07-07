@@ -10,6 +10,7 @@ export interface DocumentRecord {
   sizeBytes: number;
   resourceType?: DocumentResourceType | null;
   resourceId?: string | null;
+  expiresAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -21,6 +22,7 @@ export interface CreateUploadUrlPayload {
   sizeBytes: number;
   resourceType?: DocumentResourceType | null;
   resourceId?: string | null;
+  expiresAt?: string | null;
 }
 
 export interface CreateUploadUrlResponse {
@@ -53,4 +55,21 @@ export function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+export const EXPIRY_WARNING_DAYS = 30;
+
+export type DocumentExpiryStatus = 'expired' | 'expiring-soon' | 'valid' | 'none';
+
+/** Laudos, receitas controladas e carteirinhas costumam ter validade — usado
+ * para destacar documentos vencidos/a vencer sem depender do backend. */
+export function getExpiryStatus(
+  expiresAt: string | null | undefined,
+  warningDays: number = EXPIRY_WARNING_DAYS,
+): DocumentExpiryStatus {
+  if (!expiresAt) return 'none';
+  const diffDays = (new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
+  if (diffDays < 0) return 'expired';
+  if (diffDays <= warningDays) return 'expiring-soon';
+  return 'valid';
 }

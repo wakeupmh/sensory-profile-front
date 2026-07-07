@@ -6,7 +6,11 @@ import { GumroadText } from '../design-system/GumroadHeading';
 import GumroadBadge from '../design-system/GumroadBadge';
 import DocumentTypeIcon from './DocumentTypeIcon';
 import type { DocumentRecord } from '../../types/documents';
-import { DOCUMENT_RESOURCE_TYPE_LABELS, formatFileSize } from '../../types/documents';
+import { DOCUMENT_RESOURCE_TYPE_LABELS, formatFileSize, getExpiryStatus } from '../../types/documents';
+
+function formatExpiresAt(iso: string): string {
+  return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
 
 interface DocumentCardProps {
   document: DocumentRecord;
@@ -15,6 +19,8 @@ interface DocumentCardProps {
 }
 
 const DocumentCard: React.FC<DocumentCardProps> = ({ document, onOpen, onDelete }) => {
+  const expiryStatus = getExpiryStatus(document.expiresAt);
+
   return (
     <div
       onClick={() => onOpen(document)}
@@ -70,6 +76,16 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, onOpen, onDelete 
         {document.resourceType && (
           <GumroadBadge color="lavender" style={{ alignSelf: 'flex-start' }}>
             {DOCUMENT_RESOURCE_TYPE_LABELS[document.resourceType]}
+          </GumroadBadge>
+        )}
+        {expiryStatus === 'expired' && (
+          <GumroadBadge color="salmon" style={{ alignSelf: 'flex-start' }}>
+            Vencido em {formatExpiresAt(document.expiresAt!)}
+          </GumroadBadge>
+        )}
+        {expiryStatus === 'expiring-soon' && (
+          <GumroadBadge color="yellow" style={{ alignSelf: 'flex-start' }}>
+            Vence em {formatExpiresAt(document.expiresAt!)}
           </GumroadBadge>
         )}
       </Flex>
