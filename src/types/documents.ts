@@ -30,6 +30,12 @@ export interface CreateUploadUrlResponse {
   uploadUrl: string;
 }
 
+export interface UpdateDocumentPayload {
+  title?: string;
+  description?: string | null;
+  expiresAt?: string | null;
+}
+
 export interface DownloadUrlResponse {
   downloadUrl: string;
   expiresAt?: string;

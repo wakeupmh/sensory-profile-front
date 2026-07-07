@@ -900,6 +900,7 @@ import type {
   CreateUploadUrlPayload,
   CreateUploadUrlResponse,
   DownloadUrlResponse,
+  UpdateDocumentPayload,
 } from '../types/documents';
 
 export const documentApi = {
@@ -918,6 +919,11 @@ export const documentApi = {
 
   getDownloadUrl: async (token: string | null, id: string): Promise<DownloadUrlResponse> => {
     const response = await api.get(`/api/documents/${id}/download-url`, { headers: getAuthHeaders(token) });
+    return response.data?.data ?? response.data;
+  },
+
+  update: async (token: string | null, id: string, payload: UpdateDocumentPayload): Promise<DocumentRecord> => {
+    const response = await api.patch(`/api/documents/${id}`, payload, { headers: getAuthHeaders(token) });
     return response.data?.data ?? response.data;
   },
 
