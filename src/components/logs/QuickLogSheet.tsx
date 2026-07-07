@@ -23,7 +23,7 @@ const LOG_TYPE_LABELS: Record<LogType, string> = {
 interface QuickLogSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (payload: CreateLogPayload) => Promise<void>;
+  onSubmit: (payload: CreateLogPayload, photo?: File | null) => Promise<void>;
   childId: string;
   defaultLogType?: LogType;
 }
@@ -41,7 +41,17 @@ export default function QuickLogSheet({
   const [notes, setNotes] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
   const toast = useToast();
+
+  const handlePhotoSelect = (file: File | null) => {
+    setPhotoPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return file ? URL.createObjectURL(file) : null;
+    });
+    setPhotoFile(file);
+  };
 
   const speech = useSpeechToText((finalText) => {
     if (!finalText) return;
@@ -63,6 +73,11 @@ export default function QuickLogSheet({
     setSelectedType(defaultLogType ?? null);
     setNotes('');
     setError(null);
+    setPhotoFile(null);
+    setPhotoPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, defaultLogType, speech.stop]);
 
@@ -82,7 +97,7 @@ export default function QuickLogSheet({
         occurredAt: new Date(occurredAt).toISOString(),
         data,
         notes: notes.trim() || null,
-      });
+      }, photoFile);
       toast.success('Registro salvo');
       onClose();
     } catch {
@@ -223,6 +238,81 @@ export default function QuickLogSheet({
               <div style={{ fontFamily: fonts.display, fontSize: '11px', color: colors['ink-muted'], textAlign: 'right', marginTop: '4px' }}>
                 {notes.length}/200
               </div>
+            </Box>
+
+            <Box mt="3">
+              <label
+                style={{
+                  display: 'block',
+                  fontFamily: fonts.display,
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  color: colors.ink,
+                  marginBottom: '6px',
+                }}
+              >
+                Foto (opcional)
+              </label>
+              {photoPreviewUrl ? (
+                <Flex align="center" gap="3">
+                  <img
+                    src={photoPreviewUrl}
+                    alt="Prévia da foto selecionada"
+                    style={{
+                      width: '64px',
+                      height: '64px',
+                      objectFit: 'cover',
+                      borderRadius: radii.md,
+                      border: `2px solid ${colors.ink}`,
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handlePhotoSelect(null)}
+                    className="press-in"
+                    style={{
+                      fontFamily: fonts.display,
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      color: colors.ink,
+                      background: colors.surface,
+                      border: `2px solid ${colors.ink}`,
+                      borderRadius: radii.md,
+                      padding: '6px 12px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Remover foto
+                  </button>
+                </Flex>
+              ) : (
+                <label
+                  className="press-in"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontFamily: fonts.display,
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    color: colors.ink,
+                    background: colors.surface,
+                    border: `2px solid ${colors.ink}`,
+                    borderRadius: radii.md,
+                    padding: '8px 14px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <span aria-hidden="true">📷</span>
+                  Adicionar foto
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handlePhotoSelect(e.target.files?.[0] ?? null)}
+                    style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}
+                  />
+                </label>
+              )}
             </Box>
           </>
         )}

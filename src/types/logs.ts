@@ -7,11 +7,31 @@ export interface FoodData { meal?: 'cafe' | 'almoco' | 'jantar' | 'lanche'; acce
 export interface ToiletingData { type?: 'urina' | 'fezes' | 'ambos'; independent?: boolean; }
 export type LogData = AbcData | MoodData | SleepData | FoodData | ToiletingData;
 
+export interface LogAttachment {
+  id: string;
+  logId: string;
+  mimeType: string;
+  sizeBytes: number | null;
+  createdAt: string;
+  url: string;
+}
+
 export interface DailyLog {
   id: string; childId: string; logType: LogType; occurredAt: string;
   data: LogData; notes?: string | null; createdAt: string; updatedAt: string;
+  attachments?: LogAttachment[];
 }
 
 export interface CreateLogPayload {
   childId: string; logType: LogType; occurredAt: string; data: LogData; notes?: string | null;
+}
+
+export interface CreateLogAttachmentPayload {
+  mimeType: string;
+  sizeBytes?: number | null;
+}
+
+export interface CreateLogAttachmentResponse {
+  attachment: { id: string; logId: string; mimeType: string; sizeBytes: number | null; createdAt: string };
+  uploadUrl: string;
 }

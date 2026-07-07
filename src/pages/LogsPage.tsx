@@ -103,21 +103,54 @@ export default function LogsPage() {
     previousQueuedCount.current = queuedCount;
   }, [queuedCount, fetchLogs]);
 
-  const handleCreateLog = async (payload: CreateLogPayload) => {
+  const handleCreateLog = async (payload: CreateLogPayload, photo?: File | null) => {
     const token = await getTokenRef.current();
     try {
-      await logApi.createLog(token, payload);
+      const log = await logApi.createLog(token, payload);
+      if (photo) {
+        try {
+          const { uploadUrl } = await logApi.requestAttachmentUpload(token, log.id, {
+            mimeType: photo.type || 'image/jpeg',
+            sizeBytes: photo.size,
+          });
+          await logApi.uploadAttachmentToPresignedUrl(uploadUrl, photo);
+        } catch {
+          toast.info('Registro salvo, mas não foi possível anexar a foto. Tente novamente pelo registro.');
+        }
+      }
       await fetchLogs();
     } catch (err) {
       // Sem conexão: guarda localmente em vez de perder o registro. Não
       // relança o erro — para o usuário, o registro "foi salvo" (fica
-      // pendente de sincronização, não bloqueia o fluxo).
+      // pendente de sincronização, não bloqueia o fluxo). A foto não entra
+      // na fila offline — precisa do id do registro, que só existe depois
+      // de sincronizar.
       if (isNetworkError(err)) {
         queueLog(payload);
-        toast.info('Sem conexão — registro salvo no aparelho e será enviado ao reconectar');
+        toast.info(
+          photo
+            ? 'Sem conexão — registro salvo no aparelho (a foto não foi anexada; adicione-a depois de reconectar)'
+            : 'Sem conexão — registro salvo no aparelho e será enviado ao reconectar',
+        );
         return;
       }
       throw err;
+    }
+  };
+
+  const handleDeleteAttachment = async (logId: string, attachmentId: string) => {
+    const token = await getTokenRef.current();
+    try {
+      await logApi.deleteAttachment(token, logId, attachmentId);
+      setLogs((prev) =>
+        prev.map((log) =>
+          log.id === logId
+            ? { ...log, attachments: (log.attachments ?? []).filter((a) => a.id !== attachmentId) }
+            : log,
+        ),
+      );
+    } catch {
+      toast.error('Não foi possível remover a foto. Tente novamente.');
     }
   };
 
@@ -225,6 +258,48 @@ export default function LogsPage() {
                     >
                       {log.notes.length > 80 ? log.notes.slice(0, 80) + '…' : log.notes}
                     </GumroadText>
+                  )}
+                  {log.attachments && log.attachments.length > 0 && (
+                    <Flex gap="2" wrap="wrap" mt="1">
+                      {log.attachments.map((att) => (
+                        <Box key={att.id} style={{ position: 'relative' }}>
+                          <a href={att.url} target="_blank" rel="noopener noreferrer">
+                            <img
+                              src={att.url}
+                              alt="Foto do registro"
+                              style={{
+                                width: '56px',
+                                height: '56px',
+                                objectFit: 'cover',
+                                borderRadius: '8px',
+                                border: `2px solid ${colors.ink}`,
+                                display: 'block',
+                              }}
+                            />
+                          </a>
+                          <button
+                            onClick={() => handleDeleteAttachment(log.id, att.id)}
+                            aria-label="Remover foto"
+                            style={{
+                              position: 'absolute',
+                              top: '-6px',
+                              right: '-6px',
+                              width: '20px',
+                              height: '20px',
+                              borderRadius: '9999px',
+                              border: `1.5px solid ${colors.ink}`,
+                              backgroundColor: colors['brand-salmon'],
+                              cursor: 'pointer',
+                              fontSize: '11px',
+                              lineHeight: 1,
+                              padding: 0,
+                            }}
+                          >
+                            ×
+                          </button>
+                        </Box>
+                      ))}
+                    </Flex>
                   )}
                 </Flex>
                 <GumroadBadge color={LOG_TYPE_COLORS[log.logType]}>
