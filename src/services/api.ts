@@ -840,6 +840,24 @@ export const reminderApi = {
   },
 };
 
+// ─── Reminder e-mail delivery preferences ────────────────────────────
+import type { NotificationPreferences, UpdateNotificationPreferencesPayload } from '../types/notifications';
+
+export const notificationApi = {
+  getPreferences: async (token: string | null): Promise<NotificationPreferences> => {
+    const response = await api.get('/api/notifications/preferences', { headers: getAuthHeaders(token) });
+    return response.data?.data ?? response.data;
+  },
+
+  updatePreferences: async (
+    token: string | null,
+    payload: UpdateNotificationPreferencesPayload,
+  ): Promise<NotificationPreferences> => {
+    const response = await api.patch('/api/notifications/preferences', payload, { headers: getAuthHeaders(token) });
+    return response.data?.data ?? response.data;
+  },
+};
+
 // ─── Therapeutic goals / PEI with progress tracking ─────────────────
 import type {
   Goal,
