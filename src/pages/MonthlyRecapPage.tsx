@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
 import { ChevronLeftIcon, ChevronRightIcon, ExclamationTriangleIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { logApi, milestoneApi, goalApi, goalProgressApi } from '../services/api';
-import type { DailyLog, LogType, MoodData } from '../types/logs';
+import type { DailyLog, LogType } from '../types/logs';
 import { useAuthContext } from '../context/AuthContext';
 import { useDomainPage } from '../hooks/useDomainPage';
 import { ChildSelector } from '../components/domain/ChildSelector';
@@ -11,10 +11,11 @@ import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadBadge from '../components/design-system/GumroadBadge';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
 import LoadingSpinner from '../components/LoadingSpinner';
-import MoodTrendChart, { type DayMood } from '../components/recap/MoodTrendChart';
+import MoodTrendChart from '../components/recap/MoodTrendChart';
 import type { Goal } from '../types/goals';
 import type { DevelopmentalMilestone } from '../types/development';
 import { MILESTONE_CATEGORY_LABELS } from '../types/development';
+import { getMonthRange, isDateStringInMonth, aggregateLogs } from '../utils/monthlyRecap';
 
 const LOG_TYPE_LABELS: Record<LogType, string> = {
   abc: 'ABC',
@@ -29,15 +30,6 @@ interface GoalWithMonthProgress {
   entriesInMonth: number;
 }
 
-function isDateStringInMonth(dateStr: string, year: number, month: number): boolean {
-  const d = new Date(`${dateStr}T00:00:00`);
-  return d.getFullYear() === year && d.getMonth() === month;
-}
-
-function capitalize(text: string): string {
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}
-
 export default function MonthlyRecapPage() {
   const { isLoaded, session } = useAuthContext();
   const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
@@ -49,22 +41,10 @@ export default function MonthlyRecapPage() {
   const [milestonesAchieved, setMilestonesAchieved] = useState<DevelopmentalMilestone[]>([]);
   const [goalsProgress, setGoalsProgress] = useState<GoalWithMonthProgress[]>([]);
 
-  const { monthStart, monthEnd, monthLabel, year, month, daysInMonth } = useMemo(() => {
-    const now = new Date();
-    const target = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
-    const y = target.getFullYear();
-    const m = target.getMonth();
-    const start = new Date(y, m, 1, 0, 0, 0, 0);
-    const end = new Date(y, m + 1, 0, 23, 59, 59, 999);
-    return {
-      monthStart: start,
-      monthEnd: end,
-      monthLabel: capitalize(target.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })),
-      year: y,
-      month: m,
-      daysInMonth: end.getDate(),
-    };
-  }, [monthOffset]);
+  const { monthStart, monthEnd, monthLabel, year, month, daysInMonth } = useMemo(
+    () => getMonthRange(monthOffset),
+    [monthOffset],
+  );
 
   const fetchRecap = useCallback(async () => {
     if (!effectiveChildId) {
@@ -116,27 +96,7 @@ export default function MonthlyRecapPage() {
     if (isLoaded && session) fetchRecap();
   }, [fetchRecap, isLoaded, session]);
 
-  const { countsByType, moodByDay, moodAverage } = useMemo(() => {
-    const counts: Partial<Record<LogType, number>> = {};
-    const moodMap = new Map<number, number[]>();
-    for (const log of logs) {
-      counts[log.logType] = (counts[log.logType] ?? 0) + 1;
-      if (log.logType === 'mood') {
-        const day = new Date(log.occurredAt).getDate();
-        const levels = moodMap.get(day) ?? [];
-        levels.push((log.data as MoodData).level);
-        moodMap.set(day, levels);
-      }
-    }
-    const dayMoods: DayMood[] = Array.from(moodMap.entries())
-      .map(([day, levels]) => ({ day, average: levels.reduce((a, b) => a + b, 0) / levels.length }))
-      .sort((a, b) => a.day - b.day);
-    const allMoodLevels = dayMoods.flatMap(({ day }) => moodMap.get(day) ?? []);
-    const avg = allMoodLevels.length > 0
-      ? allMoodLevels.reduce((a, b) => a + b, 0) / allMoodLevels.length
-      : null;
-    return { countsByType: counts, moodByDay: dayMoods, moodAverage: avg };
-  }, [logs]);
+  const { countsByType, moodByDay, moodAverage } = useMemo(() => aggregateLogs(logs), [logs]);
 
   const totalLogs = logs.length;
   const goalsWithProgress = goalsProgress.filter((g) => g.entriesInMonth > 0);
