@@ -92,6 +92,7 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file,
   const toast = useToast();
   const [resourceType, setResourceType] = useState<DocumentResourceType | ''>('');
   const [resourceId, setResourceId] = useState('');
+  const [expiresAt, setExpiresAt] = useState('');
   const [options, setOptions] = useState<ResourceOption[]>([]);
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
@@ -102,6 +103,7 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file,
     if (!isOpen) {
       setResourceType('');
       setResourceId('');
+      setExpiresAt('');
       setOptions([]);
       setProgress(0);
       setUploading(false);
@@ -138,6 +140,7 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file,
         sizeBytes: file.size,
         resourceType: resourceType || undefined,
         resourceId: resourceType ? resourceId || undefined : undefined,
+        expiresAt: expiresAt || undefined,
       });
       await documentApi.uploadToPresignedUrl(uploadUrl, file, setProgress);
       setSuccess(true);
@@ -200,6 +203,21 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file,
               )}
             </div>
           )}
+
+          <div>
+            <label style={labelStyle} htmlFor="docupload-validade">Data de validade (opcional)</label>
+            <input
+              id="docupload-validade"
+              type="date"
+              value={expiresAt}
+              onChange={(e) => setExpiresAt(e.target.value)}
+              style={inputStyle}
+              disabled={uploading}
+            />
+            <GumroadText level="caption" as="p" style={{ opacity: 0.6, marginTop: '4px' }}>
+              Para laudos, receitas e carteirinhas com prazo de validade
+            </GumroadText>
+          </div>
         </Flex>
 
         {uploading && (

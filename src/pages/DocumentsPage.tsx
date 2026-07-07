@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Box, Flex, AlertDialog } from '@radix-ui/themes';
 import { ExclamationTriangleIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { documentApi } from '../services/api';
 import type { DocumentRecord } from '../types/documents';
+import { getExpiryStatus } from '../types/documents';
 import { useAuthContext } from '../context/AuthContext';
 import { useDomainPage } from '../hooks/useDomainPage';
 import { ChildSelector } from '../components/domain/ChildSelector';
@@ -78,6 +79,14 @@ export default function DocumentsPage() {
     setDocuments((prev) => prev.filter((d) => d.id !== id));
   };
 
+  const expiringCount = useMemo(
+    () => documents.filter((d) => {
+      const status = getExpiryStatus(d.expiresAt);
+      return status === 'expired' || status === 'expiring-soon';
+    }).length,
+    [documents],
+  );
+
   return (
     <Box>
       <Flex justify="between" align={{ initial: 'start', sm: 'center' }} mb="6" gap="4" direction={{ initial: 'column', sm: 'row' }}>
@@ -92,6 +101,19 @@ export default function DocumentsPage() {
       </Flex>
 
       <ChildSelector children={children} selectedChildId={selectedChildId} onChange={setSelectedChildId} />
+
+      {expiringCount > 0 && (
+        <GumroadCard role="alert" color="yellow" shadow="sm" padding="md" style={{ marginBottom: spacing.md }}>
+          <Flex align="center" gap="2">
+            <ExclamationTriangleIcon />
+            <GumroadText level="body-sm" as="p">
+              {expiringCount === 1
+                ? '1 documento vencido ou vencendo em breve'
+                : `${expiringCount} documentos vencidos ou vencendo em breve`}
+            </GumroadText>
+          </Flex>
+        </GumroadCard>
+      )}
 
       {!effectiveChildId ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>

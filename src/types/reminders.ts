@@ -1,6 +1,6 @@
 // Types for reminders feed (manual + derived) — GET /api/reminders/upcoming
 
-export type ReminderOrigin = 'manual' | 'medical' | 'school' | 'milestone' | 'medication';
+export type ReminderOrigin = 'manual' | 'medical' | 'school' | 'milestone' | 'medication' | 'document';
 export type ReminderStatus = 'pending' | 'done' | 'dismissed';
 
 export interface UpcomingReminder {
@@ -44,6 +44,7 @@ export const REMINDER_ORIGIN_LABELS: Record<ReminderOrigin, string> = {
   school: 'Escola',
   milestone: 'Marco',
   medication: 'Medicação',
+  document: 'Documento',
 };
 
 export const REMINDER_ORIGIN_ICONS: Record<ReminderOrigin, string> = {
@@ -52,4 +53,5 @@ export const REMINDER_ORIGIN_ICONS: Record<ReminderOrigin, string> = {
   school: '🎒',
   milestone: '🌱',
   medication: '💊',
+  document: '📄',
 };
