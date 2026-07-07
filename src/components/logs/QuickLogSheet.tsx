@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Box } from '@radix-ui/themes';
+import { Box, Flex } from '@radix-ui/themes';
 import { colors, shadows, radii, fonts, spacing } from '../../theme/tokens';
 import GumroadModal from '../design-system/GumroadModal';
 import { useToast } from '../../context/ToastContext';
+import { useSpeechToText } from '../../hooks/useSpeechToText';
 import LogTypeSelector from './LogTypeSelector';
 import AbcLogForm from './AbcLogForm';
 import MoodLogForm from './MoodLogForm';
@@ -42,9 +43,17 @@ export default function QuickLogSheet({
   const [error, setError] = useState<string | null>(null);
   const toast = useToast();
 
+  const speech = useSpeechToText((finalText) => {
+    if (!finalText) return;
+    setNotes((prev) => (prev ? `${prev} ${finalText}` : finalText).slice(0, 200));
+  });
+
   // Reinicia o formulário a cada abertura (foco/trap/Escape são do GumroadModal)
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      speech.stop();
+      return;
+    }
     const now = new Date();
     const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
       .toISOString()
@@ -54,7 +63,8 @@ export default function QuickLogSheet({
     setSelectedType(defaultLogType ?? null);
     setNotes('');
     setError(null);
-  }, [isOpen, defaultLogType]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, defaultLogType, speech.stop]);
 
   const handleTypeSelect = (type: LogType) => {
     setSelectedType(type);
@@ -135,19 +145,46 @@ export default function QuickLogSheet({
             {selectedType === 'food' && <FoodLogForm onSubmit={handleDataSubmit} isLoading={isLoading} />}
             {selectedType === 'toileting' && <ToiletingLogForm onSubmit={handleDataSubmit} isLoading={isLoading} />}
             <Box mt="3">
-              <label
-                htmlFor="quicklog-observacoes"
-                style={{
-                  display: 'block',
-                  fontFamily: fonts.display,
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  color: colors.ink,
-                  marginBottom: '6px',
-                }}
-              >
-                Observações
-              </label>
+              <Flex align="center" justify="between" mb="1">
+                <label
+                  htmlFor="quicklog-observacoes"
+                  style={{
+                    display: 'block',
+                    fontFamily: fonts.display,
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    color: colors.ink,
+                  }}
+                >
+                  Observações
+                </label>
+                {speech.isSupported && (
+                  <button
+                    type="button"
+                    onClick={() => (speech.isListening ? speech.stop() : speech.start())}
+                    aria-pressed={speech.isListening}
+                    aria-label={speech.isListening ? 'Parar ditado por voz' : 'Ditar observações por voz'}
+                    className="press-in"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '4px 10px',
+                      fontFamily: fonts.display,
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      color: colors.ink,
+                      backgroundColor: speech.isListening ? colors['brand-salmon'] : colors.surface,
+                      border: `2px solid ${colors.ink}`,
+                      borderRadius: radii.pill,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <span aria-hidden="true">{speech.isListening ? '⏹️' : '🎙️'}</span>
+                    {speech.isListening ? 'Parar' : 'Ditar'}
+                  </button>
+                )}
+              </Flex>
               <textarea
                 id="quicklog-observacoes"
                 value={notes}
@@ -169,6 +206,20 @@ export default function QuickLogSheet({
                   boxShadow: shadows.input,
                 }}
               />
+              {speech.isListening && (
+                <p
+                  role="status"
+                  style={{
+                    fontFamily: fonts.display,
+                    fontSize: '12px',
+                    color: colors['ink-muted'],
+                    fontStyle: 'italic',
+                    margin: '4px 0 0',
+                  }}
+                >
+                  {speech.interimText || 'Ouvindo...'}
+                </p>
+              )}
               <div style={{ fontFamily: fonts.display, fontSize: '11px', color: colors['ink-muted'], textAlign: 'right', marginTop: '4px' }}>
                 {notes.length}/200
               </div>
