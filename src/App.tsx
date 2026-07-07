@@ -27,6 +27,7 @@ const EducationPage = lazy(() => import('./pages/EducationPage'));
 const GoalsPage = lazy(() => import('./pages/GoalsPage'));
 const GoalDetailPage = lazy(() => import('./pages/GoalDetailPage'));
 const DocumentsPage = lazy(() => import('./pages/DocumentsPage'));
+const FichaCriancaPage = lazy(() => import('./pages/FichaCriancaPage'));
 const ShareChildPage = lazy(() => import('./pages/ShareChildPage'));
 const CaregiversPage = lazy(() => import('./pages/CaregiversPage'));
 const CaregiverInviteAcceptPage = lazy(() => import('./pages/CaregiverInviteAcceptPage'));
@@ -85,6 +86,7 @@ function App() {
               <Route path="/children/:childId/caregivers" element={<ProtectedRoute><CaregiversPage /></ProtectedRoute>} />
               <Route path="/children/:childId/team-notes" element={<ProtectedRoute><TeamNotesPage /></ProtectedRoute>} />
               <Route path="/children/:childId/access-log" element={<ProtectedRoute><AccessLogPage /></ProtectedRoute>} />
+              <Route path="/children/:childId/ficha" element={<ProtectedRoute><FichaCriancaPage /></ProtectedRoute>} />
               <Route path="/logs" element={<ProtectedRoute><LogsPage /></ProtectedRoute>} />
               <Route path="/therapy" element={<ProtectedRoute><TherapyPage /></ProtectedRoute>} />
               <Route path="/medical" element={<ProtectedRoute><MedicalPage /></ProtectedRoute>} />

@@ -10,6 +10,7 @@ import {
   ChatBubbleIcon,
   ActivityLogIcon,
   DownloadIcon,
+  IdCardIcon,
 } from '@radix-ui/react-icons';
 import { childApi, dataExportApi } from '../services/api';
 import { useAuthContext } from '../context/AuthContext';
@@ -212,6 +213,12 @@ const ChildProfilePage = () => {
                     <Link to={`/children/${childId}/access-log`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                       <ActivityLogIcon />
                       Histórico de acesso
+                    </Link>
+                  </GumroadButton>
+                  <GumroadButton variant="secondary" size="sm" asChild>
+                    <Link to={`/children/${childId}/ficha`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <IdCardIcon />
+                      Ficha da criança
                     </Link>
                   </GumroadButton>
                   <GumroadButton variant="secondary" size="sm" onClick={handleStartEdit}>
