@@ -20,6 +20,7 @@ import {
   TargetIcon,
   ArchiveIcon,
   GroupIcon,
+  CalendarIcon,
 } from '@radix-ui/react-icons';
 import { colors, typography, zIndex, shadows } from '../theme/tokens';
 import GumroadButton from './design-system/GumroadButton';
@@ -43,6 +44,7 @@ const SECONDARY: NavItem[] = [
   { path: '/education', match: '/education', label: 'Educação', icon: ReaderIcon },
   { path: '/goals', match: '/goals', label: 'Metas', icon: TargetIcon },
   { path: '/documents', match: '/documents', label: 'Documentos', icon: ArchiveIcon },
+  { path: '/monthly-recap', match: '/monthly-recap', label: 'Resumo do mês', icon: CalendarIcon },
   { path: '/professionals', match: '/professionals', label: 'Profissionais', icon: Share1Icon },
   { path: '/shared', match: '/shared', label: 'Compartilhados comigo', icon: EyeOpenIcon },
   { path: '/shared/children', match: '/shared/children', label: 'Crianças compartilhadas', icon: GroupIcon },
