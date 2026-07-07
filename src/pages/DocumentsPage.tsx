@@ -72,6 +72,11 @@ export default function DocumentsPage() {
     setDocuments((prev) => [doc, ...prev]);
   };
 
+  const handleUpdated = (doc: DocumentRecord) => {
+    setDocuments((prev) => prev.map((d) => (d.id === doc.id ? doc : d)));
+    setPreviewDoc(doc);
+  };
+
   const handleDelete = async (id: string) => {
     setDeletingId(null);
     const token = await getTokenRef.current();
@@ -168,7 +173,7 @@ export default function DocumentsPage() {
         onUploaded={handleUploaded}
       />
 
-      <DocumentPreviewModal document={previewDoc} onClose={() => setPreviewDoc(null)} />
+      <DocumentPreviewModal document={previewDoc} onClose={() => setPreviewDoc(null)} onUpdated={handleUpdated} />
 
       <AlertDialog.Root open={!!deletingId} onOpenChange={(open) => !open && setDeletingId(null)}>
         <AlertDialog.Content size="2">
