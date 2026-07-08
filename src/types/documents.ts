@@ -5,7 +5,8 @@ export type DocumentResourceType = 'appointment' | 'therapy_session' | 'educatio
 export interface DocumentRecord {
   id: string;
   childId: string;
-  fileName: string;
+  title: string;
+  description?: string | null;
   mimeType: string;
   sizeBytes: number;
   resourceType?: DocumentResourceType | null;
@@ -17,7 +18,7 @@ export interface DocumentRecord {
 
 export interface CreateUploadUrlPayload {
   childId: string;
-  fileName: string;
+  title: string;
   mimeType: string;
   sizeBytes: number;
   resourceType?: DocumentResourceType | null;
