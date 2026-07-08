@@ -174,7 +174,7 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
   });
 
   return (
-    <div style={reportStyle}>
+    <div className="paper-surface" style={reportStyle}>
       <div style={headerStyle}>
         <h1 style={{ fontSize: "24px", margin: "0 0 5px 0" }}>{instrument.name}</h1>
         <h2 style={{ fontSize: "18px", fontWeight: "normal", margin: "0" }}>Relatório de Avaliação</h2>

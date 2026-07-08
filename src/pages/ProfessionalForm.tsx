@@ -225,12 +225,12 @@ const ProfessionalForm: React.FC = () => {
                 <Box
                   style={{
                     padding: '10px 14px',
-                    backgroundColor: '#FFEBEE',
+                    backgroundColor: 'rgba(255, 107, 107, 0.15)',
                     borderRadius: '8px',
                     border: `2px solid ${colors['brand-salmon']}`,
                   }}
                 >
-                  <GumroadText level="body-sm" as="span" color={colors.ink}>
+                  <GumroadText level="body-sm" as="span" color={colors.error}>
                     {validationError}
                   </GumroadText>
                 </Box>

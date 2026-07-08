@@ -122,7 +122,7 @@ const ChildPicker: React.FC<ChildPickerProps> = ({ selectedId, onSelect }) => {
       {missingSelected && (
         <Box
           style={{
-            backgroundColor: '#FFF3CD',
+            backgroundColor: colors['surface-cream'],
             border: `2px solid ${colors.ink}`,
             borderRadius: radii.md,
             padding: `${spacing.sm} ${spacing.md}`,

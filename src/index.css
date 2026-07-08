@@ -7,7 +7,7 @@
   --color-canvas: #FFFEF5;
   --color-ink: #0A0A1A;
   --color-ink-muted: #55556A;
-  --color-surface: #FFFFFF;
+  --color-card-surface: #FFFFFF;
   --color-surface-cream: #FFF8E1;
 
   --color-brand-cyan: #4ECDC4;
@@ -22,12 +22,12 @@
   --color-error: #dc2626;
 
   /* Shadows */
-  --shadow-card: 6px 6px 0px #0A0A1A;
-  --shadow-card-hover: 8px 8px 0px #0A0A1A;
-  --shadow-card-sm: 4px 4px 0px #0A0A1A;
-  --shadow-button: 3px 3px 0px #0A0A1A;
-  --shadow-button-active: 1px 1px 0px #0A0A1A;
-  --shadow-input: 2px 2px 0px #0A0A1A;
+  --shadow-card: 6px 6px 0px var(--color-ink);
+  --shadow-card-hover: 8px 8px 0px var(--color-ink);
+  --shadow-card-sm: 4px 4px 0px var(--color-ink);
+  --shadow-button: 3px 3px 0px var(--color-ink);
+  --shadow-button-active: 1px 1px 0px var(--color-ink);
+  --shadow-input: 2px 2px 0px var(--color-ink);
 
   /* Radii */
   --radius-xs: 6px;
@@ -56,6 +56,63 @@
   --ease-standard: ease;
   --ease-out: ease-out;
   --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+
+  color-scheme: light;
+}
+
+/* Tema escuro — ativado via ThemeContext, que grava data-theme no <html>
+   (resolve 'system' com matchMedia em JS para manter uma única fonte de
+   verdade compartilhada com o appearance do Radix Theme). Os tokens de
+   marca (cyan/yellow/salmon/mint/lavender/peach) já são pastéis vívidos
+   e mantêm contraste em ambos os fundos, por isso não mudam aqui. */
+:root[data-theme="dark"] {
+  --color-canvas: #121218;
+  --color-ink: #F1F0E9;
+  --color-ink-muted: #9999B3;
+  --color-card-surface: #1C1C26;
+  --color-surface-cream: #2B2419;
+
+  --color-success: #4ade80;
+  --color-warning: #fbbf24;
+  --color-error: #f87171;
+
+  color-scheme: dark;
+}
+
+/* "Ilha de papel" — conteúdo estilo documento/impresso (relatórios,
+   PDFs) foi desenhado para parecer uma folha branca e mistura tokens com
+   cores literais internamente; forçar sempre os valores claros aqui evita
+   ter que auditar cada literal por contraste ao ligar o tema escuro, e
+   mantém a pré-visualização consistente com o que será impresso. */
+.paper-surface {
+  --color-canvas: #FFFEF5;
+  --color-ink: #0A0A1A;
+  --color-ink-muted: #55556A;
+  --color-card-surface: #FFFFFF;
+  --color-surface-cream: #FFF8E1;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #dc2626;
+  color-scheme: light;
+}
+
+/* Impressão sempre em claro, independente do tema do app — cobre bordas e
+   sombras baseadas nas custom properties que os overrides pontuais de
+   background/color feitos em cada fluxo de impressão não alcançam.
+   !important é necessário: :root[data-theme="dark"] tem especificidade
+   maior que :root puro e venceria o cascade mesmo dentro de @media print. */
+@media print {
+  :root {
+    --color-canvas: #FFFEF5 !important;
+    --color-ink: #0A0A1A !important;
+    --color-ink-muted: #55556A !important;
+    --color-card-surface: #FFFFFF !important;
+    --color-surface-cream: #FFF8E1 !important;
+    --color-success: #22c55e !important;
+    --color-warning: #f59e0b !important;
+    --color-error: #dc2626 !important;
+    color-scheme: light !important;
+  }
 }
 
 /* ─── Focus & screen-reader utilities ─────────────────────── */
@@ -210,11 +267,11 @@ a {
 /* GumroadButton — hover lift + CSS :active press state */
 .gumroad-btn:hover:not(:disabled) {
   transform: translate(-1px, -1px) !important;
-  box-shadow: 4px 4px 0px #0A0A1A !important;
+  box-shadow: 4px 4px 0px var(--color-ink) !important;
 }
 .gumroad-btn:active:not(:disabled) {
   transform: translate(2px, 2px) !important;
-  box-shadow: 1px 1px 0px #0A0A1A !important;
+  box-shadow: 1px 1px 0px var(--color-ink) !important;
 }
 
 /* Padrão "press-in" compartilhado — substitui as cópias inline */
@@ -253,7 +310,7 @@ a {
 .domain-stats-card:hover,
 .domain-stats-card:focus-visible {
   transform: translate(-2px, -2px);
-  box-shadow: 8px 8px 0px #0A0A1A !important;
+  box-shadow: 8px 8px 0px var(--color-ink) !important;
 }
 
 /* FastRadioCards — responsive grid */
@@ -374,6 +431,11 @@ a {
   animation: skeleton-shimmer 1.6s linear infinite;
 }
 
+:root[data-theme="dark"] .skeleton-shimmer {
+  background: linear-gradient(100deg, #24242F 40%, #2E2E3B 50%, #24242F 60%);
+  background-size: 200% 100%;
+}
+
 /* --- Toasts --- */
 @keyframes toast-in {
   from { transform: translateY(16px); opacity: 0; }
@@ -420,7 +482,7 @@ a {
   align-items: flex-start;
   gap: 10px;
   padding: 12px 14px;
-  background: var(--color-surface);
+  background: var(--color-card-surface);
   border: 2px solid var(--color-ink);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-card-sm);

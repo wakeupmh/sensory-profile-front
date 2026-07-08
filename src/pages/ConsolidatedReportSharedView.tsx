@@ -60,7 +60,7 @@ const ConsolidatedReportSharedView: React.FC = () => {
       <Container size="2" p="6">
         <div
           style={{
-            background: '#fff',
+            background: colors.surface,
             border: `2px solid ${colors.ink}`,
             borderRadius: '16px',
             padding: '40px 24px',
@@ -105,7 +105,7 @@ const ConsolidatedReportSharedView: React.FC = () => {
         {new Date(summary.period.to).toLocaleDateString('pt-BR')}
       </p>
 
-      <div style={{ maxWidth: '720px' }}>
+      <div className="paper-surface" style={{ maxWidth: '720px' }}>
         <SectionCard title="Avaliações" icon="🧠" accentColor={colors['brand-cyan']}>
           <AssessmentsSection data={summary.assessments} />
         </SectionCard>
