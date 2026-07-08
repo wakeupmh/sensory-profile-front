@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Box, Flex, Switch } from '@radix-ui/themes';
-import { ExclamationTriangleIcon, EnvelopeClosedIcon, BellIcon, SunIcon, MoonIcon, DesktopIcon } from '@radix-ui/react-icons';
+import { useTranslation } from 'react-i18next';
+import { ExclamationTriangleIcon, EnvelopeClosedIcon, BellIcon, GlobeIcon, SunIcon, MoonIcon, DesktopIcon } from '@radix-ui/react-icons';
 import { notificationApi } from '../services/api';
 import type { NotificationPreferences } from '../types/notifications';
 import { useAuthContext } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useTheme, type ThemePreference } from '../context/ThemeContext';
+import type { SupportedLanguage } from '../i18n';
 import {
   getCurrentPushSubscription,
   getPushPermissionState,
@@ -19,13 +21,19 @@ import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
 import LoadingSpinner from '../components/LoadingSpinner';
 
-const APPEARANCE_OPTIONS: { value: ThemePreference; label: string; icon: React.ReactNode }[] = [
-  { value: 'light', label: 'Claro', icon: <SunIcon /> },
-  { value: 'dark', label: 'Escuro', icon: <MoonIcon /> },
-  { value: 'system', label: 'Sistema', icon: <DesktopIcon /> },
+const APPEARANCE_OPTIONS: { value: ThemePreference; labelKey: string; icon: React.ReactNode }[] = [
+  { value: 'light', labelKey: 'settings.appearance.light', icon: <SunIcon /> },
+  { value: 'dark', labelKey: 'settings.appearance.dark', icon: <MoonIcon /> },
+  { value: 'system', labelKey: 'settings.appearance.system', icon: <DesktopIcon /> },
+];
+
+const LANGUAGE_OPTIONS: { value: SupportedLanguage; labelKey: string }[] = [
+  { value: 'pt-BR', labelKey: 'settings.language.ptBR' },
+  { value: 'en-US', labelKey: 'settings.language.enUS' },
 ];
 
 export default function SettingsPage() {
+  const { t, i18n } = useTranslation();
   const { getToken } = useAuthContext();
   const toast = useToast();
   const { theme, setTheme } = useTheme();
@@ -45,11 +53,11 @@ export default function SettingsPage() {
       const data = await notificationApi.getPreferences(token);
       setPreferences(data);
     } catch {
-      setError('Erro ao carregar preferências. Por favor, tente novamente.');
+      setError(t('settings.error'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchPreferences();
@@ -64,10 +72,10 @@ export default function SettingsPage() {
       const token = await getTokenRef.current();
       const updated = await notificationApi.updatePreferences(token, { reminderEmailsEnabled: checked });
       setPreferences(updated);
-      toast.success(checked ? 'Lembretes por e-mail ativados' : 'Lembretes por e-mail desativados');
+      toast.success(checked ? t('settings.emailReminders.enabledToast') : t('settings.emailReminders.disabledToast'));
     } catch {
       setPreferences(previous);
-      toast.error('Não foi possível salvar. Tente novamente.');
+      toast.error(t('settings.emailReminders.saveErrorToast'));
     } finally {
       setSaving(false);
     }
@@ -98,13 +106,13 @@ export default function SettingsPage() {
       const token = await getTokenRef.current();
       if (checked) {
         await subscribeToPush(token);
-        toast.success('Notificações push ativadas');
+        toast.success(t('settings.push.enabledToast'));
       } else {
         await unsubscribeFromPush(token);
-        toast.success('Notificações push desativadas');
+        toast.success(t('settings.push.disabledToast'));
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Não foi possível atualizar as notificações push.');
+      toast.error(err instanceof Error ? err.message : t('settings.push.errorToast'));
     } finally {
       await refreshPushState();
       setPushBusy(false);
@@ -115,21 +123,21 @@ export default function SettingsPage() {
     <Box style={{ maxWidth: '640px', margin: '0 auto' }}>
       <Box mb="6">
         <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
-          Configurações
+          {t('settings.title')}
         </GumroadHeading>
         <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7 }}>
-          Preferências de notificação e conta
+          {t('settings.subtitle')}
         </GumroadText>
       </Box>
 
       <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
         <GumroadHeading level="title-md" as="h2" style={{ marginBottom: spacing.xs }}>
-          Aparência
+          {t('settings.appearance.title')}
         </GumroadHeading>
         <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, marginBottom: spacing.md }}>
-          Escolha entre tema claro, escuro ou seguir o sistema do dispositivo
+          {t('settings.appearance.description')}
         </GumroadText>
-        <Flex gap="2" wrap="wrap" role="radiogroup" aria-label="Tema do aplicativo">
+        <Flex gap="2" wrap="wrap" role="radiogroup" aria-label={t('settings.appearance.groupLabel')}>
           {APPEARANCE_OPTIONS.map((opt) => (
             <GumroadButton
               key={opt.value}
@@ -141,15 +149,39 @@ export default function SettingsPage() {
             >
               <Flex align="center" gap="2">
                 {opt.icon}
-                {opt.label}
+                {t(opt.labelKey)}
               </Flex>
             </GumroadButton>
           ))}
         </Flex>
       </GumroadCard>
 
+      <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+        <Flex align="center" gap="2" mb="1">
+          <GlobeIcon />
+          <GumroadHeading level="title-md" as="h2">{t('settings.language.title')}</GumroadHeading>
+        </Flex>
+        <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, marginBottom: spacing.md }}>
+          {t('settings.language.description')}
+        </GumroadText>
+        <Flex gap="2" wrap="wrap" role="radiogroup" aria-label={t('settings.language.groupLabel')}>
+          {LANGUAGE_OPTIONS.map((opt) => (
+            <GumroadButton
+              key={opt.value}
+              variant={i18n.language === opt.value ? 'primary' : 'secondary'}
+              size="sm"
+              onClick={() => i18n.changeLanguage(opt.value)}
+              aria-pressed={i18n.language === opt.value}
+              style={{ borderRadius: radii.pill }}
+            >
+              {t(opt.labelKey)}
+            </GumroadButton>
+          ))}
+        </Flex>
+      </GumroadCard>
+
       {loading ? (
-        <Flex justify="center" py="6"><LoadingSpinner size="medium" text="Carregando..." /></Flex>
+        <Flex justify="center" py="6"><LoadingSpinner size="medium" text={t('settings.loading')} /></Flex>
       ) : error ? (
         <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
           <Flex align="center" gap="2">
@@ -161,11 +193,10 @@ export default function SettingsPage() {
         <GumroadCard color="white" shadow="md" padding="lg">
           <Flex align="center" gap="2" mb="3">
             <EnvelopeClosedIcon />
-            <GumroadHeading level="title-md" as="h2">Lembretes por e-mail</GumroadHeading>
+            <GumroadHeading level="title-md" as="h2">{t('settings.emailReminders.title')}</GumroadHeading>
           </Flex>
           <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, marginBottom: spacing.md }}>
-            Além do feed de lembretes no app, receba um e-mail quando algo estiver vencendo nos próximos dias
-            (retornos médicos, revisões de PEI, fim de medicação, documentos e mais).
+            {t('settings.emailReminders.description')}
           </GumroadText>
 
           <Flex align="center" justify="between" gap="3" style={{
@@ -176,15 +207,15 @@ export default function SettingsPage() {
           }}>
             <Box>
               <GumroadText level="body-sm" as="p" style={{ fontWeight: 600 }}>
-                Receber lembretes por e-mail
+                {t('settings.emailReminders.toggleLabel')}
               </GumroadText>
               {preferences.email ? (
                 <GumroadText level="caption" as="p" style={{ opacity: 0.6 }}>
-                  Enviado para {preferences.email}
+                  {t('settings.emailReminders.sentTo', { email: preferences.email })}
                 </GumroadText>
               ) : (
                 <GumroadText level="caption" as="p" style={{ opacity: 0.6 }}>
-                  Seu e-mail ainda não foi identificado — acesse o app normalmente e ele será capturado automaticamente
+                  {t('settings.emailReminders.emailUnknown')}
                 </GumroadText>
               )}
             </Box>
@@ -193,7 +224,7 @@ export default function SettingsPage() {
               onCheckedChange={handleToggle}
               disabled={saving}
               color="cyan"
-              aria-label="Receber lembretes por e-mail"
+              aria-label={t('settings.emailReminders.toggleLabel')}
             />
           </Flex>
         </GumroadCard>
@@ -202,21 +233,19 @@ export default function SettingsPage() {
       <GumroadCard color="white" shadow="md" padding="lg" style={{ marginTop: spacing.lg }}>
         <Flex align="center" gap="2" mb="3">
           <BellIcon />
-          <GumroadHeading level="title-md" as="h2">Notificações push</GumroadHeading>
+          <GumroadHeading level="title-md" as="h2">{t('settings.push.title')}</GumroadHeading>
         </Flex>
         <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, marginBottom: spacing.md }}>
-          Receba um alerta diretamente no dispositivo quando algo estiver vencendo, sem precisar abrir o app ou
-          checar o e-mail.
+          {t('settings.push.description')}
         </GumroadText>
 
         {pushPermission === 'unsupported' ? (
           <GumroadText level="body-sm" as="p" style={{ opacity: 0.6 }}>
-            Este navegador ou dispositivo não é compatível com notificações push.
+            {t('settings.push.unsupported')}
           </GumroadText>
         ) : pushPermission === 'denied' ? (
           <GumroadText level="body-sm" as="p" style={{ opacity: 0.6 }}>
-            A permissão de notificações foi negada. Para ativar, permita notificações para este site nas
-            configurações do navegador.
+            {t('settings.push.denied')}
           </GumroadText>
         ) : (
           <Flex align="center" justify="between" gap="3" style={{
@@ -226,14 +255,14 @@ export default function SettingsPage() {
             backgroundColor: colors.surface,
           }}>
             <GumroadText level="body-sm" as="p" style={{ fontWeight: 600 }}>
-              Receber notificações push
+              {t('settings.push.toggleLabel')}
             </GumroadText>
             <Switch
               checked={pushSubscribed}
               onCheckedChange={handlePushToggle}
               disabled={pushBusy}
               color="cyan"
-              aria-label="Receber notificações push"
+              aria-label={t('settings.push.toggleLabel')}
             />
           </Flex>
         )}

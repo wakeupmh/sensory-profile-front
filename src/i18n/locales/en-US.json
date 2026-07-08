@@ -1,0 +1,183 @@
+{
+  "nav": {
+    "dashboard": "Home",
+    "assessments": "Assessments",
+    "newAssessment": "New Assessment",
+    "anamneses": "Anamneses",
+    "children": "Children",
+    "logs": "Logs",
+    "medical": "Health",
+    "therapy": "Therapy",
+    "development": "Development",
+    "education": "Education",
+    "goals": "Goals",
+    "documents": "Documents",
+    "monthlyRecap": "Monthly recap",
+    "professionals": "Professionals",
+    "sharedWithMe": "Shared with me",
+    "sharedChildren": "Shared children",
+    "acceptInvite": "Accept invite",
+    "settings": "Settings",
+    "more": "More",
+    "moreOptions": "More options",
+    "signOut": "Sign out",
+    "signIn": "Sign in",
+    "close": "Close",
+    "mainNavLabel": "Main navigation",
+    "bottomNavLabel": "Bottom navigation"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Notification and account preferences",
+    "loading": "Loading...",
+    "error": "Error loading preferences. Please try again.",
+    "appearance": {
+      "title": "Appearance",
+      "description": "Choose between a light theme, a dark theme, or following the system",
+      "groupLabel": "App theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "language": {
+      "title": "Language",
+      "description": "Choose the app language",
+      "groupLabel": "App language",
+      "ptBR": "Portuguese (Brazil)",
+      "enUS": "English (US)"
+    },
+    "emailReminders": {
+      "title": "Email reminders",
+      "description": "Besides the in-app reminders feed, get an email when something is coming due in the next few days (doctor follow-ups, IEP reviews, medication running out, documents, and more).",
+      "toggleLabel": "Receive email reminders",
+      "sentTo": "Sent to {{email}}",
+      "emailUnknown": "Your email hasn't been identified yet — use the app normally and it'll be captured automatically",
+      "enabledToast": "Email reminders enabled",
+      "disabledToast": "Email reminders disabled",
+      "saveErrorToast": "Couldn't save. Please try again."
+    },
+    "push": {
+      "title": "Push notifications",
+      "description": "Get an alert right on your device when something is due, without needing to open the app or check email.",
+      "unsupported": "This browser or device doesn't support push notifications.",
+      "denied": "Notification permission was denied. To enable it, allow notifications for this site in your browser settings.",
+      "toggleLabel": "Receive push notifications",
+      "enabledToast": "Push notifications enabled",
+      "disabledToast": "Push notifications disabled",
+      "errorToast": "Couldn't update push notifications."
+    }
+  },
+  "landing": {
+    "hero": {
+      "title": "Assess the Child's Sensory Profile",
+      "description": "A complete system for sensory assessment based on the Sensory Profile 2. Create assessments, generate reports, and share intake forms with the team.",
+      "startCta": "Start Assessment",
+      "badge": "SENSORY"
+    },
+    "features": {
+      "title": "What you can do",
+      "assessments": {
+        "title": "Sensory Assessments",
+        "description": "Apply the Sensory Profile 2 with 86-item questionnaires for children ages 3 to 14. Automatic quadrant classification."
+      },
+      "anamneses": {
+        "title": "Digital Anamneses",
+        "description": "Record complete intake forms and share them via public links. Reuse data across multiple assessments."
+      },
+      "reports": {
+        "title": "Automatic Reports",
+        "description": "Generate complete reports with normal-curve charts, classifications, and per-section observations."
+      }
+    },
+    "cta": {
+      "title": "Start your first assessment today",
+      "description": "Sign up for free and start assessing children's sensory profiles with a professional, complete system.",
+      "button": "Start Now"
+    },
+    "footer": {
+      "copyright": "© {{year}} Perfil Sensorial. All rights reserved.",
+      "terms": "Terms",
+      "privacy": "Privacy"
+    }
+  },
+  "auth": {
+    "tagline": "Assess. Understand. Transform.",
+    "signIn": {
+      "emailLabel": "Email",
+      "emailPlaceholder": "Your email address",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Your password",
+      "button": "Sign in",
+      "linkText": "Don't have an account? Sign up"
+    },
+    "signUp": {
+      "emailLabel": "Email",
+      "emailPlaceholder": "Your email address",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Create a password",
+      "button": "Create account",
+      "linkText": "Already have an account? Sign in"
+    },
+    "forgottenPassword": {
+      "emailLabel": "Email",
+      "emailPlaceholder": "Your email address",
+      "button": "Send instructions",
+      "linkText": "Forgot your password?"
+    }
+  },
+  "dashboard": {
+    "title": "Assessments",
+    "subtitle": "Manage all sensory profile assessments",
+    "consolidatedReport": {
+      "title": "Consolidated Report",
+      "viewProfile": "View profile"
+    },
+    "draft": {
+      "assessmentInProgress": "Draft in progress: Sensory Profile Assessment",
+      "anamneseInProgress": "Draft in progress: Anamnese",
+      "lastEdited": "Last edited: {{date}}",
+      "continue": "Continue",
+      "discard": "Discard"
+    },
+    "filter": {
+      "byInstrument": "Filter by instrument:",
+      "all": "All"
+    },
+    "errors": {
+      "fetchAssessments": "Error loading assessments. Please try again.",
+      "discardDraft": "Couldn't discard the draft. Please try again.",
+      "deleteAssessment": "Error deleting assessment. Please try again."
+    },
+    "empty": {
+      "noAssessments": {
+        "title": "No assessments found",
+        "description": "Click \"{{action}}\" to get started",
+        "cta": "Create first assessment"
+      },
+      "noneForInstrument": {
+        "title": "No assessments for this instrument",
+        "description": "Select \"{{all}}\" or another instrument to see assessments"
+      }
+    },
+    "card": {
+      "examiner": "Examiner:",
+      "date": "Date:"
+    },
+    "actions": {
+      "view": "View",
+      "viewAssessment": "View assessment",
+      "edit": "Edit",
+      "editAssessment": "Edit assessment",
+      "report": "Report",
+      "viewReport": "View report",
+      "delete": "Delete",
+      "deleteAssessment": "Delete assessment"
+    },
+    "deleteDialog": {
+      "title": "Delete Assessment",
+      "description": "Are you sure you want to delete this assessment? This action cannot be undone.",
+      "cancel": "Cancel",
+      "deleting": "Deleting..."
+    }
+  }
+}

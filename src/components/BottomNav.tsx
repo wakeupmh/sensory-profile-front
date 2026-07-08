@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useAuthContext } from '../context/AuthContext';
 import { Box } from '@radix-ui/themes';
@@ -24,6 +25,7 @@ import {
 import { colors, zIndex, typography, shadows } from '../theme/tokens';
 
 const BottomNav: React.FC = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut, session } = useAuthContext();
@@ -35,22 +37,22 @@ const BottomNav: React.FC = () => {
   };
 
   const primaryTabs = [
-    { path: '/dashboard', label: 'Início', icon: HomeIcon },
-    { path: '/children', label: 'Crianças', icon: PersonIcon },
-    { path: '/logs', label: 'Registros', icon: ActivityLogIcon },
-    { path: '/medical', label: 'Saúde', icon: PlusCircledIcon },
+    { path: '/dashboard', labelKey: 'nav.dashboard', icon: HomeIcon },
+    { path: '/children', labelKey: 'nav.children', icon: PersonIcon },
+    { path: '/logs', labelKey: 'nav.logs', icon: ActivityLogIcon },
+    { path: '/medical', labelKey: 'nav.medical', icon: PlusCircledIcon },
   ];
 
   const moreTabs = [
-    { path: '/therapy', label: 'Terapia', icon: HeartIcon },
-    { path: '/development', label: 'Desenvolvimento', icon: BarChartIcon },
-    { path: '/education', label: 'Educação', icon: ReaderIcon },
-    { path: '/goals', label: 'Metas', icon: TargetIcon },
-    { path: '/documents', label: 'Documentos', icon: ArchiveIcon },
-    { path: '/monthly-recap', label: 'Resumo do mês', icon: CalendarIcon },
-    { path: '/assessment/new', label: 'Nova Avaliação', icon: PlusIcon },
-    { path: '/anamneses', label: 'Anamneses', icon: ClipboardIcon },
-    { path: '/settings', label: 'Configurações', icon: GearIcon },
+    { path: '/therapy', labelKey: 'nav.therapy', icon: HeartIcon },
+    { path: '/development', labelKey: 'nav.development', icon: BarChartIcon },
+    { path: '/education', labelKey: 'nav.education', icon: ReaderIcon },
+    { path: '/goals', labelKey: 'nav.goals', icon: TargetIcon },
+    { path: '/documents', labelKey: 'nav.documents', icon: ArchiveIcon },
+    { path: '/monthly-recap', labelKey: 'nav.monthlyRecap', icon: CalendarIcon },
+    { path: '/assessment/new', labelKey: 'nav.newAssessment', icon: PlusIcon },
+    { path: '/anamneses', labelKey: 'nav.anamneses', icon: ClipboardIcon },
+    { path: '/settings', labelKey: 'nav.settings', icon: GearIcon },
   ];
 
   const handleSignOut = () => signOut().then(() => navigate('/sign-in', { replace: true }));
@@ -93,7 +95,7 @@ const BottomNav: React.FC = () => {
     borderRadius: '10px',
   };
 
-  const isMoreActive = moreTabs.some((t) => isActive(t.path.split('?')[0]));
+  const isMoreActive = moreTabs.some((tab) => isActive(tab.path.split('?')[0]));
 
   return (
     <>
@@ -126,11 +128,11 @@ const BottomNav: React.FC = () => {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 12px 8px' }}>
               <Dialog.Title asChild>
-                <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Mais opções</span>
+                <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>{t('nav.moreOptions')}</span>
               </Dialog.Title>
               <Dialog.Close asChild>
                 <button
-                  aria-label="Fechar"
+                  aria-label={t('nav.close')}
                   style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: '4px' }}
                 >
                   <Cross2Icon width={18} height={18} />
@@ -148,7 +150,7 @@ const BottomNav: React.FC = () => {
                   onClick={() => setMoreOpen(false)}
                 >
                   <Icon width={20} height={20} />
-                  <span>{tab.label}</span>
+                  <span>{t(tab.labelKey)}</span>
                 </Link>
               );
             })}
@@ -158,7 +160,7 @@ const BottomNav: React.FC = () => {
                 style={{ ...moreItemStyle, color: colors['brand-salmon'] }}
               >
                 <ExitIcon width={20} height={20} />
-                <span>Sair</span>
+                <span>{t('nav.signOut')}</span>
               </button>
             )}
           </Dialog.Content>
@@ -179,7 +181,7 @@ const BottomNav: React.FC = () => {
         }}
         className="bottom-nav"
       >
-        <nav aria-label="Navegação inferior">
+        <nav aria-label={t('nav.bottomNavLabel')}>
           <div
             style={{
               display: 'flex',
@@ -204,7 +206,7 @@ const BottomNav: React.FC = () => {
                   aria-current={active ? 'page' : undefined}
                 >
                   <Icon width={22} height={22} style={{ flexShrink: 0 }} />
-                  <span>{tab.label}</span>
+                  <span>{t(tab.labelKey)}</span>
                 </Link>
               );
             })}
@@ -215,7 +217,7 @@ const BottomNav: React.FC = () => {
               aria-expanded={moreOpen}
             >
               <DotsHorizontalIcon width={22} height={22} style={{ flexShrink: 0 }} />
-              <span>Mais</span>
+              <span>{t('nav.more')}</span>
             </button>
           </div>
         </nav>
