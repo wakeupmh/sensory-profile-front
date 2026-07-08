@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
-import { CheckIcon, Cross2Icon, ExclamationTriangleIcon, PlusIcon } from '@radix-ui/react-icons';
+import { CalendarIcon, CheckIcon, Cross2Icon, ExclamationTriangleIcon, PlusIcon } from '@radix-ui/react-icons';
 import { reminderApi } from '../../services/api';
 import { useAuthContext } from '../../context/AuthContext';
 import type { CreateReminderPayload, UpcomingReminder } from '../../types/reminders';
 import { REMINDER_ORIGIN_ICONS, REMINDER_ORIGIN_LABELS } from '../../types/reminders';
 import { colors, radii, shadows } from '../../theme/tokens';
+import { generateICS, downloadICS, dateOnlyFromISOString } from '../../utils/ics';
 import GumroadCard from '../design-system/GumroadCard';
 import GumroadButton from '../design-system/GumroadButton';
 import GumroadHeading, { GumroadText } from '../design-system/GumroadHeading';
@@ -80,6 +81,16 @@ const RemindersWidget: React.FC<RemindersWidgetProps> = ({ childId, days = 14 })
     const token = await getToken();
     await reminderApi.create(token, payload);
     await fetchReminders();
+  };
+
+  const handleAddToCalendar = (item: UpcomingReminder) => {
+    const ics = generateICS({
+      uid: item.id,
+      title: item.title,
+      description: REMINDER_ORIGIN_LABELS[item.origin],
+      date: dateOnlyFromISOString(item.dueAt),
+    });
+    downloadICS(`lembrete-${item.id}`, ics);
   };
 
   if (!childId) return null;
@@ -184,6 +195,26 @@ const RemindersWidget: React.FC<RemindersWidgetProps> = ({ childId, days = 14 })
                     </span>
                   </Flex>
                 </Box>
+
+                <button
+                  onClick={() => handleAddToCalendar(item)}
+                  aria-label="Adicionar ao calendário"
+                  title="Adicionar ao calendário"
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    flexShrink: 0,
+                    borderRadius: radii.md,
+                    border: `2px solid ${colors.ink}`,
+                    backgroundColor: colors.canvas,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <CalendarIcon />
+                </button>
 
                 {item.origin === 'manual' && (
                   <button
