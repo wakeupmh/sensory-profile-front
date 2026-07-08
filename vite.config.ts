@@ -12,6 +12,13 @@ export default defineConfig({
       ],
     }),
     VitePWA({
+      // injectManifest (em vez do generateSW padrão) porque o service worker
+      // agora também lida com notificações push (self.addEventListener em
+      // 'push'/'notificationclick', em src/sw.ts) — o generateSW não permite
+      // adicionar listeners customizados ao worker que ele gera sozinho.
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       registerType: 'autoUpdate',
       includeAssets: ['apple-touch-icon.png'],
       manifest: {
@@ -30,15 +37,14 @@ export default defineConfig({
           { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
-      workbox: {
+      injectManifest: {
         // Só o app shell (JS/CSS/fontes/ícones do build) — dados de saúde não
         // devem servir de um cache potencialmente desatualizado; a fila
         // offline de registros (useOfflineLogQueue) já cobre a escrita
         // offline de forma explícita e auditável, então chamadas a /api/
-        // ficam de fora do cache do service worker deliberadamente.
+        // ficam de fora do cache do service worker deliberadamente (ver o
+        // NavigationRoute com denylist em src/sw.ts).
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api\//],
       },
     }),
   ],

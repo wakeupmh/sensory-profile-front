@@ -1,11 +1,18 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Box, Flex, Switch } from '@radix-ui/themes';
-import { ExclamationTriangleIcon, EnvelopeClosedIcon, SunIcon, MoonIcon, DesktopIcon } from '@radix-ui/react-icons';
+import { ExclamationTriangleIcon, EnvelopeClosedIcon, BellIcon, SunIcon, MoonIcon, DesktopIcon } from '@radix-ui/react-icons';
 import { notificationApi } from '../services/api';
 import type { NotificationPreferences } from '../types/notifications';
 import { useAuthContext } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useTheme, type ThemePreference } from '../context/ThemeContext';
+import {
+  getCurrentPushSubscription,
+  getPushPermissionState,
+  subscribeToPush,
+  unsubscribeFromPush,
+  type PushPermissionState,
+} from '../services/pushNotifications';
 import { colors, radii, spacing } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
@@ -63,6 +70,44 @@ export default function SettingsPage() {
       toast.error('Não foi possível salvar. Tente novamente.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const [pushPermission, setPushPermission] = useState<PushPermissionState>('unsupported');
+  const [pushSubscribed, setPushSubscribed] = useState(false);
+  const [pushBusy, setPushBusy] = useState(false);
+
+  const refreshPushState = useCallback(async () => {
+    const permission = getPushPermissionState();
+    setPushPermission(permission);
+    if (permission === 'granted') {
+      const subscription = await getCurrentPushSubscription();
+      setPushSubscribed(subscription !== null);
+    } else {
+      setPushSubscribed(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshPushState();
+  }, [refreshPushState]);
+
+  const handlePushToggle = async (checked: boolean) => {
+    setPushBusy(true);
+    try {
+      const token = await getTokenRef.current();
+      if (checked) {
+        await subscribeToPush(token);
+        toast.success('Notificações push ativadas');
+      } else {
+        await unsubscribeFromPush(token);
+        toast.success('Notificações push desativadas');
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Não foi possível atualizar as notificações push.');
+    } finally {
+      await refreshPushState();
+      setPushBusy(false);
     }
   };
 
@@ -153,6 +198,46 @@ export default function SettingsPage() {
           </Flex>
         </GumroadCard>
       ) : null}
+
+      <GumroadCard color="white" shadow="md" padding="lg" style={{ marginTop: spacing.lg }}>
+        <Flex align="center" gap="2" mb="3">
+          <BellIcon />
+          <GumroadHeading level="title-md" as="h2">Notificações push</GumroadHeading>
+        </Flex>
+        <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, marginBottom: spacing.md }}>
+          Receba um alerta diretamente no dispositivo quando algo estiver vencendo, sem precisar abrir o app ou
+          checar o e-mail.
+        </GumroadText>
+
+        {pushPermission === 'unsupported' ? (
+          <GumroadText level="body-sm" as="p" style={{ opacity: 0.6 }}>
+            Este navegador ou dispositivo não é compatível com notificações push.
+          </GumroadText>
+        ) : pushPermission === 'denied' ? (
+          <GumroadText level="body-sm" as="p" style={{ opacity: 0.6 }}>
+            A permissão de notificações foi negada. Para ativar, permita notificações para este site nas
+            configurações do navegador.
+          </GumroadText>
+        ) : (
+          <Flex align="center" justify="between" gap="3" style={{
+            padding: spacing.sm,
+            border: `2px solid ${colors.ink}`,
+            borderRadius: '8px',
+            backgroundColor: colors.surface,
+          }}>
+            <GumroadText level="body-sm" as="p" style={{ fontWeight: 600 }}>
+              Receber notificações push
+            </GumroadText>
+            <Switch
+              checked={pushSubscribed}
+              onCheckedChange={handlePushToggle}
+              disabled={pushBusy}
+              color="cyan"
+              aria-label="Receber notificações push"
+            />
+          </Flex>
+        )}
+      </GumroadCard>
     </Box>
   );
 }
