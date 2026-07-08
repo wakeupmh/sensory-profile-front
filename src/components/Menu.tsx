@@ -209,7 +209,7 @@ const Menu: React.FC = () => {
                         top: 'calc(100% + 10px)',
                         left: 0,
                         minWidth: '220px',
-                        background: '#fff',
+                        background: colors.surface,
                         border: `2px solid ${colors.ink}`,
                         borderRadius: '14px',
                         boxShadow: shadows.card,

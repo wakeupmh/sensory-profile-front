@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, memo } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
-import { colors, spacing, typography } from '../theme/tokens';
+import { colors, shadows, spacing, typography } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
@@ -110,7 +110,7 @@ const LandingPage = () => {
                 background: colors['brand-yellow'],
                 border: `2px solid ${colors.ink}`,
                 borderRadius: '20px',
-                boxShadow: '6px 6px 0px #0A0A1A',
+                boxShadow: shadows.card,
                 transform: 'rotate(-6deg)',
                 zIndex: 1,
               }}
@@ -125,7 +125,7 @@ const LandingPage = () => {
                 background: colors['brand-lavender'],
                 border: `2px solid ${colors.ink}`,
                 borderRadius: '20px',
-                boxShadow: '6px 6px 0px #0A0A1A',
+                boxShadow: shadows.card,
                 transform: 'rotate(3deg)',
                 zIndex: 2,
               }}
@@ -140,7 +140,7 @@ const LandingPage = () => {
                 background: colors['brand-cyan'],
                 border: `2px solid ${colors.ink}`,
                 borderRadius: '20px',
-                boxShadow: '6px 6px 0px #0A0A1A',
+                boxShadow: shadows.card,
                 transform: 'rotate(-2deg)',
                 zIndex: 3,
                 display: 'flex',

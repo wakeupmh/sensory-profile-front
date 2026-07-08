@@ -52,7 +52,7 @@ const SensoryItemsTable: React.FC<SensoryItemsTableProps> = memo(({ items, onRes
               border: `2px solid ${colors.ink}`,
               borderRadius: '12px',
               padding: '16px',
-              backgroundColor: '#FFFFFF',
+              backgroundColor: colors.surface,
               display: 'flex',
               flexDirection: 'column',
               gap: '12px',

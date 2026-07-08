@@ -117,7 +117,7 @@ const BottomNav: React.FC = () => {
               zIndex: zIndex.bottomNav + 2,
               maxWidth: '400px',
               margin: '0 auto',
-              background: '#fff',
+              background: colors.surface,
               border: `2px solid ${colors.ink}`,
               borderRadius: '16px',
               boxShadow: shadows.card,

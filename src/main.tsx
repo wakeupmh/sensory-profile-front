@@ -2,13 +2,13 @@ import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import "@radix-ui/themes/styles.css";
-import { Theme } from "@radix-ui/themes";
 import { AuthProvider } from "./context/AuthContext.tsx";
 import { DelegationProvider } from "./context/DelegationContext.tsx";
+import { ThemeProvider } from "./context/ThemeContext.tsx";
 import { ToastProvider } from "./context/ToastContext.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <Theme accentColor="teal" grayColor="sand" radius="large" scaling="100%">
+  <ThemeProvider>
     <AuthProvider>
       <DelegationProvider>
         <ToastProvider>
@@ -16,5 +16,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </ToastProvider>
       </DelegationProvider>
     </AuthProvider>
-  </Theme>
+  </ThemeProvider>
 );

@@ -1,18 +1,27 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Box, Flex, Switch } from '@radix-ui/themes';
-import { ExclamationTriangleIcon, EnvelopeClosedIcon } from '@radix-ui/react-icons';
+import { ExclamationTriangleIcon, EnvelopeClosedIcon, SunIcon, MoonIcon, DesktopIcon } from '@radix-ui/react-icons';
 import { notificationApi } from '../services/api';
 import type { NotificationPreferences } from '../types/notifications';
 import { useAuthContext } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { colors, spacing } from '../theme/tokens';
+import { useTheme, type ThemePreference } from '../context/ThemeContext';
+import { colors, radii, spacing } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
+import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
 import LoadingSpinner from '../components/LoadingSpinner';
+
+const APPEARANCE_OPTIONS: { value: ThemePreference; label: string; icon: React.ReactNode }[] = [
+  { value: 'light', label: 'Claro', icon: <SunIcon /> },
+  { value: 'dark', label: 'Escuro', icon: <MoonIcon /> },
+  { value: 'system', label: 'Sistema', icon: <DesktopIcon /> },
+];
 
 export default function SettingsPage() {
   const { getToken } = useAuthContext();
   const toast = useToast();
+  const { theme, setTheme } = useTheme();
   const getTokenRef = useRef(getToken);
   getTokenRef.current = getToken;
 
@@ -67,6 +76,32 @@ export default function SettingsPage() {
           Preferências de notificação e conta
         </GumroadText>
       </Box>
+
+      <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+        <GumroadHeading level="title-md" as="h2" style={{ marginBottom: spacing.xs }}>
+          Aparência
+        </GumroadHeading>
+        <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, marginBottom: spacing.md }}>
+          Escolha entre tema claro, escuro ou seguir o sistema do dispositivo
+        </GumroadText>
+        <Flex gap="2" wrap="wrap" role="radiogroup" aria-label="Tema do aplicativo">
+          {APPEARANCE_OPTIONS.map((opt) => (
+            <GumroadButton
+              key={opt.value}
+              variant={theme === opt.value ? 'primary' : 'secondary'}
+              size="sm"
+              onClick={() => setTheme(opt.value)}
+              aria-pressed={theme === opt.value}
+              style={{ borderRadius: radii.pill }}
+            >
+              <Flex align="center" gap="2">
+                {opt.icon}
+                {opt.label}
+              </Flex>
+            </GumroadButton>
+          ))}
+        </Flex>
+      </GumroadCard>
 
       {loading ? (
         <Flex justify="center" py="6"><LoadingSpinner size="medium" text="Carregando..." /></Flex>

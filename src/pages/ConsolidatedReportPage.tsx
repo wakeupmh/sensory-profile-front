@@ -5,7 +5,7 @@ import { ArrowLeftIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { consolidatedReportApi } from '../services/api';
 import type { ConsolidatedSummary } from '../types/consolidatedReport';
 import { useAuthContext } from '../context/AuthContext';
-import { colors, fonts, spacing } from '../theme/tokens';
+import { colors, fonts, shadows, spacing } from '../theme/tokens';
 import LoadingSpinner from '../components/LoadingSpinner';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
@@ -108,7 +108,7 @@ const ConsolidatedReportPage = () => {
               fontSize: '0.82rem',
               fontWeight: 700,
               cursor: 'pointer',
-              boxShadow: periodDays === opt.value ? 'none' : '2px 2px 0px #0A0A1A',
+              boxShadow: periodDays === opt.value ? 'none' : shadows.input,
               fontFamily: fonts.display,
             }}
           >
@@ -124,7 +124,7 @@ const ConsolidatedReportPage = () => {
       ) : error ? (
         <div
           style={{
-            background: '#fff',
+            background: colors.surface,
             border: `2px solid ${colors.ink}`,
             borderRadius: '12px',
             padding: '24px',
@@ -139,33 +139,36 @@ const ConsolidatedReportPage = () => {
         </div>
       ) : summary ? (
         <>
-          <SectionCard title="Avaliações" icon="🧠" accentColor={colors['brand-cyan']}>
-            <AssessmentsSection data={summary.assessments} />
-          </SectionCard>
+          <div className="paper-surface">
+            <SectionCard title="Avaliações" icon="🧠" accentColor={colors['brand-cyan']}>
+              <AssessmentsSection data={summary.assessments} />
+            </SectionCard>
 
-          <SectionCard title="Registros Diários" icon="📋" accentColor={colors['brand-yellow']}>
-            <LogsSummary data={summary.logs} />
-          </SectionCard>
+            <SectionCard title="Registros Diários" icon="📋" accentColor={colors['brand-yellow']}>
+              <LogsSummary data={summary.logs} />
+            </SectionCard>
 
-          <SectionCard title="Terapia" icon="🏥" accentColor={colors['brand-mint']}>
-            <TherapySection data={summary.therapy} />
-          </SectionCard>
+            <SectionCard title="Terapia" icon="🏥" accentColor={colors['brand-mint']}>
+              <TherapySection data={summary.therapy} />
+            </SectionCard>
 
-          <SectionCard title="Saúde" icon="💊" accentColor={colors['brand-salmon']}>
-            <MedicalSection data={summary.medical} />
-          </SectionCard>
+            <SectionCard title="Saúde" icon="💊" accentColor={colors['brand-salmon']}>
+              <MedicalSection data={summary.medical} />
+            </SectionCard>
 
-          <SectionCard title="Desenvolvimento" icon="🌱" accentColor="#22c55e">
-            <DevelopmentSection data={summary.development} />
-          </SectionCard>
+            <SectionCard title="Desenvolvimento" icon="🌱" accentColor="#22c55e">
+              <DevelopmentSection data={summary.development} />
+            </SectionCard>
 
-          <SectionCard title="Educação" icon="🎒" accentColor={colors['brand-lavender']}>
-            <EducationSection data={summary.education} />
-          </SectionCard>
+            <SectionCard title="Educação" icon="🎒" accentColor={colors['brand-lavender']}>
+              <EducationSection data={summary.education} />
+            </SectionCard>
+
+            {childId && <SharePanel childId={childId} periodDays={periodDays} />}
+          </div>
 
           {childId && (
             <>
-              <SharePanel childId={childId} periodDays={periodDays} />
               <GumroadCard color="cream" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
                 <AISummaryHistoryPanel childId={childId} />
               </GumroadCard>

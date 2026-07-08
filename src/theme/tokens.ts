@@ -4,13 +4,16 @@
  */
 
 // ─── Colors ───────────────────────────────────────────────
+// Valores indiretos via CSS custom properties (ver src/index.css) — o
+// mesmo token continua funcionando em style inline em toda a base, mas
+// passa a responder ao tema claro/escuro definido em :root[data-theme].
 export const colors = {
-  canvas: '#FFFEF5',
-  ink: '#0A0A1A',
+  canvas: 'var(--color-canvas)',
+  ink: 'var(--color-ink)',
   // Texto secundário com contraste AA garantido (substitui ink + opacity baixa)
-  'ink-muted': '#55556A',
-  surface: '#FFFFFF',
-  'surface-cream': '#FFF8E1',
+  'ink-muted': 'var(--color-ink-muted)',
+  surface: 'var(--color-card-surface)',
+  'surface-cream': 'var(--color-surface-cream)',
 
   'brand-cyan': '#4ECDC4',
   'brand-yellow': '#FFD93D',
@@ -19,19 +22,19 @@ export const colors = {
   'brand-lavender': '#C7B8FF',
   'brand-peach': '#FFC09F',
 
-  success: '#22c55e',
-  warning: '#f59e0b',
-  error: '#dc2626',
+  success: 'var(--color-success)',
+  warning: 'var(--color-warning)',
+  error: 'var(--color-error)',
 } as const;
 
 // ─── Shadows ──────────────────────────────────────────────
 export const shadows = {
-  card: '6px 6px 0px #0A0A1A',
-  'card-hover': '8px 8px 0px #0A0A1A',
-  'card-sm': '4px 4px 0px #0A0A1A',
-  button: '3px 3px 0px #0A0A1A',
-  'button-active': '1px 1px 0px #0A0A1A',
-  input: '2px 2px 0px #0A0A1A',
+  card: '6px 6px 0px var(--color-ink)',
+  'card-hover': '8px 8px 0px var(--color-ink)',
+  'card-sm': '4px 4px 0px var(--color-ink)',
+  button: '3px 3px 0px var(--color-ink)',
+  'button-active': '1px 1px 0px var(--color-ink)',
+  input: '2px 2px 0px var(--color-ink)',
   none: 'none',
 } as const;
 
@@ -83,15 +86,15 @@ export const typography = {
 
 // ─── Borders ──────────────────────────────────────────────
 export const borders = {
-  default: '2px solid #0A0A1A',
-  hairline: '1px solid #0A0A1A',
-  thick: '3px solid #0A0A1A',
+  default: '2px solid var(--color-ink)',
+  hairline: '1px solid var(--color-ink)',
+  thick: '3px solid var(--color-ink)',
 } as const;
 
 // ─── Shared Styles ───────────────────────────────────────
 export const itemCardStyle: React.CSSProperties = {
-  background: '#FFFEF5',
-  border: '2px solid #0A0A1A',
+  background: 'var(--color-canvas)',
+  border: '2px solid var(--color-ink)',
   borderRadius: '10px',
   padding: '6px 12px',
 };

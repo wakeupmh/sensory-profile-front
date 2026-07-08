@@ -15,6 +15,8 @@ interface GumroadButtonProps {
   style?: React.CSSProperties;
   className?: string;
   asChild?: boolean;
+  'aria-pressed'?: boolean;
+  'aria-label'?: string;
 }
 
 const sizeMap: Record<ButtonSize, React.CSSProperties> = {
@@ -52,7 +54,7 @@ const variantMap: Record<ButtonVariant, React.CSSProperties> = {
 };
 
 const GumroadButton = React.forwardRef<HTMLButtonElement, GumroadButtonProps>(
-  ({ children, variant = 'primary', size = 'md', onClick, disabled, type = 'button', style, className, asChild }, ref) => {
+  ({ children, variant = 'primary', size = 'md', onClick, disabled, type = 'button', style, className, asChild, 'aria-pressed': ariaPressed, 'aria-label': ariaLabel }, ref) => {
     const baseStyle: React.CSSProperties = {
       ...variantMap[variant],
       ...sizeMap[size],
@@ -81,6 +83,8 @@ const GumroadButton = React.forwardRef<HTMLButtonElement, GumroadButtonProps>(
         className={`gumroad-btn${className ? ' ' + className : ''}`}
         asChild={asChild}
         style={baseStyle}
+        aria-pressed={ariaPressed}
+        aria-label={ariaLabel}
       >
         {children}
       </Button>
