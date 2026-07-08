@@ -207,7 +207,7 @@ export default function MedicalPage() {
                 Gerenciar
               </GumroadButton>
             </Flex>
-            {medications.slice(0, 3).length === 0 ? (
+            {children.length > 0 && medications.slice(0, 3).length === 0 ? (
               <p style={emptyStyle}>Nenhum registro</p>
             ) : (
               medications.slice(0, 3).map((med) => (
@@ -236,7 +236,7 @@ export default function MedicalPage() {
                 Gerenciar
               </GumroadButton>
             </Flex>
-            {comorbidities.slice(0, 3).length === 0 ? (
+            {children.length > 0 && comorbidities.slice(0, 3).length === 0 ? (
               <p style={emptyStyle}>Nenhum registro</p>
             ) : (
               comorbidities.slice(0, 3).map((c) => (
@@ -265,7 +265,7 @@ export default function MedicalPage() {
                 Gerenciar
               </GumroadButton>
             </Flex>
-            {appointments.slice(0, 3).length === 0 ? (
+            {children.length > 0 && appointments.slice(0, 3).length === 0 ? (
               <p style={emptyStyle}>Nenhum registro</p>
             ) : (
               appointments.slice(0, 3).map((appt) => (

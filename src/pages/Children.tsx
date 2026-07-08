@@ -284,9 +284,14 @@ const Children = () => {
                 Nenhuma criança cadastrada
               </GumroadHeading>
               <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-                Clique em "Adicionar Criança" para começar.
+                Cadastre a primeira criança para começar a usar avaliações, registros diários,
+                metas e o restante do app.
               </GumroadText>
             </Box>
+            <GumroadButton variant="primary" size="md" onClick={handleStartAdd}>
+              <PlusIcon />
+              Adicionar Criança
+            </GumroadButton>
           </Flex>
         </GumroadCard>
       ) : (

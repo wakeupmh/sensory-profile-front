@@ -21,6 +21,7 @@ import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadBadge from '../components/design-system/GumroadBadge';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
 import { DashboardSkeleton } from '../components/skeletons/PageSkeletons';
+import { NoChildrenPrompt } from '../components/domain/NoChildrenPrompt';
 
 interface Assessment {
   id: string;
@@ -329,6 +330,8 @@ const Home = () => {
             </GumroadText>
           </Flex>
         </GumroadCard>
+      ) : children.length === 0 ? (
+        <NoChildrenPrompt description="Cadastre a primeira criança para começar — depois disso você poderá fazer avaliações, registrar o dia a dia e acompanhar o progresso." />
       ) : assessments.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">

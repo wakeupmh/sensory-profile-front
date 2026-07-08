@@ -145,7 +145,7 @@ export default function EducationPage() {
                 Gerenciar
               </GumroadButton>
             </Flex>
-            {plans.slice(0, 3).length === 0 ? (
+            {children.length > 0 && plans.slice(0, 3).length === 0 ? (
               <p style={emptyStyle}>Nenhum plano cadastrado</p>
             ) : (
               plans.slice(0, 3).map((plan) => {
@@ -203,7 +203,7 @@ export default function EducationPage() {
                 Gerenciar
               </GumroadButton>
             </Flex>
-            {comms.slice(0, 3).length === 0 ? (
+            {children.length > 0 && comms.slice(0, 3).length === 0 ? (
               <p style={emptyStyle}>Nenhuma comunicação registrada</p>
             ) : (
               comms.slice(0, 3).map((comm) => {
