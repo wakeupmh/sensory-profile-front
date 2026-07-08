@@ -1,14 +1,47 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
+import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react({
-    // Configuração do SWC para melhorar o desempenho
-    plugins: [
-      ['@swc/plugin-emotion', {}],
-    ],
-  })],
+  plugins: [
+    react({
+      // Configuração do SWC para melhorar o desempenho
+      plugins: [
+        ['@swc/plugin-emotion', {}],
+      ],
+    }),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['apple-touch-icon.png'],
+      manifest: {
+        name: 'Perfil Sensorial',
+        short_name: 'Sensorial',
+        description: 'Acompanhamento sensorial, comportamental e de desenvolvimento infantil',
+        lang: 'pt-BR',
+        start_url: '/dashboard',
+        scope: '/',
+        display: 'standalone',
+        background_color: '#FFFEF5',
+        theme_color: '#FFFEF5',
+        icons: [
+          { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        ],
+      },
+      workbox: {
+        // Só o app shell (JS/CSS/fontes/ícones do build) — dados de saúde não
+        // devem servir de um cache potencialmente desatualizado; a fila
+        // offline de registros (useOfflineLogQueue) já cobre a escrita
+        // offline de forma explícita e auditável, então chamadas a /api/
+        // ficam de fora do cache do service worker deliberadamente.
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api\//],
+      },
+    }),
+  ],
   // Otimizações de desempenho
   resolve: {
     dedupe: ['react', 'react-dom'],

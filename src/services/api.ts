@@ -840,6 +840,24 @@ export const reminderApi = {
   },
 };
 
+// ─── Reminder e-mail delivery preferences ────────────────────────────
+import type { NotificationPreferences, UpdateNotificationPreferencesPayload } from '../types/notifications';
+
+export const notificationApi = {
+  getPreferences: async (token: string | null): Promise<NotificationPreferences> => {
+    const response = await api.get('/api/notifications/preferences', { headers: getAuthHeaders(token) });
+    return response.data?.data ?? response.data;
+  },
+
+  updatePreferences: async (
+    token: string | null,
+    payload: UpdateNotificationPreferencesPayload,
+  ): Promise<NotificationPreferences> => {
+    const response = await api.patch('/api/notifications/preferences', payload, { headers: getAuthHeaders(token) });
+    return response.data?.data ?? response.data;
+  },
+};
+
 // ─── Therapeutic goals / PEI with progress tracking ─────────────────
 import type {
   Goal,
@@ -900,6 +918,7 @@ import type {
   CreateUploadUrlPayload,
   CreateUploadUrlResponse,
   DownloadUrlResponse,
+  UpdateDocumentPayload,
 } from '../types/documents';
 
 export const documentApi = {
@@ -918,6 +937,11 @@ export const documentApi = {
 
   getDownloadUrl: async (token: string | null, id: string): Promise<DownloadUrlResponse> => {
     const response = await api.get(`/api/documents/${id}/download-url`, { headers: getAuthHeaders(token) });
+    return response.data?.data ?? response.data;
+  },
+
+  update: async (token: string | null, id: string, payload: UpdateDocumentPayload): Promise<DocumentRecord> => {
+    const response = await api.patch(`/api/documents/${id}`, payload, { headers: getAuthHeaders(token) });
     return response.data?.data ?? response.data;
   },
 
