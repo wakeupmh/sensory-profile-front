@@ -1154,6 +1154,20 @@ export const dataExportApi = {
     authRequest<any>('get', token, `/api/children/${childId}/export`).then(unwrap<DataExportResponse>),
 };
 
+// Free-text search across children, daily logs, and documents.
+import type { SearchResults } from '../types/search';
+
+export const searchApi = {
+  search: async (token: string | null, query: string, signal?: AbortSignal): Promise<SearchResults> => {
+    const response = await api.get('/api/search', {
+      headers: getAuthHeaders(token),
+      params: { q: query },
+      signal,
+    });
+    return response.data?.data ?? response.data;
+  },
+};
+
 export default api;
 
 

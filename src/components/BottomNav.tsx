@@ -20,14 +20,17 @@ import {
   ArchiveIcon,
   CalendarIcon,
   GearIcon,
+  MagnifyingGlassIcon,
 } from '@radix-ui/react-icons';
 import { colors, zIndex, typography, shadows } from '../theme/tokens';
+import GlobalSearch from './GlobalSearch';
 
 const BottomNav: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut, session } = useAuthContext();
   const [moreOpen, setMoreOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const isActive = (path: string) => {
     if (path === '/dashboard') return location.pathname === '/dashboard';
@@ -137,6 +140,16 @@ const BottomNav: React.FC = () => {
                 </button>
               </Dialog.Close>
             </div>
+            <button
+              onClick={() => {
+                setMoreOpen(false);
+                setSearchOpen(true);
+              }}
+              style={moreItemStyle}
+            >
+              <MagnifyingGlassIcon width={20} height={20} />
+              <span>Buscar</span>
+            </button>
             {moreTabs.map((tab) => {
               const Icon = tab.icon;
               const active = isActive(tab.path.split('?')[0]);
@@ -220,6 +233,8 @@ const BottomNav: React.FC = () => {
           </div>
         </nav>
       </Box>
+
+      <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
 };

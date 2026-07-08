@@ -285,6 +285,12 @@ a {
   box-shadow: 1px 1px 0px var(--color-ink) !important;
 }
 
+/* GlobalSearch — result row hover/focus */
+.search-result-row:hover,
+.search-result-row:focus-visible {
+  background-color: var(--color-brand-cyan) !important;
+}
+
 /* GumroadCard — hover/focus lift (também por teclado) */
 .gumroad-card-interactive {
   transition: transform var(--duration-base) var(--ease-standard),

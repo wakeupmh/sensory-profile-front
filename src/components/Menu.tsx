@@ -22,10 +22,12 @@ import {
   GroupIcon,
   CalendarIcon,
   GearIcon,
+  MagnifyingGlassIcon,
 } from '@radix-ui/react-icons';
 import { colors, typography, zIndex, shadows } from '../theme/tokens';
 import GumroadButton from './design-system/GumroadButton';
 import DelegationSwitcher from './DelegationSwitcher';
+import GlobalSearch from './GlobalSearch';
 
 type NavItem = { path: string; match: string; label: string; icon: React.ComponentType<{ width?: number; height?: number }> };
 
@@ -58,6 +60,7 @@ const Menu: React.FC = () => {
   const navigate = useNavigate();
   const { signOut, session } = useAuthContext();
   const [moreOpen, setMoreOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -239,7 +242,20 @@ const Menu: React.FC = () => {
 
           <DelegationSwitcher />
 
-          <Flex align="center" display={{ initial: 'none', md: 'flex' }}>
+          <Flex align="center" gap="3" display={{ initial: 'none', md: 'flex' }}>
+            {session && (
+              <button
+                type="button"
+                onClick={() => setSearchOpen(true)}
+                aria-label="Buscar"
+                style={{
+                  ...navLinkStyle(false),
+                  padding: '8px',
+                }}
+              >
+                <MagnifyingGlassIcon width={18} height={18} />
+              </button>
+            )}
             {session ? (
               <GumroadButton variant="secondary" size="sm" onClick={handleSignOut}>
                 <ExitIcon />
@@ -252,6 +268,7 @@ const Menu: React.FC = () => {
             )}
           </Flex>
         </Flex>
+        <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
       </header>
     </Box>
   );
