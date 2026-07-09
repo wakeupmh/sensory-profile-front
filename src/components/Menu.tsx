@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuthContext } from '../context/AuthContext';
 import { Box, Flex } from '@radix-ui/themes';
 import {
@@ -27,33 +28,34 @@ import { colors, typography, zIndex, shadows } from '../theme/tokens';
 import GumroadButton from './design-system/GumroadButton';
 import DelegationSwitcher from './DelegationSwitcher';
 
-type NavItem = { path: string; match: string; label: string; icon: React.ComponentType<{ width?: number; height?: number }> };
+type NavItem = { path: string; match: string; labelKey: string; icon: React.ComponentType<{ width?: number; height?: number }> };
 
 // Links mais usados ficam inline; o resto vai para o menu "Mais" (espelha a navegação mobile)
 const PRIMARY: NavItem[] = [
-  { path: '/dashboard', match: '/dashboard', label: 'Início', icon: HomeIcon },
-  { path: '/assessment/new', match: '/assessment', label: 'Avaliações', icon: FileTextIcon },
-  { path: '/anamneses', match: '/anamnese', label: 'Anamneses', icon: ClipboardIcon },
-  { path: '/children', match: '/children', label: 'Crianças', icon: PersonIcon },
+  { path: '/dashboard', match: '/dashboard', labelKey: 'nav.dashboard', icon: HomeIcon },
+  { path: '/assessment/new', match: '/assessment', labelKey: 'nav.assessments', icon: FileTextIcon },
+  { path: '/anamneses', match: '/anamnese', labelKey: 'nav.anamneses', icon: ClipboardIcon },
+  { path: '/children', match: '/children', labelKey: 'nav.children', icon: PersonIcon },
 ];
 
 const SECONDARY: NavItem[] = [
-  { path: '/logs', match: '/logs', label: 'Registros', icon: ActivityLogIcon },
-  { path: '/medical', match: '/medical', label: 'Saúde', icon: PlusCircledIcon },
-  { path: '/therapy', match: '/therapy', label: 'Terapia', icon: HeartIcon },
-  { path: '/development', match: '/development', label: 'Desenvolvimento', icon: BarChartIcon },
-  { path: '/education', match: '/education', label: 'Educação', icon: ReaderIcon },
-  { path: '/goals', match: '/goals', label: 'Metas', icon: TargetIcon },
-  { path: '/documents', match: '/documents', label: 'Documentos', icon: ArchiveIcon },
-  { path: '/monthly-recap', match: '/monthly-recap', label: 'Resumo do mês', icon: CalendarIcon },
-  { path: '/professionals', match: '/professionals', label: 'Profissionais', icon: Share1Icon },
-  { path: '/shared', match: '/shared', label: 'Compartilhados comigo', icon: EyeOpenIcon },
-  { path: '/shared/children', match: '/shared/children', label: 'Crianças compartilhadas', icon: GroupIcon },
-  { path: '/invite/accept', match: '/invite', label: 'Aceitar convite', icon: EnvelopeOpenIcon },
-  { path: '/settings', match: '/settings', label: 'Configurações', icon: GearIcon },
+  { path: '/logs', match: '/logs', labelKey: 'nav.logs', icon: ActivityLogIcon },
+  { path: '/medical', match: '/medical', labelKey: 'nav.medical', icon: PlusCircledIcon },
+  { path: '/therapy', match: '/therapy', labelKey: 'nav.therapy', icon: HeartIcon },
+  { path: '/development', match: '/development', labelKey: 'nav.development', icon: BarChartIcon },
+  { path: '/education', match: '/education', labelKey: 'nav.education', icon: ReaderIcon },
+  { path: '/goals', match: '/goals', labelKey: 'nav.goals', icon: TargetIcon },
+  { path: '/documents', match: '/documents', labelKey: 'nav.documents', icon: ArchiveIcon },
+  { path: '/monthly-recap', match: '/monthly-recap', labelKey: 'nav.monthlyRecap', icon: CalendarIcon },
+  { path: '/professionals', match: '/professionals', labelKey: 'nav.professionals', icon: Share1Icon },
+  { path: '/shared', match: '/shared', labelKey: 'nav.sharedWithMe', icon: EyeOpenIcon },
+  { path: '/shared/children', match: '/shared/children', labelKey: 'nav.sharedChildren', icon: GroupIcon },
+  { path: '/invite/accept', match: '/invite', labelKey: 'nav.acceptInvite', icon: EnvelopeOpenIcon },
+  { path: '/settings', match: '/settings', labelKey: 'nav.settings', icon: GearIcon },
 ];
 
 const Menu: React.FC = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut, session } = useAuthContext();
@@ -170,8 +172,8 @@ const Menu: React.FC = () => {
 
             {/* Desktop nav links */}
             <Flex asChild gap="2" align="center" display={{ initial: 'none', md: 'flex' }}>
-              <nav aria-label="Navegação principal">
-                {PRIMARY.map(({ path, match, label, icon: Icon }) => (
+              <nav aria-label={t('nav.mainNavLabel')}>
+                {PRIMARY.map(({ path, match, labelKey, icon: Icon }) => (
                   <Link
                     key={path}
                     to={path}
@@ -179,7 +181,7 @@ const Menu: React.FC = () => {
                     aria-current={isActive(match) ? 'page' : undefined}
                   >
                     <Icon width={16} height={16} />
-                    {label}
+                    {t(labelKey)}
                   </Link>
                 ))}
 
@@ -192,7 +194,7 @@ const Menu: React.FC = () => {
                     aria-expanded={moreOpen}
                     aria-controls="menu-mais"
                   >
-                    Mais
+                    {t('nav.more')}
                     <ChevronDownIcon
                       width={16}
                       height={16}
@@ -219,7 +221,7 @@ const Menu: React.FC = () => {
                         gap: '2px',
                       }}
                     >
-                      {SECONDARY.map(({ path, match, label, icon: Icon }) => (
+                      {SECONDARY.map(({ path, match, labelKey, icon: Icon }) => (
                         <Link
                           key={path}
                           to={path}
@@ -227,7 +229,7 @@ const Menu: React.FC = () => {
                           aria-current={isActive(match) ? 'page' : undefined}
                         >
                           <Icon width={18} height={18} />
-                          {label}
+                          {t(labelKey)}
                         </Link>
                       ))}
                     </div>
@@ -243,11 +245,11 @@ const Menu: React.FC = () => {
             {session ? (
               <GumroadButton variant="secondary" size="sm" onClick={handleSignOut}>
                 <ExitIcon />
-                Sair
+                {t('nav.signOut')}
               </GumroadButton>
             ) : (
               <GumroadButton variant="primary" size="sm" onClick={() => navigate('/sign-in')}>
-                Entrar
+                {t('nav.signIn')}
               </GumroadButton>
             )}
           </Flex>

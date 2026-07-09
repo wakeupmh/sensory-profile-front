@@ -1,0 +1,183 @@
+{
+  "nav": {
+    "dashboard": "Início",
+    "assessments": "Avaliações",
+    "newAssessment": "Nova Avaliação",
+    "anamneses": "Anamneses",
+    "children": "Crianças",
+    "logs": "Registros",
+    "medical": "Saúde",
+    "therapy": "Terapia",
+    "development": "Desenvolvimento",
+    "education": "Educação",
+    "goals": "Metas",
+    "documents": "Documentos",
+    "monthlyRecap": "Resumo do mês",
+    "professionals": "Profissionais",
+    "sharedWithMe": "Compartilhados comigo",
+    "sharedChildren": "Crianças compartilhadas",
+    "acceptInvite": "Aceitar convite",
+    "settings": "Configurações",
+    "more": "Mais",
+    "moreOptions": "Mais opções",
+    "signOut": "Sair",
+    "signIn": "Entrar",
+    "close": "Fechar",
+    "mainNavLabel": "Navegação principal",
+    "bottomNavLabel": "Navegação inferior"
+  },
+  "settings": {
+    "title": "Configurações",
+    "subtitle": "Preferências de notificação e conta",
+    "loading": "Carregando...",
+    "error": "Erro ao carregar preferências. Por favor, tente novamente.",
+    "appearance": {
+      "title": "Aparência",
+      "description": "Escolha entre tema claro, escuro ou seguir o sistema do dispositivo",
+      "groupLabel": "Tema do aplicativo",
+      "light": "Claro",
+      "dark": "Escuro",
+      "system": "Sistema"
+    },
+    "language": {
+      "title": "Idioma",
+      "description": "Escolha o idioma do aplicativo",
+      "groupLabel": "Idioma do aplicativo",
+      "ptBR": "Português (Brasil)",
+      "enUS": "Inglês (EUA)"
+    },
+    "emailReminders": {
+      "title": "Lembretes por e-mail",
+      "description": "Além do feed de lembretes no app, receba um e-mail quando algo estiver vencendo nos próximos dias (retornos médicos, revisões de PEI, fim de medicação, documentos e mais).",
+      "toggleLabel": "Receber lembretes por e-mail",
+      "sentTo": "Enviado para {{email}}",
+      "emailUnknown": "Seu e-mail ainda não foi identificado — acesse o app normalmente e ele será capturado automaticamente",
+      "enabledToast": "Lembretes por e-mail ativados",
+      "disabledToast": "Lembretes por e-mail desativados",
+      "saveErrorToast": "Não foi possível salvar. Tente novamente."
+    },
+    "push": {
+      "title": "Notificações push",
+      "description": "Receba um alerta diretamente no dispositivo quando algo estiver vencendo, sem precisar abrir o app ou checar o e-mail.",
+      "unsupported": "Este navegador ou dispositivo não é compatível com notificações push.",
+      "denied": "A permissão de notificações foi negada. Para ativar, permita notificações para este site nas configurações do navegador.",
+      "toggleLabel": "Receber notificações push",
+      "enabledToast": "Notificações push ativadas",
+      "disabledToast": "Notificações push desativadas",
+      "errorToast": "Não foi possível atualizar as notificações push."
+    }
+  },
+  "landing": {
+    "hero": {
+      "title": "Avalie o Perfil Sensorial da Criança",
+      "description": "Sistema completo para avaliação sensorial baseado no Perfil Sensorial 2. Crie avaliações, gere relatórios e compartilhe anamneses com a equipe.",
+      "startCta": "Começar Avaliação",
+      "badge": "SENSORIAL"
+    },
+    "features": {
+      "title": "O que você pode fazer",
+      "assessments": {
+        "title": "Avaliações Sensoriais",
+        "description": "Aplique o Perfil Sensorial 2 com questionários de 86 itens para crianças de 3 a 14 anos. Classificação automática por quadrantes."
+      },
+      "anamneses": {
+        "title": "Anamneses Digitais",
+        "description": "Cadastre anamneses completas e compartilhe com links públicos. Reutilize dados em múltiplas avaliações."
+      },
+      "reports": {
+        "title": "Relatórios Automáticos",
+        "description": "Gere relatórios completos com gráficos de curva normal, classificações e observações por seção."
+      }
+    },
+    "cta": {
+      "title": "Comece sua primeira avaliação hoje",
+      "description": "Cadastre-se gratuitamente e comece a avaliar o perfil sensorial das crianças com um sistema profissional e completo.",
+      "button": "Começar Agora"
+    },
+    "footer": {
+      "copyright": "© {{year}} Perfil Sensorial. Todos os direitos reservados.",
+      "terms": "Termos",
+      "privacy": "Privacidade"
+    }
+  },
+  "auth": {
+    "tagline": "Avalie. Compreenda. Transforme.",
+    "signIn": {
+      "emailLabel": "Email",
+      "emailPlaceholder": "Seu endereço de e-mail",
+      "passwordLabel": "Senha",
+      "passwordPlaceholder": "Sua senha",
+      "button": "Entrar",
+      "linkText": "Não tem uma conta? Cadastre-se"
+    },
+    "signUp": {
+      "emailLabel": "Email",
+      "emailPlaceholder": "Seu endereço de e-mail",
+      "passwordLabel": "Senha",
+      "passwordPlaceholder": "Crie uma senha",
+      "button": "Criar conta",
+      "linkText": "Já tem uma conta? Entre"
+    },
+    "forgottenPassword": {
+      "emailLabel": "Email",
+      "emailPlaceholder": "Seu endereço de e-mail",
+      "button": "Enviar instruções",
+      "linkText": "Esqueceu sua senha?"
+    }
+  },
+  "dashboard": {
+    "title": "Avaliações",
+    "subtitle": "Gerencie todas as avaliações de perfil sensorial",
+    "consolidatedReport": {
+      "title": "Relatório Consolidado",
+      "viewProfile": "Ver perfil"
+    },
+    "draft": {
+      "assessmentInProgress": "Rascunho em andamento: Avaliação de Perfil Sensorial",
+      "anamneseInProgress": "Rascunho em andamento: Anamnese",
+      "lastEdited": "Última edição: {{date}}",
+      "continue": "Continuar",
+      "discard": "Descartar"
+    },
+    "filter": {
+      "byInstrument": "Filtrar por instrumento:",
+      "all": "Todos"
+    },
+    "errors": {
+      "fetchAssessments": "Erro ao carregar avaliações. Por favor, tente novamente.",
+      "discardDraft": "Não foi possível descartar o rascunho. Tente novamente.",
+      "deleteAssessment": "Erro ao excluir avaliação. Por favor, tente novamente."
+    },
+    "empty": {
+      "noAssessments": {
+        "title": "Nenhuma avaliação encontrada",
+        "description": "Clique em \"{{action}}\" para começar",
+        "cta": "Criar primeira avaliação"
+      },
+      "noneForInstrument": {
+        "title": "Nenhuma avaliação para este instrumento",
+        "description": "Selecione \"{{all}}\" ou outro instrumento para ver as avaliações"
+      }
+    },
+    "card": {
+      "examiner": "Examinador:",
+      "date": "Data:"
+    },
+    "actions": {
+      "view": "Visualizar",
+      "viewAssessment": "Visualizar avaliação",
+      "edit": "Editar",
+      "editAssessment": "Editar avaliação",
+      "report": "Relatório",
+      "viewReport": "Ver relatório",
+      "delete": "Excluir",
+      "deleteAssessment": "Excluir avaliação"
+    },
+    "deleteDialog": {
+      "title": "Excluir Avaliação",
+      "description": "Tem certeza que deseja excluir esta avaliação? Esta ação não pode ser desfeita.",
+      "cancel": "Cancelar",
+      "deleting": "Excluindo..."
+    }
+  }
+}

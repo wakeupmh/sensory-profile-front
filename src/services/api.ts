@@ -841,7 +841,11 @@ export const reminderApi = {
 };
 
 // ─── Reminder e-mail delivery preferences ────────────────────────────
-import type { NotificationPreferences, UpdateNotificationPreferencesPayload } from '../types/notifications';
+import type {
+  NotificationPreferences,
+  UpdateNotificationPreferencesPayload,
+  PushSubscriptionPayload,
+} from '../types/notifications';
 
 export const notificationApi = {
   getPreferences: async (token: string | null): Promise<NotificationPreferences> => {
@@ -855,6 +859,22 @@ export const notificationApi = {
   ): Promise<NotificationPreferences> => {
     const response = await api.patch('/api/notifications/preferences', payload, { headers: getAuthHeaders(token) });
     return response.data?.data ?? response.data;
+  },
+
+  getPushPublicKey: async (token: string | null): Promise<string> => {
+    const response = await api.get('/api/notifications/push-subscriptions/public-key', {
+      headers: getAuthHeaders(token),
+    });
+    const data = response.data?.data ?? response.data;
+    return data.publicKey;
+  },
+
+  subscribeToPush: async (token: string | null, subscription: PushSubscriptionPayload): Promise<void> => {
+    await api.post('/api/notifications/push-subscriptions', subscription, { headers: getAuthHeaders(token) });
+  },
+
+  unsubscribeFromPush: async (token: string | null, endpoint: string): Promise<void> => {
+    await api.delete('/api/notifications/push-subscriptions', { headers: getAuthHeaders(token), data: { endpoint } });
   },
 };
 

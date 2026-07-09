@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '../lib/supabase';
@@ -9,6 +10,7 @@ import { colors, radii, typography } from '../theme/tokens';
 import GumroadHeading from '../components/design-system/GumroadHeading';
 
 export default function SignIn() {
+  const { t } = useTranslation();
   const { session } = useAuthContext();
   const navigate = useNavigate();
   const location = useLocation();
@@ -44,7 +46,7 @@ export default function SignIn() {
             Perfil Sensorial
           </GumroadHeading>
           <div style={{ fontSize: '14px', color: colors.ink, opacity: 0.6, fontFamily: typography['body-sm'].font }}>
-            Avalie. Compreenda. Transforme.
+            {t('auth.tagline')}
           </div>
         </div>
         <Auth
@@ -103,29 +105,29 @@ export default function SignIn() {
           localization={{
             variables: {
               sign_in: {
-                email_label: 'Email',
-                email_input_placeholder: 'Seu endereço de e-mail',
-                password_label: 'Senha',
-                password_input_placeholder: 'Sua senha',
-                button_label: 'Entrar',
-                link_text: 'Não tem uma conta? Cadastre-se',
+                email_label: t('auth.signIn.emailLabel'),
+                email_input_placeholder: t('auth.signIn.emailPlaceholder'),
+                password_label: t('auth.signIn.passwordLabel'),
+                password_input_placeholder: t('auth.signIn.passwordPlaceholder'),
+                button_label: t('auth.signIn.button'),
+                link_text: t('auth.signIn.linkText'),
               },
               sign_up: {
-                email_label: 'Email',
-                email_input_placeholder: 'Seu endereço de e-mail',
-                password_label: 'Senha',
-                password_input_placeholder: 'Crie uma senha',
-                button_label: 'Criar conta',
-                link_text: 'Já tem uma conta? Entre',
+                email_label: t('auth.signUp.emailLabel'),
+                email_input_placeholder: t('auth.signUp.emailPlaceholder'),
+                password_label: t('auth.signUp.passwordLabel'),
+                password_input_placeholder: t('auth.signUp.passwordPlaceholder'),
+                button_label: t('auth.signUp.button'),
+                link_text: t('auth.signUp.linkText'),
               },
               forgotten_password: {
-                email_label: 'Email',
-                email_input_placeholder: 'Seu endereço de e-mail',
-                button_label: 'Enviar instruções',
+                email_label: t('auth.forgottenPassword.emailLabel'),
+                email_input_placeholder: t('auth.forgottenPassword.emailPlaceholder'),
+                button_label: t('auth.forgottenPassword.button'),
                 // Exibido na tela de login como o link "esqueci minha senha"
                 // (é assim que a lib nomeia essa variável, não é sobre a
                 // própria tela de recuperação)
-                link_text: 'Esqueceu sua senha?',
+                link_text: t('auth.forgottenPassword.linkText'),
               },
             },
           }}
