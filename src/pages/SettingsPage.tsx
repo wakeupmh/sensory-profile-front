@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Box, Flex, Switch } from '@radix-ui/themes';
-import { ExclamationTriangleIcon, EnvelopeClosedIcon, SunIcon, MoonIcon, DesktopIcon } from '@radix-ui/react-icons';
-import { notificationApi } from '../services/api';
+import { ExclamationTriangleIcon, EnvelopeClosedIcon, SunIcon, MoonIcon, DesktopIcon, DownloadIcon } from '@radix-ui/react-icons';
+import { notificationApi, accountApi } from '../services/api';
 import type { NotificationPreferences } from '../types/notifications';
 import { useAuthContext } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -11,6 +11,7 @@ import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
 import LoadingSpinner from '../components/LoadingSpinner';
+import DeleteAccountModal from '../components/settings/DeleteAccountModal';
 
 const APPEARANCE_OPTIONS: { value: ThemePreference; label: string; icon: React.ReactNode }[] = [
   { value: 'light', label: 'Claro', icon: <SunIcon /> },
@@ -29,6 +30,8 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const fetchPreferences = useCallback(async () => {
     try {
@@ -63,6 +66,20 @@ export default function SettingsPage() {
       toast.error('Não foi possível salvar. Tente novamente.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleExportAll = async () => {
+    setExporting(true);
+    try {
+      const token = await getTokenRef.current();
+      const { downloadUrl } = await accountApi.exportAll(token);
+      window.open(downloadUrl, '_blank', 'noopener,noreferrer');
+      toast.success('Exportação pronta', 'O download foi aberto em uma nova aba');
+    } catch {
+      toast.error('Não foi possível gerar a exportação. Tente novamente.');
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -153,6 +170,45 @@ export default function SettingsPage() {
           </Flex>
         </GumroadCard>
       ) : null}
+
+      <GumroadCard color="white" shadow="md" padding="lg" style={{ marginTop: spacing.lg }}>
+        <GumroadHeading level="title-md" as="h2" style={{ marginBottom: spacing.xs }}>
+          Privacidade e dados
+        </GumroadHeading>
+        <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, marginBottom: spacing.md }}>
+          Baixe uma cópia de tudo que sua conta possui — todas as crianças, avaliações, registros,
+          anamneses, documentos e demais dados — em um único arquivo.
+        </GumroadText>
+        <GumroadButton variant="secondary" size="md" onClick={handleExportAll} disabled={exporting}>
+          <DownloadIcon />
+          {exporting ? 'Gerando exportação...' : 'Exportar todos os meus dados'}
+        </GumroadButton>
+      </GumroadCard>
+
+      <GumroadCard
+        color="white"
+        shadow="md"
+        padding="lg"
+        style={{ marginTop: spacing.lg, border: `2px solid ${colors['brand-salmon']}` }}
+      >
+        <GumroadHeading level="title-md" as="h2" style={{ marginBottom: spacing.xs }}>
+          Zona de risco
+        </GumroadHeading>
+        <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, marginBottom: spacing.md }}>
+          Excluir sua conta apaga permanentemente todas as crianças cadastradas e tudo ligado a elas.
+          Essa ação não pode ser desfeita.
+        </GumroadText>
+        <GumroadButton
+          variant="secondary"
+          size="md"
+          onClick={() => setDeleteModalOpen(true)}
+          style={{ borderColor: colors['brand-salmon'], color: colors['brand-salmon'] }}
+        >
+          Excluir minha conta
+        </GumroadButton>
+      </GumroadCard>
+
+      <DeleteAccountModal open={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} />
     </Box>
   );
 }

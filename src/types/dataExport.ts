@@ -3,3 +3,9 @@ export interface DataExportResponse {
   downloadUrl: string;
   expiresAt?: string;
 }
+
+/** Resultado de DELETE /api/account (LGPD, direito à eliminação) */
+export interface AccountErasureResult {
+  childrenDeleted: number;
+  storageObjectsDeleted: number;
+}
