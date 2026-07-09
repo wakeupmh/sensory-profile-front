@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useState, useEffect, memo } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
 import { colors, shadows, spacing, typography } from '../theme/tokens';
@@ -308,12 +308,12 @@ const LandingPage = () => {
             &copy; {new Date().getFullYear()} Perfil Sensorial. Todos os direitos reservados.
           </GumroadText>
           <Flex gap="4">
-            <a href="#" style={{ fontFamily: typography.caption.font, fontSize: typography.caption.size }}>
+            <Link to="/termos" style={{ fontFamily: typography.caption.font, fontSize: typography.caption.size, color: colors.ink }}>
               Termos
-            </a>
-            <a href="#" style={{ fontFamily: typography.caption.font, fontSize: typography.caption.size }}>
+            </Link>
+            <Link to="/privacidade" style={{ fontFamily: typography.caption.font, fontSize: typography.caption.size, color: colors.ink }}>
               Privacidade
-            </a>
+            </Link>
           </Flex>
         </Flex>
       </Box>
