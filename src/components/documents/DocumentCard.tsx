@@ -68,7 +68,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, onOpen, onDelete 
           as="p"
           style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
         >
-          {document.fileName}
+          {document.title}
         </GumroadText>
         <GumroadText level="caption" as="span" style={{ opacity: 0.6 }}>
           {formatFileSize(document.sizeBytes)}

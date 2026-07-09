@@ -1,5 +1,6 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useState, useEffect, memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, Flex } from '@radix-ui/themes';
 import { colors, shadows, spacing, typography } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
@@ -42,6 +43,7 @@ const HeroEmoji = memo(() => {
 });
 
 const LandingPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { session } = useAuthContext();
 
@@ -66,26 +68,25 @@ const LandingPage = () => {
         >
           <Box style={{ flex: 1, maxWidth: '600px' }}>
             <GumroadHeading level="display-lg" as="h1" style={{ marginBottom: spacing.md }}>
-              Avalie o Perfil Sensorial da Criança
+              {t('landing.hero.title')}
             </GumroadHeading>
             <GumroadText
               level="body-lg"
               as="p"
               style={{ marginBottom: spacing.xl, color: colors.ink, opacity: 0.8 }}
             >
-              Sistema completo para avaliação sensorial baseado no Perfil Sensorial 2.
-              Crie avaliações, gere relatórios e compartilhe anamneses com a equipe.
+              {t('landing.hero.description')}
             </GumroadText>
             <Flex gap="3" wrap="wrap">
               <GumroadButton variant="primary" size="lg" onClick={handleStart}>
-                Começar Avaliação
+                {t('landing.hero.startCta')}
               </GumroadButton>
               <GumroadButton
                 variant="secondary"
                 size="lg"
                 onClick={() => navigate('/sign-in')}
               >
-                Entrar
+                {t('nav.signIn')}
               </GumroadButton>
             </Flex>
           </Box>
@@ -154,7 +155,7 @@ const LandingPage = () => {
               <Flex direction="column" align="center" gap="2">
                 <HeroEmoji />
                 <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', opacity: 0.7 }}>
-                  SENSORIAL
+                  {t('landing.hero.badge')}
                 </span>
               </Flex>
             </div>
@@ -176,7 +177,7 @@ const LandingPage = () => {
           as="h2"
           style={{ textAlign: 'center', marginBottom: spacing.xl }}
         >
-          O que você pode fazer
+          {t('landing.features.title')}
         </GumroadHeading>
 
         <Flex
@@ -201,11 +202,10 @@ const LandingPage = () => {
                 <FileTextIcon width={24} height={24} />
               </Box>
               <GumroadHeading level="title-lg" as="h3">
-                Avaliações Sensoriais
+                {t('landing.features.assessments.title')}
               </GumroadHeading>
               <GumroadText level="body-md" as="p">
-                Aplique o Perfil Sensorial 2 com questionários de 86 itens para
-                crianças de 3 a 14 anos. Classificação automática por quadrantes.
+                {t('landing.features.assessments.description')}
               </GumroadText>
             </Flex>
           </GumroadCard>
@@ -227,11 +227,10 @@ const LandingPage = () => {
                 <ClipboardIcon width={24} height={24} />
               </Box>
               <GumroadHeading level="title-lg" as="h3">
-                Anamneses Digitais
+                {t('landing.features.anamneses.title')}
               </GumroadHeading>
               <GumroadText level="body-md" as="p">
-                Cadastre anamneses completas e compartilhe com links públicos.
-                Reutilize dados em múltiplas avaliações.
+                {t('landing.features.anamneses.description')}
               </GumroadText>
             </Flex>
           </GumroadCard>
@@ -253,11 +252,10 @@ const LandingPage = () => {
                 <FileIcon width={24} height={24} />
               </Box>
               <GumroadHeading level="title-lg" as="h3">
-                Relatórios Automáticos
+                {t('landing.features.reports.title')}
               </GumroadHeading>
               <GumroadText level="body-md" as="p">
-                Gere relatórios completos com gráficos de curva normal,
-                classificações e observações por seção.
+                {t('landing.features.reports.description')}
               </GumroadText>
             </Flex>
           </GumroadCard>
@@ -273,15 +271,14 @@ const LandingPage = () => {
         <GumroadCard color="yellow" shadow="lg" padding="xl">
           <Flex direction="column" align="center" gap="4" style={{ textAlign: 'center' }}>
             <GumroadHeading level="display-sm" as="h2">
-              Comece sua primeira avaliação hoje
+              {t('landing.cta.title')}
             </GumroadHeading>
             <GumroadText level="body-md" as="p" style={{ maxWidth: '500px' }}>
-              Cadastre-se gratuitamente e comece a avaliar o perfil sensorial
-              das crianças com um sistema profissional e completo.
+              {t('landing.cta.description')}
             </GumroadText>
             <GumroadButton variant="primary" size="lg" onClick={handleStart}>
               <StarIcon />
-              Começar Agora
+              {t('landing.cta.button')}
             </GumroadButton>
           </Flex>
         </GumroadCard>
@@ -305,15 +302,15 @@ const LandingPage = () => {
           style={{ maxWidth: '1200px', margin: '0 auto' }}
         >
           <GumroadText level="caption" as="p">
-            &copy; {new Date().getFullYear()} Perfil Sensorial. Todos os direitos reservados.
+            {t('landing.footer.copyright', { year: new Date().getFullYear() })}
           </GumroadText>
           <Flex gap="4">
-            <a href="#" style={{ fontFamily: typography.caption.font, fontSize: typography.caption.size }}>
-              Termos
-            </a>
-            <a href="#" style={{ fontFamily: typography.caption.font, fontSize: typography.caption.size }}>
-              Privacidade
-            </a>
+            <Link to="/termos" style={{ fontFamily: typography.caption.font, fontSize: typography.caption.size, color: colors.ink }}>
+              {t('landing.footer.terms')}
+            </Link>
+            <Link to="/privacidade" style={{ fontFamily: typography.caption.font, fontSize: typography.caption.size, color: colors.ink }}>
+              {t('landing.footer.privacy')}
+            </Link>
           </Flex>
         </Flex>
       </Box>

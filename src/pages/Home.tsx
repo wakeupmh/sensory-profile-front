@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { assessmentApi, draftApi, childApi, DraftData } from '../services/api';
 import type { ChildData } from '../services/api';
 import { Box, Flex, AlertDialog, IconButton } from '@radix-ui/themes';
@@ -43,6 +44,7 @@ const getInstrumentBadgeColor = (instrumentId?: string): BadgeColor =>
   (instrumentId && INSTRUMENT_BADGE_COLOR[instrumentId]) || 'cream';
 
 const Home = () => {
+  const { t, i18n } = useTranslation();
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [children, setChildren] = useState<ChildData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,12 +74,12 @@ const Home = () => {
       setAnamneseDraft(anmd);
       setError(null);
     } catch (err) {
-      setError('Erro ao carregar avaliações. Por favor, tente novamente.');
+      setError(t('dashboard.errors.fetchAssessments'));
       console.error(err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (isLoaded && session) {
@@ -97,7 +99,7 @@ const Home = () => {
       else setAnamneseDraft(null);
     } catch (err) {
       console.error('Erro ao descartar rascunho:', err);
-      setError('Não foi possível descartar o rascunho. Tente novamente.');
+      setError(t('dashboard.errors.discardDraft'));
     }
   };
 
@@ -108,7 +110,7 @@ const Home = () => {
       await assessmentApi.deleteAssessment(id, token);
       setAssessments((prev) => prev.filter((a) => a.id !== id));
     } catch (err) {
-      setError('Erro ao excluir avaliação. Por favor, tente novamente.');
+      setError(t('dashboard.errors.deleteAssessment'));
       console.error(err);
     } finally {
       setDeleteLoading(null);
@@ -140,10 +142,10 @@ const Home = () => {
       >
         <Box>
           <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
-            Avaliações
+            {t('dashboard.title')}
           </GumroadHeading>
           <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7 }}>
-            Gerencie todas as avaliações de perfil sensorial
+            {t('dashboard.subtitle')}
           </GumroadText>
         </Box>
         <GumroadButton variant="primary" size="md" asChild>
@@ -152,7 +154,7 @@ const Home = () => {
             style={{ textDecoration: 'none', display: 'inline-flex' }}
           >
             <PlusIcon />
-            Nova Avaliação
+            {t('nav.newAssessment')}
           </Link>
         </GumroadButton>
       </Flex>
@@ -164,7 +166,7 @@ const Home = () => {
             <Flex align="center" gap="2">
               <BarChartIcon width={20} height={20} />
               <GumroadText level="body-md" as="p" style={{ fontWeight: 700 }}>
-                Relatório Consolidado
+                {t('dashboard.consolidatedReport.title')}
               </GumroadText>
             </Flex>
             <Flex gap="2" wrap="wrap">
@@ -192,7 +194,7 @@ const Home = () => {
                       to={`/children/${child.id}`}
                       style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                     >
-                      Ver perfil
+                      {t('dashboard.consolidatedReport.viewProfile')}
                     </Link>
                   </GumroadButton>
                 </Flex>
@@ -210,11 +212,10 @@ const Home = () => {
               <Flex justify="between" align="center" gap="4" wrap="wrap">
                 <Box>
                   <GumroadText level="body-md" as="p" style={{ fontWeight: 600 }}>
-                    Rascunho em andamento: Avaliação de Perfil Sensorial
+                    {t('dashboard.draft.assessmentInProgress')}
                   </GumroadText>
                   <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, marginTop: spacing.xxs }}>
-                    Última edição:{' '}
-                    {new Date(assessmentDraft.updatedAt).toLocaleString('pt-BR')}
+                    {t('dashboard.draft.lastEdited', { date: new Date(assessmentDraft.updatedAt).toLocaleString(i18n.language) })}
                   </GumroadText>
                 </Box>
                 <Flex gap="2">
@@ -223,14 +224,14 @@ const Home = () => {
                     size="sm"
                     onClick={() => navigate('/assessment/new')}
                   >
-                    Continuar
+                    {t('dashboard.draft.continue')}
                   </GumroadButton>
                   <GumroadButton
                     variant="secondary"
                     size="sm"
                     onClick={() => handleDiscardDraft('sensory_assessment')}
                   >
-                    Descartar
+                    {t('dashboard.draft.discard')}
                   </GumroadButton>
                 </Flex>
               </Flex>
@@ -241,11 +242,10 @@ const Home = () => {
               <Flex justify="between" align="center" gap="4" wrap="wrap">
                 <Box>
                   <GumroadText level="body-md" as="p" style={{ fontWeight: 600 }}>
-                    Rascunho em andamento: Anamnese
+                    {t('dashboard.draft.anamneseInProgress')}
                   </GumroadText>
                   <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, marginTop: spacing.xxs }}>
-                    Última edição:{' '}
-                    {new Date(anamneseDraft.updatedAt).toLocaleString('pt-BR')}
+                    {t('dashboard.draft.lastEdited', { date: new Date(anamneseDraft.updatedAt).toLocaleString(i18n.language) })}
                   </GumroadText>
                 </Box>
                 <Flex gap="2">
@@ -254,14 +254,14 @@ const Home = () => {
                     size="sm"
                     onClick={() => navigate('/anamnese/new')}
                   >
-                    Continuar
+                    {t('dashboard.draft.continue')}
                   </GumroadButton>
                   <GumroadButton
                     variant="secondary"
                     size="sm"
                     onClick={() => handleDiscardDraft('anamnese')}
                   >
-                    Descartar
+                    {t('dashboard.draft.discard')}
                   </GumroadButton>
                 </Flex>
               </Flex>
@@ -274,7 +274,7 @@ const Home = () => {
       {!loading && !error && assessments.length > 0 && distinctInstrumentIds.length > 1 && (
         <Flex align="center" gap="2" mb="4" wrap="wrap">
           <GumroadText level="body-sm" as="span" style={{ opacity: 0.7, whiteSpace: 'nowrap' }}>
-            Filtrar por instrumento:
+            {t('dashboard.filter.byInstrument')}
           </GumroadText>
           <button
             onClick={() => setInstrumentFilter('all')}
@@ -290,7 +290,7 @@ const Home = () => {
               boxShadow: instrumentFilter === 'all' ? 'none' : '2px 2px 0px #0A0A1A',
             }}
           >
-            Todos
+            {t('dashboard.filter.all')}
           </button>
           {distinctInstrumentIds.map((id) => {
             const inst = getInstrument(id);
@@ -335,15 +335,15 @@ const Home = () => {
             <InfoCircledIcon width={40} height={40} />
             <Box>
               <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
-                Nenhuma avaliação encontrada
+                {t('dashboard.empty.noAssessments.title')}
               </GumroadHeading>
               <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-                Clique em "Nova Avaliação" para começar
+                {t('dashboard.empty.noAssessments.description', { action: t('nav.newAssessment') })}
               </GumroadText>
             </Box>
             <GumroadButton variant="primary" size="md" asChild>
               <Link to="/assessment/new" style={{ textDecoration: 'none' }}>
-                Criar primeira avaliação
+                {t('dashboard.empty.noAssessments.cta')}
               </Link>
             </GumroadButton>
           </Flex>
@@ -354,10 +354,10 @@ const Home = () => {
             <InfoCircledIcon width={40} height={40} />
             <Box>
               <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
-                Nenhuma avaliação para este instrumento
+                {t('dashboard.empty.noneForInstrument.title')}
               </GumroadHeading>
               <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-                Selecione "Todos" ou outro instrumento para ver as avaliações
+                {t('dashboard.empty.noneForInstrument.description', { all: t('dashboard.filter.all') })}
               </GumroadText>
             </Box>
           </Flex>
@@ -399,11 +399,11 @@ const Home = () => {
                   {/* Details */}
                   <Flex direction="column" gap="1">
                     <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-                      <strong>Examinador:</strong> {assessment.examinerName}
+                      <strong>{t('dashboard.card.examiner')}</strong> {assessment.examinerName}
                     </GumroadText>
                     <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-                      <strong>Data:</strong>{' '}
-                      {new Date(assessment.createdAt).toLocaleDateString('pt-BR')}
+                      <strong>{t('dashboard.card.date')}</strong>{' '}
+                      {new Date(assessment.createdAt).toLocaleDateString(i18n.language)}
                     </GumroadText>
                   </Flex>
 
@@ -413,8 +413,8 @@ const Home = () => {
                       variant="soft"
                       size="2"
                       asChild
-                      title="Visualizar"
-                      aria-label="Visualizar avaliação"
+                      title={t('dashboard.actions.view')}
+                      aria-label={t('dashboard.actions.viewAssessment')}
                       style={{
                         background: colors.canvas,
                         border: `2px solid ${colors.ink}`,
@@ -431,8 +431,8 @@ const Home = () => {
                       variant="soft"
                       size="2"
                       asChild
-                      title="Editar"
-                      aria-label="Editar avaliação"
+                      title={t('dashboard.actions.edit')}
+                      aria-label={t('dashboard.actions.editAssessment')}
                       style={{
                         background: colors['brand-cyan'],
                         border: `2px solid ${colors.ink}`,
@@ -449,8 +449,8 @@ const Home = () => {
                       variant="soft"
                       size="2"
                       asChild
-                      title="Relatório"
-                      aria-label="Ver relatório"
+                      title={t('dashboard.actions.report')}
+                      aria-label={t('dashboard.actions.viewReport')}
                       style={{
                         background: colors['brand-mint'],
                         border: `2px solid ${colors.ink}`,
@@ -468,8 +468,8 @@ const Home = () => {
                         <IconButton
                           variant="soft"
                           size="2"
-                          title="Excluir"
-                          aria-label="Excluir avaliação"
+                          title={t('dashboard.actions.delete')}
+                          aria-label={t('dashboard.actions.deleteAssessment')}
                           style={{
                             background: colors['brand-salmon'],
                             border: `2px solid ${colors.ink}`,
@@ -482,14 +482,14 @@ const Home = () => {
                         </IconButton>
                       </AlertDialog.Trigger>
                       <AlertDialog.Content size="2">
-                        <AlertDialog.Title>Excluir Avaliação</AlertDialog.Title>
+                        <AlertDialog.Title>{t('dashboard.deleteDialog.title')}</AlertDialog.Title>
                         <AlertDialog.Description size="2">
-                          Tem certeza que deseja excluir esta avaliação? Esta ação não pode ser desfeita.
+                          {t('dashboard.deleteDialog.description')}
                         </AlertDialog.Description>
                         <Flex gap="3" mt="4" justify="end">
                           <AlertDialog.Cancel>
                             <GumroadButton variant="secondary" size="sm">
-                              Cancelar
+                              {t('dashboard.deleteDialog.cancel')}
                             </GumroadButton>
                           </AlertDialog.Cancel>
                           <AlertDialog.Action>
@@ -499,7 +499,7 @@ const Home = () => {
                               disabled={deleteLoading === assessment.id}
                               onClick={() => handleDeleteAssessment(assessment.id)}
                             >
-                              {deleteLoading === assessment.id ? 'Excluindo...' : 'Excluir'}
+                              {deleteLoading === assessment.id ? t('dashboard.deleteDialog.deleting') : t('dashboard.actions.delete')}
                             </GumroadButton>
                           </AlertDialog.Action>
                         </Flex>

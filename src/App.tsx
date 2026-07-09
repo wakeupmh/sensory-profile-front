@@ -45,6 +45,8 @@ const InviteAcceptPage = lazy(() => import('./pages/InviteAcceptPage'));
 const SharedRecordsList = lazy(() => import('./pages/SharedRecordsList'));
 const SharedAnamneseView = lazy(() => import('./pages/SharedAnamneseView'));
 const SharedAssessmentView = lazy(() => import('./pages/SharedAssessmentView'));
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
+const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage'));
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { session, isLoaded } = useAuthContext();
@@ -69,6 +71,8 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/sign-in" element={<SignIn />} />
+            <Route path="/privacidade" element={<PrivacyPolicyPage />} />
+            <Route path="/termos" element={<TermsOfServicePage />} />
             <Route path="/anamnese/shared/:token" element={<AnamneseSharedView />} />
             <Route path="/consolidated/shared/:token" element={<ConsolidatedReportSharedView />} />
 

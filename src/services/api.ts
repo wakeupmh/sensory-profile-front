@@ -841,7 +841,11 @@ export const reminderApi = {
 };
 
 // ─── Reminder e-mail delivery preferences ────────────────────────────
-import type { NotificationPreferences, UpdateNotificationPreferencesPayload } from '../types/notifications';
+import type {
+  NotificationPreferences,
+  UpdateNotificationPreferencesPayload,
+  PushSubscriptionPayload,
+} from '../types/notifications';
 
 export const notificationApi = {
   getPreferences: async (token: string | null): Promise<NotificationPreferences> => {
@@ -855,6 +859,22 @@ export const notificationApi = {
   ): Promise<NotificationPreferences> => {
     const response = await api.patch('/api/notifications/preferences', payload, { headers: getAuthHeaders(token) });
     return response.data?.data ?? response.data;
+  },
+
+  getPushPublicKey: async (token: string | null): Promise<string> => {
+    const response = await api.get('/api/notifications/push-subscriptions/public-key', {
+      headers: getAuthHeaders(token),
+    });
+    const data = response.data?.data ?? response.data;
+    return data.publicKey;
+  },
+
+  subscribeToPush: async (token: string | null, subscription: PushSubscriptionPayload): Promise<void> => {
+    await api.post('/api/notifications/push-subscriptions', subscription, { headers: getAuthHeaders(token) });
+  },
+
+  unsubscribeFromPush: async (token: string | null, endpoint: string): Promise<void> => {
+    await api.delete('/api/notifications/push-subscriptions', { headers: getAuthHeaders(token), data: { endpoint } });
   },
 };
 
@@ -1147,7 +1167,7 @@ export const accessLogApi = {
 };
 
 // Owner-side: full data export (LGPD, direito à portabilidade dos dados).
-import type { DataExportResponse } from '../types/dataExport';
+import type { DataExportResponse, AccountErasureResult } from '../types/dataExport';
 
 export const dataExportApi = {
   request: (token: string | null, childId: string): Promise<DataExportResponse> =>
@@ -1166,6 +1186,18 @@ export const searchApi = {
     });
     return response.data?.data ?? response.data;
   },
+};
+
+// Account-wide equivalents (LGPD Art. 18): everything the account owns —
+// every child, not just one — plus anamneses, professionals and drafts,
+// which aren't linked to a specific child. Never resolves through
+// delegated caregiver access on the backend, regardless of headers sent.
+export const accountApi = {
+  exportAll: (token: string | null): Promise<DataExportResponse> =>
+    authRequest<any>('get', token, '/api/account/export').then(unwrap<DataExportResponse>),
+
+  eraseAccount: (token: string | null): Promise<AccountErasureResult> =>
+    authRequest<any>('delete', token, '/api/account').then(unwrap<AccountErasureResult>),
 };
 
 export default api;
