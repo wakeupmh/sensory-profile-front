@@ -11,7 +11,7 @@ function makeDocument(overrides: Partial<DocumentRecord> = {}): DocumentRecord {
   return {
     id: 'doc-1',
     childId: 'child-1',
-    fileName: 'laudo.pdf',
+    title: 'laudo.pdf',
     mimeType: 'application/pdf',
     sizeBytes: 1024,
     createdAt: '',

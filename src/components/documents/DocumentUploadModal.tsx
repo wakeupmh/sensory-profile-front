@@ -135,7 +135,7 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file,
       const token = await getToken();
       const { document, uploadUrl } = await documentApi.createUploadUrl(token, {
         childId,
-        fileName: file.name,
+        title: file.name,
         mimeType: file.type || 'application/octet-stream',
         sizeBytes: file.size,
         resourceType: resourceType || undefined,

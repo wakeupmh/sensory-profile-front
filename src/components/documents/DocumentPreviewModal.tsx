@@ -79,7 +79,7 @@ const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({ document, o
     <GumroadModal
       open={document !== null}
       onClose={onClose}
-      title={document.fileName}
+      title={document.title}
       variant="center"
       maxWidth="720px"
     >
@@ -153,9 +153,9 @@ const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({ document, o
           </Flex>
         ) : downloadUrl ? (
           kind === 'image' ? (
-            <img src={downloadUrl} alt={document.fileName} style={{ maxWidth: '100%', maxHeight: '70vh', display: 'block', margin: '0 auto', borderRadius: radii.md, border: `2px solid ${colors.ink}` }} />
+            <img src={downloadUrl} alt={document.title} style={{ maxWidth: '100%', maxHeight: '70vh', display: 'block', margin: '0 auto', borderRadius: radii.md, border: `2px solid ${colors.ink}` }} />
           ) : kind === 'pdf' ? (
-            <iframe src={downloadUrl} title={document.fileName} style={{ width: '100%', height: '70vh', border: `2px solid ${colors.ink}`, borderRadius: radii.md }} />
+            <iframe src={downloadUrl} title={document.title} style={{ width: '100%', height: '70vh', border: `2px solid ${colors.ink}`, borderRadius: radii.md }} />
           ) : kind === 'video' ? (
             <video src={downloadUrl} controls style={{ width: '100%', maxHeight: '70vh', borderRadius: radii.md, border: `2px solid ${colors.ink}` }} />
           ) : (
