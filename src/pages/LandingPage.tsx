@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useState, useEffect, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Flex } from '@radix-ui/themes';
@@ -305,12 +305,12 @@ const LandingPage = () => {
             {t('landing.footer.copyright', { year: new Date().getFullYear() })}
           </GumroadText>
           <Flex gap="4">
-            <a href="#" style={{ fontFamily: typography.caption.font, fontSize: typography.caption.size }}>
+            <Link to="/termos" style={{ fontFamily: typography.caption.font, fontSize: typography.caption.size, color: colors.ink }}>
               {t('landing.footer.terms')}
-            </a>
-            <a href="#" style={{ fontFamily: typography.caption.font, fontSize: typography.caption.size }}>
+            </Link>
+            <Link to="/privacidade" style={{ fontFamily: typography.caption.font, fontSize: typography.caption.size, color: colors.ink }}>
               {t('landing.footer.privacy')}
-            </a>
+            </Link>
           </Flex>
         </Flex>
       </Box>

@@ -1167,11 +1167,23 @@ export const accessLogApi = {
 };
 
 // Owner-side: full data export (LGPD, direito à portabilidade dos dados).
-import type { DataExportResponse } from '../types/dataExport';
+import type { DataExportResponse, AccountErasureResult } from '../types/dataExport';
 
 export const dataExportApi = {
   request: (token: string | null, childId: string): Promise<DataExportResponse> =>
     authRequest<any>('get', token, `/api/children/${childId}/export`).then(unwrap<DataExportResponse>),
+};
+
+// Account-wide equivalents (LGPD Art. 18): everything the account owns —
+// every child, not just one — plus anamneses, professionals and drafts,
+// which aren't linked to a specific child. Never resolves through
+// delegated caregiver access on the backend, regardless of headers sent.
+export const accountApi = {
+  exportAll: (token: string | null): Promise<DataExportResponse> =>
+    authRequest<any>('get', token, '/api/account/export').then(unwrap<DataExportResponse>),
+
+  eraseAccount: (token: string | null): Promise<AccountErasureResult> =>
+    authRequest<any>('delete', token, '/api/account').then(unwrap<AccountErasureResult>),
 };
 
 export default api;
