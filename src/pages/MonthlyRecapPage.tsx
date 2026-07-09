@@ -161,7 +161,7 @@ export default function MonthlyRecapPage() {
         </button>
       </Flex>
 
-      {!effectiveChildId ? (
+      {children.length === 0 ? null : !effectiveChildId ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <GumroadText level="body-md" as="p" style={{ opacity: 0.7 }}>
             Selecione uma criança para ver o resumo do mês

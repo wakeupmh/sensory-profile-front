@@ -126,7 +126,7 @@ export default function DevelopmentPage() {
                 Gerenciar
               </GumroadButton>
             </Flex>
-            {milestones.slice(0, 3).length === 0 ? (
+            {children.length > 0 && milestones.slice(0, 3).length === 0 ? (
               <p style={emptyStyle}>Nenhum registro</p>
             ) : (
               milestones.slice(0, 3).map((m) => (
@@ -165,7 +165,7 @@ export default function DevelopmentPage() {
                 Gerenciar
               </GumroadButton>
             </Flex>
-            {commLogs.slice(0, 3).length === 0 ? (
+            {children.length > 0 && commLogs.slice(0, 3).length === 0 ? (
               <p style={emptyStyle}>Nenhum registro</p>
             ) : (
               commLogs.slice(0, 3).map((log) => (

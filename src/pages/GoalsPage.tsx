@@ -115,7 +115,7 @@ export default function GoalsPage() {
             <GumroadText level="body-md" as="p">{error}</GumroadText>
           </Flex>
         </GumroadCard>
-      ) : goals.length === 0 ? (
+      ) : children.length > 0 && goals.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">
             <InfoCircledIcon width={40} height={40} />

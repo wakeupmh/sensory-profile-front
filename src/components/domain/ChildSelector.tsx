@@ -1,6 +1,7 @@
 import { Box } from '@radix-ui/themes';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import type { ChildData } from '../../services/api';
+import { NoChildrenPrompt } from './NoChildrenPrompt';
 
 interface ChildSelectorProps {
   children: ChildData[];
@@ -10,7 +11,7 @@ interface ChildSelectorProps {
 }
 
 export function ChildSelector({ children, selectedChildId, onChange, emptyLabel = 'Todas as crianças' }: ChildSelectorProps) {
-  if (children.length === 0) return null;
+  if (children.length === 0) return <NoChildrenPrompt />;
   return (
     <Box mb="4">
       <select
