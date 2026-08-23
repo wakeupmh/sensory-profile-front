@@ -13,6 +13,12 @@ import {
 import type { AudioRecording } from '../../hooks/useAudioRecorder';
 
 interface DailyReportRecorderProps {
+  /**
+   * O relato que já existe para esta data, se houver. Gravar de novo o
+   * substitui — há um relato por criança por dia — então o usuário precisa
+   * saber disso *antes* de falar, não depois de perder o anterior.
+   */
+  replaces?: import('../../types/dailyReports').DailyReport | null;
   isOpen: boolean;
   onClose: () => void;
   /** Recebe a gravação já finalizada; faz upload, dispara a transcrição e resolve. */
@@ -28,6 +34,7 @@ export default function DailyReportRecorder({
   onClose,
   onFinish,
   reportDate,
+  replaces = null,
 }: DailyReportRecorderProps) {
   const { isRecording, seconds, error, start, stop, cancel } = useAudioRecorder();
   const [submitting, setSubmitting] = useState(false);
@@ -139,6 +146,25 @@ export default function DailyReportRecorder({
           {' — '}
           conte como foi o dia. A gravação vira um relatório com registros sugeridos que você confirma depois.
         </GumroadText>
+
+        {replaces && (
+          <Box
+            role="alert"
+            style={{
+              backgroundColor: colors['brand-yellow'],
+              border: `2px solid ${colors.ink}`,
+              borderRadius: radii.md,
+              padding: spacing.sm,
+              marginBottom: spacing.md,
+            }}
+          >
+            <GumroadText level="body-sm" as="p">
+              {replaces.status === 'ready'
+                ? 'Já existe um relato para hoje. Gravar de novo substitui a transcrição e o relatório atuais.'
+                : 'Já existe uma gravação para hoje. Gravar de novo substitui a anterior.'}
+            </GumroadText>
+          </Box>
+        )}
 
         {!supported ? (
           <Flex align="center" gap="2" style={{ color: colors.ink }}>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Box, Flex } from '@radix-ui/themes';
+import { AlertDialog, Box, Flex } from '@radix-ui/themes';
 import {
   CheckIcon,
   ExclamationTriangleIcon,
@@ -67,6 +67,7 @@ export default function DailyReportPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [savingLog, setSavingLog] = useState<string | null>(null);
   const [savedLogs, setSavedLogs] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState<DailyReport | null>(null);
 
   const fetchReports = useCallback(async () => {
     if (!effectiveChildId) {
@@ -140,6 +141,7 @@ export default function DailyReportPage() {
   };
 
   const handleDelete = async (report: DailyReport) => {
+    setDeleting(null);
     try {
       const token = await getTokenRef.current();
       await dailyReportApi.remove(token, report.id);
@@ -178,6 +180,8 @@ export default function DailyReportPage() {
       setSavingLog(null);
     }
   };
+
+  const todaysReport = reports.find((r) => r.reportDate === today());
 
   return (
     <Box>
@@ -258,7 +262,7 @@ export default function DailyReportPage() {
                       Ouvir
                     </GumroadButton>
                   )}
-                  <GumroadButton variant="ghost" size="sm" onClick={() => handleDelete(report)}>
+                  <GumroadButton variant="ghost" size="sm" onClick={() => setDeleting(report)}>
                     <TrashIcon />
                     Excluir
                   </GumroadButton>
@@ -368,7 +372,29 @@ export default function DailyReportPage() {
         onClose={() => setRecorderOpen(false)}
         onFinish={handleFinishRecording}
         reportDate={today()}
+        replaces={todaysReport ?? null}
       />
+
+      <AlertDialog.Root open={!!deleting} onOpenChange={(open) => !open && setDeleting(null)}>
+        <AlertDialog.Content size="2">
+          <AlertDialog.Title>Excluir relato</AlertDialog.Title>
+          <AlertDialog.Description size="2">
+            {deleting?.status === 'ready'
+              ? 'A transcrição, o relatório e a gravação deste dia serão apagados. Esta ação não pode ser desfeita.'
+              : 'Este relato e a gravação dele serão apagados. Esta ação não pode ser desfeita.'}
+          </AlertDialog.Description>
+          <Flex gap="3" mt="4" justify="end">
+            <AlertDialog.Cancel>
+              <GumroadButton variant="secondary" size="sm">Cancelar</GumroadButton>
+            </AlertDialog.Cancel>
+            <AlertDialog.Action>
+              <GumroadButton variant="danger" size="sm" onClick={() => deleting && handleDelete(deleting)}>
+                Excluir
+              </GumroadButton>
+            </AlertDialog.Action>
+          </Flex>
+        </AlertDialog.Content>
+      </AlertDialog.Root>
     </Box>
   );
 }
