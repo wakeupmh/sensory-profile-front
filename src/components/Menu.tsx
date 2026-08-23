@@ -24,6 +24,7 @@ import {
   CalendarIcon,
   GearIcon,
   MagnifyingGlassIcon,
+  SpeakerLoudIcon,
 } from '@radix-ui/react-icons';
 import { colors, typography, zIndex, shadows } from '../theme/tokens';
 import GumroadButton from './design-system/GumroadButton';
@@ -42,6 +43,7 @@ const PRIMARY: NavItem[] = [
 
 const SECONDARY: NavItem[] = [
   { path: '/logs', match: '/logs', labelKey: 'nav.logs', icon: ActivityLogIcon },
+  { path: '/relato-do-dia', match: '/relato-do-dia', labelKey: 'nav.dailyReport', icon: SpeakerLoudIcon },
   { path: '/medical', match: '/medical', labelKey: 'nav.medical', icon: PlusCircledIcon },
   { path: '/therapy', match: '/therapy', labelKey: 'nav.therapy', icon: HeartIcon },
   { path: '/development', match: '/development', labelKey: 'nav.development', icon: BarChartIcon },

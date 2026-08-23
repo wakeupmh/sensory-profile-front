@@ -22,6 +22,7 @@ import {
   CalendarIcon,
   GearIcon,
   MagnifyingGlassIcon,
+  SpeakerLoudIcon,
 } from '@radix-ui/react-icons';
 import { colors, zIndex, typography, shadows } from '../theme/tokens';
 import GlobalSearch from './GlobalSearch';
@@ -47,6 +48,7 @@ const BottomNav: React.FC = () => {
   ];
 
   const moreTabs = [
+    { path: '/relato-do-dia', labelKey: 'nav.dailyReport', icon: SpeakerLoudIcon },
     { path: '/therapy', labelKey: 'nav.therapy', icon: HeartIcon },
     { path: '/development', labelKey: 'nav.development', icon: BarChartIcon },
     { path: '/education', labelKey: 'nav.education', icon: ReaderIcon },

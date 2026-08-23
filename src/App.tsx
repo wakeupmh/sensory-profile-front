@@ -20,6 +20,7 @@ const AnamneseSharedView = lazy(() => import('./pages/AnamneseSharedView'));
 const Children = lazy(() => import('./pages/Children'));
 const ChildProfilePage = lazy(() => import('./pages/ChildProfilePage'));
 const LogsPage = lazy(() => import('./pages/LogsPage'));
+const DailyReportPage = lazy(() => import('./pages/DailyReportPage'));
 const TherapyPage = lazy(() => import('./pages/TherapyPage'));
 const MedicalPage = lazy(() => import('./pages/MedicalPage'));
 const DevelopmentPage = lazy(() => import('./pages/DevelopmentPage'));
@@ -94,6 +95,7 @@ function App() {
               <Route path="/children/:childId/access-log" element={<ProtectedRoute><AccessLogPage /></ProtectedRoute>} />
               <Route path="/children/:childId/ficha" element={<ProtectedRoute><FichaCriancaPage /></ProtectedRoute>} />
               <Route path="/logs" element={<ProtectedRoute><LogsPage /></ProtectedRoute>} />
+              <Route path="/relato-do-dia" element={<ProtectedRoute><DailyReportPage /></ProtectedRoute>} />
               <Route path="/therapy" element={<ProtectedRoute><TherapyPage /></ProtectedRoute>} />
               <Route path="/medical" element={<ProtectedRoute><MedicalPage /></ProtectedRoute>} />
               <Route path="/development" element={<ProtectedRoute><DevelopmentPage /></ProtectedRoute>} />
