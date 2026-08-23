@@ -185,6 +185,60 @@ describe('useAudioRecorder', () => {
 
     expect(FakeMediaRecorder.instances[0].state).toBe('inactive');
   });
+
+  it('releases the microphone when the automatic cutoff fires, not just the button', async () => {
+    const { result } = renderHook(() => useAudioRecorder());
+
+    await act(async () => {
+      await result.current.start();
+    });
+    FakeMediaRecorder.instances[0].emit(256);
+    await act(async () => {
+      vi.advanceTimersByTime(10 * 60 * 1000);
+    });
+
+    // O limite de segurança é justamente o caminho em que o microfone ficava
+    // aberto: o handler de parada só era instalado pelo botão.
+    expect(trackStop).toHaveBeenCalled();
+    expect(result.current.isRecording).toBe(false);
+  });
+
+  it('keeps the audio captured before the cutoff instead of discarding it', async () => {
+    const { result } = renderHook(() => useAudioRecorder());
+
+    await act(async () => {
+      await result.current.start();
+    });
+    FakeMediaRecorder.instances[0].emit(256);
+    await act(async () => {
+      vi.advanceTimersByTime(10 * 60 * 1000);
+    });
+
+    let recording: Awaited<ReturnType<typeof result.current.stop>> = null;
+    await act(async () => {
+      recording = await result.current.stop();
+    });
+
+    expect(recording).not.toBeNull();
+    expect(recording!.blob.size).toBe(256);
+  });
+
+  it('does not keep ticking the timer after the cutoff', async () => {
+    const { result } = renderHook(() => useAudioRecorder());
+
+    await act(async () => {
+      await result.current.start();
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(10 * 60 * 1000);
+    });
+    const atCutoff = result.current.seconds;
+    await act(async () => {
+      vi.advanceTimersByTime(30 * 1000);
+    });
+
+    expect(result.current.seconds).toBe(atCutoff);
+  });
 });
 
 describe('formatDuration', () => {

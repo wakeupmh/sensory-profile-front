@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { parseLocalDate } from '../utils/date';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Box, Flex } from '@radix-ui/themes';
 import { ArrowLeftIcon, ExclamationTriangleIcon, Share2Icon } from '@radix-ui/react-icons';
@@ -24,7 +25,7 @@ const SAVE_DEBOUNCE_MS = 600;
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 function calculateAge(birthDate: string): string {
-  const birth = new Date(`${birthDate}T00:00:00`);
+  const birth = parseLocalDate(birthDate);
   const now = new Date();
   let years = now.getFullYear() - birth.getFullYear();
   let months = now.getMonth() - birth.getMonth();
@@ -35,7 +36,7 @@ function calculateAge(birthDate: string): string {
 }
 
 function formatBirthDate(birthDate: string): string {
-  return new Date(`${birthDate}T00:00:00`).toLocaleDateString('pt-BR');
+  return parseLocalDate(birthDate).toLocaleDateString('pt-BR');
 }
 
 const textareaStyle: React.CSSProperties = {

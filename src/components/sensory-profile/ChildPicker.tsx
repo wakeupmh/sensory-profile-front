@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { parseLocalDate } from '../../utils/date';
 import { Flex, Box } from '@radix-ui/themes';
 import { childApi, ChildData } from '../../services/api';
 import { useAuthContext } from '../../context/AuthContext';
@@ -13,7 +14,7 @@ interface ChildPickerProps {
 }
 
 function computeAge(birthDate: string): number {
-  const bd = new Date(birthDate);
+  const bd = parseLocalDate(birthDate);
   const today = new Date();
   let age = today.getFullYear() - bd.getFullYear();
   const m = today.getMonth() - bd.getMonth();

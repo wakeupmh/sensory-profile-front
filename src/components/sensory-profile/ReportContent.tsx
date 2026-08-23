@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { parseLocalDate } from '../../utils/date';
 import { FormData, SensoryItem } from "./types";
 import NormalCurveChart from "./NormalCurveChart";
 import { getInstrument } from "../../instruments";
@@ -216,7 +217,7 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
             <div style={{ flex: 1 }}>
               <span style={fieldLabelStyle}>Data de Nascimento:</span> {
                 formData.child.birthDate
-                  ? new Intl.DateTimeFormat('pt-BR').format(new Date(formData.child.birthDate))
+                  ? new Intl.DateTimeFormat('pt-BR').format(parseLocalDate(formData.child.birthDate))
                   : 'Não informada'
               }
             </div>

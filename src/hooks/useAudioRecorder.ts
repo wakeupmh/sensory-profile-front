@@ -51,6 +51,10 @@ export function useAudioRecorder(): UseAudioRecorder {
   const streamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<number | null>(null);
   const secondsRef = useRef(0);
+  // Resolver de um `stop()` em andamento, e a gravação já finalizada quando
+  // ninguém estava esperando (o caso do corte automático em MAX_RECORDING_SECONDS).
+  const pendingStopRef = useRef<((r: AudioRecording | null) => void) | null>(null);
+  const finalizedRef = useRef<AudioRecording | null>(null);
 
   // Soltar o stream é o que apaga o indicador de microfone do navegador. Se
   // isso vazar, o usuário vê "gravando" numa aba que já saiu da tela.
@@ -83,6 +87,28 @@ export function useAudioRecorder(): UseAudioRecorder {
       recorder.ondataavailable = (event) => {
         if (event.data.size > 0) chunksRef.current.push(event.data);
       };
+      // Atribuído aqui, e não dentro de `stop()`: o corte automático abaixo
+      // chama `recorder.stop()` diretamente, e com o handler instalado só no
+      // caminho do botão o microfone ficava aberto para sempre justamente
+      // quando o limite de segurança disparava.
+      recorder.onstop = () => {
+        // O mimeType real do recorder, não o que pedimos: quando o navegador
+        // ignora a preferência, o backend precisa saber o que de fato chegou.
+        const mimeType = recorder.mimeType || 'audio/webm';
+        const blob = new Blob(chunksRef.current, { type: mimeType });
+        const recording: AudioRecording | null =
+          blob.size > 0 ? { blob, mimeType, durationSeconds: secondsRef.current } : null;
+        chunksRef.current = [];
+        releaseStream();
+        setIsRecording(false);
+
+        const resolve = pendingStopRef.current;
+        pendingStopRef.current = null;
+        // Sem ninguém esperando, a gravação fica guardada para o `stop()`
+        // seguinte — o corte automático não pode descartar o que foi falado.
+        if (resolve) resolve(recording);
+        else finalizedRef.current = recording;
+      };
       recorderRef.current = recorder;
       recorder.start();
       setIsRecording(true);
@@ -90,7 +116,9 @@ export function useAudioRecorder(): UseAudioRecorder {
       timerRef.current = window.setInterval(() => {
         secondsRef.current += 1;
         setSeconds(secondsRef.current);
-        if (secondsRef.current >= MAX_RECORDING_SECONDS) recorder.stop();
+        if (secondsRef.current >= MAX_RECORDING_SECONDS && recorder.state !== 'inactive') {
+          recorder.stop();
+        }
       }, 1000);
     } catch (e) {
       releaseStream();
@@ -105,22 +133,15 @@ export function useAudioRecorder(): UseAudioRecorder {
   const stop = useCallback((): Promise<AudioRecording | null> => {
     const recorder = recorderRef.current;
     if (!recorder || recorder.state === 'inactive') {
+      // Já parado: ou nunca gravou, ou o corte automático finalizou antes.
+      const finalized = finalizedRef.current;
+      finalizedRef.current = null;
       releaseStream();
       setIsRecording(false);
-      return Promise.resolve(null);
+      return Promise.resolve(finalized);
     }
     return new Promise((resolve) => {
-      recorder.onstop = () => {
-        // O mimeType real do recorder, não o que pedimos: quando o navegador
-        // ignora a preferência, o backend precisa saber o que de fato chegou.
-        const mimeType = recorder.mimeType || 'audio/webm';
-        const blob = new Blob(chunksRef.current, { type: mimeType });
-        const durationSeconds = secondsRef.current;
-        chunksRef.current = [];
-        releaseStream();
-        setIsRecording(false);
-        resolve(blob.size > 0 ? { blob, mimeType, durationSeconds } : null);
-      };
+      pendingStopRef.current = resolve;
       recorder.stop();
     });
   }, [releaseStream]);
@@ -132,6 +153,8 @@ export function useAudioRecorder(): UseAudioRecorder {
       recorder.stop();
     }
     chunksRef.current = [];
+    finalizedRef.current = null;
+    pendingStopRef.current = null;
     secondsRef.current = 0;
     setSeconds(0);
     releaseStream();
