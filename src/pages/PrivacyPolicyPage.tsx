@@ -131,9 +131,10 @@ export default function PrivacyPolicyPage() {
           </P>
           <P>
             <strong>Amazon Web Services (AWS)</strong> — infraestrutura de nuvem: Amazon S3
-            (armazenamento de documentos e fotos anexadas), Amazon SES (envio de e-mails de
-            lembrete) e Amazon Bedrock (geração de resumos por IA, quando você solicita essa
-            funcionalidade). Esses serviços podem processar dados em servidores fora do Brasil,
+            (armazenamento de documentos, fotos anexadas e gravações do relato do dia), Amazon SES
+            (envio de e-mails de lembrete), Amazon Transcribe (transcrição do áudio do relato do
+            dia e dos ditados por voz, quando você grava um) e Amazon Bedrock (geração de resumos por IA e organização do
+            relato transcrito, quando você solicita essa funcionalidade). Esses serviços podem processar dados em servidores fora do Brasil,
             conforme a região da AWS configurada para esta aplicação — o que constitui uma
             transferência internacional de dados (Art. 33 da LGPD), amparada pelas cláusulas
             contratuais padrão da AWS.
@@ -153,7 +154,11 @@ export default function PrivacyPolicyPage() {
             mantidos enquanto sua conta existir, para que o histórico continue disponível e útil ao
             longo do tempo. Registros de acesso (trilha de auditoria) são mantidos por 180 dias, e o
             histórico de envio de lembretes por e-mail por 90 dias — depois disso são apagados
-            automaticamente. Links de compartilhamento público (relatório consolidado) expiram
+            automaticamente. A gravação de áudio do relato do dia é apagada 30 dias depois de
+            enviada; a transcrição e o relatório gerado a partir dela permanecem, como qualquer
+            outro registro. Já o áudio de um ditado por voz (o botão de microfone ao lado dos
+            campos de texto) é apagado assim que o texto é gerado, e o próprio ditado é descartado
+            em 7 dias — o que fica é apenas o texto que você manteve no campo. Links de compartilhamento público (relatório consolidado) expiram
             automaticamente na data configurada ao criá-los.
           </P>
         </Section>

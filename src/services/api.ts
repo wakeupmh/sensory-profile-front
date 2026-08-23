@@ -268,6 +268,69 @@ export const logApi = {
       .then(() => undefined),
 };
 
+import type {
+  CreateDailyReportPayload,
+  CreateDailyReportResponse,
+  DailyReport,
+} from '../types/dailyReports';
+
+import type { VoiceNote, CreateVoiceNoteResponse } from '../types/dailyReports';
+
+/**
+ * Ditado avulso: o mesmo maquinário do relato do dia, mas devolvendo texto
+ * puro para qualquer campo do app. Não recebe childId — o ditado é da conta.
+ */
+export const voiceNoteApi = {
+  create: async (token: string | null, mimeType: string): Promise<CreateVoiceNoteResponse> =>
+    (await authRequest<Envelope<CreateVoiceNoteResponse>>('post', token, '/api/voice-notes', { mimeType })).data,
+
+  startTranscription: async (token: string | null, id: string): Promise<VoiceNote> =>
+    (await authRequest<Envelope<VoiceNote>>('post', token, `/api/voice-notes/${id}/transcribe`)).data,
+
+  get: async (token: string | null, id: string): Promise<VoiceNote> =>
+    (await authRequest<Envelope<VoiceNote>>('get', token, `/api/voice-notes/${id}`)).data,
+
+  uploadAudio: putPresignedBlob,
+};
+
+/** Sem header de autenticação: a própria URL pré-assinada é a credencial. */
+function putPresignedBlob(uploadUrl: string, blob: Blob, mimeType: string): Promise<void> {
+  return axios.put(uploadUrl, blob, { headers: { 'Content-Type': mimeType } }).then(() => undefined);
+}
+
+/** O backend responde `{ success, data, timestamp }`; `authRequest` devolve o envelope inteiro. */
+interface Envelope<T> {
+  data: T;
+}
+
+/**
+ * Relato falado do dia. O fluxo tem três passos porque o áudio nunca passa
+ * pelo backend (upload direto ao S3) e a transcrição é assíncrona:
+ * `create` -> `uploadAudio` -> `startTranscription` -> `get` em loop.
+ */
+export const dailyReportApi = {
+  list: async (token: string | null, childId: string): Promise<DailyReport[]> =>
+    (await authRequest<Envelope<DailyReport[]>>('get', token, '/api/daily-reports', undefined, { params: { childId } })).data ?? [],
+
+  get: async (token: string | null, id: string): Promise<DailyReport> =>
+    (await authRequest<Envelope<DailyReport>>('get', token, `/api/daily-reports/${id}`)).data,
+
+  create: async (token: string | null, payload: CreateDailyReportPayload): Promise<CreateDailyReportResponse> =>
+    (await authRequest<Envelope<CreateDailyReportResponse>>('post', token, '/api/daily-reports', payload)).data,
+
+  startTranscription: async (token: string | null, id: string): Promise<DailyReport> =>
+    (await authRequest<Envelope<DailyReport>>('post', token, `/api/daily-reports/${id}/transcribe`)).data,
+
+  getAudioUrl: async (token: string | null, id: string): Promise<{ url: string }> =>
+    (await authRequest<Envelope<{ url: string }>>('get', token, `/api/daily-reports/${id}/audio`)).data,
+
+  remove: async (token: string | null, id: string): Promise<void> => {
+    await authRequest<unknown>('delete', token, `/api/daily-reports/${id}`);
+  },
+
+  uploadAudio: putPresignedBlob,
+};
+
 import type { CreateSessionPayload, CreateTherapistPayload, PaginatedSessions, TherapySession, Therapist, TherapyType } from '../types/therapy';
 
 export interface SessionQueryParams {

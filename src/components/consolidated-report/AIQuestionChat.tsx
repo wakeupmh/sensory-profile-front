@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import DictateButton from '../design-system/DictateButton';
 import { Box, Flex } from '@radix-ui/themes';
 import { ChatBubbleIcon, InfoCircledIcon, PaperPlaneIcon } from '@radix-ui/react-icons';
 import { aiQuestionApi, AIRateLimitError } from '../../services/api';
@@ -162,6 +163,15 @@ const AIQuestionChat: React.FC<Props> = ({ childId, periodDays = 90 }) => {
           >
             <PaperPlaneIcon />
           </button>
+        </Flex>
+        <Flex justify="end" mt="2">
+          {/* Perguntar em voz alta costuma ser mais natural que digitar uma
+              pergunta longa; o texto é acrescentado para poder ser revisado
+              antes de enviar. */}
+          <DictateButton
+            onText={(text) => setQuestion((prev) => (prev ? `${prev} ${text}` : text).slice(0, 500))}
+            fieldLabel="pergunta"
+          />
         </Flex>
       </form>
 
