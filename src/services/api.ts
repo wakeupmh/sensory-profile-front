@@ -274,6 +274,30 @@ import type {
   DailyReport,
 } from '../types/dailyReports';
 
+import type { VoiceNote, CreateVoiceNoteResponse } from '../types/dailyReports';
+
+/**
+ * Ditado avulso: o mesmo maquinário do relato do dia, mas devolvendo texto
+ * puro para qualquer campo do app. Não recebe childId — o ditado é da conta.
+ */
+export const voiceNoteApi = {
+  create: async (token: string | null, mimeType: string): Promise<CreateVoiceNoteResponse> =>
+    (await authRequest<Envelope<CreateVoiceNoteResponse>>('post', token, '/api/voice-notes', { mimeType })).data,
+
+  startTranscription: async (token: string | null, id: string): Promise<VoiceNote> =>
+    (await authRequest<Envelope<VoiceNote>>('post', token, `/api/voice-notes/${id}/transcribe`)).data,
+
+  get: async (token: string | null, id: string): Promise<VoiceNote> =>
+    (await authRequest<Envelope<VoiceNote>>('get', token, `/api/voice-notes/${id}`)).data,
+
+  uploadAudio: putPresignedBlob,
+};
+
+/** Sem header de autenticação: a própria URL pré-assinada é a credencial. */
+function putPresignedBlob(uploadUrl: string, blob: Blob, mimeType: string): Promise<void> {
+  return axios.put(uploadUrl, blob, { headers: { 'Content-Type': mimeType } }).then(() => undefined);
+}
+
 /** O backend responde `{ success, data, timestamp }`; `authRequest` devolve o envelope inteiro. */
 interface Envelope<T> {
   data: T;
@@ -304,9 +328,7 @@ export const dailyReportApi = {
     await authRequest<unknown>('delete', token, `/api/daily-reports/${id}`);
   },
 
-  /** Sem header de autenticação: a própria URL pré-assinada é a credencial. */
-  uploadAudio: (uploadUrl: string, blob: Blob, mimeType: string): Promise<void> =>
-    axios.put(uploadUrl, blob, { headers: { 'Content-Type': mimeType } }).then(() => undefined),
+  uploadAudio: putPresignedBlob,
 };
 
 import type { CreateSessionPayload, CreateTherapistPayload, PaginatedSessions, TherapySession, Therapist, TherapyType } from '../types/therapy';

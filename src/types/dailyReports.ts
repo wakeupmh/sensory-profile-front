@@ -44,3 +44,17 @@ export interface CreateDailyReportResponse {
   report: DailyReport;
   uploadUrl: string;
 }
+
+/** Ditado avulso — o texto é o produto; o áudio é descartado pelo backend assim que sai. */
+export interface VoiceNote {
+  id: string;
+  status: 'draft' | 'transcribing' | 'ready' | 'failed';
+  transcript: string | null;
+  error: string | null;
+  createdAt: string;
+}
+
+export interface CreateVoiceNoteResponse {
+  note: VoiceNote;
+  uploadUrl: string;
+}

@@ -133,7 +133,7 @@ export default function PrivacyPolicyPage() {
             <strong>Amazon Web Services (AWS)</strong> — infraestrutura de nuvem: Amazon S3
             (armazenamento de documentos, fotos anexadas e gravações do relato do dia), Amazon SES
             (envio de e-mails de lembrete), Amazon Transcribe (transcrição do áudio do relato do
-            dia, quando você grava um) e Amazon Bedrock (geração de resumos por IA e organização do
+            dia e dos ditados por voz, quando você grava um) e Amazon Bedrock (geração de resumos por IA e organização do
             relato transcrito, quando você solicita essa funcionalidade). Esses serviços podem processar dados em servidores fora do Brasil,
             conforme a região da AWS configurada para esta aplicação — o que constitui uma
             transferência internacional de dados (Art. 33 da LGPD), amparada pelas cláusulas
@@ -156,7 +156,9 @@ export default function PrivacyPolicyPage() {
             histórico de envio de lembretes por e-mail por 90 dias — depois disso são apagados
             automaticamente. A gravação de áudio do relato do dia é apagada 30 dias depois de
             enviada; a transcrição e o relatório gerado a partir dela permanecem, como qualquer
-            outro registro. Links de compartilhamento público (relatório consolidado) expiram
+            outro registro. Já o áudio de um ditado por voz (o botão de microfone ao lado dos
+            campos de texto) é apagado assim que o texto é gerado, e o próprio ditado é descartado
+            em 7 dias — o que fica é apenas o texto que você manteve no campo. Links de compartilhamento público (relatório consolidado) expiram
             automaticamente na data configurada ao criá-los.
           </P>
         </Section>
