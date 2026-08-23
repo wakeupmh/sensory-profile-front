@@ -70,6 +70,8 @@ export default function DailyReportPage() {
   const [savedLogs, setSavedLogs] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState<DailyReport | null>(null);
   const [retrying, setRetrying] = useState<string | null>(null);
+  const [audioUrls, setAudioUrls] = useState<Record<string, string>>({});
+  const [loadingAudio, setLoadingAudio] = useState<string | null>(null);
 
   const fetchReports = useCallback(async () => {
     if (!effectiveChildId) {
@@ -152,13 +154,25 @@ export default function DailyReportPage() {
     }
   };
 
+  /**
+   * Toca dentro do card em vez de abrir a URL assinada numa aba nova.
+   * `window.open` aqui acontece depois de dois `await` — fora do stack do
+   * gesto do usuário — e o Safari do iOS bloqueia isso; num PWA que o cuidador
+   * usa no celular, era o caminho mais provável de a gravação simplesmente não
+   * tocar. Mesmo quando abria, jogava a pessoa numa aba com uma URL crua do S3
+   * (que vários navegadores baixam em vez de tocar), sem contexto e sem volta.
+   */
   const handlePlayAudio = async (report: DailyReport) => {
+    if (audioUrls[report.id]) return;
+    setLoadingAudio(report.id);
     try {
       const token = await getTokenRef.current();
       const { url } = await dailyReportApi.getAudioUrl(token, report.id);
-      window.open(url, '_blank', 'noopener,noreferrer');
+      setAudioUrls((prev) => ({ ...prev, [report.id]: url }));
     } catch {
-      toast.error('Não foi possível abrir a gravação.');
+      toast.error('Não foi possível carregar a gravação.');
+    } finally {
+      setLoadingAudio(null);
     }
   };
 
@@ -289,10 +303,15 @@ export default function DailyReportPage() {
                       {retrying === report.id ? 'Reenviando…' : 'Tentar novamente'}
                     </GumroadButton>
                   )}
-                  {report.hasAudio && (
-                    <GumroadButton variant="ghost" size="sm" onClick={() => handlePlayAudio(report)}>
+                  {report.hasAudio && !audioUrls[report.id] && (
+                    <GumroadButton
+                      variant="ghost"
+                      size="sm"
+                      disabled={loadingAudio === report.id}
+                      onClick={() => handlePlayAudio(report)}
+                    >
                       <SpeakerLoudIcon />
-                      Ouvir
+                      {loadingAudio === report.id ? 'Carregando…' : 'Ouvir'}
                     </GumroadButton>
                   )}
                   <GumroadButton variant="ghost" size="sm" onClick={() => setDeleting(report)}>
@@ -300,6 +319,30 @@ export default function DailyReportPage() {
                     Excluir
                   </GumroadButton>
                 </Flex>
+
+                {audioUrls[report.id] && (
+                  <Box mt="3">
+                    {/* A URL assinada vale 15 minutos; se expirar com o player
+                        aberto, o `onError` devolve o botão em vez de deixar um
+                        controle morto na tela. */}
+                    <audio
+                      controls
+                      autoPlay
+                      src={audioUrls[report.id]}
+                      style={{ width: '100%' }}
+                      onError={() => {
+                        setAudioUrls((prev) => {
+                          const next = { ...prev };
+                          delete next[report.id];
+                          return next;
+                        });
+                        toast.error('A gravação expirou. Toque em "Ouvir" novamente.');
+                      }}
+                    >
+                      <track kind="captions" />
+                    </audio>
+                  </Box>
+                )}
 
                 {expanded && (
                   <Box mt="4" style={{ borderTop: `2px solid ${colors.ink}`, paddingTop: spacing.md }}>
