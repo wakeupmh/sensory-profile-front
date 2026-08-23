@@ -24,6 +24,21 @@ import DailyReportRecorder from '../components/logs/DailyReportRecorder';
 import type { AudioRecording } from '../hooks/useAudioRecorder';
 import { useAuthContext } from '../context/AuthContext';
 
+/**
+ * O backend valida a saída da IA antes de gravar, mas relatos estruturados
+ * antes disso continuam no banco — e um `.map` em não-lista derruba a página
+ * inteira. Ler defensivamente aqui custa uma função e cobre esses registros.
+ */
+function readSuggestedLogs(report: DailyReport): SuggestedLog[] {
+  const suggestions = report.structured?.suggestedLogs;
+  if (!Array.isArray(suggestions)) return [];
+  return suggestions.filter((s): s is SuggestedLog => !!s && typeof s === 'object' && s.logType in LOG_TYPE_LABELS);
+}
+
+function readStringList(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string') : [];
+}
+
 const LOG_TYPE_LABELS: Record<LogType, string> = {
   abc: 'ABC',
   mood: 'Humor',
@@ -346,43 +361,43 @@ export default function DailyReportPage() {
 
                 {expanded && (
                   <Box mt="4" style={{ borderTop: `2px solid ${colors.ink}`, paddingTop: spacing.md }}>
-                    {report.structured?.highlights?.length ? (
+                    {readStringList(report.structured?.highlights).length > 0 ? (
                       <Box mb="3">
                         <GumroadHeading level="title-sm" as="h4">Destaques</GumroadHeading>
                         <ul style={{ margin: 0, paddingLeft: '20px' }}>
-                          {report.structured.highlights.map((item, i) => (
+                          {readStringList(report.structured?.highlights).map((item, i) => (
                             <li key={i}><GumroadText level="body-sm">{item}</GumroadText></li>
                           ))}
                         </ul>
                       </Box>
                     ) : null}
 
-                    {report.structured?.concerns?.length ? (
+                    {readStringList(report.structured?.concerns).length > 0 ? (
                       <Box mb="3">
                         <GumroadHeading level="title-sm" as="h4">Pontos de atenção</GumroadHeading>
                         <ul style={{ margin: 0, paddingLeft: '20px' }}>
-                          {report.structured.concerns.map((item, i) => (
+                          {readStringList(report.structured?.concerns).map((item, i) => (
                             <li key={i}><GumroadText level="body-sm">{item}</GumroadText></li>
                           ))}
                         </ul>
                       </Box>
                     ) : null}
 
-                    {report.structured?.suggestedLogs?.length ? (
+                    {readSuggestedLogs(report).length > 0 ? (
                       <Box mb="3">
                         <GumroadHeading level="title-sm" as="h4">Registros sugeridos</GumroadHeading>
                         <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, marginBottom: spacing.sm }}>
                           Nada é salvo sem a sua confirmação.
                         </GumroadText>
                         <Flex direction="column" gap="2">
-                          {report.structured.suggestedLogs.map((suggestion, i) => {
+                          {readSuggestedLogs(report).map((suggestion, i) => {
                             const key = `${report.id}:${i}`;
                             const saved = savedLogs.has(key);
                             return (
                               <Flex key={key} justify="between" align="center" gap="2" wrap="wrap">
                                 <Flex align="center" gap="2" style={{ flex: 1, minWidth: 0 }}>
                                   <GumroadBadge color="lavender">
-                                    {LOG_TYPE_LABELS[suggestion.logType] ?? suggestion.logType}
+                                    {LOG_TYPE_LABELS[suggestion.logType]}
                                   </GumroadBadge>
                                   <GumroadText level="body-sm">{suggestion.notes ?? ''}</GumroadText>
                                 </Flex>
