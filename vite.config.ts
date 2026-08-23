@@ -4,6 +4,9 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
+  esbuild: {
+    drop: ['console', 'debugger'],
+  },
   plugins: [
     react({
       // Configuração do SWC para melhorar o desempenho
@@ -58,13 +61,17 @@ export default defineConfig({
   },
   build: {
     // Minificação e otimização para produção
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-      },
-    },
+    // esbuild (padrão do Vite) em vez de terser. Com `terser` +
+    // `drop_console: true` o bundle saía QUEBRADO: a declaração da classe
+    // `AIRateLimitError` desaparecia do chunk, mas o nome continuava na lista
+    // de exports — e o navegador falhava logo na inicialização do módulo com
+    // "Export 'AIRateLimitError' is not defined in module", deixando a página
+    // em branco. O app inteiro não subia em produção.
+    //
+    // Isolado por bisseção: só `drop_console` dispara; sem ele o mesmo terser
+    // gera bundle correto. Como o objetivo era remover logs, `esbuild.drop`
+    // faz isso corretamente (e mais rápido).
+    minify: 'esbuild',
     // Divisão de chunks para melhor carregamento.
     // Usa uma função (não o atalho de objeto) porque o atalho casa pelo
     // especificador exato do import — main.tsx importa 'react-dom/client'
@@ -79,6 +86,19 @@ export default defineConfig({
           }
           if (id.includes('node_modules/@radix-ui/themes') || id.includes('node_modules/@radix-ui/react-icons')) {
             return 'radix-ui';
+          }
+          // Dependências que praticamente nunca mudam, mas que estavam
+          // misturadas ao código do app no chunk de entrada: qualquer deploy
+          // trocava o hash das três e o usuário rebaixava tudo de novo,
+          // mesmo quando só uma tela mudou.
+          if (id.includes('node_modules/@supabase/')) {
+            return 'supabase';
+          }
+          if (id.includes('node_modules/i18next') || id.includes('node_modules/react-i18next')) {
+            return 'i18n';
+          }
+          if (id.includes('node_modules/axios')) {
+            return 'axios';
           }
         },
       },
