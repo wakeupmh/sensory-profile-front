@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FormData } from './types';
+import { parseLocalDate } from '../../utils/date';
 import { useEffect, useState, memo } from 'react';
 import { Box } from '@radix-ui/themes';
 import FastTextField from './FastTextField';
@@ -17,7 +18,7 @@ const ChildDataSection: React.FC<ChildDataSectionProps> = memo(({ formData, upda
 
   useEffect(() => {
     if (formData.child?.birthDate) {
-      const birthDate = new Date(formData.child.birthDate);
+      const birthDate = parseLocalDate(formData.child.birthDate);
       const today = new Date();
 
       let age = today.getFullYear() - birthDate.getFullYear();

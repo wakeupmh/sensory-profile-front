@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { parseLocalDate } from '../utils/date';
 import { Box, Flex, AlertDialog } from '@radix-ui/themes';
 import { Link } from 'react-router-dom';
 import { PlusIcon, Pencil1Icon, TrashIcon, InfoCircledIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
@@ -16,7 +17,7 @@ import { ChildrenListSkeleton } from '../components/skeletons/PageSkeletons';
 import axios from 'axios';
 
 function calculateAge(birthDate: string): string {
-  const birth = new Date(birthDate);
+  const birth = parseLocalDate(birthDate);
   const today = new Date();
   let age = today.getFullYear() - birth.getFullYear();
   const m = today.getMonth() - birth.getMonth();
