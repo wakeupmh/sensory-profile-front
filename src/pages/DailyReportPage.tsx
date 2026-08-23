@@ -6,6 +6,7 @@ import {
   InfoCircledIcon,
   SpeakerLoudIcon,
   TrashIcon,
+  UpdateIcon,
 } from '@radix-ui/react-icons';
 import { dailyReportApi, logApi } from '../services/api';
 import type { DailyReport, SuggestedLog } from '../types/dailyReports';
@@ -68,6 +69,7 @@ export default function DailyReportPage() {
   const [savingLog, setSavingLog] = useState<string | null>(null);
   const [savedLogs, setSavedLogs] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState<DailyReport | null>(null);
+  const [retrying, setRetrying] = useState<string | null>(null);
 
   const fetchReports = useCallback(async () => {
     if (!effectiveChildId) {
@@ -128,6 +130,26 @@ export default function DailyReportPage() {
     const started = await dailyReportApi.startTranscription(token, report.id);
     setReports((prev) => [started, ...prev.filter((r) => r.id !== started.id)]);
     toast.info('Gravação enviada', 'A transcrição leva alguns instantes.');
+  };
+
+  /**
+   * Uma transcrição que falhou não custa a gravação: o áudio continua no S3
+   * pela janela de retenção, e o backend gera um job novo a cada chamada. Sem
+   * isto o cuidador teria que regravar dois minutos de relato por causa de uma
+   * indisponibilidade momentânea da AWS.
+   */
+  const handleRetry = async (report: DailyReport) => {
+    setRetrying(report.id);
+    try {
+      const token = await getTokenRef.current();
+      const updated = await dailyReportApi.startTranscription(token, report.id);
+      // Volta para `transcribing`, e o polling desta tela assume daqui.
+      setReports((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+    } catch {
+      toast.error('Não foi possível reprocessar a gravação.');
+    } finally {
+      setRetrying(null);
+    }
   };
 
   const handlePlayAudio = async (report: DailyReport) => {
@@ -254,6 +276,17 @@ export default function DailyReportPage() {
                   {report.status === 'ready' && (
                     <GumroadButton variant="secondary" size="sm" onClick={() => setExpandedId(expanded ? null : report.id)}>
                       {expanded ? 'Ocultar detalhes' : 'Ver relatório'}
+                    </GumroadButton>
+                  )}
+                  {report.status === 'failed' && report.hasAudio && (
+                    <GumroadButton
+                      variant="secondary"
+                      size="sm"
+                      disabled={retrying === report.id}
+                      onClick={() => handleRetry(report)}
+                    >
+                      <UpdateIcon />
+                      {retrying === report.id ? 'Reenviando…' : 'Tentar novamente'}
                     </GumroadButton>
                   )}
                   {report.hasAudio && (
