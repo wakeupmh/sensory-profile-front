@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
 import { colors, shadows, radii, fonts, spacing } from '../../theme/tokens';
 import GumroadModal from '../design-system/GumroadModal';
@@ -10,15 +10,8 @@ import MoodLogForm from './MoodLogForm';
 import SleepLogForm from './SleepLogForm';
 import FoodLogForm from './FoodLogForm';
 import ToiletingLogForm from './ToiletingLogForm';
+import { LOG_TYPE_LABELS } from '../../types/logs';
 import type { LogType, LogData, CreateLogPayload } from '../../types/logs';
-
-const LOG_TYPE_LABELS: Record<LogType, string> = {
-  abc: 'ABC (Comportamento)',
-  mood: 'Humor / Regulação',
-  sleep: 'Sono',
-  food: 'Alimentação',
-  toileting: 'Banheiro',
-};
 
 interface QuickLogSheetProps {
   isOpen: boolean;
@@ -43,22 +36,47 @@ export default function QuickLogSheet({
   const [error, setError] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
+  // Espelho em ref para que a limpeza no desmonte alcance a URL atual sem
+  // precisar dela nas dependências do efeito.
+  const photoPreviewUrlRef = useRef<string | null>(null);
   const toast = useToast();
 
+  /**
+   * Toda troca da pré-visualização passa por aqui. Uma URL de blob não é
+   * coletada pelo garbage collector: ela só some com `revokeObjectURL` ou com
+   * o descarregamento do documento — que num PWA instalado pode não acontecer
+   * por dias. Uma foto de celular são 2-5 MB, e salvar um registro e sair da
+   * tela deixava isso retido para sempre, acumulando a cada registro.
+   */
+  const setPhotoPreview = (url: string | null) => {
+    if (photoPreviewUrlRef.current) URL.revokeObjectURL(photoPreviewUrlRef.current);
+    photoPreviewUrlRef.current = url;
+    setPhotoPreviewUrl(url);
+  };
+
   const handlePhotoSelect = (file: File | null) => {
-    setPhotoPreviewUrl((prev) => {
-      if (prev) URL.revokeObjectURL(prev);
-      return file ? URL.createObjectURL(file) : null;
-    });
+    setPhotoPreview(file ? URL.createObjectURL(file) : null);
     setPhotoFile(file);
   };
+
+  // Desmonte: o QuickLogSheet é montado pela LogsPage o tempo todo, então sem
+  // isto a última pré-visualização sobrevive à navegação para fora da tela.
+  useEffect(() => () => {
+    if (photoPreviewUrlRef.current) URL.revokeObjectURL(photoPreviewUrlRef.current);
+    photoPreviewUrlRef.current = null;
+  }, []);
 
   const appendDictation = (text: string) =>
     setNotes((prev) => (prev ? `${prev} ${text}` : text).slice(0, 200));
 
   // Reinicia o formulário a cada abertura (foco/trap/Escape são do GumroadModal)
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      // Fechar conta como descartar: o caminho de sucesso chama onClose(), e
+      // antes ele saía por aqui sem liberar nada.
+      setPhotoPreview(null);
+      return;
+    }
     const now = new Date();
     const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
       .toISOString()
@@ -69,10 +87,7 @@ export default function QuickLogSheet({
     setNotes('');
     setError(null);
     setPhotoFile(null);
-    setPhotoPreviewUrl((prev) => {
-      if (prev) URL.revokeObjectURL(prev);
-      return null;
-    });
+    setPhotoPreview(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, defaultLogType]);
 

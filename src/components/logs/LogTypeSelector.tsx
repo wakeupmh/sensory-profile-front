@@ -1,14 +1,15 @@
 import { Flex } from '@radix-ui/themes';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
+import { LOG_TYPE_EMOJI, LOG_TYPE_LABELS, LOG_TYPES } from '../../types/logs';
 import type { LogType } from '../../types/logs';
 
-const LOG_TYPES: { type: LogType; label: string; emoji: string }[] = [
-  { type: 'abc', label: 'ABC (Comportamento)', emoji: '🔄' },
-  { type: 'mood', label: 'Humor / Regulação', emoji: '😊' },
-  { type: 'sleep', label: 'Sono', emoji: '🌙' },
-  { type: 'food', label: 'Alimentação', emoji: '🍽️' },
-  { type: 'toileting', label: 'Banheiro', emoji: '🚿' },
-];
+// Derivado da tabela canônica — antes esta lista era uma sexta cópia dos
+// nomes, e com rótulos que discordavam das outras cinco.
+const LOG_TYPE_OPTIONS = LOG_TYPES.map((type) => ({
+  type,
+  label: LOG_TYPE_LABELS[type],
+  emoji: LOG_TYPE_EMOJI[type],
+}));
 
 interface LogTypeSelectorProps {
   selected: LogType | null;
@@ -18,7 +19,7 @@ interface LogTypeSelectorProps {
 export default function LogTypeSelector({ selected, onSelect }: LogTypeSelectorProps) {
   return (
     <Flex direction="column" gap="2">
-      {LOG_TYPES.map(({ type, label, emoji }, i) => {
+      {LOG_TYPE_OPTIONS.map(({ type, label, emoji }, i) => {
         const isActive = selected === type;
         return (
           <button

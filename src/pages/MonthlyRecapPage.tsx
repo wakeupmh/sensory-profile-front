@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
 import { ChevronLeftIcon, ChevronRightIcon, ExclamationTriangleIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { logApi, milestoneApi, goalApi, goalProgressApi } from '../services/api';
+import { LOG_TYPE_LABELS } from '../types/logs';
 import type { DailyLog, LogType } from '../types/logs';
 import { useAuthContext } from '../context/AuthContext';
 import { useDomainPage } from '../hooks/useDomainPage';
@@ -16,14 +17,6 @@ import type { Goal } from '../types/goals';
 import type { DevelopmentalMilestone } from '../types/development';
 import { MILESTONE_CATEGORY_LABELS } from '../types/development';
 import { getMonthRange, isDateStringInMonth, aggregateLogs } from '../utils/monthlyRecap';
-
-const LOG_TYPE_LABELS: Record<LogType, string> = {
-  abc: 'ABC',
-  mood: 'Humor',
-  sleep: 'Sono',
-  food: 'Alimentação',
-  toileting: 'Banheiro',
-};
 
 interface GoalWithMonthProgress {
   goal: Goal;

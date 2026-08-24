@@ -160,13 +160,9 @@ export const THERAPY_TYPE_LABELS: Record<string, string> = {
   fisioterapia: 'Fisioterapia',
 };
 
-export const LOG_TYPE_LABELS: Record<string, string> = {
-  abc: 'Comportamento (ABC)',
-  mood: 'Humor',
-  sleep: 'Sono',
-  food: 'Alimentação',
-  toileting: 'Higiene',
-};
+// Reexportado de types/logs para os consumidores existentes: o nome de um
+// tipo de registro é um só, não um por tela.
+export { LOG_TYPE_LABELS } from './logs';
 
 export const INSTRUMENT_LABELS: Record<string, string> = {
   'crianca-3-14': 'Perfil Sensorial 2 (3-14)',
