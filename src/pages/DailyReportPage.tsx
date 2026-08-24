@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AlertDialog, Box, Flex } from '@radix-ui/themes';
 import {
   CheckIcon,
@@ -10,7 +10,7 @@ import {
 } from '@radix-ui/react-icons';
 import { dailyReportApi, logApi } from '../services/api';
 import type { DailyReport, SuggestedLog } from '../types/dailyReports';
-import type { LogType } from '../types/logs';
+import { LOG_TYPE_LABELS } from '../types/logs';
 import { useDomainPage } from '../hooks/useDomainPage';
 import { useToast } from '../context/ToastContext';
 import { ChildSelector } from '../components/domain/ChildSelector';
@@ -39,14 +39,6 @@ function readStringList(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string') : [];
 }
 
-const LOG_TYPE_LABELS: Record<LogType, string> = {
-  abc: 'ABC',
-  mood: 'Humor',
-  sleep: 'Sono',
-  food: 'Alimentação',
-  toileting: 'Banheiro',
-};
-
 const STATUS_LABELS: Record<DailyReport['status'], string> = {
   draft: 'Aguardando áudio',
   transcribing: 'Transcrevendo…',
@@ -56,6 +48,14 @@ const STATUS_LABELS: Record<DailyReport['status'], string> = {
 
 /** Transcrever alguns minutos leva dezenas de segundos; 4s é o meio-termo. */
 const POLL_INTERVAL_MS = 4000;
+/** Teto do afastamento depois de falhas seguidas. */
+const MAX_POLL_INTERVAL_MS = 60000;
+/**
+ * Depois disto o relato provavelmente travou no servidor. Transcrever alguns
+ * minutos de áudio não leva cinco — insistir para sempre só gasta bateria e
+ * requisição, e esconde do cuidador que algo deu errado.
+ */
+const POLL_TIMEOUT_MS = 5 * 60 * 1000;
 
 function today(): string {
   const now = new Date();
@@ -85,6 +85,7 @@ export default function DailyReportPage() {
   const [savedLogs, setSavedLogs] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState<DailyReport | null>(null);
   const [retrying, setRetrying] = useState<string | null>(null);
+  const [pollTimedOut, setPollTimedOut] = useState(false);
   const [audioUrls, setAudioUrls] = useState<Record<string, string>>({});
   const [loadingAudio, setLoadingAudio] = useState<string | null>(null);
 
@@ -114,23 +115,68 @@ export default function DailyReportPage() {
   // é consultado — por isso o polling vive aqui e não numa fila no servidor.
   const transcribingIds = reports.filter((r) => r.status === 'transcribing').map((r) => r.id);
   const transcribingKey = transcribingIds.join(',');
-  const pollRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    setPollTimedOut(false);
+  }, [transcribingKey]);
 
   useEffect(() => {
     if (!transcribingKey) return;
     const ids = transcribingKey.split(',');
-    pollRef.current = window.setInterval(async () => {
+    let cancelled = false;
+    let timer: number | undefined;
+    const startedAt = Date.now();
+    let consecutiveFailures = 0;
+
+    const tick = async () => {
+      if (cancelled) return;
+
+      // Aba escondida não precisa de polling: num PWA instalado isto acordava
+      // o rádio a cada 4 segundos, indefinidamente, com a tela apagada.
+      if (document.visibilityState === 'hidden') return schedule(POLL_INTERVAL_MS);
+
+      // Um relato que trava no servidor (job morto) fazia o cliente consultar
+      // para sempre. Passado o teto, para e diz que parou.
+      if (Date.now() - startedAt > POLL_TIMEOUT_MS) {
+        if (!cancelled) setPollTimedOut(true);
+        return;
+      }
+
       try {
         const token = await getTokenRef.current();
         const updated = await Promise.all(ids.map((id) => dailyReportApi.get(token, id)));
-        setReports((prev) => prev.map((r) => updated.find((u) => u.id === r.id) ?? r));
+        if (cancelled) return;
+        consecutiveFailures = 0;
+        setReports((prev) => {
+          // Devolver `prev` quando nada mudou evita recriar o array — e com
+          // ele o JSX de todos os cartões — a cada 4 segundos.
+          let changed = false;
+          const next = prev.map((r) => {
+            const fresh = updated.find((u) => u.id === r.id);
+            if (!fresh || fresh.updatedAt === r.updatedAt) return r;
+            changed = true;
+            return fresh;
+          });
+          return changed ? next : prev;
+        });
       } catch {
-        // Uma consulta que falha não deve derrubar o loop: a próxima tenta de novo.
+        // Um backend em erro era martelado a 15 req/min para sempre, porque o
+        // catch engolia tudo. Agora cada falha afasta a próxima tentativa.
+        consecutiveFailures += 1;
       }
-    }, POLL_INTERVAL_MS);
+      schedule(Math.min(POLL_INTERVAL_MS * 2 ** consecutiveFailures, MAX_POLL_INTERVAL_MS));
+    };
+
+    // setTimeout encadeado, não setInterval: o intervalo não espera a chamada
+    // anterior, então numa conexão lenta as requisições se empilhavam.
+    function schedule(delay: number) {
+      if (!cancelled) timer = window.setTimeout(tick, delay);
+    }
+
+    schedule(POLL_INTERVAL_MS);
     return () => {
-      if (pollRef.current !== null) window.clearInterval(pollRef.current);
-      pollRef.current = null;
+      cancelled = true;
+      if (timer !== undefined) window.clearTimeout(timer);
     };
   }, [transcribingKey, getTokenRef]);
 
@@ -291,7 +337,9 @@ export default function DailyReportPage() {
                         ? report.structured?.summary ?? report.transcript ?? ''
                         : report.status === 'failed'
                           ? report.error ?? 'A transcrição falhou.'
-                          : 'Estamos transcrevendo a gravação…'}
+                          : pollTimedOut
+                            ? 'A transcrição está demorando mais que o esperado. Atualize a página para verificar de novo.'
+                            : 'Estamos transcrevendo a gravação…'}
                     </GumroadText>
                   </Box>
                   <GumroadBadge

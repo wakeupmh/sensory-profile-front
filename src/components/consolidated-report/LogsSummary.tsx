@@ -2,6 +2,7 @@ import React from 'react';
 import type { ConsolidatedLogs } from '../../types/consolidatedReport';
 import { LOG_TYPE_LABELS } from '../../types/consolidatedReport';
 import { colors, fonts } from '../../theme/tokens';
+import type { LogType } from '../../types/logs';
 
 interface Props {
   data: ConsolidatedLogs;
@@ -56,7 +57,7 @@ const LogsSummary: React.FC<Props> = ({ data }) => {
                 gap: '4px',
               }}
             >
-              <span>{LOG_TYPE_LABELS[type] ?? type}</span>
+              <span>{LOG_TYPE_LABELS[type as LogType] ?? type}</span>
               <span style={{ opacity: 0.75 }}>· {count}x</span>
             </div>
           ))}

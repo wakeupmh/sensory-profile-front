@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
 import { ExclamationTriangleIcon, InfoCircledIcon, PlusIcon, UpdateIcon } from '@radix-ui/react-icons';
 import { logApi } from '../services/api';
+import { LOG_TYPE_LABELS, LOG_TYPES } from '../types/logs';
 import type { CreateLogPayload, DailyLog, LogType } from '../types/logs';
 import { useAuthContext } from '../context/AuthContext';
 import { useDomainPage } from '../hooks/useDomainPage';
@@ -28,23 +29,13 @@ const LOG_TYPE_COLORS: Record<LogType, BadgeColor> = {
   toileting: 'cyan',
 };
 
-const LOG_TYPE_LABELS: Record<LogType, string> = {
-  abc: 'ABC',
-  mood: 'Humor',
-  sleep: 'Sono',
-  food: 'Alimentação',
-  toileting: 'Banheiro',
-};
-
 type FilterType = 'all' | LogType;
 
+// Derivado da tabela canônica: um tipo novo em LOG_TYPES aparece no filtro
+// sozinho, em vez de compilar limpo e sumir da tela.
 const FILTER_OPTIONS: { value: FilterType; label: string }[] = [
   { value: 'all', label: 'Todos' },
-  { value: 'abc', label: 'ABC' },
-  { value: 'mood', label: 'Humor' },
-  { value: 'sleep', label: 'Sono' },
-  { value: 'food', label: 'Alimentação' },
-  { value: 'toileting', label: 'Banheiro' },
+  ...LOG_TYPES.map((value) => ({ value, label: LOG_TYPE_LABELS[value] })),
 ];
 
 function formatOccurredAt(iso: string): string {
