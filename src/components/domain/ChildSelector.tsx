@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { Box } from '@radix-ui/themes';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import type { ChildData } from '../../services/api';
@@ -11,10 +12,18 @@ interface ChildSelectorProps {
 }
 
 export function ChildSelector({ children, selectedChildId, onChange, emptyLabel = 'Todas as crianças' }: ChildSelectorProps) {
+  const selectId = useId();
   if (children.length === 0) return <NoChildrenPrompt />;
   return (
     <Box mb="4">
+      {/* Visível apenas para leitores de tela: o filtro por criança é o
+          controle mais importante destas páginas, mas seu visual (borda +
+          opções) já comunica o propósito para quem enxerga a tela. */}
+      <label htmlFor={selectId} className="sr-only">
+        Selecionar criança
+      </label>
       <select
+        id={selectId}
         value={selectedChildId}
         onChange={(e) => onChange(e.target.value)}
         style={{

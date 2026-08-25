@@ -321,6 +321,15 @@ export const dailyReportApi = {
   startTranscription: async (token: string | null, id: string): Promise<DailyReport> =>
     (await authRequest<Envelope<DailyReport>>('post', token, `/api/daily-reports/${id}/transcribe`)).data,
 
+  /**
+   * Corrige a transcrição de um relato `ready` (nome, remédio ou termo que a
+   * transcrição automática errou). O backend reestrutura via IA a partir do
+   * texto novo, então o relato devolvido pode trazer `structured` atualizado
+   * (ou `null`, se a reestruturação falhar) — nunca a versão antiga.
+   */
+  updateTranscript: async (token: string | null, id: string, transcript: string): Promise<DailyReport> =>
+    (await authRequest<Envelope<DailyReport>>('patch', token, `/api/daily-reports/${id}`, { transcript })).data,
+
   getAudioUrl: async (token: string | null, id: string): Promise<{ url: string }> =>
     (await authRequest<Envelope<{ url: string }>>('get', token, `/api/daily-reports/${id}/audio`)).data,
 
