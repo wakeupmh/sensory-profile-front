@@ -6,6 +6,7 @@ import GumroadCard from '../design-system/GumroadCard';
 import GumroadHeading from '../design-system/GumroadHeading';
 import { GumroadText } from '../design-system/GumroadHeading';
 import GumroadModal from '../design-system/GumroadModal';
+import { ErrorState } from '../domain/ErrorState';
 import MilestoneCard from './MilestoneCard';
 import MilestoneForm from './MilestoneForm';
 import { milestoneApi } from '../../services/api';
@@ -121,9 +122,9 @@ const MilestonesPanel: React.FC<MilestonesPanelProps> = ({
             </GumroadButton>
 
             {error && (
-              <GumroadCard role="alert" color="salmon" padding="md" style={{ marginBottom: '16px' }}>
-                <GumroadText level="body-md">{error}</GumroadText>
-              </GumroadCard>
+              <div style={{ marginBottom: '16px' }}>
+                <ErrorState message={error} onRetry={fetchMilestones} />
+              </div>
             )}
 
             {!error && milestones.length === 0 ? (

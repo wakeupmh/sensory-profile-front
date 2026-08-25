@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
-import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { medicationApi, comorbidityApi, appointmentApi } from '../services/api';
 import type {
   Medication,
@@ -16,6 +15,7 @@ import type {
 import { useAuthContext } from '../context/AuthContext';
 import { useDomainPage } from '../hooks/useDomainPage';
 import { ChildSelector } from '../components/domain/ChildSelector';
+import { ErrorState } from '../components/domain/ErrorState';
 import { previewItemStyle, emptyStyle } from '../components/domain/previewStyles';
 import { colors, spacing } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
@@ -181,12 +181,7 @@ export default function MedicalPage() {
       {loading ? (
         <DomainListSkeleton />
       ) : error ? (
-        <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
-          <Flex align="center" gap="2">
-            <ExclamationTriangleIcon />
-            <GumroadText level="body-md" as="p">{error}</GumroadText>
-          </Flex>
-        </GumroadCard>
+        <ErrorState message={error} onRetry={fetchAll} />
       ) : (
         <Flex direction="column" gap="4">
           {/* Medicamentos Ativos */}

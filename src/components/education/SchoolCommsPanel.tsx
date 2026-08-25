@@ -6,6 +6,7 @@ import GumroadCard from '../design-system/GumroadCard';
 import GumroadHeading from '../design-system/GumroadHeading';
 import { GumroadText } from '../design-system/GumroadHeading';
 import GumroadModal from '../design-system/GumroadModal';
+import { ErrorState } from '../domain/ErrorState';
 import SchoolCommCard from './SchoolCommCard';
 import SchoolCommForm from './SchoolCommForm';
 import { schoolCommApi } from '../../services/api';
@@ -150,9 +151,9 @@ const SchoolCommsPanel: React.FC<SchoolCommsPanelProps> = ({
             </GumroadButton>
 
             {error && (
-              <GumroadCard role="alert" color="salmon" padding="md" style={{ marginBottom: '16px' }}>
-                <GumroadText level="body-md">{error}</GumroadText>
-              </GumroadCard>
+              <div style={{ marginBottom: '16px' }}>
+                <ErrorState message={error} onRetry={fetchComms} />
+              </div>
             )}
 
             {!error && comms.length === 0 ? (

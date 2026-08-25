@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
-import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { childApi } from '../../services/api';
 import { useAuthContext } from '../../context/AuthContext';
 import { spacing } from '../../theme/tokens';
 import GumroadCard from '../design-system/GumroadCard';
 import GumroadButton from '../design-system/GumroadButton';
 import { GumroadText } from '../design-system/GumroadHeading';
+import { ErrorState } from '../domain/ErrorState';
 import LoadingSpinner from '../LoadingSpinner';
 import TimelineEventCard from './TimelineEventCard';
 import type { TimelineEvent } from '../../types/child';
@@ -76,14 +76,7 @@ const UnifiedTimeline: React.FC<UnifiedTimelineProps> = ({ childId }) => {
   }
 
   if (error) {
-    return (
-      <GumroadCard color="salmon" shadow="md" padding="md">
-        <Flex align="center" gap="2">
-          <ExclamationTriangleIcon />
-          <GumroadText level="body-md" as="p">{error}</GumroadText>
-        </Flex>
-      </GumroadCard>
-    );
+    return <ErrorState message={error} onRetry={() => fetchPage(1, false)} />;
   }
 
   if (events.length === 0) {

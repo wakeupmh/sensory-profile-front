@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Flex, AlertDialog } from '@radix-ui/themes';
-import { ArrowLeftIcon, ExclamationTriangleIcon, Pencil1Icon, PlusIcon, TrashIcon } from '@radix-ui/react-icons';
+import { ArrowLeftIcon, Pencil1Icon, PlusIcon, TrashIcon } from '@radix-ui/react-icons';
 import { goalApi, goalProgressApi } from '../services/api';
 import { useAuthContext } from '../context/AuthContext';
 import type { Goal, GoalProgressEntry, GoalProgressSummary, CreateGoalPayload, UpdateGoalPayload, CreateGoalProgressPayload } from '../types/goals';
@@ -12,6 +12,7 @@ import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadBadge from '../components/design-system/GumroadBadge';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { ErrorState } from '../components/domain/ErrorState';
 import GoalProgressBar from '../components/goals/GoalProgressBar';
 import GoalProgressChart from '../components/goals/GoalProgressChart';
 import GoalProgressForm from '../components/goals/GoalProgressForm';
@@ -103,12 +104,7 @@ export default function GoalDetailPage() {
           <LoadingSpinner size="large" text="Carregando meta..." />
         </GumroadCard>
       ) : error ? (
-        <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
-          <Flex align="center" gap="2">
-            <ExclamationTriangleIcon />
-            <GumroadText level="body-md" as="p">{error}</GumroadText>
-          </Flex>
-        </GumroadCard>
+        <ErrorState message={error} onRetry={fetchAll} />
       ) : goal ? (
         <>
           {isAchieved && (

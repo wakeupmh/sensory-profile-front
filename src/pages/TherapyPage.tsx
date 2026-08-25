@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
 import {
-  ExclamationTriangleIcon,
   InfoCircledIcon,
   PlusIcon,
   HeartIcon,
@@ -18,6 +17,7 @@ import { useAuthContext } from '../context/AuthContext';
 import { useDomainPage } from '../hooks/useDomainPage';
 import { ChildSelector } from '../components/domain/ChildSelector';
 import { FilterPill } from '../components/domain/FilterPill';
+import { ErrorState } from '../components/domain/ErrorState';
 import { colors, spacing, shadows } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
@@ -194,12 +194,7 @@ export default function TherapyPage() {
       {loading ? (
         <DomainListSkeleton />
       ) : error ? (
-        <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
-          <Flex align="center" gap="2">
-            <ExclamationTriangleIcon />
-            <GumroadText level="body-md" as="p">{error}</GumroadText>
-          </Flex>
-        </GumroadCard>
+        <ErrorState message={error} onRetry={fetchSessions} />
       ) : children.length > 0 && sessions.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">

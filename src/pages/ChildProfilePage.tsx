@@ -3,7 +3,6 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Box, Flex } from '@radix-ui/themes';
 import {
   ArrowLeftIcon,
-  ExclamationTriangleIcon,
   Pencil1Icon,
   Share1Icon,
   GroupIcon,
@@ -19,6 +18,7 @@ import { colors, spacing } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
+import { ErrorState } from '../components/domain/ErrorState';
 import DomainStatsCard from '../components/child-profile/DomainStatsCard';
 import UnifiedTimeline from '../components/child-profile/UnifiedTimeline';
 import BehaviorInsightsPanel from '../components/behavior-insights/BehaviorInsightsPanel';
@@ -164,12 +164,9 @@ const ChildProfilePage = () => {
 
       {/* Error */}
       {error && (
-        <GumroadCard role="alert" color="salmon" shadow="md" padding="md" style={{ marginBottom: spacing.lg }}>
-          <Flex align="center" gap="2">
-            <ExclamationTriangleIcon />
-            <GumroadText level="body-md" as="p">{error}</GumroadText>
-          </Flex>
-        </GumroadCard>
+        <Box mb="5">
+          <ErrorState message={error} onRetry={() => fetchProfile(periodDays)} />
+        </Box>
       )}
 
       {loading ? (

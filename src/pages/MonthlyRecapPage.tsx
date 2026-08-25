@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
-import { ChevronLeftIcon, ChevronRightIcon, ExclamationTriangleIcon, InfoCircledIcon } from '@radix-ui/react-icons';
+import { ChevronLeftIcon, ChevronRightIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { logApi, milestoneApi, goalApi, goalProgressApi } from '../services/api';
 import { LOG_TYPE_LABELS } from '../types/logs';
 import type { DailyLog, LogType } from '../types/logs';
 import { useAuthContext } from '../context/AuthContext';
 import { useDomainPage } from '../hooks/useDomainPage';
 import { ChildSelector } from '../components/domain/ChildSelector';
+import { ErrorState } from '../components/domain/ErrorState';
 import { colors, spacing, radii } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadBadge from '../components/design-system/GumroadBadge';
@@ -163,12 +164,7 @@ export default function MonthlyRecapPage() {
       ) : loading ? (
         <Flex justify="center" py="6"><LoadingSpinner size="medium" text="Carregando resumo..." /></Flex>
       ) : error ? (
-        <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
-          <Flex align="center" gap="2">
-            <ExclamationTriangleIcon />
-            <GumroadText level="body-md" as="p">{error}</GumroadText>
-          </Flex>
-        </GumroadCard>
+        <ErrorState message={error} onRetry={fetchRecap} />
       ) : !hasAnyActivity ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="3">

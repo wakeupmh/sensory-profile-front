@@ -6,6 +6,7 @@ import GumroadCard from '../design-system/GumroadCard';
 import GumroadHeading from '../design-system/GumroadHeading';
 import { GumroadText } from '../design-system/GumroadHeading';
 import GumroadModal from '../design-system/GumroadModal';
+import { ErrorState } from '../domain/ErrorState';
 import CommunicationLogCard from './CommunicationLogCard';
 import CommunicationLogForm from './CommunicationLogForm';
 import { communicationLogApi } from '../../services/api';
@@ -132,9 +133,9 @@ const CommunicationLogsPanel: React.FC<CommunicationLogsPanelProps> = ({
             </GumroadButton>
 
             {error && (
-              <GumroadCard role="alert" color="salmon" padding="md" style={{ marginBottom: '16px' }}>
-                <GumroadText level="body-md">{error}</GumroadText>
-              </GumroadCard>
+              <div style={{ marginBottom: '16px' }}>
+                <ErrorState message={error} onRetry={fetchLogs} />
+              </div>
             )}
 
             {!error && logs.length === 0 ? (

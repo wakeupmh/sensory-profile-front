@@ -7,6 +7,7 @@ import { getExpiryStatus } from '../types/documents';
 import { useAuthContext } from '../context/AuthContext';
 import { useDomainPage } from '../hooks/useDomainPage';
 import { ChildSelector } from '../components/domain/ChildSelector';
+import { ErrorState } from '../components/domain/ErrorState';
 import { colors, spacing } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
@@ -140,12 +141,7 @@ export default function DocumentsPage() {
           {loading ? (
             <DocumentsGridSkeleton />
           ) : error ? (
-            <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
-              <Flex align="center" gap="2">
-                <ExclamationTriangleIcon />
-                <GumroadText level="body-md" as="p">{error}</GumroadText>
-              </Flex>
-            </GumroadCard>
+            <ErrorState message={error} onRetry={fetchDocuments} />
           ) : documents.length === 0 ? (
             <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
               <Flex direction="column" align="center" gap="3">

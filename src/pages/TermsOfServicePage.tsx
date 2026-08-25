@@ -46,6 +46,12 @@ export default function TermsOfServicePage() {
               fontFamily: typography['nav-link'].font,
               fontWeight: 600,
               fontSize: typography['nav-link'].size,
+              // Alvo de toque WCAG 2.2 SC 2.5.8 (>=24x24px CSS): o texto
+              // sozinho renderiza ~21px de altura — o padding amplia a área
+              // clicável sem mudar a fonte.
+              minHeight: '24px',
+              padding: '8px 4px',
+              margin: '-8px -4px',
             }}
           >
             <ArrowLeftIcon />
