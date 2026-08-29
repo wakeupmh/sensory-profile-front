@@ -14,6 +14,21 @@ import {
   StarIcon,
 } from '@radix-ui/react-icons';
 
+// Alvo de toque das duas mensuras: WCAG 2.2 SC 2.5.8 pede >=24x24px CSS.
+// O texto (13px/caption) sozinho renderiza ~19px de altura — o padding
+// vertical/horizontal amplia a área clicável sem alterar a fonte, mantendo
+// o visual neubrutalista (só texto, sem fundo/borda extra por padrão).
+const footerLinkStyle: React.CSSProperties = {
+  fontFamily: typography.caption.font,
+  fontSize: typography.caption.size,
+  color: colors.ink,
+  display: 'inline-flex',
+  alignItems: 'center',
+  minHeight: '24px',
+  padding: '8px 4px',
+  margin: '-8px -4px',
+};
+
 const SENSES = ['👁️', '👂', '🤲', '👃', '🧠'];
 const HeroEmoji = memo(() => {
   const [idx, setIdx] = useState(0);
@@ -305,10 +320,10 @@ const LandingPage = () => {
             {t('landing.footer.copyright', { year: new Date().getFullYear() })}
           </GumroadText>
           <Flex gap="4">
-            <Link to="/termos" style={{ fontFamily: typography.caption.font, fontSize: typography.caption.size, color: colors.ink }}>
+            <Link to="/termos" style={footerLinkStyle}>
               {t('landing.footer.terms')}
             </Link>
-            <Link to="/privacidade" style={{ fontFamily: typography.caption.font, fontSize: typography.caption.size, color: colors.ink }}>
+            <Link to="/privacidade" style={footerLinkStyle}>
               {t('landing.footer.privacy')}
             </Link>
           </Flex>

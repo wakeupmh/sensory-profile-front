@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
-import { ExclamationTriangleIcon, InfoCircledIcon, PlusIcon, UpdateIcon } from '@radix-ui/react-icons';
+import { InfoCircledIcon, PlusIcon, UpdateIcon } from '@radix-ui/react-icons';
 import { logApi } from '../services/api';
 import { LOG_TYPE_LABELS, LOG_TYPES } from '../types/logs';
 import type { CreateLogPayload, DailyLog, LogType } from '../types/logs';
@@ -11,6 +11,7 @@ import { queueLog, isNetworkError } from '../services/offlineLogQueue';
 import { useToast } from '../context/ToastContext';
 import { ChildSelector } from '../components/domain/ChildSelector';
 import { FilterPill } from '../components/domain/FilterPill';
+import { ErrorState } from '../components/domain/ErrorState';
 import { colors, spacing, shadows } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
@@ -200,12 +201,7 @@ export default function LogsPage() {
       {loading ? (
         <LogsListSkeleton />
       ) : error ? (
-        <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
-          <Flex align="center" gap="2">
-            <ExclamationTriangleIcon />
-            <GumroadText level="body-md" as="p">{error}</GumroadText>
-          </Flex>
-        </GumroadCard>
+        <ErrorState message={error} onRetry={fetchLogs} />
       ) : children.length > 0 && logs.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">

@@ -4,7 +4,6 @@ import { Box, Flex } from '@radix-ui/themes';
 import {
   ArrowUpIcon,
   ArrowDownIcon,
-  ExclamationTriangleIcon,
   InfoCircledIcon,
   PlusIcon,
 } from '@radix-ui/react-icons';
@@ -18,6 +17,7 @@ import GumroadButton from '../design-system/GumroadButton';
 import GumroadBadge from '../design-system/GumroadBadge';
 import GumroadHeading, { GumroadText } from '../design-system/GumroadHeading';
 import LoadingSpinner from '../LoadingSpinner';
+import { ErrorState } from '../domain/ErrorState';
 import SimpleBarChart, { type BarDatum } from './SimpleBarChart';
 
 interface BehaviorInsightsPanelProps {
@@ -142,12 +142,7 @@ const BehaviorInsightsPanel: React.FC<BehaviorInsightsPanelProps> = ({ childId }
           <LoadingSpinner size="large" text="Carregando insights..." />
         </GumroadCard>
       ) : error ? (
-        <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
-          <Flex align="center" gap="2">
-            <ExclamationTriangleIcon />
-            <GumroadText level="body-md" as="p">{error}</GumroadText>
-          </Flex>
-        </GumroadCard>
+        <ErrorState message={error} onRetry={fetchInsights} />
       ) : !insights || insights.totalCount === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">

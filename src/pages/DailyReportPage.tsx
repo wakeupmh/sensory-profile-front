@@ -2,8 +2,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { AlertDialog, Box, Flex } from '@radix-ui/themes';
 import {
   CheckIcon,
+  Cross2Icon,
   ExclamationTriangleIcon,
   InfoCircledIcon,
+  Pencil1Icon,
   SpeakerLoudIcon,
   TrashIcon,
   UpdateIcon,
@@ -14,13 +16,14 @@ import { LOG_TYPE_LABELS } from '../types/logs';
 import { useDomainPage } from '../hooks/useDomainPage';
 import { useToast } from '../context/ToastContext';
 import { ChildSelector } from '../components/domain/ChildSelector';
-import { colors, spacing, shadows } from '../theme/tokens';
+import { colors, spacing, shadows, radii, fonts } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadBadge from '../components/design-system/GumroadBadge';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
 import LoadingSpinner from '../components/LoadingSpinner';
 import DailyReportRecorder from '../components/logs/DailyReportRecorder';
+import SuggestedLogValuesEditor from '../components/logs/SuggestedLogValuesEditor';
 import type { AudioRecording } from '../hooks/useAudioRecorder';
 import { useAuthContext } from '../context/AuthContext';
 
@@ -88,6 +91,13 @@ export default function DailyReportPage() {
   const [pollTimedOut, setPollTimedOut] = useState(false);
   const [audioUrls, setAudioUrls] = useState<Record<string, string>>({});
   const [loadingAudio, setLoadingAudio] = useState<string | null>(null);
+  // Chave `${reportId}:${index}`: valores que o cuidador ajustou antes de
+  // confirmar uma sugestão. Ausente = usa `suggestion.data` como veio da IA.
+  const [adjustedData, setAdjustedData] = useState<Record<string, Record<string, unknown>>>({});
+  const [editingSuggestion, setEditingSuggestion] = useState<string | null>(null);
+  const [editingTranscriptId, setEditingTranscriptId] = useState<string | null>(null);
+  const [transcriptDraft, setTranscriptDraft] = useState('');
+  const [savingTranscript, setSavingTranscript] = useState(false);
 
   const fetchReports = useCallback(async () => {
     if (!effectiveChildId) {
@@ -266,15 +276,65 @@ export default function DailyReportPage() {
         // sabemos a hora do evento. Meio-dia evita que o fuso empurre o
         // registro para o dia anterior ou seguinte.
         occurredAt: new Date(`${report.reportDate}T12:00:00`).toISOString(),
-        data: (suggestion.data ?? {}) as never,
+        // O que o cuidador ajustou (se ajustou) prevalece sobre o que a IA
+        // propôs — ver SuggestedLogValuesEditor.
+        data: (adjustedData[key] ?? suggestion.data ?? {}) as never,
         notes: suggestion.notes ?? null,
       });
       setSavedLogs((prev) => new Set(prev).add(key));
+      setEditingSuggestion((prev) => (prev === key ? null : prev));
       toast.success('Registro salvo.');
     } catch {
       toast.error('Não foi possível salvar o registro.');
     } finally {
       setSavingLog(null);
+    }
+  };
+
+  /**
+   * A transcrição é o registro durável (alimenta a exportação LGPD e os
+   * resumos da IA), então precisa ser corrigível quando a transcrição
+   * automática erra um nome, remédio ou termo clínico — sem descartar a
+   * gravação inteira. O backend reestrutura via IA a partir do texto novo e
+   * devolve `structured` atualizado (ou `null`, se a IA falhar) — nunca a
+   * versão antiga descrevendo um texto que não existe mais. Por isso os
+   * marcadores de "sugestão ajustada"/"registro salvo" deste relato são
+   * descartados aqui: eles se referem a índices de uma lista de sugestões
+   * que acabou de deixar de existir.
+   */
+  const handleSaveTranscript = async (report: DailyReport) => {
+    const transcript = transcriptDraft.trim();
+    if (!transcript) {
+      toast.error('A transcrição não pode ficar vazia.');
+      return;
+    }
+    setSavingTranscript(true);
+    try {
+      const token = await getTokenRef.current();
+      const updated = await dailyReportApi.updateTranscript(token, report.id, transcript);
+      setReports((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+      const prefix = `${report.id}:`;
+      setSavedLogs((prev) => {
+        const next = new Set(prev);
+        for (const k of next) if (k.startsWith(prefix)) next.delete(k);
+        return next;
+      });
+      setAdjustedData((prev) => {
+        const next = { ...prev };
+        for (const k of Object.keys(next)) if (k.startsWith(prefix)) delete next[k];
+        return next;
+      });
+      setEditingSuggestion((prev) => (prev?.startsWith(prefix) ? null : prev));
+      setEditingTranscriptId(null);
+      toast.success(
+        updated.structured
+          ? 'Transcrição atualizada e o resumo foi reorganizado.'
+          : 'Transcrição atualizada. Não foi possível reorganizar o resumo agora.',
+      );
+    } catch {
+      toast.error('Não foi possível salvar a transcrição.');
+    } finally {
+      setSavingTranscript(false);
     }
   };
 
@@ -441,23 +501,54 @@ export default function DailyReportPage() {
                           {readSuggestedLogs(report).map((suggestion, i) => {
                             const key = `${report.id}:${i}`;
                             const saved = savedLogs.has(key);
+                            const editing = editingSuggestion === key;
+                            const currentData = adjustedData[key] ?? suggestion.data ?? {};
                             return (
-                              <Flex key={key} justify="between" align="center" gap="2" wrap="wrap">
-                                <Flex align="center" gap="2" style={{ flex: 1, minWidth: 0 }}>
-                                  <GumroadBadge color="lavender">
-                                    {LOG_TYPE_LABELS[suggestion.logType]}
-                                  </GumroadBadge>
-                                  <GumroadText level="body-sm">{suggestion.notes ?? ''}</GumroadText>
+                              <Box
+                                key={key}
+                                style={{
+                                  border: `2px solid ${colors.ink}`,
+                                  borderRadius: radii.md,
+                                  padding: spacing.sm,
+                                }}
+                              >
+                                <Flex justify="between" align="center" gap="2" wrap="wrap">
+                                  <Flex align="center" gap="2" style={{ flex: 1, minWidth: 0 }}>
+                                    <GumroadBadge color="lavender">
+                                      {LOG_TYPE_LABELS[suggestion.logType]}
+                                    </GumroadBadge>
+                                    <GumroadText level="body-sm">{suggestion.notes ?? ''}</GumroadText>
+                                  </Flex>
+                                  <Flex gap="2">
+                                    {!saved && (
+                                      <GumroadButton
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setEditingSuggestion(editing ? null : key)}
+                                      >
+                                        <Pencil1Icon /> {editing ? 'Fechar' : 'Ajustar'}
+                                      </GumroadButton>
+                                    )}
+                                    <GumroadButton
+                                      variant={saved ? 'ghost' : 'secondary'}
+                                      size="sm"
+                                      disabled={saved || savingLog === key}
+                                      onClick={() => handleConfirmLog(report, suggestion, i)}
+                                    >
+                                      {saved ? <><CheckIcon /> Salvo</> : savingLog === key ? 'Salvando…' : 'Salvar registro'}
+                                    </GumroadButton>
+                                  </Flex>
                                 </Flex>
-                                <GumroadButton
-                                  variant={saved ? 'ghost' : 'secondary'}
-                                  size="sm"
-                                  disabled={saved || savingLog === key}
-                                  onClick={() => handleConfirmLog(report, suggestion, i)}
-                                >
-                                  {saved ? <><CheckIcon /> Salvo</> : savingLog === key ? 'Salvando…' : 'Salvar registro'}
-                                </GumroadButton>
-                              </Flex>
+                                {editing && !saved && (
+                                  <Box mt="3">
+                                    <SuggestedLogValuesEditor
+                                      logType={suggestion.logType}
+                                      data={currentData}
+                                      onChange={(next) => setAdjustedData((prev) => ({ ...prev, [key]: next }))}
+                                    />
+                                  </Box>
+                                )}
+                              </Box>
                             );
                           })}
                         </Flex>
@@ -466,10 +557,71 @@ export default function DailyReportPage() {
 
                     {report.transcript && (
                       <Box>
-                        <GumroadHeading level="title-sm" as="h4">Transcrição</GumroadHeading>
-                        <GumroadText level="body-sm" as="p" style={{ whiteSpace: 'pre-wrap' }}>
-                          {report.transcript}
-                        </GumroadText>
+                        <Flex justify="between" align="center" mb="1">
+                          <GumroadHeading level="title-sm" as="h4">Transcrição</GumroadHeading>
+                          {editingTranscriptId !== report.id && (
+                            <GumroadButton
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setEditingTranscriptId(report.id);
+                                setTranscriptDraft(report.transcript ?? '');
+                              }}
+                            >
+                              <Pencil1Icon /> Corrigir
+                            </GumroadButton>
+                          )}
+                        </Flex>
+                        {editingTranscriptId === report.id ? (
+                          <Box>
+                            <textarea
+                              value={transcriptDraft}
+                              onChange={(e) => setTranscriptDraft(e.target.value)}
+                              autoFocus
+                              style={{
+                                width: '100%',
+                                minHeight: '140px',
+                                padding: '10px 12px',
+                                backgroundColor: 'transparent',
+                                border: `2px solid ${colors.ink}`,
+                                borderRadius: radii.sm,
+                                boxShadow: shadows.input,
+                                fontFamily: fonts.body,
+                                fontSize: '14px',
+                                color: colors.ink,
+                                boxSizing: 'border-box',
+                                whiteSpace: 'pre-wrap',
+                                resize: 'vertical',
+                              }}
+                            />
+                            <GumroadText level="body-sm" as="p" style={{ opacity: 0.65, marginTop: spacing.xxs }}>
+                              Corrija nomes, remédios ou termos que a transcrição automática errou. O resumo da IA
+                              é reorganizado a partir do texto corrigido.
+                            </GumroadText>
+                            <Flex gap="2" mt="2">
+                              <GumroadButton
+                                variant="primary"
+                                size="sm"
+                                disabled={savingTranscript}
+                                onClick={() => handleSaveTranscript(report)}
+                              >
+                                {savingTranscript ? 'Salvando…' : 'Salvar correção'}
+                              </GumroadButton>
+                              <GumroadButton
+                                variant="secondary"
+                                size="sm"
+                                disabled={savingTranscript}
+                                onClick={() => setEditingTranscriptId(null)}
+                              >
+                                <Cross2Icon /> Cancelar
+                              </GumroadButton>
+                            </Flex>
+                          </Box>
+                        ) : (
+                          <GumroadText level="body-sm" as="p" style={{ whiteSpace: 'pre-wrap' }}>
+                            {report.transcript}
+                          </GumroadText>
+                        )}
                       </Box>
                     )}
                   </Box>

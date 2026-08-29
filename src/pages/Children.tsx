@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { parseLocalDate } from '../utils/date';
 import { Box, Flex, AlertDialog } from '@radix-ui/themes';
 import { Link } from 'react-router-dom';
-import { PlusIcon, Pencil1Icon, TrashIcon, InfoCircledIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import { PlusIcon, Pencil1Icon, TrashIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { childApi, ChildData } from '../services/api';
 import { useAuthContext } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -14,6 +14,7 @@ import GumroadHeading, { GumroadText } from '../components/design-system/Gumroad
 import GumroadModal from '../components/design-system/GumroadModal';
 import ChildForm, { ChildFormValue } from '../components/sensory-profile/ChildForm';
 import { ChildrenListSkeleton } from '../components/skeletons/PageSkeletons';
+import { ErrorState } from '../components/domain/ErrorState';
 import axios from 'axios';
 
 function calculateAge(birthDate: string): string {
@@ -243,12 +244,9 @@ const Children = () => {
 
       {/* Error banner */}
       {error && (
-        <GumroadCard role="alert" color="salmon" shadow="md" padding="md" style={{ marginBottom: spacing.lg }}>
-          <Flex align="center" gap="2">
-            <ExclamationTriangleIcon />
-            <GumroadText level="body-md" as="p">{error}</GumroadText>
-          </Flex>
-        </GumroadCard>
+        <Box mb="5">
+          <ErrorState message={error} onRetry={fetchChildren} />
+        </Box>
       )}
 
       {/* Add form — bottom-sheet modal */}
