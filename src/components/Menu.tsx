@@ -25,11 +25,13 @@ import {
   GearIcon,
   MagnifyingGlassIcon,
   SpeakerLoudIcon,
+  BadgeIcon,
 } from '@radix-ui/react-icons';
 import { colors, typography, zIndex, shadows } from '../theme/tokens';
 import GumroadButton from './design-system/GumroadButton';
 import DelegationSwitcher from './DelegationSwitcher';
 import GlobalSearch from './GlobalSearch';
+import { useCareTeamCaseload } from '../hooks/useCareTeamCaseload';
 
 type NavItem = { path: string; match: string; labelKey: string; icon: React.ComponentType<{ width?: number; height?: number }> };
 
@@ -58,15 +60,26 @@ const SECONDARY: NavItem[] = [
   { path: '/settings', match: '/settings', labelKey: 'nav.settings', icon: GearIcon },
 ];
 
+// Só entra na navegação quando a conta tem pelo menos um atendimento — ver
+// useCareTeamCaseload.
+const CARE_TEAM_CASELOAD_ITEM: NavItem = {
+  path: '/care-team/children',
+  match: '/care-team/children',
+  labelKey: 'nav.careTeamCaseload',
+  icon: BadgeIcon,
+};
+
 const Menu: React.FC = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut, session } = useAuthContext();
+  const hasCareTeamCaseload = useCareTeamCaseload();
   const [moreOpen, setMoreOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
+  const secondaryItems = hasCareTeamCaseload ? [...SECONDARY, CARE_TEAM_CASELOAD_ITEM] : SECONDARY;
 
   const handleSignOut = () => signOut().then(() => navigate('/sign-in', { replace: true }));
 
@@ -138,7 +151,7 @@ const Menu: React.FC = () => {
     transition: 'background 0.12s ease',
   });
 
-  const isSecondaryActive = SECONDARY.some((t) => isActive(t.match));
+  const isSecondaryActive = secondaryItems.some((t) => isActive(t.match));
 
   return (
     <Box
@@ -226,7 +239,7 @@ const Menu: React.FC = () => {
                         gap: '2px',
                       }}
                     >
-                      {SECONDARY.map(({ path, match, labelKey, icon: Icon }) => (
+                      {secondaryItems.map(({ path, match, labelKey, icon: Icon }) => (
                         <Link
                           key={path}
                           to={path}

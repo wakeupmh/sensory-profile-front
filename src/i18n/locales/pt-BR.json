@@ -18,6 +18,7 @@
     "sharedWithMe": "Compartilhados comigo",
     "sharedChildren": "Crianças compartilhadas",
     "acceptInvite": "Aceitar convite",
+    "careTeamCaseload": "Meus atendimentos",
     "settings": "Configurações",
     "more": "Mais",
     "moreOptions": "Mais opções",
@@ -179,6 +180,104 @@
       "description": "Tem certeza que deseja excluir esta avaliação? Esta ação não pode ser desfeita.",
       "cancel": "Cancelar",
       "deleting": "Excluindo..."
+    }
+  },
+  "careTeam": {
+    "manage": {
+      "back": "Voltar",
+      "title": "Equipe de cuidado",
+      "titleWithChild": "Equipe de cuidado de {{name}}",
+      "thisChild": "esta criança",
+      "subtitle": "Convide profissionais para acompanhar {{name}}. Só você concede o acesso, e só você pode revogá-lo.",
+      "childLinkButton": "Equipe de cuidado",
+      "inviteForm": {
+        "nameLabel": "Nome do profissional",
+        "namePlaceholder": "Ex: Dra. Camila Souza",
+        "roleLabel": "Especialidade",
+        "rolePlaceholder": "Selecione",
+        "submit": "Convidar profissional",
+        "submitting": "Convidando..."
+      },
+      "inviteSuccess": {
+        "title": "Convite criado",
+        "body": "Envie este link para {{name}} ({{role}}). Ao abrir o link, ele(a) deve fazer login para entrar na equipe de cuidado.",
+        "warning": "Por segurança, este link não será exibido novamente — copie e envie agora.",
+        "copy": "Copiar link",
+        "copied": "Copiado!",
+        "dismiss": "Entendi, fechar"
+      },
+      "error": {
+        "load": "Não foi possível carregar a equipe de cuidado.",
+        "invite": "Não foi possível criar o convite. Tente novamente.",
+        "revoke": "Não foi possível revogar o acesso. Tente novamente."
+      },
+      "empty": {
+        "title": "Nenhum profissional na equipe ainda",
+        "description": "Convide um profissional acima para que ele(a) possa ver e registrar dados de {{name}}."
+      },
+      "status": {
+        "active": "Ativo",
+        "pending": "Pendente",
+        "expired": "Expirado",
+        "revoked": "Revogado"
+      },
+      "groupHeading": {
+        "active": "Ativos",
+        "pending": "Convites pendentes",
+        "expired": "Convites expirados",
+        "revoked": "Acesso revogado"
+      },
+      "memberCard": {
+        "invitedOn": "Convidado em {{date}}",
+        "acceptedOn": "Aceito em {{date}}",
+        "expiresOn": "Expira em {{date}}",
+        "expiredOn": "Expirou em {{date}}",
+        "revokedOn": "Revogado em {{date}}",
+        "revoke": "Revogar acesso",
+        "cancelInvite": "Cancelar convite",
+        "revoking": "Revogando..."
+      },
+      "revokeDialog": {
+        "title": "Revogar acesso",
+        "description": "{{name}} perderá o acesso a {{childName}} imediatamente. Os registros que já escreveu continuam salvos — só o acesso é removido, e não é possível desfazer esta ação por aqui.",
+        "titlePending": "Cancelar convite",
+        "descriptionPending": "O convite para {{name}} será cancelado e o link enviado deixará de funcionar. Ele(a) ainda não tinha acesso — nada muda para os dados já registrados. Você pode convidar novamente quando quiser.",
+        "cancel": "Cancelar",
+        "confirm": "Revogar acesso",
+        "confirmPending": "Cancelar convite"
+      }
+    },
+    "caseload": {
+      "title": "Meus atendimentos",
+      "subtitle": "Crianças cuja equipe de cuidado inclui você, com acesso concedido pelo responsável de cada uma.",
+      "error": "Não foi possível carregar seus atendimentos.",
+      "empty": {
+        "title": "Você ainda não está em nenhuma equipe de cuidado",
+        "description": "Peça ao responsável de uma criança para te convidar pela tela de equipe de cuidado dela."
+      },
+      "acceptedOn": "Desde {{date}}",
+      "open": "Abrir"
+    },
+    "accept": {
+      "title": "Aceitar convite da equipe de cuidado",
+      "description": "Cole abaixo o link ou código de convite que você recebeu do responsável.",
+      "tokenLabel": "Código de convite",
+      "tokenPlaceholder": "Cole o código aqui",
+      "submit": "Aceitar convite",
+      "submitting": "Validando...",
+      "cancel": "Cancelar",
+      "errors": {
+        "empty": "Cole o código de convite recebido.",
+        "invalid": "Convite inválido, expirado ou já utilizado.",
+        "generic": "Não foi possível aceitar o convite. Tente novamente."
+      },
+      "success": {
+        "title": "Convite aceito",
+        "bodyWithChild": "Você agora faz parte da equipe de cuidado de {{name}} como {{role}}.",
+        "bodyGeneric": "Você agora faz parte da equipe de cuidado como {{role}}.",
+        "cta": "Ver meus atendimentos",
+        "secondaryCta": "Ir para o início"
+      }
     }
   }
 }

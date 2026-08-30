@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Box, Flex } from '@radix-ui/themes';
 import {
   ArrowLeftIcon,
   Pencil1Icon,
   Share1Icon,
   GroupIcon,
+  BadgeIcon,
   ChatBubbleIcon,
   ActivityLogIcon,
   DownloadIcon,
@@ -53,6 +55,7 @@ function childProfileToFormValue(profile: ChildProfile): ChildFormValue {
 const ChildProfilePage = () => {
   const { childId } = useParams<{ childId: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { getToken } = useAuthContext();
   const toast = useToast();
   const getTokenRef = useRef(getToken);
@@ -198,6 +201,12 @@ const ChildProfilePage = () => {
                     <Link to={`/children/${childId}/caregivers`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                       <GroupIcon />
                       Cuidadores
+                    </Link>
+                  </GumroadButton>
+                  <GumroadButton variant="secondary" size="sm" asChild>
+                    <Link to={`/children/${childId}/care-team`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <BadgeIcon />
+                      {t('careTeam.manage.childLinkButton')}
                     </Link>
                   </GumroadButton>
                   <GumroadButton variant="secondary" size="sm" asChild>

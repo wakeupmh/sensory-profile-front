@@ -18,6 +18,7 @@
     "sharedWithMe": "Shared with me",
     "sharedChildren": "Shared children",
     "acceptInvite": "Accept invite",
+    "careTeamCaseload": "My caseload",
     "settings": "Settings",
     "more": "More",
     "moreOptions": "More options",
@@ -179,6 +180,104 @@
       "description": "Are you sure you want to delete this assessment? This action cannot be undone.",
       "cancel": "Cancel",
       "deleting": "Deleting..."
+    }
+  },
+  "careTeam": {
+    "manage": {
+      "back": "Back",
+      "title": "Care team",
+      "titleWithChild": "{{name}}'s care team",
+      "thisChild": "this child",
+      "subtitle": "Invite professionals to follow {{name}}. Only you grant access, and only you can revoke it.",
+      "childLinkButton": "Care team",
+      "inviteForm": {
+        "nameLabel": "Professional's name",
+        "namePlaceholder": "E.g. Dr. Camila Souza",
+        "roleLabel": "Specialty",
+        "rolePlaceholder": "Select",
+        "submit": "Invite professional",
+        "submitting": "Inviting..."
+      },
+      "inviteSuccess": {
+        "title": "Invitation created",
+        "body": "Send this link to {{name}} ({{role}}). They must sign in and open the link to join the care team.",
+        "warning": "For security, this link will not be shown again — copy and send it now.",
+        "copy": "Copy link",
+        "copied": "Copied!",
+        "dismiss": "Got it, close"
+      },
+      "error": {
+        "load": "Could not load the care team.",
+        "invite": "Could not create the invitation. Please try again.",
+        "revoke": "Could not revoke access. Please try again."
+      },
+      "empty": {
+        "title": "No professionals on the team yet",
+        "description": "Invite a professional above so they can see and record data for {{name}}."
+      },
+      "status": {
+        "active": "Active",
+        "pending": "Pending",
+        "expired": "Expired",
+        "revoked": "Revoked"
+      },
+      "groupHeading": {
+        "active": "Active",
+        "pending": "Pending invitations",
+        "expired": "Expired invitations",
+        "revoked": "Revoked access"
+      },
+      "memberCard": {
+        "invitedOn": "Invited on {{date}}",
+        "acceptedOn": "Accepted on {{date}}",
+        "expiresOn": "Expires on {{date}}",
+        "expiredOn": "Expired on {{date}}",
+        "revokedOn": "Revoked on {{date}}",
+        "revoke": "Revoke access",
+        "cancelInvite": "Cancel invitation",
+        "revoking": "Revoking..."
+      },
+      "revokeDialog": {
+        "title": "Revoke access",
+        "description": "{{name}} will immediately lose access to {{childName}}. Records they already wrote stay saved — only the access is removed, and this cannot be undone from here.",
+        "titlePending": "Cancel invitation",
+        "descriptionPending": "The invitation for {{name}} will be canceled and the link sent will stop working. They never had access yet — nothing changes for data already recorded. You can invite them again whenever you like.",
+        "cancel": "Cancel",
+        "confirm": "Revoke access",
+        "confirmPending": "Cancel invitation"
+      }
+    },
+    "caseload": {
+      "title": "My caseload",
+      "subtitle": "Children whose care team includes you, with access granted by each one's parent.",
+      "error": "Could not load your caseload.",
+      "empty": {
+        "title": "You're not on any care team yet",
+        "description": "Ask a child's parent to invite you from that child's care team screen."
+      },
+      "acceptedOn": "Since {{date}}",
+      "open": "Open"
+    },
+    "accept": {
+      "title": "Accept care team invitation",
+      "description": "Paste below the invite link or code you received from the parent.",
+      "tokenLabel": "Invitation code",
+      "tokenPlaceholder": "Paste the code here",
+      "submit": "Accept invitation",
+      "submitting": "Validating...",
+      "cancel": "Cancel",
+      "errors": {
+        "empty": "Paste the invitation code you received.",
+        "invalid": "Invalid, expired, or already used invitation.",
+        "generic": "Could not accept the invitation. Please try again."
+      },
+      "success": {
+        "title": "Invitation accepted",
+        "bodyWithChild": "You're now on {{name}}'s care team as {{role}}.",
+        "bodyGeneric": "You're now on the care team as {{role}}.",
+        "cta": "View my caseload",
+        "secondaryCta": "Go to home"
+      }
     }
   }
 }

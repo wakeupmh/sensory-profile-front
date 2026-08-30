@@ -1203,6 +1203,52 @@ export const caregiverApi = {
     ),
 };
 
+// ─── Care team: professionals granted read-write access to one child ────
+// (phase 1 — see /workspace/sensory-profile-backend/CONTRACT.md). Distinct
+// from `caregiverApi` above: a care-team grant is per-child, addressed to a
+// role (fonoaudióloga, psicóloga, ...), and the accept/list/my-children
+// split across two route prefixes because a professional accepting an
+// invite or opening their caseload has no childId in hand yet.
+import type {
+  CareTeamMember,
+  CreateCareTeamMemberPayload,
+  CreateCareTeamMemberResponse,
+  AcceptCareTeamInvitationResponse,
+  CareTeamCaseloadEntry,
+} from '../types/careTeam';
+
+export const careTeamApi = {
+  list: async (token: string | null, childId: string): Promise<CareTeamMember[]> =>
+    (await authRequest<Envelope<CareTeamMember[]>>('get', token, `/api/children/${childId}/care-team`)).data ?? [],
+
+  // Devolve `invitationToken` — a ÚNICA resposta da API que o traz. A tela
+  // que chama isto é responsável por mostrar o link agora, porque um
+  // refresh da lista nunca mais vai trazê-lo de volta.
+  invite: async (
+    token: string | null,
+    childId: string,
+    payload: CreateCareTeamMemberPayload,
+  ): Promise<CreateCareTeamMemberResponse> =>
+    (await authRequest<Envelope<CreateCareTeamMemberResponse>>('post', token, `/api/children/${childId}/care-team`, payload))
+      .data,
+
+  // Revogação SOFT no backend (a linha fica, com revokedAt preenchido) —
+  // devolve só uma mensagem, sem `data`.
+  revoke: async (token: string | null, childId: string, id: string): Promise<void> => {
+    await authRequest<unknown>('delete', token, `/api/children/${childId}/care-team/${id}`);
+  },
+
+  acceptInvite: async (token: string | null, inviteToken: string): Promise<AcceptCareTeamInvitationResponse> =>
+    (await authRequest<Envelope<AcceptCareTeamInvitationResponse>>('post', token, '/api/care-team/accept', { token: inviteToken }))
+      .data,
+
+  // O caseload do profissional: as crianças com participação aceita e não
+  // revogada, em qualquer família. Endpoint irmão de `list` mas fora do
+  // prefixo `/children/:childId` — quem chama ainda não tem criança na mão.
+  myChildren: async (token: string | null): Promise<CareTeamCaseloadEntry[]> =>
+    (await authRequest<Envelope<CareTeamCaseloadEntry[]>>('get', token, '/api/care-team/my-children')).data ?? [],
+};
+
 // ─── Professional notes on shared children + owner access audit (SP-20) ──
 import type {
   ProfessionalNote,
