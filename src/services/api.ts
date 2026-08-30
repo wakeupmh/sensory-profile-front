@@ -705,6 +705,15 @@ export const consolidatedReportApi = {
     return response.data?.data ?? response.data;
   },
 
+  // O token de UM compartilhamento, no clique de copiar. A listagem não os
+  // traz mais; ver o comentário em `ReportShare.token`.
+  revealShareToken: async (token: string | null, id: string): Promise<string> => {
+    const response = await api.get(`/api/consolidated/shares/${id}/token`, {
+      headers: getAuthHeaders(token),
+    });
+    return (response.data?.data ?? response.data).token as string;
+  },
+
   deleteShare: async (token: string | null, id: string): Promise<void> => {
         await api.delete(`/api/consolidated/shares/${id}`, {
       headers: getAuthHeaders(token),

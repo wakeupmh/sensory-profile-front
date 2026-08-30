@@ -121,6 +121,12 @@ export function useDomainResource<T>(
       // que a página já não está mostrando.
       fetchSequence.current++;
       setLoading(false);
+      // E limpa o que ficou. Sem isto, uma tela desabilitada (por exemplo,
+      // Documentos sem criança escolhida) continua segurando os dados da
+      // criança anterior, e qualquer coisa derivada deles — um contador, um
+      // aviso de vencimento — segue na tela falando de outra criança.
+      setData(null);
+      setError(null);
       return;
     }
     run();

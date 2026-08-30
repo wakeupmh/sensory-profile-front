@@ -17,10 +17,11 @@ const SharePanel: React.FC<Props> = ({ childId, periodDays = 90, isPublicView })
   const [shares, setShares] = useState<ReportShare[]>([]);
   const [creating, setCreating] = useState(false);
   const [expiresInDays, setExpiresInDays] = useState(30);
-  const [copied, setCopied] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [copyingId, setCopyingId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
     if (isPublicView) return;
@@ -53,8 +54,8 @@ const SharePanel: React.FC<Props> = ({ childId, periodDays = 90, isPublicView })
       const res = await consolidatedReportApi.createShare(token, { childId, expiresInDays, periodDays });
       setShares((prev) => [res.share, ...prev]);
       await navigator.clipboard.writeText(res.shareUrl);
-      setCopied(res.shareUrl);
-      setTimeout(() => setCopied(null), 2000);
+      setCopiedId(res.share.id);
+      setTimeout(() => setCopiedId(null), 2000);
     } catch {
       setActionError('Erro ao gerar link de compartilhamento.');
     } finally {
@@ -75,10 +76,31 @@ const SharePanel: React.FC<Props> = ({ childId, periodDays = 90, isPublicView })
     }
   };
 
+  /**
+   * Busca o token deste compartilhamento e copia o link.
+   *
+   * A listagem não traz mais o token — ele é a capacidade de ler o relatório
+   * da criança sem login, e vinha em toda linha de todo `GET /shares`. Agora
+   * sai um de cada vez, no clique.
+   */
+  const handleCopyShare = async (id: string) => {
+    try {
+      setCopyingId(id);
+      setActionError(null);
+      const auth = await getToken();
+      const shareToken = await consolidatedReportApi.revealShareToken(auth, id);
+      await handleCopy(`${window.location.origin}/consolidated/shared/${shareToken}`);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {
+      setActionError('Erro ao copiar o link.');
+    } finally {
+      setCopyingId(null);
+    }
+  };
+
   const handleCopy = async (url: string) => {
     await navigator.clipboard.writeText(url);
-    setCopied(url);
-    setTimeout(() => setCopied(null), 2000);
   };
 
   const isExpired = (expiresAt: string) => new Date(expiresAt) < new Date();
@@ -159,8 +181,7 @@ const SharePanel: React.FC<Props> = ({ childId, periodDays = 90, isPublicView })
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
           {shares.map((share) => {
             const expired = isExpired(share.expiresAt);
-            const shareUrl = `${window.location.origin}/consolidated/shared/${share.token}`;
-            const isCopied = copied === shareUrl;
+            const isCopied = copiedId === share.id;
             return (
               <div
                 key={share.id}
@@ -179,8 +200,8 @@ const SharePanel: React.FC<Props> = ({ childId, periodDays = 90, isPublicView })
               >
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '0.8rem', opacity: 0.65, wordBreak: 'break-all' }}>
-                      {shareUrl}
+                    <span style={{ fontSize: '0.8rem', opacity: 0.65 }}>
+                      Link dos últimos {share.periodDays} dias
                     </span>
                     {expired && (
                       <span
@@ -204,7 +225,8 @@ const SharePanel: React.FC<Props> = ({ childId, periodDays = 90, isPublicView })
                 <div style={{ display: 'flex', gap: '6px' }}>
                   {!expired && (
                     <button
-                      onClick={() => handleCopy(shareUrl)}
+                      onClick={() => handleCopyShare(share.id)}
+                      disabled={copyingId === share.id}
                       style={{
                         background: isCopied ? colors['brand-yellow'] : colors.canvas,
                         border: `2px solid ${colors.ink}`,
@@ -216,7 +238,7 @@ const SharePanel: React.FC<Props> = ({ childId, periodDays = 90, isPublicView })
                         boxShadow: '1px 1px 0px #0A0A1A',
                       }}
                     >
-                      {isCopied ? 'Copiado!' : 'Copiar'}
+                      {copyingId === share.id ? 'Copiando…' : isCopied ? 'Copiado!' : 'Copiar'}
                     </button>
                   )}
                   <AlertDialog.Root>

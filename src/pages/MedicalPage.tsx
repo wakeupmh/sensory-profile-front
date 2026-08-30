@@ -74,7 +74,24 @@ export default function MedicalPage() {
     (meds.loading && meds.data === null) ||
     (comorbs.loading && comorbs.data === null) ||
     (appts.loading && appts.data === null);
-  const error = meds.error ?? comorbs.error ?? appts.error;
+  // Erro da página inteira só quando as TRÊS seções falharam — aí não há o que
+  // mostrar mesmo. Antes, o primeiro erro trocava a página toda por um
+  // `ErrorState`, e uma seção fora do ar apagava as outras duas. É o benefício
+  // que a divisão em três recursos prometia e que só agora está implementado.
+  const error = meds.error && comorbs.error && appts.error ? meds.error : null;
+
+  /** Erro de UMA seção, mostrado no lugar da lista daquela seção. */
+  const sectionError = (resource: { error: string | null }, retry: () => void) =>
+    resource.error ? (
+      <Flex direction="column" gap="2" align="start" style={{ padding: '4px 0' }}>
+        <GumroadText level="body-sm" as="p" style={{ color: colors['brand-salmon'] }}>
+          {resource.error}
+        </GumroadText>
+        <GumroadButton variant="secondary" size="sm" onClick={retry}>
+          Tentar novamente
+        </GumroadButton>
+      </Flex>
+    ) : null;
 
   const fetchMedications = meds.reload;
   const fetchComorbidities = comorbs.reload;
@@ -196,7 +213,8 @@ export default function MedicalPage() {
                 Gerenciar
               </GumroadButton>
             </Flex>
-            {children.length > 0 && medications.slice(0, 3).length === 0 ? (
+            {sectionError(meds, fetchMedications) ??
+             (children.length > 0 && medications.slice(0, 3).length === 0 ? (
               <p style={emptyStyle}>Nenhum registro</p>
             ) : (
               medications.slice(0, 3).map((med) => (
@@ -204,7 +222,7 @@ export default function MedicalPage() {
                   {med.name}{med.dosage ? ` — ${med.dosage}` : ''}
                 </div>
               ))
-            )}
+            ))}
           </GumroadCard>
 
           {/* Diagnósticos */}
@@ -225,7 +243,8 @@ export default function MedicalPage() {
                 Gerenciar
               </GumroadButton>
             </Flex>
-            {children.length > 0 && comorbidities.slice(0, 3).length === 0 ? (
+            {sectionError(comorbs, fetchComorbidities) ??
+             (children.length > 0 && comorbidities.slice(0, 3).length === 0 ? (
               <p style={emptyStyle}>Nenhum registro</p>
             ) : (
               comorbidities.slice(0, 3).map((c) => (
@@ -233,7 +252,7 @@ export default function MedicalPage() {
                   {c.conditionName}{c.icdCode ? ` (${c.icdCode})` : ''}
                 </div>
               ))
-            )}
+            ))}
           </GumroadCard>
 
           {/* Consultas */}
@@ -254,7 +273,8 @@ export default function MedicalPage() {
                 Gerenciar
               </GumroadButton>
             </Flex>
-            {children.length > 0 && appointments.slice(0, 3).length === 0 ? (
+            {sectionError(appts, fetchAppointments) ??
+             (children.length > 0 && appointments.slice(0, 3).length === 0 ? (
               <p style={emptyStyle}>Nenhum registro</p>
             ) : (
               appointments.slice(0, 3).map((appt) => (
@@ -263,7 +283,7 @@ export default function MedicalPage() {
                   {appt.doctorName ? ` — ${appt.doctorName}` : ''}
                 </div>
               ))
-            )}
+            ))}
           </GumroadCard>
         </Flex>
       )}

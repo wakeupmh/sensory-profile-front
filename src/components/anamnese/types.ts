@@ -96,7 +96,12 @@ export interface AnamneseSummary {
   caregiverName: string;
   createdAt: string;
   updatedAt?: string;
-  shareToken?: string | null;
+  /**
+   * Se está compartilhada — não o token. A listagem só mostra o selo
+   * "Compartilhada"/"Privada", e o backend deixou de mandar a capacidade viva
+   * de cada anamnese em toda listagem por causa de um booleano.
+   */
+  isShared: boolean;
 }
 
 export const emptyClinicalHistory = (): AnamneseClinicalHistory => ({

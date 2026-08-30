@@ -133,7 +133,14 @@ export interface ReportShare {
   id: string;
   userId: string;
   childId: string;
-  token: string;
+  /**
+   * NÃO vem na listagem. O token é a capacidade — quem o tem abre o relatório
+   * da criança sem login — e mandá-lo para toda linha em todo `GET /shares`
+   * espalhava essa capacidade por cache, histórico e log de rede sem
+   * necessidade. Vem só na resposta da criação e pelo endpoint de revelar, um
+   * compartilhamento por vez, quando o dono clica em copiar.
+   */
+  token?: string;
   periodDays: number;
   expiresAt: string;
   createdAt: string;
