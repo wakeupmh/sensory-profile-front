@@ -26,7 +26,8 @@
     "signIn": "Sign in",
     "close": "Close",
     "mainNavLabel": "Main navigation",
-    "bottomNavLabel": "Bottom navigation"
+    "bottomNavLabel": "Bottom navigation",
+    "clinics": "Clinics"
   },
   "settings": {
     "title": "Settings",
@@ -235,7 +236,9 @@
         "revokedOn": "Revoked on {{date}}",
         "revoke": "Revoke access",
         "cancelInvite": "Cancel invitation",
-        "revoking": "Revoking..."
+        "revoking": "Revoking...",
+        "reinvite": "Invite again",
+        "reinviting": "Inviting…"
       },
       "revokeDialog": {
         "title": "Revoke access",
@@ -278,6 +281,87 @@
         "cta": "View my caseload",
         "secondaryCta": "Go to home"
       }
+    },
+    "roles": {
+      "fonoaudiologia": "Speech therapist",
+      "psicologia": "Psychologist",
+      "terapia_ocupacional": "Occupational therapist",
+      "acompanhante_terapeutico": "Therapeutic companion",
+      "educacao_fisica": "Physical educator",
+      "fisioterapia": "Physiotherapist",
+      "psicopedagogia": "Educational psychologist",
+      "outro": "Other"
     }
+  },
+  "clinic": {
+    "pageTitle": "Clinics",
+    "pageSubtitle": "The clinics you belong to. The clinic manages its team; access to each child's data is still granted by that child's parent.",
+    "subtitle": "Who works here. To see a child's records, that child's parent must invite the person to the care team.",
+    "openRoster": "View team",
+    "noneYet": "You don't belong to any clinic yet.",
+    "empty": "Nobody on the team yet.",
+    "created": "Clinic created",
+    "removed": "Membership ended",
+    "remove": "Remove",
+    "caseload_one": "{{count}} child seen",
+    "caseload_other": "{{count}} children seen",
+    "create": {
+      "label": "Clinic name",
+      "placeholder": "e.g. Movimento Clinic",
+      "submit": "Create clinic",
+      "creating": "Creating…"
+    },
+    "form": {
+      "name": "Person's name",
+      "namePlaceholder": "e.g. Dr. Helena Martins",
+      "role": "Role",
+      "invite": "Invite",
+      "inviting": "Inviting…"
+    },
+    "invite": {
+      "title": "Invitation created for {{name}}",
+      "onceOnly": "Copy the link now — it won't be shown again.",
+      "copy": "Copy link",
+      "copied": "Copied!"
+    },
+    "status": {
+      "pending": "Invitation pending",
+      "active": "Active",
+      "expired": "Invitation expired",
+      "revoked": "Removed"
+    },
+    "confirm": {
+      "title": "Remove from clinic?",
+      "body": "{{name}} leaves the clinic's team. The children they see are unaffected — only each child's parent can revoke that access."
+    },
+    "accept": {
+      "title": "Join clinic",
+      "tokenLabel": "Invitation code",
+      "tokenPlaceholder": "Paste the code you received",
+      "submit": "Join",
+      "submitting": "Joining…",
+      "success": "Done — you joined as {{role}}.",
+      "noAccessNote": "Joining a clinic grants no access to any child. Each child's access is still granted by their parent.",
+      "goToClinics": "View my clinics",
+      "errors": {
+        "empty": "Enter the invitation code.",
+        "invalid": "Invalid or expired invitation.",
+        "generic": "Couldn't accept the invitation. Please try again."
+      }
+    },
+    "errors": {
+      "load": "Couldn't load. Please try again.",
+      "create": "Couldn't create the clinic.",
+      "invite": "Couldn't create the invitation.",
+      "remove": "Couldn't remove that person.",
+      "copy": "Couldn't copy the link."
+    },
+    "roles": {
+      "admin": "Administration",
+      "profissional": "Professional"
+    }
+  },
+  "common": {
+    "select": "Select"
   }
 }

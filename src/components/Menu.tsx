@@ -32,6 +32,7 @@ import GumroadButton from './design-system/GumroadButton';
 import DelegationSwitcher from './DelegationSwitcher';
 import GlobalSearch from './GlobalSearch';
 import { useCareTeamCaseload } from '../hooks/useCareTeamCaseload';
+import { useClinicMembership } from '../hooks/useClinicMembership';
 
 type NavItem = { path: string; match: string; labelKey: string; icon: React.ComponentType<{ width?: number; height?: number }> };
 
@@ -69,17 +70,31 @@ const CARE_TEAM_CASELOAD_ITEM: NavItem = {
   icon: BadgeIcon,
 };
 
+// Mesma regra da equipe de cuidado: só aparece para quem faz parte de alguma
+// clínica, para uma conta de responsável não ganhar um link morto.
+const CLINICS_ITEM: NavItem = {
+  path: '/clinics',
+  match: '/clinics',
+  labelKey: 'nav.clinics',
+  icon: GroupIcon,
+};
+
 const Menu: React.FC = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut, session } = useAuthContext();
   const hasCareTeamCaseload = useCareTeamCaseload();
+  const belongsToClinic = useClinicMembership();
   const [moreOpen, setMoreOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
-  const secondaryItems = hasCareTeamCaseload ? [...SECONDARY, CARE_TEAM_CASELOAD_ITEM] : SECONDARY;
+  const secondaryItems = [
+    ...SECONDARY,
+    ...(hasCareTeamCaseload ? [CARE_TEAM_CASELOAD_ITEM] : []),
+    ...(belongsToClinic ? [CLINICS_ITEM] : []),
+  ];
 
   const handleSignOut = () => signOut().then(() => navigate('/sign-in', { replace: true }));
 

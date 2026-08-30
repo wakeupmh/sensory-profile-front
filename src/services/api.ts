@@ -1226,6 +1226,47 @@ import type {
   CareTeamCaseloadEntry,
 } from '../types/careTeam';
 
+import type {
+  Clinic,
+  ClinicMembership,
+  ClinicRosterMember,
+  CreateClinicMemberResponse,
+  ClinicRole,
+} from '../types/clinic';
+
+export const clinicApi = {
+  create: async (token: string | null, name: string): Promise<Clinic> =>
+    (await authRequest<Envelope<Clinic>>('post', token, '/api/clinics', { name })).data,
+
+  // As clínicas de que EU faço parte, com o meu papel em cada uma.
+  listMine: async (token: string | null): Promise<ClinicMembership[]> =>
+    (await authRequest<Envelope<ClinicMembership[]>>('get', token, '/api/clinics/mine')).data ?? [],
+
+  // O quadro. Cada linha traz `caseloadSize` — um número. Quais crianças cada
+  // profissional atende continua sendo entre ele e o responsável.
+  roster: async (token: string | null, clinicId: string): Promise<ClinicRosterMember[]> =>
+    (await authRequest<Envelope<ClinicRosterMember[]>>('get', token, `/api/clinics/${clinicId}/members`)).data ?? [],
+
+  // Devolve `invitationToken` — a ÚNICA resposta da API que o traz. A tela que
+  // chama isto tem de mostrar o link agora; o quadro nunca mais o devolve.
+  invite: async (
+    token: string | null,
+    clinicId: string,
+    payload: { memberName: string; role: ClinicRole },
+  ): Promise<CreateClinicMemberResponse> =>
+    (await authRequest<Envelope<CreateClinicMemberResponse>>('post', token, `/api/clinics/${clinicId}/members`, payload)).data,
+
+  // Saída soft no backend: a linha fica, com `revokedAt` preenchido.
+  removeMember: async (token: string | null, clinicId: string, id: string): Promise<void> => {
+    await authRequest<unknown>('delete', token, `/api/clinics/${clinicId}/members/${id}`);
+  },
+
+  acceptInvite: async (token: string | null, inviteToken: string): Promise<{ clinicId: string; role: ClinicRole }> =>
+    (await authRequest<Envelope<{ id: string; clinicId: string; role: ClinicRole }>>(
+      'post', token, '/api/clinics/accept', { token: inviteToken },
+    )).data,
+};
+
 export const careTeamApi = {
   list: async (token: string | null, childId: string): Promise<CareTeamMember[]> =>
     (await authRequest<Envelope<CareTeamMember[]>>('get', token, `/api/children/${childId}/care-team`)).data ?? [],
