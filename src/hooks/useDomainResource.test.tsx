@@ -31,12 +31,13 @@ function deferred<T>() {
 }
 
 function Probe({ childId, load }: { childId: string; load: (t: string | null) => Promise<string> }) {
-  const { data, loading, error } = useDomainResource(load, [childId]);
+  const { data, loading, error, setData } = useDomainResource(load, [childId]);
   return (
     <div>
       <span data-testid="data">{data ?? '-'}</span>
       <span data-testid="loading">{String(loading)}</span>
       <span data-testid="error">{error ?? '-'}</span>
+      <button onClick={() => setData((previous) => `${previous ?? ''}+otimista`)}>escrever</button>
     </div>
   );
 }
@@ -127,5 +128,45 @@ describe('useDomainResource — ciclo básico', () => {
     await act(async () => {});
     expect(screen.getByTestId('error')).toHaveTextContent('-');
     expect(screen.getByTestId('data')).toHaveTextContent('deu certo');
+  });
+});
+
+describe('useDomainResource — escrita otimista durante uma busca em voo', () => {
+  it('a escrita vence a resposta que chega depois, mas o loading BAIXA', async () => {
+    // O defeito que isto guarda: a escrita otimista invalidava a busca em voo
+    // inteira, inclusive o `finally` que baixa o `loading`. Quem enviasse um
+    // documento enquanto a lista ainda carregava ficava no esqueleto para
+    // sempre — o registro no servidor, e a tela num spinner até dar refresh.
+    const inFlight = deferred<string>();
+    const load = vi.fn().mockReturnValue(inFlight.promise);
+
+    render(<Probe childId="crianca-A" load={load} />);
+    expect(screen.getByTestId('loading')).toHaveTextContent('true');
+
+    await act(async () => {
+      screen.getByRole('button', { name: 'escrever' }).click();
+    });
+    await act(async () => {
+      inFlight.resolve('do servidor');
+    });
+
+    expect(screen.getByTestId('data')).toHaveTextContent('+otimista');
+    expect(screen.getByTestId('loading')).toHaveTextContent('false');
+  });
+
+  it('uma busca que falha depois da escrita otimista não mostra erro nem trava o loading', async () => {
+    const inFlight = deferred<string>();
+    const load = vi.fn().mockReturnValue(inFlight.promise);
+
+    render(<Probe childId="crianca-A" load={load} />);
+    await act(async () => {
+      screen.getByRole('button', { name: 'escrever' }).click();
+    });
+    await act(async () => {
+      inFlight.reject(new Error('falhou tarde'));
+    });
+
+    expect(screen.getByTestId('error')).toHaveTextContent('-');
+    expect(screen.getByTestId('loading')).toHaveTextContent('false');
   });
 });

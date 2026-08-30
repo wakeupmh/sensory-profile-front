@@ -65,7 +65,15 @@ export default function MedicalPage() {
   const comorbidities = comorbs.data ?? [];
   const appointments = appts.data ?? [];
 
-  const loading = meds.loading || comorbs.loading || appts.loading;
+  // Esqueleto SÓ na primeira carga (`data` ainda nulo). Antes desta página
+  // virar hook, os refetches por seção não mexiam em `loading`; com
+  // `loading` puro, apagar um medicamento levava as três seções para o
+  // esqueleto de uma vez. `data === null` distingue "ainda não carregou" de
+  // "está recarregando o que já está na tela".
+  const loading =
+    (meds.loading && meds.data === null) ||
+    (comorbs.loading && comorbs.data === null) ||
+    (appts.loading && appts.data === null);
   const error = meds.error ?? comorbs.error ?? appts.error;
 
   const fetchMedications = meds.reload;

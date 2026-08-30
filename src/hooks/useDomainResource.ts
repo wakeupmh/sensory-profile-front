@@ -72,7 +72,14 @@ export function useDomainResource<T>(
   const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
 
-  const sequence = useRef(0);
+  // Dois contadores, e não um. `fetchSequence` diz qual busca é a mais
+  // recente; `localWrites` diz se alguém escreveu à mão desde que a busca
+  // começou. Com um contador só, uma escrita otimista invalidava a busca em
+  // voo INTEIRA — inclusive o `finally` que baixa o `loading`, e a tela ficava
+  // no esqueleto para sempre. São perguntas diferentes: "posso escrever este
+  // dado?" e "sou eu quem manda no loading?".
+  const fetchSequence = useRef(0);
+  const localWrites = useRef(0);
   const mounted = useRef(true);
   useEffect(() => {
     mounted.current = true;
@@ -82,22 +89,29 @@ export function useDomainResource<T>(
   }, []);
 
   const run = useCallback(async () => {
-    const mine = ++sequence.current;
-    /** Só a busca mais recente, e só enquanto a página existe, escreve. */
-    const isCurrent = () => mounted.current && mine === sequence.current;
+    const mine = ++fetchSequence.current;
+    const localWritesAtStart = localWrites.current;
+
+    /** Sou a busca mais recente, e a página ainda existe? Manda no `loading`. */
+    const ownsLoading = () => mounted.current && mine === fetchSequence.current;
+    /** E, além disso, ninguém escreveu à mão no meio? Aí posso escrever o dado. */
+    const mayWriteData = () => ownsLoading() && localWrites.current === localWritesAtStart;
 
     setLoading(true);
     try {
       const token = await getTokenRef.current();
       const result = await loadRef.current(token);
-      if (!isCurrent()) return;
-      setData(result);
-      setError(null);
+      if (mayWriteData()) {
+        setData(result);
+        setError(null);
+      }
     } catch {
-      if (!isCurrent()) return;
-      setError(errorMessage);
+      if (mayWriteData()) setError(errorMessage);
     } finally {
-      if (isCurrent()) setLoading(false);
+      // Repare que aqui é `ownsLoading`, não `mayWriteData`: uma escrita
+      // otimista descarta o DADO desta busca, mas quem começou o `loading`
+      // tem de terminá-lo de qualquer jeito.
+      if (ownsLoading()) setLoading(false);
     }
   }, [errorMessage]);
 
@@ -105,7 +119,7 @@ export function useDomainResource<T>(
     if (!isLoaded || !userId || !enabled) {
       // Descarta qualquer busca em voo: o que chegar agora é de um estado
       // que a página já não está mostrando.
-      sequence.current++;
+      fetchSequence.current++;
       setLoading(false);
       return;
     }
@@ -115,7 +129,7 @@ export function useDomainResource<T>(
   }, [run, isLoaded, userId, enabled, ...deps]);
 
   const setLocalData = useCallback((update: T | ((previous: T | null) => T)) => {
-    sequence.current++;
+    localWrites.current++;
     setData((previous) => (typeof update === 'function'
       ? (update as (p: T | null) => T)(previous)
       : update));
