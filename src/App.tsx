@@ -34,6 +34,9 @@ const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const ShareChildPage = lazy(() => import('./pages/ShareChildPage'));
 const CaregiversPage = lazy(() => import('./pages/CaregiversPage'));
 const CaregiverInviteAcceptPage = lazy(() => import('./pages/CaregiverInviteAcceptPage'));
+const CareTeamPage = lazy(() => import('./pages/CareTeamPage'));
+const CareTeamChildrenPage = lazy(() => import('./pages/CareTeamChildrenPage'));
+const CareTeamAcceptPage = lazy(() => import('./pages/CareTeamAcceptPage'));
 const SharedChildrenList = lazy(() => import('./pages/SharedChildrenList'));
 const SharedChildDetailPage = lazy(() => import('./pages/SharedChildDetailPage'));
 const TeamNotesPage = lazy(() => import('./pages/TeamNotesPage'));
@@ -91,6 +94,7 @@ function App() {
               <Route path="/children/:childId" element={<ProtectedRoute><ChildProfilePage /></ProtectedRoute>} />
               <Route path="/children/:childId/share" element={<ProtectedRoute><ShareChildPage /></ProtectedRoute>} />
               <Route path="/children/:childId/caregivers" element={<ProtectedRoute><CaregiversPage /></ProtectedRoute>} />
+              <Route path="/children/:childId/care-team" element={<ProtectedRoute><CareTeamPage /></ProtectedRoute>} />
               <Route path="/children/:childId/team-notes" element={<ProtectedRoute><TeamNotesPage /></ProtectedRoute>} />
               <Route path="/children/:childId/access-log" element={<ProtectedRoute><AccessLogPage /></ProtectedRoute>} />
               <Route path="/children/:childId/ficha" element={<ProtectedRoute><FichaCriancaPage /></ProtectedRoute>} />
@@ -116,6 +120,8 @@ function App() {
               {/* Invitation acceptance + professional read-only access */}
               <Route path="/invite/accept" element={<ProtectedRoute><InviteAcceptPage /></ProtectedRoute>} />
               <Route path="/caregiver-invite/accept" element={<ProtectedRoute><CaregiverInviteAcceptPage /></ProtectedRoute>} />
+              <Route path="/care-team/accept" element={<ProtectedRoute><CareTeamAcceptPage /></ProtectedRoute>} />
+              <Route path="/care-team/children" element={<ProtectedRoute><CareTeamChildrenPage /></ProtectedRoute>} />
               <Route path="/shared" element={<ProtectedRoute><SharedRecordsList /></ProtectedRoute>} />
               <Route path="/shared/anamnese/:id" element={<ProtectedRoute><SharedAnamneseView /></ProtectedRoute>} />
               <Route path="/shared/assessment/:id" element={<ProtectedRoute><SharedAssessmentView /></ProtectedRoute>} />

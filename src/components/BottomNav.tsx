@@ -23,15 +23,18 @@ import {
   GearIcon,
   MagnifyingGlassIcon,
   SpeakerLoudIcon,
+  BadgeIcon,
 } from '@radix-ui/react-icons';
 import { colors, zIndex, typography, shadows } from '../theme/tokens';
 import GlobalSearch from './GlobalSearch';
+import { useCareTeamCaseload } from '../hooks/useCareTeamCaseload';
 
 const BottomNav: React.FC = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut, session } = useAuthContext();
+  const hasCareTeamCaseload = useCareTeamCaseload();
   const [moreOpen, setMoreOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
@@ -58,6 +61,7 @@ const BottomNav: React.FC = () => {
     { path: '/assessment/new', labelKey: 'nav.newAssessment', icon: PlusIcon },
     { path: '/anamneses', labelKey: 'nav.anamneses', icon: ClipboardIcon },
     { path: '/settings', labelKey: 'nav.settings', icon: GearIcon },
+    ...(hasCareTeamCaseload ? [{ path: '/care-team/children', labelKey: 'nav.careTeamCaseload', icon: BadgeIcon }] : []),
   ];
 
   const handleSignOut = () => signOut().then(() => navigate('/sign-in', { replace: true }));
