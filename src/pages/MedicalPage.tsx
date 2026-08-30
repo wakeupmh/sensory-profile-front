@@ -1,10 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
 import { medicationApi, comorbidityApi, appointmentApi } from '../services/api';
 import type {
-  Medication,
-  Comorbidity,
-  MedicalAppointmentSummary,
   CreateMedicationPayload,
   UpdateMedicationPayload,
   CreateComorbidityPayload,
@@ -12,8 +9,8 @@ import type {
   CreateAppointmentPayload,
   UpdateAppointmentPayload,
 } from '../types/medical';
-import { useAuthContext } from '../context/AuthContext';
 import { useDomainPage } from '../hooks/useDomainPage';
+import { useDomainResource } from '../hooks/useDomainResource';
 import { ChildSelector } from '../components/domain/ChildSelector';
 import { ErrorState } from '../components/domain/ErrorState';
 import { previewItemStyle, emptyStyle } from '../components/domain/previewStyles';
@@ -36,60 +33,49 @@ function formatDate(iso: string): string {
 }
 
 export default function MedicalPage() {
-  const { isLoaded, session } = useAuthContext();
   const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
 
-  const [medications, setMedications] = useState<Medication[]>([]);
-  const [comorbidities, setComorbidities] = useState<Comorbidity[]>([]);
-  const [appointments, setAppointments] = useState<MedicalAppointmentSummary[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [medsPanelOpen, setMedsPanelOpen] = useState(false);
   const [comorbidityPanelOpen, setComorbidityPanelOpen] = useState(false);
   const [appointmentPanelOpen, setAppointmentPanelOpen] = useState(false);
 
-  const fetchMedications = useCallback(async () => {
-    const token = await getTokenRef.current();
-    const childIdParam = selectedChildId || undefined;
-    const meds = await medicationApi.list(token, { childId: childIdParam });
-    setMedications(meds);
-  }, [selectedChildId, getTokenRef]);
+  // Três recursos independentes, e não um só: cada mutação nesta página
+  // rebusca apenas a sua seção (são nove pontos de mutação). Juntar tudo num
+  // `reload()` triplicaria o tráfego a cada alteração. De quebra, uma seção
+  // que falha não apaga mais as outras duas.
+  const childIdParam = selectedChildId || undefined;
 
-  const fetchComorbidities = useCallback(async () => {
-    const token = await getTokenRef.current();
-    const childIdParam = selectedChildId || undefined;
-    const comorbList = await comorbidityApi.list(token, { childId: childIdParam });
-    setComorbidities(comorbList);
-  }, [selectedChildId, getTokenRef]);
+  const meds = useDomainResource(
+    (token) => medicationApi.list(token, { childId: childIdParam }),
+    [childIdParam],
+  );
+  const comorbs = useDomainResource(
+    (token) => comorbidityApi.list(token, { childId: childIdParam }),
+    [childIdParam],
+  );
+  const appts = useDomainResource(
+    async (token) => {
+      const result = await appointmentApi.list(token, { childId: childIdParam });
+      return result.data ?? result;
+    },
+    [childIdParam],
+  );
 
-  const fetchAppointments = useCallback(async () => {
-    const token = await getTokenRef.current();
-    const childIdParam = selectedChildId || undefined;
-    const appts = await appointmentApi.list(token, { childId: childIdParam });
-    setAppointments(appts.data ?? appts);
-  }, [selectedChildId, getTokenRef]);
+  const medications = meds.data ?? [];
+  const comorbidities = comorbs.data ?? [];
+  const appointments = appts.data ?? [];
 
-  const fetchAll = useCallback(async () => {
-    try {
-      setLoading(true);
-      await Promise.all([
-        fetchMedications(),
-        fetchComorbidities(),
-        fetchAppointments(),
-      ]);
-      setError(null);
-    } catch {
-      setError('Erro ao carregar dados. Por favor, tente novamente.');
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchMedications, fetchComorbidities, fetchAppointments]);
+  const loading = meds.loading || comorbs.loading || appts.loading;
+  const error = meds.error ?? comorbs.error ?? appts.error;
 
-  useEffect(() => {
-    if (isLoaded && session) {
-      fetchAll();
-    }
-  }, [fetchAll, isLoaded, session]);
+  const fetchMedications = meds.reload;
+  const fetchComorbidities = comorbs.reload;
+  const fetchAppointments = appts.reload;
+  const fetchAll = () => {
+    fetchMedications();
+    fetchComorbidities();
+    fetchAppointments();
+  };
 
   // Medication handlers
   const handleAddMedication = async (payload: CreateMedicationPayload) => {

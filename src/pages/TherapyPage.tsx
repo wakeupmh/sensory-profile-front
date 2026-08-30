@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
 import {
   InfoCircledIcon,
@@ -7,14 +7,12 @@ import {
 } from '@radix-ui/react-icons';
 import { therapyApi, therapistApi } from '../services/api';
 import type {
-  TherapySessionSummary,
-  Therapist,
   TherapyType,
   CreateSessionPayload,
   CreateTherapistPayload,
 } from '../types/therapy';
-import { useAuthContext } from '../context/AuthContext';
 import { useDomainPage } from '../hooks/useDomainPage';
+import { useDomainResource } from '../hooks/useDomainResource';
 import { ChildSelector } from '../components/domain/ChildSelector';
 import { FilterPill } from '../components/domain/FilterPill';
 import { ErrorState } from '../components/domain/ErrorState';
@@ -67,56 +65,36 @@ function formatOccurredAt(iso: string): string {
 }
 
 export default function TherapyPage() {
-  const { isLoaded, session } = useAuthContext();
   const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
 
-  const [sessions, setSessions] = useState<TherapySessionSummary[]>([]);
-  const [therapists, setTherapists] = useState<Therapist[]>([]);
   const [filter, setFilter] = useState<FilterType>('all');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [therapistsPanelOpen, setTherapistsPanelOpen] = useState(false);
 
-  const fetchTherapists = useCallback(async () => {
-    try {
-      const token = await getTokenRef.current();
-      const list = await therapistApi.list(token);
-      setTherapists(list);
-    } catch {
-      // non-fatal
-    }
-  }, [getTokenRef]);
-
-  const fetchSessions = useCallback(async () => {
-    try {
-      setLoading(true);
-      const token = await getTokenRef.current();
+  const sessionsResource = useDomainResource(
+    async (token) => {
       const params = {
         ...(selectedChildId ? { childId: selectedChildId } : {}),
         ...(filter !== 'all' ? { therapyType: filter } : {}),
       };
       const result = await therapyApi.getSessions(token, params);
-      setSessions(result.data);
-      setError(null);
-    } catch {
-      setError('Erro ao carregar sessões. Por favor, tente novamente.');
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedChildId, filter, getTokenRef]);
+      return result.data;
+    },
+    [selectedChildId, filter],
+    { errorMessage: 'Erro ao carregar sessões. Por favor, tente novamente.' },
+  );
 
-  useEffect(() => {
-    if (isLoaded && session) {
-      fetchTherapists();
-    }
-  }, [fetchTherapists, isLoaded, session]);
+  // A lista de terapeutas alimenta os seletores dos painéis. Falhar aqui nunca
+  // foi fatal para a página, então o erro deste recurso não é lido — só a
+  // busca das sessões manda na tela.
+  const therapistsResource = useDomainResource((token) => therapistApi.list(token), []);
 
-  useEffect(() => {
-    if (isLoaded && session) {
-      fetchSessions();
-    }
-  }, [fetchSessions, isLoaded, session]);
+  const sessions = sessionsResource.data ?? [];
+  const therapists = therapistsResource.data ?? [];
+  const loading = sessionsResource.loading;
+  const error = sessionsResource.error;
+  const fetchSessions = sessionsResource.reload;
+  const fetchTherapists = therapistsResource.reload;
 
   const handleCreateSession = async (payload: CreateSessionPayload) => {
     const token = await getTokenRef.current();

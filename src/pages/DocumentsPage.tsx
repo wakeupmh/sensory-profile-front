@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Box, Flex, AlertDialog } from '@radix-ui/themes';
 import { ExclamationTriangleIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { documentApi } from '../services/api';
 import type { DocumentRecord } from '../types/documents';
 import { getExpiryStatus } from '../types/documents';
-import { useAuthContext } from '../context/AuthContext';
 import { useDomainPage } from '../hooks/useDomainPage';
+import { useDomainResource } from '../hooks/useDomainResource';
 import { ChildSelector } from '../components/domain/ChildSelector';
 import { ErrorState } from '../components/domain/ErrorState';
 import { colors, spacing } from '../theme/tokens';
@@ -22,39 +22,24 @@ const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
 const ACCEPTED_PREFIXES = ['application/pdf', 'image/', 'video/'];
 
 export default function DocumentsPage() {
-  const { isLoaded, session } = useAuthContext();
   const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
 
-  const [documents, setDocuments] = useState<DocumentRecord[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [previewDoc, setPreviewDoc] = useState<DocumentRecord | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const fetchDocuments = useCallback(async () => {
-    if (!effectiveChildId) {
-      setDocuments([]);
-      setLoading(false);
-      return;
-    }
-    try {
-      setLoading(true);
-      setError(null);
-      const token = await getTokenRef.current();
-      const list = await documentApi.list(token, { childId: effectiveChildId });
-      setDocuments(list);
-    } catch {
-      setError('Erro ao carregar documentos. Por favor, tente novamente.');
-    } finally {
-      setLoading(false);
-    }
-  }, [effectiveChildId, getTokenRef]);
+  const { data, loading, error, reload: fetchDocuments, setData } = useDomainResource(
+    (token) => documentApi.list(token, { childId: effectiveChildId }),
+    [effectiveChildId],
+    { errorMessage: 'Erro ao carregar documentos. Por favor, tente novamente.', enabled: Boolean(effectiveChildId) },
+  );
 
-  useEffect(() => {
-    if (isLoaded && session) fetchDocuments();
-  }, [fetchDocuments, isLoaded, session]);
+  const documents = useMemo(() => data ?? [], [data]);
+  // Atualização otimista: o upload aparece na hora, sem esperar uma nova
+  // busca. Era `setDocuments` antes de a busca virar hook.
+  const setDocuments = (update: (previous: DocumentRecord[]) => DocumentRecord[]) =>
+    setData((previous) => update(previous ?? []));
 
   const handleFileSelected = (file: File) => {
     setUploadError(null);
