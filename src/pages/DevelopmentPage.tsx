@@ -1,16 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
 import { milestoneApi, communicationLogApi } from '../services/api';
-import type {
-  DevelopmentalMilestone,
-  CommunicationLogSummary,
-} from '../types/development';
 import {
   MILESTONE_STATUS_LABELS,
   COMMUNICATION_ENTRY_TYPE_LABELS,
 } from '../types/development';
-import { useAuthContext } from '../context/AuthContext';
 import { useDomainPage } from '../hooks/useDomainPage';
+import { useDomainResource } from '../hooks/useDomainResource';
 import { ChildSelector } from '../components/domain/ChildSelector';
 import { ErrorState } from '../components/domain/ErrorState';
 import { previewItemStyle, emptyStyle } from '../components/domain/previewStyles';
@@ -34,40 +30,25 @@ function formatDateTime(iso: string): string {
 }
 
 export default function DevelopmentPage() {
-  const { isLoaded, session } = useAuthContext();
   const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
 
-  const [milestones, setMilestones] = useState<DevelopmentalMilestone[]>([]);
-  const [commLogs, setCommLogs] = useState<CommunicationLogSummary[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [milestonesPanelOpen, setMilestonesPanelOpen] = useState(false);
   const [commLogsPanelOpen, setCommLogsPanelOpen] = useState(false);
 
-  const fetchAll = useCallback(async () => {
-    try {
-      setLoading(true);
-      const token = await getTokenRef.current();
+  const { data, loading, error, reload: fetchAll } = useDomainResource(
+    async (token) => {
       const childIdParam = selectedChildId || undefined;
       const [milestonesData, logsData] = await Promise.all([
         milestoneApi.list(token, { childId: childIdParam }),
         communicationLogApi.list(token, { childId: childIdParam, limit: 20, page: 1 }),
       ]);
-      setMilestones(milestonesData);
-      setCommLogs(logsData.data ?? logsData);
-      setError(null);
-    } catch {
-      setError('Erro ao carregar dados. Por favor, tente novamente.');
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedChildId, getTokenRef]);
+      return { milestones: milestonesData, commLogs: logsData.data ?? logsData };
+    },
+    [selectedChildId],
+  );
 
-  useEffect(() => {
-    if (isLoaded && session) {
-      fetchAll();
-    }
-  }, [fetchAll, isLoaded, session]);
+  const milestones = data?.milestones ?? [];
+  const commLogs = data?.commLogs ?? [];
 
   return (
     <Box>

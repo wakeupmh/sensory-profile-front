@@ -134,7 +134,7 @@ const AnamneseList = () => {
                   <GumroadHeading level="title-md" as="h3" style={{ wordBreak: 'break-word', flex: 1 }}>
                     {a.childName}
                   </GumroadHeading>
-                  {a.shareToken ? (
+                  {a.isShared ? (
                     <GumroadBadge color="mint">
                       <Share1Icon /> Compartilhada
                     </GumroadBadge>

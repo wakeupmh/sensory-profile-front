@@ -7,7 +7,13 @@ export interface Caregiver {
   childId: string;
   caregiverName: string;
   status: CaregiverStatus;
-  invitationToken: string | null;
+  /**
+   * Só vem na resposta da criação — a listagem usa `toListView()`, que remove
+   * o token. Opcional porque numa linha vinda da listagem ele não existe, e
+   * declarar não-opcional é a mesma mentira que `types/professionals.ts`
+   * carregava.
+   */
+  invitationToken?: string | null;
   acceptedAt: string | null;
   createdAt: string;
   updatedAt: string;

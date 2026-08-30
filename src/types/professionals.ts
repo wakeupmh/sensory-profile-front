@@ -6,8 +6,14 @@ export interface Professional {
   email: string | null;
   profession: string | null;
   status: ProfessionalStatus;
-  /** Only present for pending records (or after token rotation). */
-  invitationToken: string | null;
+  /**
+   * Só vem na criação, na consulta por id e na rotação — a LISTAGEM não traz.
+   * O backend passou a devolver a lista por `toListView()` porque cada
+   * `GET /api/professionals` estava carregando o token vivo de todo convite
+   * pendente. Por isso é opcional: numa linha vinda da listagem ele não
+   * existe, e nada na tela pode depender dele para decidir o que mostrar.
+   */
+  invitationToken?: string | null;
   acceptedAt: string | null;
   createdAt: string;
   updatedAt: string;
