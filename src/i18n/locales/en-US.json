@@ -236,7 +236,9 @@
         "revokedOn": "Revoked on {{date}}",
         "revoke": "Revoke access",
         "cancelInvite": "Cancel invitation",
-        "revoking": "Revoking..."
+        "revoking": "Revoking...",
+        "reinvite": "Invite again",
+        "reinviting": "Inviting…"
       },
       "revokeDialog": {
         "title": "Revoke access",
@@ -279,6 +281,16 @@
         "cta": "View my caseload",
         "secondaryCta": "Go to home"
       }
+    },
+    "roles": {
+      "fonoaudiologia": "Speech therapist",
+      "psicologia": "Psychologist",
+      "terapia_ocupacional": "Occupational therapist",
+      "acompanhante_terapeutico": "Therapeutic companion",
+      "educacao_fisica": "Physical educator",
+      "fisioterapia": "Physiotherapist",
+      "psicopedagogia": "Educational psychologist",
+      "outro": "Other"
     }
   },
   "clinic": {
@@ -348,5 +360,8 @@
       "admin": "Administration",
       "profissional": "Professional"
     }
+  },
+  "common": {
+    "select": "Select"
   }
 }

@@ -6,7 +6,7 @@ import { BadgeIcon, CheckIcon, ExclamationTriangleIcon } from '@radix-ui/react-i
 import { useAuthContext } from '../context/AuthContext';
 import { careTeamApi } from '../services/api';
 import { resetCareTeamCaseloadCache } from '../hooks/useCareTeamCaseload';
-import { CARE_TEAM_ROLE_LABELS } from '../types/careTeam';
+import { CARE_TEAM_ROLE_LABEL_KEYS } from '../types/careTeam';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadInput from '../components/design-system/GumroadInput';
@@ -55,7 +55,7 @@ const CareTeamAcceptPage: React.FC = () => {
       }
 
       resetCareTeamCaseloadCache();
-      setSuccess({ role: CARE_TEAM_ROLE_LABELS[accepted.role], childName });
+      setSuccess({ role: t(CARE_TEAM_ROLE_LABEL_KEYS[accepted.role]), childName });
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } }).response?.status;
       if (status === 400) setError(t('careTeam.accept.errors.invalid'));

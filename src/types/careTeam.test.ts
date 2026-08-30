@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CARE_TEAM_ROLES, CARE_TEAM_ROLE_LABELS, getCareTeamDisplayStatus, type CareTeamMember } from './careTeam';
+import { CARE_TEAM_ROLES, CARE_TEAM_ROLE_LABEL_KEYS, getCareTeamDisplayStatus, type CareTeamMember } from './careTeam';
 
 /**
  * `getCareTeamDisplayStatus` is what the care-team list's four badges
@@ -50,11 +50,11 @@ describe('getCareTeamDisplayStatus', () => {
   });
 });
 
-describe('CARE_TEAM_ROLE_LABELS', () => {
+describe('CARE_TEAM_ROLE_LABEL_KEYS', () => {
   it('has exactly one label per role — no role silently falls back to undefined', () => {
     for (const role of CARE_TEAM_ROLES) {
-      expect(CARE_TEAM_ROLE_LABELS[role]).toBeTruthy();
+      expect(CARE_TEAM_ROLE_LABEL_KEYS[role]).toBeTruthy();
     }
-    expect(Object.keys(CARE_TEAM_ROLE_LABELS).sort()).toEqual([...CARE_TEAM_ROLES].sort());
+    expect(Object.keys(CARE_TEAM_ROLE_LABEL_KEYS).sort()).toEqual([...CARE_TEAM_ROLES].sort());
   });
 });

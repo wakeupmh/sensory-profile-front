@@ -236,7 +236,9 @@
         "revokedOn": "Revogado em {{date}}",
         "revoke": "Revogar acesso",
         "cancelInvite": "Cancelar convite",
-        "revoking": "Revogando..."
+        "revoking": "Revogando...",
+        "reinvite": "Convidar de novo",
+        "reinviting": "Convidando…"
       },
       "revokeDialog": {
         "title": "Revogar acesso",
@@ -279,6 +281,16 @@
         "cta": "Ver meus atendimentos",
         "secondaryCta": "Ir para o início"
       }
+    },
+    "roles": {
+      "fonoaudiologia": "Fonoaudióloga",
+      "psicologia": "Psicóloga",
+      "terapia_ocupacional": "Terapeuta ocupacional",
+      "acompanhante_terapeutico": "AT (acompanhante terapêutico)",
+      "educacao_fisica": "Educador físico",
+      "fisioterapia": "Fisioterapeuta",
+      "psicopedagogia": "Psicopedagoga",
+      "outro": "Outro"
     }
   },
   "clinic": {
@@ -348,5 +360,8 @@
       "admin": "Administração",
       "profissional": "Profissional"
     }
+  },
+  "common": {
+    "select": "Selecione"
   }
 }
