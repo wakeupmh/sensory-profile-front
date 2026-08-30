@@ -22,24 +22,63 @@ import LoadingSpinner from '../components/LoadingSpinner';
 
 const LIMIT = 20;
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return '—';
+  const date = new Date(iso);
+  // Um campo ausente virava "Invalid Date" em toda linha da tabela. Numa
+  // trilha de auditoria, "—" é honesto; "Invalid Date" é só ruído.
+  if (Number.isNaN(date.getTime())) return '—';
+  return date.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
+// Os valores gravados pelo backend são o nome da coleção da rota
+// (`daily-reports` -> `daily_reports`), mais os literais que alguns
+// controllers escrevem à mão. O fallback mostra o valor cru em vez de
+// esconder a linha: uma trilha de auditoria não pode omitir o que não
+// reconhece.
 const RESOURCE_TYPE_LABELS: Record<string, string> = {
+  access_logs: 'Histórico de acesso',
   anamnese: 'Anamnese',
+  anamneses: 'Anamneses',
   assessment: 'Avaliação',
   assessments: 'Avaliações',
+  care_team: 'Equipe de cuidado',
+  caregivers: 'Cuidadores',
+  communication_logs: 'Comunicação',
+  comorbidities: 'Comorbidades',
   daily_logs: 'Registros diários',
-  therapy: 'Terapia',
-  medical: 'Saúde',
+  daily_reports: 'Relatos do dia',
+  developmental_milestones: 'Marcos do desenvolvimento',
   development: 'Desenvolvimento',
+  documents: 'Documentos',
+  education_plans: 'Plano educacional',
+  goals: 'Objetivos',
+  medical: 'Saúde',
+  medical_appointments: 'Consultas',
+  medications: 'Medicações',
+  professional_note: 'Nota profissional',
+  professional_notes: 'Notas profissionais',
+  reminders: 'Lembretes',
+  school_communications: 'Comunicação escolar',
+  therapy: 'Terapia',
+  therapy_sessions: 'Sessões de terapia',
 };
+
+/**
+ * "Você" só quando é mesmo você. A tela dizia "Você" em qualquer linha sem
+ * nome resolvido, que é o caso da maioria — inclusive das ações de terceiros,
+ * exatamente as que esta tela existe para mostrar.
+ */
+function actorLabel(entry: AccessLogEntry, currentUserId: string | undefined): string {
+  if (currentUserId && entry.actorUserId === currentUserId) return 'Você';
+  return entry.actorName ?? 'Outro usuário';
+}
 
 export default function AccessLogPage() {
   const { childId } = useParams<{ childId: string }>();
   const navigate = useNavigate();
-  const { getToken } = useAuthContext();
+  const { getToken, session } = useAuthContext();
+  const currentUserId = session?.user?.id;
 
   const [entries, setEntries] = useState<AccessLogEntry[]>([]);
   const [total, setTotal] = useState(0);
@@ -122,9 +161,9 @@ export default function AccessLogPage() {
               <tbody>
                 {entries.map((entry, idx) => (
                   <tr key={entry.id} style={{ backgroundColor: idx % 2 === 0 ? colors.surface : colors['surface-cream'] }}>
-                    <td style={tdStyle}>{entry.professionalName ?? 'Você'}</td>
+                    <td style={tdStyle}>{actorLabel(entry, currentUserId)}</td>
                     <td style={tdStyle}>{RESOURCE_TYPE_LABELS[entry.resourceType] ?? entry.resourceType}</td>
-                    <td style={tdStyle}>{formatDate(entry.occurredAt)}</td>
+                    <td style={tdStyle}>{formatDate(entry.createdAt)}</td>
                     <td style={tdStyle}>
                       <Flex align="center" gap="1">
                         {entry.action === 'write' ? <Pencil1Icon /> : <EyeOpenIcon />}
