@@ -27,15 +27,21 @@ export type CareTeamRole = (typeof CARE_TEAM_ROLES)[number];
  * no backend sem label aqui vire erro de compilação, não um `undefined` na
  * tela.
  */
-export const CARE_TEAM_ROLE_LABELS: Record<CareTeamRole, string> = {
-  fonoaudiologia: 'Fonoaudióloga',
-  psicologia: 'Psicóloga',
-  terapia_ocupacional: 'Terapeuta ocupacional',
-  acompanhante_terapeutico: 'AT (acompanhante terapêutico)',
-  educacao_fisica: 'Educador físico',
-  fisioterapia: 'Fisioterapeuta',
-  psicopedagogia: 'Psicopedagoga',
-  outro: 'Outro',
+/**
+ * A chave de tradução de cada especialidade, num lugar só. O CONJUNTO de
+ * especialidades vive aqui (é o que não pode divergir do backend); o texto vive
+ * no i18n, senão a tela mistura idiomas — "Fonoaudióloga" aparecendo numa
+ * interface em inglês, que foi o que a verificação em navegador mostrou.
+ */
+export const CARE_TEAM_ROLE_LABEL_KEYS: Record<CareTeamRole, string> = {
+  fonoaudiologia: 'careTeam.roles.fonoaudiologia',
+  psicologia: 'careTeam.roles.psicologia',
+  terapia_ocupacional: 'careTeam.roles.terapia_ocupacional',
+  acompanhante_terapeutico: 'careTeam.roles.acompanhante_terapeutico',
+  educacao_fisica: 'careTeam.roles.educacao_fisica',
+  fisioterapia: 'careTeam.roles.fisioterapia',
+  psicopedagogia: 'careTeam.roles.psicopedagogia',
+  outro: 'careTeam.roles.outro',
 };
 
 /** Status bruto devolvido pelo backend (`CareTeamMember.getStatus()`). */

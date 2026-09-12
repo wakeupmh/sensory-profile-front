@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
 import { InfoCircledIcon, PlusIcon, UpdateIcon } from '@radix-ui/react-icons';
 import { logApi } from '../services/api';
 import { LOG_TYPE_LABELS, LOG_TYPES } from '../types/logs';
 import type { CreateLogPayload, DailyLog, LogType } from '../types/logs';
-import { useAuthContext } from '../context/AuthContext';
 import { useDomainPage } from '../hooks/useDomainPage';
+import { useDomainResource } from '../hooks/useDomainResource';
 import { useOfflineLogQueue } from '../hooks/useOfflineLogQueue';
 import { queueLog, isNetworkError } from '../services/offlineLogQueue';
 import { useToast } from '../context/ToastContext';
@@ -50,40 +50,30 @@ function formatOccurredAt(iso: string): string {
 }
 
 export default function LogsPage() {
-  const { isLoaded, session } = useAuthContext();
   const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
   const { queuedCount, syncing, flush } = useOfflineLogQueue();
   const toast = useToast();
 
-  const [logs, setLogs] = useState<DailyLog[]>([]);
   const [filter, setFilter] = useState<FilterType>('all');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
 
-  const fetchLogs = useCallback(async () => {
-    try {
-      setLoading(true);
-      const token = await getTokenRef.current();
+  const { data, loading, error, reload: fetchLogs, setData } = useDomainResource(
+    async (token) => {
       const params = {
         ...(selectedChildId ? { childId: selectedChildId } : {}),
         ...(filter !== 'all' ? { logType: filter } : {}),
       };
       const result = await logApi.getLogs(token, params);
-      setLogs(result.data);
-      setError(null);
-    } catch {
-      setError('Erro ao carregar registros. Por favor, tente novamente.');
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedChildId, filter, getTokenRef]);
+      return result.data;
+    },
+    [selectedChildId, filter],
+    { errorMessage: 'Erro ao carregar registros. Por favor, tente novamente.' },
+  );
 
-  useEffect(() => {
-    if (isLoaded && session) {
-      fetchLogs();
-    }
-  }, [fetchLogs, isLoaded, session]);
+  const logs = data ?? [];
+  // Atualização otimista de um registro já na tela, sem rebuscar a lista.
+  const setLogs = (update: (previous: DailyLog[]) => DailyLog[]) =>
+    setData((previous) => update(previous ?? []));
 
   // Registros pendentes acabaram de sincronizar — atualiza a lista para
   // mostrá-los sem exigir um refresh manual.

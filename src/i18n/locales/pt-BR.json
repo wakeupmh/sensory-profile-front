@@ -26,7 +26,8 @@
     "signIn": "Entrar",
     "close": "Fechar",
     "mainNavLabel": "Navegação principal",
-    "bottomNavLabel": "Navegação inferior"
+    "bottomNavLabel": "Navegação inferior",
+    "clinics": "Clínicas"
   },
   "settings": {
     "title": "Configurações",
@@ -235,7 +236,9 @@
         "revokedOn": "Revogado em {{date}}",
         "revoke": "Revogar acesso",
         "cancelInvite": "Cancelar convite",
-        "revoking": "Revogando..."
+        "revoking": "Revogando...",
+        "reinvite": "Convidar de novo",
+        "reinviting": "Convidando…"
       },
       "revokeDialog": {
         "title": "Revogar acesso",
@@ -278,6 +281,87 @@
         "cta": "Ver meus atendimentos",
         "secondaryCta": "Ir para o início"
       }
+    },
+    "roles": {
+      "fonoaudiologia": "Fonoaudióloga",
+      "psicologia": "Psicóloga",
+      "terapia_ocupacional": "Terapeuta ocupacional",
+      "acompanhante_terapeutico": "AT (acompanhante terapêutico)",
+      "educacao_fisica": "Educador físico",
+      "fisioterapia": "Fisioterapeuta",
+      "psicopedagogia": "Psicopedagoga",
+      "outro": "Outro"
     }
+  },
+  "clinic": {
+    "pageTitle": "Clínicas",
+    "pageSubtitle": "As clínicas de que você faz parte. A clínica administra a equipe; o acesso aos dados de cada criança continua sendo concedido pelo responsável.",
+    "subtitle": "Quem trabalha aqui. Para atender uma criança, o responsável dela precisa convidar a pessoa para a equipe de cuidado.",
+    "openRoster": "Ver equipe",
+    "noneYet": "Você ainda não faz parte de nenhuma clínica.",
+    "empty": "Ninguém na equipe ainda.",
+    "created": "Clínica criada",
+    "removed": "Participação encerrada",
+    "remove": "Desligar",
+    "caseload_one": "{{count}} criança atendida",
+    "caseload_other": "{{count}} crianças atendidas",
+    "create": {
+      "label": "Nome da clínica",
+      "placeholder": "Ex.: Clínica Movimento",
+      "submit": "Criar clínica",
+      "creating": "Criando…"
+    },
+    "form": {
+      "name": "Nome da pessoa",
+      "namePlaceholder": "Ex.: Dra. Helena Martins",
+      "role": "Função",
+      "invite": "Convidar",
+      "inviting": "Convidando…"
+    },
+    "invite": {
+      "title": "Convite criado para {{name}}",
+      "onceOnly": "Copie o link agora — ele não será exibido novamente.",
+      "copy": "Copiar link",
+      "copied": "Copiado!"
+    },
+    "status": {
+      "pending": "Convite pendente",
+      "active": "Ativo",
+      "expired": "Convite expirado",
+      "revoked": "Desligado"
+    },
+    "confirm": {
+      "title": "Desligar da clínica?",
+      "body": "{{name}} sai da equipe da clínica. Os atendimentos que o responsável de cada criança concedeu não são afetados — só o responsável pode revogar esses."
+    },
+    "accept": {
+      "title": "Entrar na clínica",
+      "tokenLabel": "Código do convite",
+      "tokenPlaceholder": "Cole aqui o código recebido",
+      "submit": "Entrar",
+      "submitting": "Entrando…",
+      "success": "Pronto — você entrou como {{role}}.",
+      "noAccessNote": "Entrar na clínica não dá acesso a nenhuma criança. Cada atendimento continua sendo concedido pelo responsável.",
+      "goToClinics": "Ver minhas clínicas",
+      "errors": {
+        "empty": "Informe o código do convite.",
+        "invalid": "Convite inválido ou expirado.",
+        "generic": "Não foi possível aceitar o convite. Tente novamente."
+      }
+    },
+    "errors": {
+      "load": "Erro ao carregar. Por favor, tente novamente.",
+      "create": "Não foi possível criar a clínica.",
+      "invite": "Não foi possível criar o convite.",
+      "remove": "Não foi possível desligar essa pessoa.",
+      "copy": "Não foi possível copiar o link."
+    },
+    "roles": {
+      "admin": "Administração",
+      "profissional": "Profissional"
+    }
+  },
+  "common": {
+    "select": "Selecione"
   }
 }

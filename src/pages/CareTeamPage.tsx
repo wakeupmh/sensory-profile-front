@@ -15,7 +15,7 @@ import { useAuthContext } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { careTeamApi, childApi } from '../services/api';
 import type { CareTeamMember, CreateCareTeamMemberResponse } from '../types/careTeam';
-import { CARE_TEAM_ROLES, CARE_TEAM_ROLE_LABELS, getCareTeamDisplayStatus, type CareTeamDisplayStatus } from '../types/careTeam';
+import { CARE_TEAM_ROLES, CARE_TEAM_ROLE_LABEL_KEYS, getCareTeamDisplayStatus, type CareTeamDisplayStatus } from '../types/careTeam';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadInput from '../components/design-system/GumroadInput';
@@ -23,7 +23,7 @@ import GumroadBadge from '../components/design-system/GumroadBadge';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
 import FastSelect from '../components/sensory-profile/FastSelect';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { colors, spacing, radii, shadows } from '../theme/tokens';
+import { colors, spacing, radii, shadows, typography } from '../theme/tokens';
 
 const STATUS_ORDER: CareTeamDisplayStatus[] = ['active', 'pending', 'expired', 'revoked'];
 
@@ -33,8 +33,6 @@ const STATUS_BADGE_COLOR: Record<CareTeamDisplayStatus, 'mint' | 'yellow' | 'pea
   expired: 'peach',
   revoked: 'cream',
 };
-
-const ROLE_OPTIONS = CARE_TEAM_ROLES.map((role) => ({ value: role, label: CARE_TEAM_ROLE_LABELS[role] }));
 
 function formatDate(iso: string): string {
   try {
@@ -59,6 +57,13 @@ export default function CareTeamPage() {
   const [members, setMembers] = useState<CareTeamMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Dentro do componente porque o rótulo passa pelo i18n — no escopo do
+  // módulo o `t` ainda não existe.
+  const roleOptions = useMemo(
+    () => CARE_TEAM_ROLES.map((role) => ({ value: role, label: t(CARE_TEAM_ROLE_LABEL_KEYS[role]) })),
+    [t],
+  );
 
   const [nameInput, setNameInput] = useState('');
   const [roleInput, setRoleInput] = useState<string>('');
@@ -91,16 +96,35 @@ export default function CareTeamPage() {
     fetchAll();
   }, [fetchAll]);
 
+  /**
+   * Convida de novo alguém cujo convite expirou.
+   *
+   * Sem isto o card expirado não tinha ação nenhuma: ficava na lista para
+   * sempre, e reconvidar exigia redigitar nome e especialidade no formulário
+   * lá em cima. Reaproveita o mesmo caminho do convite — um convite novo, com
+   * token novo e prazo novo.
+   */
+  const handleReinvite = async (member: CareTeamMember) => {
+    setNameInput(member.memberName);
+    setRoleInput(member.role);
+    await submitInvite(member.memberName, member.role);
+  };
+
   const handleInvite = async (e: FormEvent) => {
     e.preventDefault();
-    if (!childId || !nameInput.trim() || !roleInput) return;
+    if (!nameInput.trim() || !roleInput) return;
+    await submitInvite(nameInput, roleInput as CreateCareTeamMemberResponse['role']);
+  };
+
+  const submitInvite = async (memberName: string, role: CreateCareTeamMemberResponse['role']) => {
+    if (!childId || !memberName.trim() || !role) return;
     setInviting(true);
     setError(null);
     try {
       const token = await getToken();
       const created = await careTeamApi.invite(token, childId, {
-        memberName: nameInput.trim(),
-        role: roleInput as CreateCareTeamMemberResponse['role'],
+        memberName: memberName.trim(),
+        role,
       });
       // Guarda o token só neste estado local, exibido uma vez — nunca entra
       // na lista `members` (que espelha o que a listagem devolve, sem token).
@@ -209,7 +233,7 @@ export default function CareTeamPage() {
               <FastSelect
                 name="role"
                 label={t('careTeam.manage.inviteForm.roleLabel')}
-                options={ROLE_OPTIONS}
+                options={roleOptions}
                 initialValue={roleInput}
                 onValueChange={(_name, value) => setRoleInput(value)}
                 required
@@ -231,7 +255,7 @@ export default function CareTeamPage() {
             <GumroadText level="body-sm" as="p" style={{ opacity: 0.85 }}>
               {t('careTeam.manage.inviteSuccess.body', {
                 name: justInvited.memberName,
-                role: CARE_TEAM_ROLE_LABELS[justInvited.role],
+                role: t(CARE_TEAM_ROLE_LABEL_KEYS[justInvited.role]),
               })}
             </GumroadText>
             <TextField.Root
@@ -305,9 +329,23 @@ export default function CareTeamPage() {
             if (group.length === 0) return null;
             return (
               <Box key={status}>
-                <GumroadText level="caption-uppercase" as="p" style={{ opacity: 0.6, marginBottom: spacing.xs }}>
+                {/* h2: é um título de seção de verdade, e o nome de cada pessoa
+                    logo abaixo é h3. Como <p>, a página pulava de h1 para h3 e
+                    quem navega por títulos perdia a estrutura da lista. */}
+                <h2
+                  style={{
+                    ...typography['caption-uppercase'],
+                    fontSize: typography['caption-uppercase'].size,
+                    fontWeight: typography['caption-uppercase'].weight,
+                    letterSpacing: typography['caption-uppercase'].ls,
+                    fontFamily: typography['caption-uppercase'].font,
+                    textTransform: 'uppercase',
+                    opacity: 0.6,
+                    margin: `0 0 ${spacing.xs}`,
+                  }}
+                >
                   {t(`careTeam.manage.groupHeading.${status}`)} ({group.length})
-                </GumroadText>
+                </h2>
                 <Flex direction="column" gap="3">
                   {group.map((member) => (
                     <CareTeamMemberCard
@@ -317,6 +355,8 @@ export default function CareTeamPage() {
                       childName={childName}
                       revoking={revokingId === member.id}
                       onRevoke={() => handleRevoke(member.id)}
+                      onReinvite={() => handleReinvite(member)}
+                      reinviting={inviting}
                     />
                   ))}
                 </Flex>
@@ -335,12 +375,16 @@ function CareTeamMemberCard({
   childName,
   revoking,
   onRevoke,
+  onReinvite,
+  reinviting,
 }: {
   member: CareTeamMember;
   status: CareTeamDisplayStatus;
   childName: string;
   revoking: boolean;
   onRevoke: () => void;
+  onReinvite: () => void;
+  reinviting: boolean;
 }) {
   const { t } = useTranslation();
   // Expirado já não concede nada — o convite não pode mais ser aceito (o
@@ -367,7 +411,7 @@ function CareTeamMemberCard({
             <Flex gap="2" align="center" wrap="wrap">
               <GumroadBadge color={STATUS_BADGE_COLOR[status]}>{t(`careTeam.manage.status.${status}`)}</GumroadBadge>
               <GumroadText level="caption" as="span" style={{ opacity: 0.7 }}>
-                {CARE_TEAM_ROLE_LABELS[member.role]}
+                {t(CARE_TEAM_ROLE_LABEL_KEYS[member.role])}
               </GumroadText>
             </Flex>
             <GumroadText level="caption" as="span" style={{ opacity: 0.6 }}>
@@ -383,6 +427,15 @@ function CareTeamMemberCard({
             </GumroadText>
           </Flex>
         </Flex>
+
+        {/* Expirado deixou de ter ação nenhuma: o card ficava na lista para
+            sempre, e reconvidar exigia redigitar nome e especialidade no
+            formulário lá em cima. O que o responsável quer aqui é reenviar. */}
+        {status === 'expired' && (
+          <GumroadButton variant="secondary" size="sm" disabled={reinviting} onClick={onReinvite}>
+            {reinviting ? t('careTeam.manage.memberCard.reinviting') : t('careTeam.manage.memberCard.reinvite')}
+          </GumroadButton>
+        )}
 
         {canRevoke && (
           <AlertDialog.Root>

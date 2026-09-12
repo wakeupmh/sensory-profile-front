@@ -6,7 +6,7 @@ import { BadgeIcon, InfoCircledIcon, PersonIcon } from '@radix-ui/react-icons';
 import { useAuthContext } from '../context/AuthContext';
 import { careTeamApi } from '../services/api';
 import type { CareTeamCaseloadEntry } from '../types/careTeam';
-import { CARE_TEAM_ROLE_LABELS } from '../types/careTeam';
+import { CARE_TEAM_ROLE_LABEL_KEYS } from '../types/careTeam';
 import { colors, radii } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
@@ -86,7 +86,7 @@ export default function CareTeamChildrenPage() {
         <GumroadCard color="cream" shadow="md" padding="xl">
           <Flex direction="column" align="center" gap="3">
             <InfoCircledIcon width={32} height={32} />
-            <GumroadHeading level="title-sm" as="h3">
+            <GumroadHeading level="title-sm" as="h2">
               {t('careTeam.caseload.empty.title')}
             </GumroadHeading>
             <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7, textAlign: 'center' }}>
@@ -110,7 +110,7 @@ export default function CareTeamChildrenPage() {
                     <PersonIcon />
                   </Box>
                   <Flex direction="column" gap="1">
-                    <GumroadHeading level="title-sm" as="h3">{entry.childName}</GumroadHeading>
+                    <GumroadHeading level="title-sm" as="h2">{entry.childName}</GumroadHeading>
                     {entry.acceptedAt && (
                       <GumroadText level="caption" as="span" style={{ opacity: 0.65 }}>
                         {t('careTeam.caseload.acceptedOn', { date: formatDate(entry.acceptedAt) })}
@@ -119,7 +119,7 @@ export default function CareTeamChildrenPage() {
                   </Flex>
                 </Flex>
                 <Flex gap="2" align="center" wrap="wrap">
-                  <GumroadBadge color="lavender">{CARE_TEAM_ROLE_LABELS[entry.role]}</GumroadBadge>
+                  <GumroadBadge color="lavender">{t(CARE_TEAM_ROLE_LABEL_KEYS[entry.role])}</GumroadBadge>
                   <GumroadButton variant="primary" size="sm" asChild>
                     <Link to={`/children/${entry.childId}`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                       {t('careTeam.caseload.open')}

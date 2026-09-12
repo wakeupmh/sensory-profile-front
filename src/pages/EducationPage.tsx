@@ -1,16 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
-import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { educationPlanApi, schoolCommApi } from '../services/api';
-import type { EducationPlan, SchoolCommunicationSummary } from '../types/education';
 import {
   EDUCATION_PLAN_TYPE_LABELS,
   EDUCATION_PLAN_TYPE_COLORS,
   SCHOOL_COMM_TYPE_LABELS,
   SCHOOL_COMM_TYPE_COLORS,
 } from '../types/education';
-import { useAuthContext } from '../context/AuthContext';
 import { useDomainPage } from '../hooks/useDomainPage';
+import { useDomainResource } from '../hooks/useDomainResource';
+import ErrorState from '../components/domain/ErrorState';
 import { ChildSelector } from '../components/domain/ChildSelector';
 import { previewItemStyle, emptyStyle } from '../components/domain/previewStyles';
 import { colors, spacing } from '../theme/tokens';
@@ -33,45 +32,29 @@ function formatDateTime(iso: string): string {
 }
 
 export default function EducationPage() {
-  const { isLoaded, session } = useAuthContext();
-  const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
+  const { children, selectedChildId, setSelectedChildId, effectiveChildId } = useDomainPage();
 
-  const [plans, setPlans] = useState<EducationPlan[]>([]);
-  const [comms, setComms] = useState<SchoolCommunicationSummary[]>([]);
-  const [commsTotal, setCommsTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [plansPanelOpen, setPlansPanelOpen] = useState(false);
   const [commsPanelOpen, setCommsPanelOpen] = useState(false);
 
-  const fetchAll = useCallback(async () => {
-    try {
-      setLoading(true);
-      const token = await getTokenRef.current();
+  const { data, loading, error, reload } = useDomainResource(
+    async (token) => {
       const childIdParam = selectedChildId || undefined;
       const [plansData, commsData] = await Promise.all([
         educationPlanApi.list(token, { childId: childIdParam }),
         schoolCommApi.list(token, { childId: childIdParam, limit: 3, page: 1 }),
       ]);
-      setPlans(plansData);
-      setComms(commsData.data);
-      setCommsTotal(commsData.total);
-      setError(null);
-    } catch {
-      setError('Erro ao carregar dados. Por favor, tente novamente.');
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedChildId, getTokenRef]);
+      return { plans: plansData, comms: commsData.data, commsTotal: commsData.total };
+    },
+    [selectedChildId],
+  );
 
-  useEffect(() => {
-    if (isLoaded && session) {
-      fetchAll();
-    }
-  }, [fetchAll, isLoaded, session]);
+  const plans = data?.plans ?? [];
+  const comms = data?.comms ?? [];
+  const commsTotal = data?.commsTotal ?? 0;
 
   const handleMutate = () => {
-    fetchAll();
+    reload();
   };
 
   return (
@@ -114,17 +97,7 @@ export default function EducationPage() {
       {loading ? (
         <DomainListSkeleton />
       ) : error ? (
-        <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
-          <Flex align="center" gap="2" justify="between" wrap="wrap">
-            <Flex align="center" gap="2">
-              <ExclamationTriangleIcon />
-              <GumroadText level="body-md" as="p">{error}</GumroadText>
-            </Flex>
-            <GumroadButton variant="primary" size="sm" onClick={fetchAll}>
-              Tentar novamente
-            </GumroadButton>
-          </Flex>
-        </GumroadCard>
+        <ErrorState message={error} onRetry={reload} />
       ) : (
         <Flex direction="column" gap="4">
           {/* Planos Educacionais */}

@@ -1,10 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
 import { medicationApi, comorbidityApi, appointmentApi } from '../services/api';
 import type {
-  Medication,
-  Comorbidity,
-  MedicalAppointmentSummary,
   CreateMedicationPayload,
   UpdateMedicationPayload,
   CreateComorbidityPayload,
@@ -12,8 +9,8 @@ import type {
   CreateAppointmentPayload,
   UpdateAppointmentPayload,
 } from '../types/medical';
-import { useAuthContext } from '../context/AuthContext';
 import { useDomainPage } from '../hooks/useDomainPage';
+import { useDomainResource } from '../hooks/useDomainResource';
 import { ChildSelector } from '../components/domain/ChildSelector';
 import { ErrorState } from '../components/domain/ErrorState';
 import { previewItemStyle, emptyStyle } from '../components/domain/previewStyles';
@@ -36,60 +33,74 @@ function formatDate(iso: string): string {
 }
 
 export default function MedicalPage() {
-  const { isLoaded, session } = useAuthContext();
   const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
 
-  const [medications, setMedications] = useState<Medication[]>([]);
-  const [comorbidities, setComorbidities] = useState<Comorbidity[]>([]);
-  const [appointments, setAppointments] = useState<MedicalAppointmentSummary[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [medsPanelOpen, setMedsPanelOpen] = useState(false);
   const [comorbidityPanelOpen, setComorbidityPanelOpen] = useState(false);
   const [appointmentPanelOpen, setAppointmentPanelOpen] = useState(false);
 
-  const fetchMedications = useCallback(async () => {
-    const token = await getTokenRef.current();
-    const childIdParam = selectedChildId || undefined;
-    const meds = await medicationApi.list(token, { childId: childIdParam });
-    setMedications(meds);
-  }, [selectedChildId, getTokenRef]);
+  // Três recursos independentes, e não um só: cada mutação nesta página
+  // rebusca apenas a sua seção (são nove pontos de mutação). Juntar tudo num
+  // `reload()` triplicaria o tráfego a cada alteração. De quebra, uma seção
+  // que falha não apaga mais as outras duas.
+  const childIdParam = selectedChildId || undefined;
 
-  const fetchComorbidities = useCallback(async () => {
-    const token = await getTokenRef.current();
-    const childIdParam = selectedChildId || undefined;
-    const comorbList = await comorbidityApi.list(token, { childId: childIdParam });
-    setComorbidities(comorbList);
-  }, [selectedChildId, getTokenRef]);
+  const meds = useDomainResource(
+    (token) => medicationApi.list(token, { childId: childIdParam }),
+    [childIdParam],
+  );
+  const comorbs = useDomainResource(
+    (token) => comorbidityApi.list(token, { childId: childIdParam }),
+    [childIdParam],
+  );
+  const appts = useDomainResource(
+    async (token) => {
+      const result = await appointmentApi.list(token, { childId: childIdParam });
+      return result.data ?? result;
+    },
+    [childIdParam],
+  );
 
-  const fetchAppointments = useCallback(async () => {
-    const token = await getTokenRef.current();
-    const childIdParam = selectedChildId || undefined;
-    const appts = await appointmentApi.list(token, { childId: childIdParam });
-    setAppointments(appts.data ?? appts);
-  }, [selectedChildId, getTokenRef]);
+  const medications = meds.data ?? [];
+  const comorbidities = comorbs.data ?? [];
+  const appointments = appts.data ?? [];
 
-  const fetchAll = useCallback(async () => {
-    try {
-      setLoading(true);
-      await Promise.all([
-        fetchMedications(),
-        fetchComorbidities(),
-        fetchAppointments(),
-      ]);
-      setError(null);
-    } catch {
-      setError('Erro ao carregar dados. Por favor, tente novamente.');
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchMedications, fetchComorbidities, fetchAppointments]);
+  // Esqueleto SÓ na primeira carga (`data` ainda nulo). Antes desta página
+  // virar hook, os refetches por seção não mexiam em `loading`; com
+  // `loading` puro, apagar um medicamento levava as três seções para o
+  // esqueleto de uma vez. `data === null` distingue "ainda não carregou" de
+  // "está recarregando o que já está na tela".
+  const loading =
+    (meds.loading && meds.data === null) ||
+    (comorbs.loading && comorbs.data === null) ||
+    (appts.loading && appts.data === null);
+  // Erro da página inteira só quando as TRÊS seções falharam — aí não há o que
+  // mostrar mesmo. Antes, o primeiro erro trocava a página toda por um
+  // `ErrorState`, e uma seção fora do ar apagava as outras duas. É o benefício
+  // que a divisão em três recursos prometia e que só agora está implementado.
+  const error = meds.error && comorbs.error && appts.error ? meds.error : null;
 
-  useEffect(() => {
-    if (isLoaded && session) {
-      fetchAll();
-    }
-  }, [fetchAll, isLoaded, session]);
+  /** Erro de UMA seção, mostrado no lugar da lista daquela seção. */
+  const sectionError = (resource: { error: string | null }, retry: () => void) =>
+    resource.error ? (
+      <Flex direction="column" gap="2" align="start" style={{ padding: '4px 0' }}>
+        <GumroadText level="body-sm" as="p" style={{ color: colors['brand-salmon'] }}>
+          {resource.error}
+        </GumroadText>
+        <GumroadButton variant="secondary" size="sm" onClick={retry}>
+          Tentar novamente
+        </GumroadButton>
+      </Flex>
+    ) : null;
+
+  const fetchMedications = meds.reload;
+  const fetchComorbidities = comorbs.reload;
+  const fetchAppointments = appts.reload;
+  const fetchAll = () => {
+    fetchMedications();
+    fetchComorbidities();
+    fetchAppointments();
+  };
 
   // Medication handlers
   const handleAddMedication = async (payload: CreateMedicationPayload) => {
@@ -202,7 +213,8 @@ export default function MedicalPage() {
                 Gerenciar
               </GumroadButton>
             </Flex>
-            {children.length > 0 && medications.slice(0, 3).length === 0 ? (
+            {sectionError(meds, fetchMedications) ??
+             (children.length > 0 && medications.slice(0, 3).length === 0 ? (
               <p style={emptyStyle}>Nenhum registro</p>
             ) : (
               medications.slice(0, 3).map((med) => (
@@ -210,7 +222,7 @@ export default function MedicalPage() {
                   {med.name}{med.dosage ? ` — ${med.dosage}` : ''}
                 </div>
               ))
-            )}
+            ))}
           </GumroadCard>
 
           {/* Diagnósticos */}
@@ -231,7 +243,8 @@ export default function MedicalPage() {
                 Gerenciar
               </GumroadButton>
             </Flex>
-            {children.length > 0 && comorbidities.slice(0, 3).length === 0 ? (
+            {sectionError(comorbs, fetchComorbidities) ??
+             (children.length > 0 && comorbidities.slice(0, 3).length === 0 ? (
               <p style={emptyStyle}>Nenhum registro</p>
             ) : (
               comorbidities.slice(0, 3).map((c) => (
@@ -239,7 +252,7 @@ export default function MedicalPage() {
                   {c.conditionName}{c.icdCode ? ` (${c.icdCode})` : ''}
                 </div>
               ))
-            )}
+            ))}
           </GumroadCard>
 
           {/* Consultas */}
@@ -260,7 +273,8 @@ export default function MedicalPage() {
                 Gerenciar
               </GumroadButton>
             </Flex>
-            {children.length > 0 && appointments.slice(0, 3).length === 0 ? (
+            {sectionError(appts, fetchAppointments) ??
+             (children.length > 0 && appointments.slice(0, 3).length === 0 ? (
               <p style={emptyStyle}>Nenhum registro</p>
             ) : (
               appointments.slice(0, 3).map((appt) => (
@@ -269,7 +283,7 @@ export default function MedicalPage() {
                   {appt.doctorName ? ` — ${appt.doctorName}` : ''}
                 </div>
               ))
-            )}
+            ))}
           </GumroadCard>
         </Flex>
       )}

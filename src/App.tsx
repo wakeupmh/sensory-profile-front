@@ -37,6 +37,8 @@ const CaregiverInviteAcceptPage = lazy(() => import('./pages/CaregiverInviteAcce
 const CareTeamPage = lazy(() => import('./pages/CareTeamPage'));
 const CareTeamChildrenPage = lazy(() => import('./pages/CareTeamChildrenPage'));
 const CareTeamAcceptPage = lazy(() => import('./pages/CareTeamAcceptPage'));
+const ClinicsPage = lazy(() => import('./pages/ClinicsPage'));
+const ClinicAcceptPage = lazy(() => import('./pages/ClinicAcceptPage'));
 const SharedChildrenList = lazy(() => import('./pages/SharedChildrenList'));
 const SharedChildDetailPage = lazy(() => import('./pages/SharedChildDetailPage'));
 const TeamNotesPage = lazy(() => import('./pages/TeamNotesPage'));
@@ -122,6 +124,8 @@ function App() {
               <Route path="/caregiver-invite/accept" element={<ProtectedRoute><CaregiverInviteAcceptPage /></ProtectedRoute>} />
               <Route path="/care-team/accept" element={<ProtectedRoute><CareTeamAcceptPage /></ProtectedRoute>} />
               <Route path="/care-team/children" element={<ProtectedRoute><CareTeamChildrenPage /></ProtectedRoute>} />
+              <Route path="/clinics" element={<ProtectedRoute><ClinicsPage /></ProtectedRoute>} />
+              <Route path="/clinics/accept" element={<ProtectedRoute><ClinicAcceptPage /></ProtectedRoute>} />
               <Route path="/shared" element={<ProtectedRoute><SharedRecordsList /></ProtectedRoute>} />
               <Route path="/shared/anamnese/:id" element={<ProtectedRoute><SharedAnamneseView /></ProtectedRoute>} />
               <Route path="/shared/assessment/:id" element={<ProtectedRoute><SharedAssessmentView /></ProtectedRoute>} />

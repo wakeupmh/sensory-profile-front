@@ -181,7 +181,7 @@ const ProfessionalsList: React.FC = () => {
                   <GumroadBadge color={p.status === 'accepted' ? 'mint' : 'yellow'}>
                     {p.status === 'accepted' ? 'Aceito' : 'Convite pendente'}
                   </GumroadBadge>
-                  {p.status === 'pending' && p.invitationToken && (
+                  {p.status === 'pending' && (
                     <GumroadButton
                       variant="secondary"
                       size="sm"

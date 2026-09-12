@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
 import { InfoCircledIcon, PlusIcon } from '@radix-ui/react-icons';
 import { goalApi, goalProgressApi } from '../services/api';
 import type { Goal, GoalProgressSummary, CreateGoalPayload, GoalDomain, GoalStatus } from '../types/goals';
 import { GOAL_DOMAIN_LABELS, GOAL_STATUS_LABELS } from '../types/goals';
-import { useAuthContext } from '../context/AuthContext';
 import { useDomainPage } from '../hooks/useDomainPage';
+import { useDomainResource } from '../hooks/useDomainResource';
 import { ChildSelector } from '../components/domain/ChildSelector';
 import { FilterPill } from '../components/domain/FilterPill';
 import { ErrorState } from '../components/domain/ErrorState';
@@ -21,29 +21,20 @@ type DomainFilter = 'all' | GoalDomain;
 type StatusFilter = 'all' | GoalStatus;
 
 export default function GoalsPage() {
-  const { isLoaded, session } = useAuthContext();
   const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
 
-  const [goals, setGoals] = useState<Goal[]>([]);
-  const [summaries, setSummaries] = useState<Record<string, GoalProgressSummary>>({});
   const [domainFilter, setDomainFilter] = useState<DomainFilter>('all');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
 
-  const fetchGoals = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const token = await getTokenRef.current();
+  const { data, loading, error, reload: fetchGoals } = useDomainResource(
+    async (token) => {
       const params = {
         ...(selectedChildId ? { childId: selectedChildId } : {}),
         ...(domainFilter !== 'all' ? { domain: domainFilter } : {}),
         ...(statusFilter !== 'all' ? { status: statusFilter } : {}),
       };
-      const list = await goalApi.list(token, params);
-      setGoals(list);
+      const list: Goal[] = await goalApi.list(token, params);
 
       const summaryEntries = await Promise.all(
         list.map(async (g) => {
@@ -55,17 +46,17 @@ export default function GoalsPage() {
           }
         }),
       );
-      setSummaries(Object.fromEntries(summaryEntries.filter(([, s]) => s !== undefined)) as Record<string, GoalProgressSummary>);
-    } catch {
-      setError('Erro ao carregar metas. Por favor, tente novamente.');
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedChildId, domainFilter, statusFilter, getTokenRef]);
+      const summaries = Object.fromEntries(
+        summaryEntries.filter(([, s]) => s !== undefined),
+      ) as Record<string, GoalProgressSummary>;
+      return { goals: list, summaries };
+    },
+    [selectedChildId, domainFilter, statusFilter],
+    { errorMessage: 'Erro ao carregar metas. Por favor, tente novamente.' },
+  );
 
-  useEffect(() => {
-    if (isLoaded && session) fetchGoals();
-  }, [fetchGoals, isLoaded, session]);
+  const goals = useMemo(() => data?.goals ?? [], [data]);
+  const summaries = useMemo(() => data?.summaries ?? {}, [data]);
 
   const handleCreate = async (payload: CreateGoalPayload) => {
     const token = await getTokenRef.current();

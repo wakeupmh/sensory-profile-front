@@ -1,4 +1,5 @@
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useId, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Text } from '@radix-ui/themes';
 import { colors, shadows, radii, typography } from '../../theme/tokens';
 
@@ -15,6 +16,8 @@ interface FastSelectProps {
   disabled?: boolean;
   required?: boolean;
   onValueChange?: (name: string, value: string) => void;
+  /** Texto da opção vazia. Padrão: `common.select` do i18n. */
+  placeholder?: string;
 }
 
 // Chevron embutido como data-URI para o ícone à direita (appearance: none remove o nativo)
@@ -34,7 +37,13 @@ const FastSelect = memo(({
   disabled = false,
   required = false,
   onValueChange,
+  placeholder,
 }: FastSelectProps) => {
+  const { t } = useTranslation();
+  // O <label> existia mas não apontava para lugar nenhum: sem `htmlFor`/`id`,
+  // um leitor de tela anuncia o campo sem nome, e clicar no rótulo não foca o
+  // select. Vale para as cinco telas que usam este componente.
+  const selectId = useId();
   const [value, setValue] = useState(initialValue ?? '');
 
   useEffect(() => {
@@ -51,6 +60,7 @@ const FastSelect = memo(({
     <div style={{ width: '100%' }}>
       <Text
         as="label"
+        htmlFor={selectId}
         size="2"
         weight="bold"
         mb="1"
@@ -65,6 +75,7 @@ const FastSelect = memo(({
         {label} {required && <span style={{ color: colors.error }} aria-hidden="true">*</span>}
       </Text>
       <select
+        id={selectId}
         value={value}
         onChange={handleChange}
         disabled={disabled}
@@ -99,7 +110,7 @@ const FastSelect = memo(({
         }}
       >
         <option value="" disabled>
-          Selecione
+          {placeholder ?? t('common.select')}
         </option>
         {options.map((option) => (
           <option key={option.value} value={option.value} style={{ color: colors.ink }}>
