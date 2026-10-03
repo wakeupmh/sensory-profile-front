@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { parseLocalDate } from '../../utils/date';
 import { FormData, SensoryItem } from "./types";
 import NormalCurveChart from "./NormalCurveChart";
-import { getInstrument } from "../../instruments";
+import { getInstrument, getSectionsForItemIds } from "../../instruments";
 import type { ClassificationBand, InstrumentSection } from "../../instruments/types";
 
 interface ReportContentProps {
@@ -37,6 +37,15 @@ const SP2_FALLBACK_SCALE_OPTIONS = [
 
 const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId }) => {
   const instrument = getInstrument(formData.instrumentId);
+
+  // Seções efetivas: instrumentos com seções dinâmicas (M-CHAT-R/F) derivam das respostas
+  const sections: InstrumentSection[] = useMemo(() => {
+    const itemIds = Object.values(formData.sections ?? {}).flatMap((s) => (s.items ?? []).map((i) => i.id));
+    return getSectionsForItemIds(instrument, itemIds);
+  }, [instrument, formData.sections]);
+
+  const hasBands =
+    instrument.defaultBands.length > 0 || sections.some((s) => (s.bands?.length ?? 0) > 0);
 
   const responseValueMap = useMemo(() => {
     if (!instrument?.scale?.options) {
@@ -84,7 +93,7 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
       return { label: last.label, color: last.color };
     };
 
-    return instrument.sections.map((section) => {
+    return sections.map((section) => {
       const sectionData = formData.sections?.[section.key] || { items: [] };
       const items = sectionData.items || [];
 
@@ -102,7 +111,7 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
         color,
       };
     });
-  }, [instrument, formData.sections, responseValueMap]);
+  }, [instrument, sections, formData.sections, responseValueMap]);
 
   const reportStyle = {
     fontFamily: "Arial, sans-serif",
@@ -318,9 +327,16 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
       <div className="page-break"></div>
 
       {instrument.summaryComponent && (
-        <instrument.summaryComponent scores={scoreData} instrument={instrument} assessmentId={assessmentId} />
+        <instrument.summaryComponent
+          scores={formData.scoresJson ?? scoreData}
+          instrument={instrument}
+          assessmentId={assessmentId}
+          sections={formData.sections}
+        />
       )}
 
+      {/* Sem faixas de classificação (ex.: M-CHAT-R) a tabela de pontuação bruta não tem significado */}
+      {hasBands && (
       <div style={sectionStyle} className="avoid-break section-container">
         <h3 style={subHeaderStyle}>Resumo das Pontuações</h3>
         <p style={{ fontStyle: "italic", marginBottom: "15px" }}>
@@ -348,6 +364,7 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
           </tbody>
         </table>
       </div>
+      )}
 
       {instrument.hasNormalCurve && (
         <>
@@ -365,7 +382,7 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
         <h3 style={subHeaderStyle}>Detalhes das Respostas</h3>
 
         <div style={sectionContentStyle} className="detailed-responses">
-          {instrument.sections.map((section, sectionIndex) => {
+          {sections.map((section, sectionIndex) => {
             const sectionData = formData.sections?.[section.key] || { items: [] };
             const items = sectionData.items || [];
             if (items.length === 0) return null;

@@ -27,6 +27,7 @@ export interface SensoryItem {
   id: number;
   quadrant?: string;
   description: string;
+  guidance?: string[];
   response: FrequencyResponse | null;
   responseId?: string;
 }

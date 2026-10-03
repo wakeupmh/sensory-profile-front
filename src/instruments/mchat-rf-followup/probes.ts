@@ -1,130 +1,159 @@
+// Roteiros de sondagem da entrevista M-CHAT-R/F, um por item da triagem.
+// Texto próprio (não reproduz a entrevista oficial). Cada roteiro sonda exatamente
+// o item de mesma posição em mchat-r/items.ts.
+import { MCHAT_REVERSE_ITEMS } from '../mchat-r/scoring';
+
 export interface ProbeEntry {
   screenItemNumber: number; // 1-20
-  probeItemId: number;      // 4001-4020
-  probeScript: string;      // scripted follow-up question (PT-BR)
+  probeItemId: number;      // 4001-4020 (= 3000 + N + 1000)
+  /** true: resposta "sim" do cuidador é sinal de alerta (itens com pontuação invertida). */
+  failOnYes: boolean;
+  /** Pergunta a fazer ao cuidador. */
+  question: string;
+  /** Como aprofundar: pedidos de exemplo e situações típicas. */
+  guidance: string;
+  /** Regra explícita de PASSOU/FALHOU. */
+  rule: string;
+  /** Roteiro completo (pergunta + orientação + regra) em um único texto. */
+  probeScript: string;
 }
 
+const build = (
+  n: number,
+  question: string,
+  guidance: string,
+  rule: string,
+): ProbeEntry => ({
+  screenItemNumber: n,
+  probeItemId: 4000 + n,
+  failOnYes: MCHAT_REVERSE_ITEMS.includes(n),
+  question,
+  guidance,
+  rule,
+  probeScript: `${question}\n${guidance}\n${rule}`,
+});
+
 export const probes: ProbeEntry[] = [
-  {
-    screenItemNumber: 1,
-    probeItemId: 4001,
-    probeScript:
-      'Se você apontar para algo do outro lado do quarto, seu filho(a) olha para esse objeto? Peça ao cuidador para demonstrar como aponta. Pergunte se a criança olha para o objeto apontado, mesmo que não olhe para o rosto do cuidador. Se a criança olhar para o objeto em pelo menos uma das tentativas, marque PASSOU.',
-  },
-  {
-    screenItemNumber: 2,
-    probeItemId: 4002,
-    probeScript:
-      'Você já reparou se seu filho(a) olha para as coisas que você está olhando? Pergunte se a criança segue o olhar do cuidador em situações do cotidiano. Se o cuidador não tiver certeza, peça exemplos. Se a criança seguir o olhar pelo menos algumas vezes, marque PASSOU.',
-  },
-  {
-    screenItemNumber: 3,
-    probeItemId: 4003,
-    probeScript:
-      'Seu filho(a) gosta de brincar de "faz-de-conta" (ex: falar ao telefone, cuidar de bonecas, fingir que dirige)? Pergunte exemplos específicos de brincadeiras de faz-de-conta nos últimos dois meses. Se o cuidador relatar pelo menos uma brincadeira imaginativa, marque PASSOU.',
-  },
-  {
-    screenItemNumber: 4,
-    probeItemId: 4004,
-    probeScript:
-      'Seu filho(a) gosta de subir em coisas? (ex: escada, móveis, playground) Pergunte se a criança sobe sozinha em objetos ou estruturas de brincar. Se o cuidador relatar que a criança sobe em pelo menos um tipo de estrutura com frequência, marque PASSOU.',
-  },
-  {
-    screenItemNumber: 5,
-    probeItemId: 4005,
-    probeScript:
-      'Seu filho(a) gosta de fazer movimentos com os dedos perto dos olhos? Pergunte se a criança movimenta os dedos ou as mãos de forma repetitiva perto do rosto ou dos olhos. Se o cuidador não tiver certeza, peça para demonstrar. Se o cuidador confirmar que a criança faz isso com frequência, marque FALHOU.',
-  },
-  {
-    screenItemNumber: 6,
-    probeItemId: 4006,
-    probeScript:
-      'Seu filho(a) aponta com um dedo para pedir algo ou para mostrar algo interessante? Diferencie apontar para PEDIR (protoimperativo) e apontar para MOSTRAR (protodeclarativo). Se a criança apontar com o dedo indicador estendido em pelo menos uma dessas situações, marque PASSOU.',
-  },
-  {
-    screenItemNumber: 7,
-    probeItemId: 4007,
-    probeScript:
-      'Seu filho(a) aponta com um dedo para mostrar algo interessante para você? Foque especificamente no apontar protodeclarativo (compartilhar interesse). Pergunte se a criança aponta para objetos, aviões, cachorros, etc., apenas para mostrar. Se sim, marque PASSOU.',
-  },
-  {
-    screenItemNumber: 8,
-    probeItemId: 4008,
-    probeScript:
-      'Seu filho(a) se interessa por outras crianças? Pergunte se a criança observa, aproxima-se, tenta brincar junto ou reage quando outras crianças estão por perto. Se houver algum interesse demonstrado, mesmo que mínimo, marque PASSOU.',
-  },
-  {
-    screenItemNumber: 9,
-    probeItemId: 4009,
-    probeScript:
-      'Seu filho(a) mostra ou oferece objetos para você, não porque precisa de ajuda, mas para compartilhar? Pergunte se a criança traz brinquedos, flores, pedras ou outros objetos apenas para mostrar, sem pedir nada em troca. Se sim, marque PASSOU.',
-  },
-  {
-    screenItemNumber: 10,
-    probeItemId: 4010,
-    probeScript:
-      'Seu filho(a) olha para o seu rosto para verificar a sua reação quando algo inesperado acontece? (ex: cair um objeto, barulho estranho) Pergunte se a criança busca o olhar do cuidador em situações de incerteza ou surpresa. Se sim, marque PASSOU.',
-  },
-  {
-    screenItemNumber: 11,
-    probeItemId: 4011,
-    probeScript:
-      'Seu filho(a) reage de forma exagerada a sons comuns do ambiente? (ex: secador de cabelo, aspirador, alarme) Pergunte se a criança se assusta, chora, tampa os ouvidos ou reage fortemente a sons que outras crianças toleram. Se o cuidador confirmar reações excessivas frequentes, marque FALHOU.',
-  },
-  {
-    screenItemNumber: 12,
-    probeItemId: 4012,
-    probeScript:
-      'Seu filho(a) consegue andar sozinho(a)? Pergunte se a criança anda de forma independente, sem precisar segurar em móveis ou paredes (não conta engatinhar). Se a criança já anda com autonomia, marque PASSOU.',
-  },
-  {
-    screenItemNumber: 13,
-    probeItemId: 4013,
-    probeScript:
-      'Seu filho(a) olha para o seu rosto quando você chamar o nome dele(a)? Pergunte se a criança vira a cabeça ou olha para o cuidador quando o nome é chamado em um ambiente sem distrações. Se isso acontecer pelo menos algumas vezes, marque PASSOU.',
-  },
-  {
-    screenItemNumber: 14,
-    probeItemId: 4014,
-    probeScript:
-      'Seu filho(a) sorri quando você sorri para ele(a)? Pergunte se a criança devolve o sorriso em resposta ao sorriso do cuidador ou de outras pessoas familiares. Se sim, marque PASSOU.',
-  },
-  {
-    screenItemNumber: 15,
-    probeItemId: 4015,
-    probeScript:
-      'Seu filho(a) imita o que você faz? (ex: imitar caretas, barulhos, gestos simples) Pergunte exemplos recentes de imitação espontânea. Se a criança imitar pelo menos uma ação ou som, marque PASSOU.',
-  },
-  {
-    screenItemNumber: 16,
-    probeItemId: 4016,
-    probeScript:
-      'Seu filho(a) responde quando você fala de algo entediante, como "vamos para o carro" ou "quer leite"? Pergunte se a criança reage a frases comuns do cotidiano, mesmo que não sejam brincadeiras. Se houver alguma resposta (olhar, obedecer, gesticular), marque PASSOU.',
-  },
-  {
-    screenItemNumber: 17,
-    probeItemId: 4017,
-    probeScript:
-      'Se você virar a cabeça para olhar para algo, seu filho(a) vira a cabeça para ver o que você está olhando? Pergunte se a criança segue o olhar do cuidador em situações naturais. Se sim, marque PASSOU.',
-  },
-  {
-    screenItemNumber: 18,
-    probeItemId: 4018,
-    probeScript:
-      'Seu filho(a) entende o que as outras pessoas querem dizer apenas pelo tom de voz? (ex: reconhecer quando alguém está com medo, bravo ou feliz) Pergunte se a criança reage diferentemente a vozes alegres, bravas ou assustadas. Se sim, marque PASSOU.',
-  },
-  {
-    screenItemNumber: 19,
-    probeItemId: 4019,
-    probeScript:
-      'Seu filho(a) já tenta chamar a sua atenção para mostrar alguma coisa que ele(a) está fazendo? (ex: "mãe, olha!", levantar um brinquedo para mostrar) Pergunte se a criança inicia interação apenas para compartilhar atenção. Se sim, marque PASSOU.',
-  },
-  {
-    screenItemNumber: 20,
-    probeItemId: 4020,
-    probeScript:
-      'Seu filho(a) gosta de movimentos repetitivos? (ex: balançar o corpo, girar, bater as mãos repetidamente) Pergunte se a criança realiza movimentos estereotipados com frequência e se isso interfere nas atividades diárias. Se o cuidador confirmar movimentos repetitivos frequentes, marque FALHOU.',
-  },
+  build(
+    1,
+    'Quando você aponta para algo do outro lado do quarto, seu filho(a) olha para o que você apontou?',
+    'Peça ao cuidador que descreva a última vez em que isso aconteceu e que demonstre como aponta. Considere apenas olhar para o objeto, e não para a mão ou para o rosto do cuidador.',
+    'PASSOU se a criança olha para o objeto apontado na maior parte das vezes. FALHOU se raramente ou nunca olha.',
+  ),
+  build(
+    2,
+    'Você já teve dúvida sobre a audição do seu filho(a)? O que fez você pensar nisso?',
+    'Pergunte se a criança reage a sons fora do campo de visão (porta batendo, brinquedo que toca, chamado vindo de outro cômodo) e se já foi feito algum exame de audição. Esclareça se a dúvida vem da falta de resposta a sons em geral ou apenas de distração durante brincadeiras.',
+    'Item de pontuação invertida. FALHOU se a preocupação com a audição persiste, ou se a criança frequentemente não reage a sons do dia a dia. PASSOU se o cuidador não tem preocupação real e a criança reage a sons de forma consistente.',
+  ),
+  build(
+    3,
+    'Seu filho(a) brinca de faz-de-conta? Dê exemplos do que ele(a) costuma fingir.',
+    'Peça exemplos concretos dos últimos dois meses: fingir beber de um copo vazio, falar ao telefone de brinquedo, dar comida a boneca ou bicho de pelúcia, empurrar um carrinho fazendo barulho.',
+    'PASSOU se o cuidador descreve pelo menos dois tipos diferentes de brincadeira de faz-de-conta. FALHOU se não há exemplos ou apenas um tipo, raramente.',
+  ),
+  build(
+    4,
+    'Seu filho(a) gosta de subir em coisas?',
+    'Pergunte onde sobe (sofá, cama, escada, brinquedos de parquinho) e se faz isso por conta própria. Subir com muito apoio do adulto não conta.',
+    'PASSOU se a criança sobe em móveis ou estruturas com interesse e por iniciativa própria. FALHOU se evita subir ou não demonstra interesse.',
+  ),
+  build(
+    5,
+    'Seu filho(a) faz movimentos incomuns com os dedos perto dos olhos? Como são esses movimentos?',
+    'Peça ao cuidador que demonstre. Diferencie olhar ou explorar as próprias mãos de forma passageira, comum nessa idade, de mexer os dedos de modo repetido, perto do rosto, por períodos que chamam atenção.',
+    'Item de pontuação invertida. FALHOU se o movimento ocorre com frequência ou por períodos prolongados. PASSOU se é raro, breve ou apenas exploração normal das mãos.',
+  ),
+  build(
+    6,
+    'Seu filho(a) aponta com o dedo indicador para pedir algo ou para pedir ajuda?',
+    'Peça exemplos: apontar para um biscoito, brinquedo ou objeto fora do alcance. Gestos de puxar a mão do adulto, esticar o braço com a mão aberta ou apontar com a mão toda não contam.',
+    'PASSOU se a criança aponta com o dedo indicador para pedir coisas de forma regular. FALHOU se nunca ou raramente faz isso.',
+  ),
+  build(
+    7,
+    'Seu filho(a) aponta com o dedo indicador para mostrar algo interessante, sem querer ganhar nada?',
+    'Foque em apontar para compartilhar interesse: um avião no céu, um cachorro, um caminhão na rua. Se a criança aponta apenas para pedir algo, isso não conta aqui.',
+    'PASSOU se aponta para mostrar coisas de forma regular, às vezes olhando para o cuidador. FALHOU se nunca ou raramente faz isso.',
+  ),
+  build(
+    8,
+    'Seu filho(a) se interessa por outras crianças? O que ele(a) faz quando há crianças por perto?',
+    'Pergunte se observa, se aproxima, sorri, imita ou tenta brincar com crianças que não conhece. Considere interesse por crianças, e não apenas por adultos.',
+    'PASSOU se demonstra interesse claro por outras crianças em mais de uma ocasião. FALHOU se as ignora ou reage com pouco ou nenhum interesse.',
+  ),
+  build(
+    9,
+    'Seu filho(a) traz ou levanta objetos para mostrar a você, só para você ver?',
+    'Diferencie mostrar para compartilhar (flor, pedrinha, brinquedo novo) de entregar o objeto para pedir ajuda ou para que o adulto o abra ou ligue. Peça exemplos recentes.',
+    'PASSOU se mostra coisas para compartilhar de forma regular. FALHOU se nunca ou raramente faz isso.',
+  ),
+  build(
+    10,
+    'Quando você chama o nome do seu filho(a), ele(a) responde?',
+    'Considere um ambiente sem barulho, quando a criança não está absorvida em uma atividade. Resposta vale: olhar para você, falar ou balbuciar, parar o que faz. Pergunte se isso acontece quando a criança está de costas e se chamar mais de uma vez é necessário.',
+    'PASSOU se responde ao nome na maioria das vezes. FALHOU se raramente ou nunca responde, mesmo sem distrações.',
+  ),
+  build(
+    11,
+    'Quando você sorri para o seu filho(a), ele(a) sorri de volta?',
+    'Pergunte se o sorriso de volta acontece em situações do dia a dia, não só quando há cócegas ou brincadeira física. Peça um exemplo recente.',
+    'PASSOU se devolve o sorriso na maioria das vezes. FALHOU se raramente ou nunca sorri em resposta.',
+  ),
+  build(
+    12,
+    'Seu filho(a) fica muito incomodado(a) com barulhos comuns do dia a dia? Com quais?',
+    'Exemplos: aspirador, liquidificador, secador, buzina, música alta. Pergunte se chora, tampa os ouvidos, foge ou fica muito agitado(a), e se a reação é bem mais forte do que a de outras crianças da mesma idade.',
+    'Item de pontuação invertida. FALHOU se há reação de desconforto intenso a vários sons comuns, com frequência. PASSOU se a reação é rara, leve ou limitada a sons realmente muito altos.',
+  ),
+  build(
+    13,
+    'Seu filho(a) anda sozinho(a)?',
+    'Considere andar sem apoio, por vários passos seguidos. Andar segurando em móveis ou na mão do adulto, e engatinhar, não contam. Pergunte desde quando e se anda com segurança.',
+    'PASSOU se anda de forma independente. FALHOU se ainda não anda sem apoio.',
+  ),
+  build(
+    14,
+    'Seu filho(a) olha nos seus olhos quando você fala com ele(a), brinca ou troca a roupa dele(a)?',
+    'Pergunte por quanto tempo e em quais momentos o olhar acontece (mamadeira, troca de fralda, brincadeira face a face). Peça exemplos de situações em que a criança busca o olhar do adulto.',
+    'PASSOU se olha nos seus olhos regularmente nessas situações. FALHOU se raramente ou nunca faz contato visual.',
+  ),
+  build(
+    15,
+    'Seu filho(a) tenta imitar o que você faz?',
+    'Peça exemplos recentes: dar tchau, bater palmas, fazer caretas ou sons, copiar uma tarefa da casa. Vale imitação espontânea, não apenas quando é ensinada.',
+    'PASSOU se imita ações ou sons com regularidade. FALHOU se raramente ou nunca imita.',
+  ),
+  build(
+    16,
+    'Quando você vira a cabeça para olhar para alguma coisa, seu filho(a) olha na mesma direção para ver o que é?',
+    'Pergunte o que acontece quando o cuidador olha para algo (janela, porta, brinquedo no chão) sem apontar nem falar. Considere se a criança procura na mesma direção para onde você olha.',
+    'PASSOU se acompanha o seu olhar na maioria das vezes. FALHOU se raramente ou nunca acompanha.',
+  ),
+  build(
+    17,
+    'Seu filho(a) tenta fazer você olhar para ele(a)?',
+    'Exemplos: dizer "olha!", mostrar o que está fazendo, olhar para você esperando um elogio, repetir uma gracinha para chamar atenção. Pergunte com que frequência isso acontece nas brincadeiras.',
+    'PASSOU se procura sua atenção para ser observado(a) de forma regular. FALHOU se raramente ou nunca faz isso.',
+  ),
+  build(
+    18,
+    'Seu filho(a) entende quando você pede para ele(a) fazer algo, sem você apontar ou mostrar?',
+    'Exemplos: "põe o livro na mesa", "traz o cobertor", "pega o sapato". A criança deve entender só pelas palavras, sem apoio de gestos ou da situação. Peça exemplos recentes.',
+    'PASSOU se cumpre pedidos simples só pelas palavras, com regularidade. FALHOU se só entende com gestos, demonstração ou rotina, ou raramente atende.',
+  ),
+  build(
+    19,
+    'Quando acontece algo novo ou estranho, seu filho(a) olha para o seu rosto para ver como você reage?',
+    'Exemplos: um barulho inesperado, um brinquedo desconhecido, uma pessoa nova, algo que assusta. Pergunte se a criança confere sua expressão antes de decidir como reagir.',
+    'PASSOU se olha para o seu rosto nessas situações na maioria das vezes. FALHOU se raramente ou nunca confere a sua reação.',
+  ),
+  build(
+    20,
+    'Seu filho(a) gosta de brincadeiras de movimento, como ser balançado(a), jogado(a) para o alto ou pulado(a) no joelho?',
+    'Pergunte como a criança reage: se sorri, ri, pede mais ou procura repetir a brincadeira. Considere também outras atividades como balanço e gira-gira.',
+    'PASSOU se demonstra prazer e pede mais com frequência. FALHOU se NÃO gosta, mostra pouco interesse ou fica incomodado(a) com essas brincadeiras.',
+  ),
 ];
 
 /** Look up a probe entry by screen item number (1-based). */

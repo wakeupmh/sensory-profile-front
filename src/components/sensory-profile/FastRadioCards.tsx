@@ -9,6 +9,8 @@ interface RadioOption {
 
 interface FastRadioCardsProps {
   name: string;
+  /** Rótulo acessível do grupo (padrão: name). */
+  ariaLabel?: string;
   options: RadioOption[];
   initialValue?: string;
   disabled?: boolean;
@@ -35,6 +37,7 @@ const frequencyBg: Record<string, { bg: string; text: string }> = {
 
 const FastRadioCards = memo(({
   name,
+  ariaLabel,
   options,
   initialValue = '',
   disabled = false,
@@ -91,7 +94,7 @@ const FastRadioCards = memo(({
       <div
         className="radio-grid-responsive"
         role="radiogroup"
-        aria-label={name}
+        aria-label={ariaLabel ?? name}
         style={{ display: 'grid', gap: '8px', width: '100%' }}
       >
         {visibleOpts.map((option, index) => {

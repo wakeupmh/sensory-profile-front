@@ -1,50 +1,46 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import type { Instrument } from '../types';
-
-interface MchatRScores {
-  failCount: number;
-  failedItemIds: number[];
-  risk: 'baixo' | 'medio' | 'alto';
-}
+import type { SensoryItem } from '../../components/sensory-profile/types';
+import { computeMchatScores, type MchatScores } from './scoring';
 
 interface MchatRSummaryProps {
   scores: unknown;
   instrument: Instrument;
   assessmentId?: string;
+  sections?: Record<string, { items: SensoryItem[] }>;
 }
 
+// O relatório é sempre exibido em "papel" branco (inclusive no tema escuro e na
+// impressão), por isso as cores abaixo são fixas, como em ReportContent.
+const INK = '#0A0A1A';
 const RISK_COLORS: Record<string, string> = {
   baixo: '#4ECDC4',
   medio: '#FFD93D',
   alto: '#FF6B6B',
 };
 
-const RISK_LABELS: Record<string, string> = {
-  baixo: 'Baixo Risco',
-  medio: 'Risco Médio',
-  alto: 'Alto Risco',
-};
+const isMchatScores = (v: unknown): v is MchatScores =>
+  !!v && typeof v === 'object' && typeof (v as MchatScores).failCount === 'number'
+  && Array.isArray((v as MchatScores).failedItemIds);
 
-const RISK_EXPLANATIONS: Record<string, string> = {
-  baixo:
-    'Resultado de baixo risco: poucas ou nenhuma sinalização de autismo. Continue acompanhando o desenvolvimento da criança e mantenha as consultas pediátricas de rotina.',
-  medio:
-    'Resultado de risco médio: recomenda-se a realização da Entrevista de Acompanhamento (M-CHAT-R/F) para investigar mais detalhadamente os itens reprovados. Se o risco for confirmado, procure uma avaliação especializada.',
-  alto:
-    'Resultado de alto risco: indica necessidade de avaliação diagnóstica especializada o mais breve possível. Agende uma consulta com um profissional capacitado em desenvolvimento infantil (neuropediatra, psiquiatra infantil ou equipe multidisciplinar).',
-};
-
-export function MchatRSummary({ scores, instrument, assessmentId }: MchatRSummaryProps) {
+export function MchatRSummary({ scores, instrument, assessmentId, sections }: MchatRSummaryProps) {
   const navigate = useNavigate();
-  const data = scores as MchatRScores;
+  const { t } = useTranslation();
 
-  if (!data || typeof data.failCount !== 'number') {
-    return null;
+  // Usa os scores da API; se não vierem, calcula a partir das respostas
+  let data: MchatScores | null = isMchatScores(scores) ? scores : null;
+  if (!data && sections) {
+    const items = Object.values(sections).flatMap((s) => s.items ?? []);
+    if (items.some((i) => i.response)) {
+      data = computeMchatScores(items.map((i) => ({ id: i.id, response: i.response })));
+    }
   }
+
+  if (!data) return null;
 
   const { failCount, failedItemIds, risk } = data;
   const riskColor = RISK_COLORS[risk] ?? '#ccc';
-  const riskLabel = RISK_LABELS[risk] ?? risk;
 
   // Map global item IDs back to 1-based positions within the triagem section
   const section = instrument.sections.find((s) => s.key === 'triagem');
@@ -62,94 +58,89 @@ export function MchatRSummary({ scores, instrument, assessmentId }: MchatRSummar
     <div
       style={{
         background: '#fff',
-        border: '2px solid #0A0A1A',
+        border: `2px solid ${INK}`,
         borderRadius: '12px',
-        boxShadow: '6px 6px 0px #0A0A1A',
+        boxShadow: `6px 6px 0px ${INK}`,
         padding: '20px 24px',
         marginBottom: '24px',
         fontFamily: 'Inter, sans-serif',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
         <span
           style={{
             background: riskColor,
-            border: '2px solid #0A0A1A',
+            border: `2px solid ${INK}`,
             borderRadius: '9999px',
             padding: '6px 16px',
             fontFamily: 'Space Grotesk, sans-serif',
             fontWeight: 700,
             fontSize: '15px',
-            color: '#0A0A1A',
-            boxShadow: '2px 2px 0px #0A0A1A',
+            color: INK,
+            boxShadow: `2px 2px 0px ${INK}`,
             display: 'inline-block',
           }}
         >
-          {riskLabel}
+          {t(`mchatR.risk.${risk}`, { defaultValue: risk })}
         </span>
-        <span
-          style={{
-            fontSize: '15px',
-            fontWeight: 600,
-            color: '#0A0A1A',
-          }}
-        >
-          Itens não aprovados: {failCount}/20
+        <span style={{ fontSize: '15px', fontWeight: 600, color: INK }}>
+          {t('mchatR.failedCount', { count: failCount })}
         </span>
       </div>
 
+      <p style={{ margin: '0 0 16px', fontSize: '14px', lineHeight: 1.5, color: '#333' }}>
+        {t(`mchatR.explanation.${risk}`)}
+      </p>
+
       {risk === 'medio' && assessmentId && (
-        <div style={{ marginBottom: '16px' }}>
+        // screen-only: o botão não deve aparecer na versão impressa
+        <div className="screen-only" style={{ marginBottom: '16px' }}>
           <button
+            type="button"
             onClick={() =>
               navigate(
-                `/sensory-profile/new?instrument=mchat-rf-followup&parent=${assessmentId}`,
+                `/assessment/new?instrument=mchat-rf-followup&parent=${encodeURIComponent(assessmentId)}`,
               )
             }
             style={{
               background: '#fff',
-              border: '2px solid #0A0A1A',
+              border: `2px solid ${INK}`,
               borderRadius: '9999px',
               padding: '10px 20px',
+              minHeight: '44px',
               fontFamily: 'Space Grotesk, sans-serif',
               fontWeight: 700,
               fontSize: '15px',
-              color: '#0A0A1A',
-              boxShadow: '4px 4px 0px #0A0A1A',
+              color: INK,
+              boxShadow: `4px 4px 0px ${INK}`,
               cursor: 'pointer',
-              transition: 'transform 0.1s, box-shadow 0.1s',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-            onMouseDown={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.transform = 'translate(2px, 2px)';
-              (e.currentTarget as HTMLButtonElement).style.boxShadow = 'none';
-            }}
-            onMouseUp={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.transform = '';
-              (e.currentTarget as HTMLButtonElement).style.boxShadow = '4px 4px 0px #0A0A1A';
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.transform = '';
-              (e.currentTarget as HTMLButtonElement).style.boxShadow = '4px 4px 0px #0A0A1A';
             }}
           >
-            Iniciar Entrevista de Acompanhamento →
+            {t('mchatR.startFollowup')}
           </button>
         </div>
       )}
 
-      <p
-        style={{
-          margin: '0 0 16px',
-          fontSize: '14px',
-          lineHeight: 1.5,
-          color: '#333',
-        }}
-      >
-        {RISK_EXPLANATIONS[risk]}
-      </p>
+      {risk === 'alto' && (
+        <div
+          role="note"
+          style={{
+            marginBottom: '16px',
+            padding: '12px 14px',
+            border: `2px solid ${INK}`,
+            borderRadius: '8px',
+            background: '#FFF1F1',
+            color: INK,
+            fontSize: '14px',
+            lineHeight: 1.5,
+          }}
+        >
+          <strong style={{ display: 'block', marginBottom: '4px', fontFamily: 'Space Grotesk, sans-serif' }}>
+            {t('mchatR.highRisk.title')}
+          </strong>
+          {t('mchatR.highRisk.body')}
+        </div>
+      )}
 
       {failedPositions.length > 0 ? (
         <div>
@@ -163,32 +154,30 @@ export function MchatRSummary({ scores, instrument, assessmentId }: MchatRSummar
               letterSpacing: '0.05em',
             }}
           >
-            Itens reprovados (posição na triagem)
+            {t('mchatR.failedItemsTitle')}
           </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+          <ul style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', margin: 0, padding: 0, listStyle: 'none' }}>
             {failedPositions.map((pos) => (
-              <span
+              <li
                 key={pos}
                 style={{
                   background: '#FFFEF5',
-                  border: '2px solid #0A0A1A',
+                  border: `2px solid ${INK}`,
                   borderRadius: '8px',
                   padding: '3px 10px',
                   fontSize: '13px',
                   fontWeight: 700,
-                  color: '#0A0A1A',
-                  boxShadow: '2px 2px 0px #0A0A1A',
+                  color: INK,
+                  boxShadow: `2px 2px 0px ${INK}`,
                 }}
               >
                 {pos}
-              </span>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       ) : (
-        <p style={{ margin: 0, fontSize: '14px', color: '#555' }}>
-          Nenhum item reprovado.
-        </p>
+        <p style={{ margin: 0, fontSize: '14px', color: '#555' }}>{t('mchatR.noFailedItems')}</p>
       )}
     </div>
   );

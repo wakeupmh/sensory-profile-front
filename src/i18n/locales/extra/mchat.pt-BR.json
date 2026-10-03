@@ -1,1 +1,157 @@
-{}
+{
+  "mchatR": {
+    "risk": {
+      "baixo": "Baixo Risco",
+      "medio": "Risco Médio",
+      "alto": "Alto Risco"
+    },
+    "failedCount": "Itens não aprovados: {{count}}/20",
+    "explanation": {
+      "baixo": "Resultado de baixo risco: poucas ou nenhuma sinalização de autismo. Continue acompanhando o desenvolvimento da criança e mantenha as consultas pediátricas de rotina.",
+      "medio": "Resultado de risco médio: recomenda-se a realização da Entrevista de Acompanhamento (M-CHAT-R/F) para investigar mais detalhadamente os itens reprovados. Se o risco for confirmado, procure uma avaliação especializada.",
+      "alto": "Resultado de alto risco: indica necessidade de avaliação diagnóstica especializada o mais breve possível. Agende uma consulta com um profissional capacitado em desenvolvimento infantil (neuropediatra, psiquiatra infantil ou equipe multidisciplinar)."
+    },
+    "highRisk": {
+      "title": "Próximo passo: avaliação especializada",
+      "body": "Pelo protocolo, a Entrevista de Acompanhamento não é indicada neste nível de risco. Encaminhe a criança agora para avaliação diagnóstica e para intervenção precoce, sem aguardar novas triagens. Leve este relatório à consulta."
+    },
+    "startFollowup": "Iniciar Entrevista de Acompanhamento →",
+    "failedItemsTitle": "Itens reprovados (posição na triagem)",
+    "noFailedItems": "Nenhum item reprovado."
+  },
+  "mchatFollowup": {
+    "risk": {
+      "baixo": "Baixo Risco",
+      "alto": "Alto Risco"
+    },
+    "failedCountOne": "{{count}} item ainda reprovado após acompanhamento",
+    "failedCountOther": "{{count}} itens ainda reprovados após acompanhamento",
+    "explanation": {
+      "baixo": "Após a entrevista, menos de 2 itens permaneceram reprovados: a triagem é considerada negativa. Continue acompanhando o desenvolvimento e refaça a triagem se surgirem novas preocupações.",
+      "alto": "Após a entrevista, 2 ou mais itens permaneceram reprovados: a triagem é considerada positiva. Encaminhe a criança para avaliação diagnóstica especializada e intervenção precoce."
+    },
+    "resultPerItem": "Resultado por item",
+    "itemLabel": "Item {{n}}",
+    "result": {
+      "passou": "Passou",
+      "falhou": "Falhou"
+    }
+  },
+  "assessmentForm": {
+    "item": "Item",
+    "description": "Descrição",
+    "answer": "Resposta",
+    "guidanceTitle": "Roteiro da entrevista",
+    "frequency": {
+      "label": "Frequência",
+      "notApplicable": "Não se aplica",
+      "almostNever": "Quase Nunca",
+      "occasionally": "Ocasionalmente",
+      "halfTheTime": "Metade do Tempo",
+      "frequently": "Frequentemente",
+      "almostAlways": "Quase Sempre"
+    },
+    "steps": {
+      "child": "Criança",
+      "examiner": "Examinador",
+      "caregiver": "Responsável",
+      "instructions": "Instruções"
+    },
+    "confirmSwitchInstrument": "Trocar de instrumento irá reiniciar as respostas já preenchidas. Deseja continuar?",
+    "validation": {
+      "child": "Selecione ou cadastre uma criança para continuar.",
+      "examinerName": "Nome do examinador é obrigatório",
+      "examinerProfession": "Cargo/Função do examinador é obrigatório",
+      "examinerContact": "Contato do examinador é obrigatório",
+      "caregiverName": "Nome do cuidador é obrigatório",
+      "caregiverRelationship": "Relação do cuidador com a criança é obrigatória",
+      "caregiverContact": "Contato do cuidador é obrigatório",
+      "childName": "Nome da criança é obrigatório",
+      "childBirthDate": "Data de nascimento da criança é obrigatória",
+      "childGender": "Gênero da criança é obrigatório",
+      "childAge": "Idade da criança é obrigatória",
+      "allItems": "Todos os itens são obrigatórios. Volte e responda os itens que faltam.",
+      "sectionItems_one": "Falta responder {{count}} item desta etapa.",
+      "sectionItems_other": "Faltam responder {{count}} itens desta etapa."
+    },
+    "errors": {
+      "load": "Erro ao carregar avaliação. Por favor, tente novamente.",
+      "report": "Erro ao gerar relatório. Por favor, tente novamente.",
+      "save": "Erro ao salvar avaliação. Por favor, tente novamente."
+    },
+    "title": {
+      "new": "Nova Avaliação",
+      "edit": "Editar Avaliação",
+      "report": "Relatório de Avaliação",
+      "view": "Visualizar Avaliação"
+    },
+    "loading": "Carregando dados...",
+    "notFound": {
+      "title": "Avaliação não encontrada",
+      "message": "A avaliação que você está procurando não existe ou foi removida."
+    },
+    "validationPrefix": "Erros de validação:",
+    "creating": "Criando...",
+    "create": "Criar Avaliação",
+    "saving": "Salvando...",
+    "saveChanges": "Salvar Alterações",
+    "buttons": {
+      "cancel": "Cancelar",
+      "back": "Voltar",
+      "next": "Próximo",
+      "edit": "Editar",
+      "viewReport": "Ver Relatório"
+    },
+    "parent": {
+      "loadError": "Não foi possível carregar a triagem M-CHAT-R de origem. Volte e tente iniciar a entrevista de acompanhamento novamente pelo relatório da triagem.",
+      "missing": "A entrevista de acompanhamento deve ser iniciada a partir do relatório de uma triagem M-CHAT-R com risco médio.",
+      "noFailedItems": "A triagem de origem não tem itens reprovados para investigar na entrevista de acompanhamento."
+    },
+    "picker": {
+      "title": "Instrumento",
+      "help": "Escolha o questionário adequado à faixa etária. Ao trocar, as respostas já preenchidas desta avaliação serão reiniciadas.",
+      "ageRange": "Faixa etária",
+      "allAges": "Todas as idades",
+      "sections": "{{count}} seções"
+    },
+    "comments": {
+      "label": "Comentários:",
+      "placeholder": "Adicione comentários sobre esta seção"
+    },
+    "instructions": {
+      "title": "INSTRUÇÕES",
+      "intro": "As páginas a seguir contêm afirmações que descrevem como as crianças podem agir. Leia cada frase e selecione a opção que melhor descreve a frequência na qual seu/sua filho(a) demonstra esses comportamentos.",
+      "introBold": "Marque uma opção para cada afirmação.",
+      "guidelines": "Use estas orientações para marcar suas respostas:",
+      "whenOpportunity": "Quando tem a oportunidade, meu filho(a)...",
+      "yesNo": "Responda cada pergunta com Sim ou Não, pensando no comportamento habitual da criança. Se o comportamento aconteceu só uma ou duas vezes e não é habitual, responda como se ele não acontecesse. Marque uma opção para cada pergunta.",
+      "followup": "Para cada item reprovado na triagem, leia a pergunta original e faça a sondagem ao cuidador seguindo o roteiro. Em seguida, marque Passou ou Falhou conforme a regra indicada no roteiro.",
+      "options": {
+        "almostAlways": {
+          "label": "Quase sempre",
+          "description": "responde desta maneira Quase sempre (90% ou mais do tempo)."
+        },
+        "frequently": {
+          "label": "Frequentemente",
+          "description": "responde desta maneira Frequentemente (75% do tempo)."
+        },
+        "halfTheTime": {
+          "label": "Metade do tempo",
+          "description": "responde desta maneira Metade do tempo (50% do tempo)."
+        },
+        "occasionally": {
+          "label": "Ocasionalmente",
+          "description": "responde desta maneira Ocasionalmente (25% do tempo)."
+        },
+        "almostNever": {
+          "label": "Quase nunca",
+          "description": "responde desta maneira Quase nunca (10% ou menos do tempo)."
+        },
+        "notApplicable": {
+          "label": "Não se aplica",
+          "description": "Se você não puder responder porque você não observou o comportamento ou acha que tal item não se aplica ao/à seu/sua filho(a), marque Não se aplica."
+        }
+      }
+    }
+  }
+}

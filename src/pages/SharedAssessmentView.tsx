@@ -6,13 +6,9 @@ import { ChevronLeftIcon, ExclamationTriangleIcon, FileTextIcon } from '@radix-u
 import { useAuthContext } from '../context/AuthContext';
 import { sharedApi } from '../services/api';
 import ReportContent from '../components/sensory-profile/ReportContent';
-import type { FormData, SensoryItem, SensorySection } from '../components/sensory-profile/types';
-import {
-  DEFAULT_INSTRUMENT_ID,
-  findSectionByItemId,
-  getInstrument,
-} from '../instruments';
-import { toSensoryItems } from '../instruments/types';
+import type { FormData } from '../components/sensory-profile/types';
+import { DEFAULT_INSTRUMENT_ID, getInstrument } from '../instruments';
+import { buildSectionsFromResponses } from '../components/sensory-profile/buildSections';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadBadge from '../components/design-system/GumroadBadge';
@@ -48,29 +44,12 @@ const SharedAssessmentView: React.FC = () => {
         const instrumentId: string = assessment.instrumentId || DEFAULT_INSTRUMENT_ID;
         const instrument = getInstrument(instrumentId);
 
-        const sections: Record<string, SensorySection> = Object.fromEntries(
-          instrument.sections.map((s) => [
-            s.key,
-            { items: toSensoryItems(s.items) as SensoryItem[], rawScore: 0, comments: '' },
-          ]),
-        );
+        const { sections, sectionKeys } = buildSectionsFromResponses(instrument, responses);
 
-        if (Array.isArray(responses)) {
-          responses.forEach((r: { itemId: number; response: string; id?: string }) => {
-            const sectionKey = findSectionByItemId(instrument, r.itemId);
-            if (!sectionKey) return;
-            const target = sections[sectionKey].items.find((it) => it.id === r.itemId);
-            if (target) {
-              target.response = r.response as SensoryItem['response'];
-              if (r.id) target.responseId = r.id;
-            }
-          });
-        }
-
-        instrument.sections.forEach((s) => {
-          const scoreField = `${s.key}RawScore`;
+        sectionKeys.forEach((key) => {
+          const scoreField = `${key}RawScore`;
           if (assessment[scoreField] !== undefined && assessment[scoreField] !== null) {
-            sections[s.key].rawScore = assessment[scoreField];
+            sections[key].rawScore = assessment[scoreField];
           }
         });
 
@@ -101,6 +80,7 @@ const SharedAssessmentView: React.FC = () => {
             contact: assessment.caregiverContact || '',
           },
           sections,
+          scoresJson: assessment.scores_json ?? assessment.scoresJson ?? undefined,
           createdAt: assessment.createdAt,
         });
         fetchedRef.current = true;
