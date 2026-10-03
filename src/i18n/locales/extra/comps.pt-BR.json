@@ -456,5 +456,201 @@
     },
     "wordsCount_one": "{{count}} palavra",
     "wordsCount_other": "{{count}} palavras"
+  },
+  "cAnamnese": {
+    "f": {
+      "mainComplaint": {
+        "label": "Queixa principal:",
+        "placeholder": "Motivo da procura, principais preocupações"
+      },
+      "complaintOnset": {
+        "label": "Quando começou:",
+        "placeholder": "Ex: há 6 meses"
+      },
+      "previousTreatments": {
+        "label": "Tratamentos anteriores:",
+        "placeholder": "Descreva tratamentos já realizados"
+      },
+      "plannedPregnancy": {
+        "label": "Gravidez planejada:"
+      },
+      "deliveryType": {
+        "label": "Tipo de parto:"
+      },
+      "prenatalCareDetails": {
+        "label": "Pré-natal:",
+        "placeholder": "Acompanhamento, número de consultas, exames"
+      },
+      "complications": {
+        "label": "Intercorrências na gestação:",
+        "placeholder": "Hipertensão, diabetes, sangramento, etc."
+      },
+      "medicationsDuringPregnancy": {
+        "label": "Medicações durante a gestação:",
+        "placeholder": "Liste medicações utilizadas"
+      },
+      "gestationalAgeWeeks": {
+        "label": "Idade gestacional (semanas):"
+      },
+      "birthWeightGrams": {
+        "label": "Peso ao nascer (g):"
+      },
+      "birthLengthCm": {
+        "label": "Comprimento ao nascer (cm):"
+      },
+      "apgar1min": {
+        "label": "Apgar 1º minuto:"
+      },
+      "apgar5min": {
+        "label": "Apgar 5º minuto:"
+      },
+      "neonatalIntercurrences": {
+        "label": "Intercorrências neonatais:",
+        "placeholder": "UTI neonatal, icterícia, etc."
+      },
+      "heldHeadMonths": {
+        "label": "Sustentou a cabeça (meses):"
+      },
+      "sattMonths": {
+        "label": "Sentou sem apoio (meses):"
+      },
+      "crawledMonths": {
+        "label": "Engatinhou (meses):"
+      },
+      "walkedMonths": {
+        "label": "Andou (meses):"
+      },
+      "firstWordsMonths": {
+        "label": "Primeiras palavras (meses):"
+      },
+      "firstSentencesMonths": {
+        "label": "Primeiras frases (meses):"
+      },
+      "sphincterControlMonths": {
+        "label": "Controle de esfíncter (meses):"
+      },
+      "currentMotorObservations": {
+        "label": "Observações motoras atuais:",
+        "placeholder": "Coordenação, equilíbrio, preferência manual, etc."
+      },
+      "currentLanguageObservations": {
+        "label": "Observações de linguagem atuais:",
+        "placeholder": "Compreensão, expressão, articulação"
+      },
+      "allergies": {
+        "label": "Alergias:"
+      },
+      "chronicConditions": {
+        "label": "Condições crônicas / diagnósticos:"
+      },
+      "currentMedications": {
+        "label": "Medicações em uso:"
+      },
+      "pastSurgeries": {
+        "label": "Cirurgias prévias:"
+      },
+      "hospitalizations": {
+        "label": "Internações:"
+      },
+      "recurrentIllnesses": {
+        "label": "Doenças recorrentes:",
+        "placeholder": "Otites, crises convulsivas, etc."
+      },
+      "sleepPattern": {
+        "label": "Padrão de sono:"
+      },
+      "feedingPattern": {
+        "label": "Padrão alimentar:"
+      },
+      "attendsSchool": {
+        "label": "Frequenta escola:"
+      },
+      "shift": {
+        "label": "Turno:"
+      },
+      "schoolName": {
+        "label": "Nome da escola:"
+      },
+      "grade": {
+        "label": "Série / nível:"
+      },
+      "academicPerformance": {
+        "label": "Desempenho acadêmico:"
+      },
+      "socialBehaviorAtSchool": {
+        "label": "Comportamento social na escola:"
+      },
+      "hasSupportTeacher": {
+        "label": "Possui professor de apoio:"
+      },
+      "supportDetails": {
+        "label": "Detalhes do apoio:"
+      },
+      "livesWith": {
+        "label": "Mora com:",
+        "placeholder": "Ex: pai, mãe e irmãos"
+      },
+      "parentsMaritalStatus": {
+        "label": "Estado civil dos pais:"
+      },
+      "siblings": {
+        "label": "Irmãos (quantidade / idades):"
+      },
+      "familyHistoryOfDisorders": {
+        "label": "Histórico familiar de transtornos:"
+      },
+      "socioeconomicNotes": {
+        "label": "Contexto socioeconômico:"
+      },
+      "additionalNotes": {
+        "label": "Observações adicionais:"
+      }
+    },
+    "sec": {
+      "complaint": "Queixa Principal",
+      "gestation": "Gestação e Parto",
+      "development": "Desenvolvimento",
+      "health": "Saúde",
+      "school": "Escola",
+      "family": "Família e Contexto"
+    },
+    "clinicalHistory": "Histórico Clínico",
+    "opt": {
+      "yes": "Sim",
+      "no": "Não",
+      "vaginal": "Vaginal",
+      "cesarean": "Cesárea",
+      "forceps": "Fórceps",
+      "other": "Outro",
+      "morning": "Manhã",
+      "afternoon": "Tarde",
+      "full": "Integral"
+    },
+    "selector": {
+      "loadError": "Não foi possível carregar anamneses existentes.",
+      "detailError": "Erro ao carregar dados da anamnese selecionada.",
+      "title": "Usar anamnese existente",
+      "intro": "Selecione uma anamnese já cadastrada para preencher automaticamente os dados da criança e do responsável. Ao selecionar, os campos abaixo serão sobrescritos.",
+      "loading": "Carregando anamneses...",
+      "loadingDetail": "Carregando dados selecionados...",
+      "placeholder": "Selecione uma anamnese",
+      "manual": "— Preencher manualmente —",
+      "empty": "Nenhuma anamnese cadastrada ainda.",
+      "create": "+ Criar anamnese"
+    },
+    "share": {
+      "generateError": "Erro ao gerar link de compartilhamento.",
+      "revokeError": "Erro ao revogar link.",
+      "clipboardUnavailable": "Copie o link manualmente (clipboard indisponível).",
+      "copyManually": "Copie o link manualmente.",
+      "title": "Compartilhar anamnese",
+      "intro": "Gere um link somente-leitura para compartilhar com outros profissionais.",
+      "linkLabel": "Link de compartilhamento",
+      "copied": "Copiado!",
+      "copy": "Copiar",
+      "revoke": "Revogar",
+      "generating": "Gerando...",
+      "generate": "Gerar link de compartilhamento"
+    }
   }
 }

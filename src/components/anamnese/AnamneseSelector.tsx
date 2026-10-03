@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Card, Flex, Select, Text } from '@radix-ui/themes';
 import { ClipboardIcon } from '@radix-ui/react-icons';
+import { useTranslation } from 'react-i18next';
 import { useAuthContext } from '../../context/AuthContext';
 import { anamneseApi } from '../../services/api';
 import type { Anamnese, AnamneseSummary } from './types';
@@ -13,6 +14,7 @@ interface AnamneseSelectorProps {
 const MANUAL_VALUE = '__manual__';
 
 const AnamneseSelector: React.FC<AnamneseSelectorProps> = ({ onSelect }) => {
+  const { t, i18n } = useTranslation();
   const { getToken } = useAuthContext();
   const navigate = useNavigate();
   const getTokenRef = useRef(getToken);
@@ -34,13 +36,13 @@ const AnamneseSelector: React.FC<AnamneseSelectorProps> = ({ onSelect }) => {
         setError(null);
       } catch (err) {
         console.error(err);
-        setError('Não foi possível carregar anamneses existentes.');
+        setError(t('cAnamnese.selector.loadError'));
       } finally {
         setLoading(false);
       }
     };
     run();
-  }, []);
+  }, [t]);
 
   const handleChange = async (value: string) => {
     setSelected(value);
@@ -54,7 +56,8 @@ const AnamneseSelector: React.FC<AnamneseSelectorProps> = ({ onSelect }) => {
       onSelect(data);
     } catch (err) {
       console.error(err);
-      setError('Erro ao carregar dados da anamnese selecionada.');
+      setError(t('cAnamnese.selector.detailError'));
+      setSelected(MANUAL_VALUE);
     } finally {
       setLoadingDetail(false);
     }
@@ -63,26 +66,26 @@ const AnamneseSelector: React.FC<AnamneseSelectorProps> = ({ onSelect }) => {
   return (
     <Card mb="4">
       <Flex align="center" gap="2" mb="2">
-        <ClipboardIcon />
-        <Text size="3" weight="bold">Usar anamnese existente</Text>
+        <ClipboardIcon aria-hidden="true" />
+        <Text size="3" weight="bold">{t('cAnamnese.selector.title')}</Text>
       </Flex>
       <Text size="2" color="gray" mb="3" as="p">
-        Selecione uma anamnese já cadastrada para preencher automaticamente os dados da criança e do responsável. Ao selecionar, os campos abaixo serão sobrescritos.
+        {t('cAnamnese.selector.intro')}
       </Text>
 
-      {loading && <Text size="1" color="gray" mt="2" as="p">Carregando anamneses...</Text>}
-      {loadingDetail && <Text size="1" color="gray" mt="2" as="p">Carregando dados selecionados...</Text>}
-      {error && <Text size="1" color="crimson" mt="2" as="p">{error}</Text>}
+      {loading && <Text size="1" color="gray" mt="2" as="p" role="status">{t('cAnamnese.selector.loading')}</Text>}
+      {loadingDetail && <Text size="1" color="gray" mt="2" as="p" role="status">{t('cAnamnese.selector.loadingDetail')}</Text>}
+      {error && <Text size="1" color="crimson" mt="2" as="p" role="alert">{error}</Text>}
 
       {!loading && items.length > 0 && (
         <Box>
           <Select.Root value={selected} onValueChange={handleChange} disabled={loadingDetail}>
-            <Select.Trigger placeholder="Selecione uma anamnese" />
+            <Select.Trigger placeholder={t('cAnamnese.selector.placeholder')} aria-label={t('cAnamnese.selector.title')} />
             <Select.Content>
-              <Select.Item value={MANUAL_VALUE}>— Preencher manualmente —</Select.Item>
+              <Select.Item value={MANUAL_VALUE}>{t('cAnamnese.selector.manual')}</Select.Item>
               {items.map((a) => (
                 <Select.Item key={a.id} value={a.id}>
-                  {a.childName} · {new Date(a.createdAt).toLocaleDateString('pt-BR')}
+                  {a.childName} · {new Date(a.createdAt).toLocaleDateString(i18n.language)}
                 </Select.Item>
               ))}
             </Select.Content>
@@ -92,7 +95,7 @@ const AnamneseSelector: React.FC<AnamneseSelectorProps> = ({ onSelect }) => {
 
       {!loading && items.length === 0 && !error && (
         <Flex align="center" gap="3" mt="2" wrap="wrap">
-          <Text size="1" color="gray" as="p">Nenhuma anamnese cadastrada ainda.</Text>
+          <Text size="1" color="gray" as="p">{t('cAnamnese.selector.empty')}</Text>
           <button
             type="button"
             onClick={() => navigate('/anamnese/new')}
@@ -108,7 +111,7 @@ const AnamneseSelector: React.FC<AnamneseSelectorProps> = ({ onSelect }) => {
               boxShadow: '2px 2px 0px #0A0A1A',
             }}
           >
-            + Criar anamnese
+            {t('cAnamnese.selector.create')}
           </button>
         </Flex>
       )}

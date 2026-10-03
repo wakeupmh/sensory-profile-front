@@ -456,5 +456,201 @@
       "deleteDesc": "This action cannot be undone.",
       "cancel": "Cancel"
     }
+  },
+  "cAnamnese": {
+    "f": {
+      "mainComplaint": {
+        "label": "Main complaint:",
+        "placeholder": "Reason for seeking care, main concerns"
+      },
+      "complaintOnset": {
+        "label": "When it started:",
+        "placeholder": "E.g. 6 months ago"
+      },
+      "previousTreatments": {
+        "label": "Previous treatments:",
+        "placeholder": "Describe treatments already tried"
+      },
+      "plannedPregnancy": {
+        "label": "Planned pregnancy:"
+      },
+      "deliveryType": {
+        "label": "Type of delivery:"
+      },
+      "prenatalCareDetails": {
+        "label": "Prenatal care:",
+        "placeholder": "Follow-up, number of appointments, exams"
+      },
+      "complications": {
+        "label": "Complications during pregnancy:",
+        "placeholder": "Hypertension, diabetes, bleeding, etc."
+      },
+      "medicationsDuringPregnancy": {
+        "label": "Medications during pregnancy:",
+        "placeholder": "List medications used"
+      },
+      "gestationalAgeWeeks": {
+        "label": "Gestational age (weeks):"
+      },
+      "birthWeightGrams": {
+        "label": "Birth weight (g):"
+      },
+      "birthLengthCm": {
+        "label": "Birth length (cm):"
+      },
+      "apgar1min": {
+        "label": "Apgar at 1 minute:"
+      },
+      "apgar5min": {
+        "label": "Apgar at 5 minutes:"
+      },
+      "neonatalIntercurrences": {
+        "label": "Neonatal complications:",
+        "placeholder": "Neonatal ICU, jaundice, etc."
+      },
+      "heldHeadMonths": {
+        "label": "Held head up (months):"
+      },
+      "sattMonths": {
+        "label": "Sat without support (months):"
+      },
+      "crawledMonths": {
+        "label": "Crawled (months):"
+      },
+      "walkedMonths": {
+        "label": "Walked (months):"
+      },
+      "firstWordsMonths": {
+        "label": "First words (months):"
+      },
+      "firstSentencesMonths": {
+        "label": "First sentences (months):"
+      },
+      "sphincterControlMonths": {
+        "label": "Sphincter control (months):"
+      },
+      "currentMotorObservations": {
+        "label": "Current motor observations:",
+        "placeholder": "Coordination, balance, hand preference, etc."
+      },
+      "currentLanguageObservations": {
+        "label": "Current language observations:",
+        "placeholder": "Comprehension, expression, articulation"
+      },
+      "allergies": {
+        "label": "Allergies:"
+      },
+      "chronicConditions": {
+        "label": "Chronic conditions / diagnoses:"
+      },
+      "currentMedications": {
+        "label": "Current medications:"
+      },
+      "pastSurgeries": {
+        "label": "Past surgeries:"
+      },
+      "hospitalizations": {
+        "label": "Hospitalizations:"
+      },
+      "recurrentIllnesses": {
+        "label": "Recurrent illnesses:",
+        "placeholder": "Ear infections, seizures, etc."
+      },
+      "sleepPattern": {
+        "label": "Sleep pattern:"
+      },
+      "feedingPattern": {
+        "label": "Feeding pattern:"
+      },
+      "attendsSchool": {
+        "label": "Attends school:"
+      },
+      "shift": {
+        "label": "Shift:"
+      },
+      "schoolName": {
+        "label": "School name:"
+      },
+      "grade": {
+        "label": "Grade / level:"
+      },
+      "academicPerformance": {
+        "label": "Academic performance:"
+      },
+      "socialBehaviorAtSchool": {
+        "label": "Social behavior at school:"
+      },
+      "hasSupportTeacher": {
+        "label": "Has a support teacher:"
+      },
+      "supportDetails": {
+        "label": "Support details:"
+      },
+      "livesWith": {
+        "label": "Lives with:",
+        "placeholder": "E.g. father, mother and siblings"
+      },
+      "parentsMaritalStatus": {
+        "label": "Parents' marital status:"
+      },
+      "siblings": {
+        "label": "Siblings (number / ages):"
+      },
+      "familyHistoryOfDisorders": {
+        "label": "Family history of disorders:"
+      },
+      "socioeconomicNotes": {
+        "label": "Socioeconomic context:"
+      },
+      "additionalNotes": {
+        "label": "Additional notes:"
+      }
+    },
+    "sec": {
+      "complaint": "Main Complaint",
+      "gestation": "Pregnancy and Birth",
+      "development": "Development",
+      "health": "Health",
+      "school": "School",
+      "family": "Family and Context"
+    },
+    "clinicalHistory": "Clinical History",
+    "opt": {
+      "yes": "Yes",
+      "no": "No",
+      "vaginal": "Vaginal",
+      "cesarean": "C-section",
+      "forceps": "Forceps",
+      "other": "Other",
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "full": "Full-time"
+    },
+    "selector": {
+      "loadError": "Could not load existing intake forms.",
+      "detailError": "Error loading the selected intake form data.",
+      "title": "Use existing intake form",
+      "intro": "Select an existing intake form to automatically fill in the child's and caregiver's data. When selected, the fields below will be overwritten.",
+      "loading": "Loading intake forms...",
+      "loadingDetail": "Loading selected data...",
+      "placeholder": "Select an intake form",
+      "manual": "— Fill in manually —",
+      "empty": "No intake forms registered yet.",
+      "create": "+ Create intake form"
+    },
+    "share": {
+      "generateError": "Error generating the sharing link.",
+      "revokeError": "Error revoking the link.",
+      "clipboardUnavailable": "Copy the link manually (clipboard unavailable).",
+      "copyManually": "Copy the link manually.",
+      "title": "Share intake form",
+      "intro": "Generate a read-only link to share with other professionals.",
+      "linkLabel": "Sharing link",
+      "copied": "Copied!",
+      "copy": "Copy",
+      "revoke": "Revoke",
+      "generating": "Generating...",
+      "generate": "Generate sharing link"
+    }
   }
 }
