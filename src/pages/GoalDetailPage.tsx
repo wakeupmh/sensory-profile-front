@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Box, Flex, AlertDialog } from '@radix-ui/themes';
 import { ArrowLeftIcon, Pencil1Icon, PlusIcon, TrashIcon } from '@radix-ui/react-icons';
 import { goalApi, goalProgressApi } from '../services/api';
 import { useAuthContext } from '../context/AuthContext';
 import type { Goal, GoalProgressEntry, GoalProgressSummary, CreateGoalPayload, UpdateGoalPayload, CreateGoalProgressPayload } from '../types/goals';
-import { GOAL_DOMAIN_LABELS, GOAL_STATUS_LABELS, GOAL_STATUS_COLORS } from '../types/goals';
+import { GOAL_STATUS_COLORS } from '../types/goals';
 import { spacing } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
@@ -18,11 +19,12 @@ import GoalProgressChart from '../components/goals/GoalProgressChart';
 import GoalProgressForm from '../components/goals/GoalProgressForm';
 import GoalFormPanel from '../components/goals/GoalFormPanel';
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('pt-BR');
+function formatDate(iso: string, locale: string): string {
+  return new Date(iso).toLocaleDateString(locale);
 }
 
 export default function GoalDetailPage() {
+  const { t, i18n } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { getToken } = useAuthContext();
@@ -51,11 +53,11 @@ export default function GoalDetailPage() {
       setEntries(e);
       setSummary(s);
     } catch {
-      setError('Erro ao carregar a meta. Por favor, tente novamente.');
+      setError(t('p1GoalDetail.errLoad'));
     } finally {
       setLoading(false);
     }
-  }, [id, getToken]);
+  }, [id, getToken, t]);
 
   useEffect(() => {
     fetchAll();
@@ -84,7 +86,7 @@ export default function GoalDetailPage() {
       await goalApi.delete(token, id);
       navigate('/goals');
     } catch {
-      setError('Erro ao excluir a meta. Tente novamente.');
+      setError(t('p1GoalDetail.errDelete'));
       setDeleting(false);
     }
   };
@@ -95,13 +97,13 @@ export default function GoalDetailPage() {
     <Box style={{ maxWidth: '720px', margin: '0 auto' }}>
       <Box style={{ marginBottom: spacing.md }}>
         <GumroadButton variant="secondary" size="sm" onClick={() => navigate('/goals')}>
-          <ArrowLeftIcon /> Voltar
+          <ArrowLeftIcon aria-hidden="true" /> {t('p1GoalDetail.back')}
         </GumroadButton>
       </Box>
 
       {loading ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
-          <LoadingSpinner size="large" text="Carregando meta..." />
+          <LoadingSpinner size="large" text={t('p1GoalDetail.loading')} />
         </GumroadCard>
       ) : error ? (
         <ErrorState message={error} onRetry={fetchAll} />
@@ -110,7 +112,7 @@ export default function GoalDetailPage() {
           {isAchieved && (
             <GumroadCard color="mint" shadow="md" padding="md" style={{ marginBottom: spacing.lg, textAlign: 'center' }}>
               <GumroadText level="body-lg" as="p" style={{ fontWeight: 700 }}>
-                🎉 Meta alcançada! Reconheça esse progresso.
+                {t('p1GoalDetail.achieved')}
               </GumroadText>
             </GumroadCard>
           )}
@@ -122,32 +124,32 @@ export default function GoalDetailPage() {
                   {goal.title}
                 </GumroadHeading>
                 <Flex gap="2" wrap="wrap">
-                  <GumroadBadge color="lavender">{GOAL_DOMAIN_LABELS[goal.domain]}</GumroadBadge>
-                  <GumroadBadge color={GOAL_STATUS_COLORS[goal.status]}>{GOAL_STATUS_LABELS[goal.status]}</GumroadBadge>
+                  <GumroadBadge color="lavender">{t(`p1Common.goalDomain.${goal.domain}`)}</GumroadBadge>
+                  <GumroadBadge color={GOAL_STATUS_COLORS[goal.status]}>{t(`p1Common.goalStatus.${goal.status}`)}</GumroadBadge>
                 </Flex>
               </Box>
               <Flex gap="2">
                 <GumroadButton variant="secondary" size="sm" onClick={() => setEditOpen(true)}>
-                  <Pencil1Icon /> Editar
+                  <Pencil1Icon aria-hidden="true" /> {t('p1GoalDetail.edit')}
                 </GumroadButton>
                 <AlertDialog.Root>
                   <AlertDialog.Trigger>
                     <GumroadButton variant="danger" size="sm">
-                      <TrashIcon /> Excluir
+                      <TrashIcon aria-hidden="true" /> {t('p1GoalDetail.delete')}
                     </GumroadButton>
                   </AlertDialog.Trigger>
                   <AlertDialog.Content size="2">
-                    <AlertDialog.Title>Excluir Meta</AlertDialog.Title>
+                    <AlertDialog.Title>{t('p1GoalDetail.deleteTitle')}</AlertDialog.Title>
                     <AlertDialog.Description size="2">
-                      Tem certeza que deseja excluir esta meta e seu histórico de progresso? Esta ação não pode ser desfeita.
+                      {t('p1GoalDetail.deleteBody')}
                     </AlertDialog.Description>
                     <Flex gap="3" mt="4" justify="end">
                       <AlertDialog.Cancel>
-                        <GumroadButton variant="secondary" size="sm">Cancelar</GumroadButton>
+                        <GumroadButton variant="secondary" size="sm">{t('p1GoalDetail.cancel')}</GumroadButton>
                       </AlertDialog.Cancel>
                       <AlertDialog.Action>
                         <GumroadButton variant="danger" size="sm" disabled={deleting} onClick={handleDeleteGoal}>
-                          {deleting ? 'Excluindo...' : 'Excluir'}
+                          {deleting ? t('p1GoalDetail.deleting') : t('p1GoalDetail.delete')}
                         </GumroadButton>
                       </AlertDialog.Action>
                     </Flex>
@@ -158,7 +160,7 @@ export default function GoalDetailPage() {
 
             {goal.criteria && (
               <Box style={{ marginBottom: spacing.sm }}>
-                <GumroadText level="caption-uppercase" as="p" style={{ opacity: 0.6, marginBottom: '4px' }}>Critério</GumroadText>
+                <GumroadText level="caption-uppercase" as="p" style={{ opacity: 0.6, marginBottom: '4px' }}>{t('p1GoalDetail.criteria')}</GumroadText>
                 <GumroadText level="body-sm" as="p">{goal.criteria}</GumroadText>
               </Box>
             )}
@@ -177,28 +179,28 @@ export default function GoalDetailPage() {
             />
             {summary && (
               <GumroadText level="body-sm" as="p" style={{ marginTop: spacing.xs, opacity: 0.75 }}>
-                Último registro: {summary.lastValue ?? '—'}{goal.unit ? ` ${goal.unit}` : ''}
-                {summary.delta !== null && ` (${summary.delta >= 0 ? '+' : ''}${summary.delta} desde o baseline)`}
+                {t('p1GoalDetail.lastEntry', { value: summary.lastValue ?? '—', unit: goal.unit ? ` ${goal.unit}` : '' })}
+                {summary.delta !== null && t('p1GoalDetail.sinceBaseline', { delta: `${summary.delta >= 0 ? '+' : ''}${summary.delta}` })}
               </GumroadText>
             )}
           </GumroadCard>
 
           <GumroadCard color="cream" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
             <Flex justify="between" align="center" mb="3" wrap="wrap" gap="2">
-              <GumroadHeading level="title-md" as="h2">Histórico de progresso</GumroadHeading>
+              <GumroadHeading level="title-md" as="h2">{t('p1GoalDetail.history')}</GumroadHeading>
               <GumroadButton variant="primary" size="sm" onClick={() => setProgressFormOpen(true)}>
-                <PlusIcon /> Registrar progresso
+                <PlusIcon aria-hidden="true" /> {t('p1GoalDetail.logProgress')}
               </GumroadButton>
             </Flex>
             <GoalProgressChart entries={entries} baseline={goal.baseline} target={goal.target} />
           </GumroadCard>
 
           <Box>
-            <GumroadHeading level="title-md" as="h2" style={{ marginBottom: spacing.sm }}>Registros</GumroadHeading>
+            <GumroadHeading level="title-md" as="h2" style={{ marginBottom: spacing.sm }}>{t('p1GoalDetail.entries')}</GumroadHeading>
             {entries.length === 0 ? (
               <GumroadCard color="white" shadow="sm" padding="md">
                 <GumroadText level="body-sm" as="p" style={{ opacity: 0.6, fontStyle: 'italic' }}>
-                  Nenhum registro de progresso ainda
+                  {t('p1GoalDetail.noEntries')}
                 </GumroadText>
               </GumroadCard>
             ) : (
@@ -213,7 +215,7 @@ export default function GoalDetailPage() {
                             {entry.value}{goal.unit ? ` ${goal.unit}` : ''}
                           </GumroadText>
                           <GumroadText level="caption" as="p" style={{ opacity: 0.6 }}>
-                            {formatDate(entry.occurredAt)}
+                            {formatDate(entry.occurredAt, i18n.language)}
                           </GumroadText>
                           {entry.notes && (
                             <GumroadText level="body-sm" as="p" style={{ opacity: 0.75, marginTop: '4px' }}>
@@ -221,7 +223,7 @@ export default function GoalDetailPage() {
                             </GumroadText>
                           )}
                         </Box>
-                        {entry.therapySessionId && <GumroadBadge color="cyan">Sessão vinculada</GumroadBadge>}
+                        {entry.therapySessionId && <GumroadBadge color="cyan">{t('p1GoalDetail.linkedSession')}</GumroadBadge>}
                       </Flex>
                     </GumroadCard>
                   ))}

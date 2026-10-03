@@ -90,7 +90,22 @@
     "loading": "Carregando...",
     "all": "Todos",
     "toChildren": "Ir para Minhas Crianças",
-    "removePhoto": "Remover foto"
+    "removePhoto": "Remover foto",
+    "goalDomain": {
+      "comunicacao": "Comunicação",
+      "social": "Social",
+      "motor": "Motor",
+      "autocuidado": "Autocuidado",
+      "academico": "Acadêmico",
+      "comportamental": "Comportamental",
+      "outro": "Outro"
+    },
+    "goalStatus": {
+      "active": "Ativa",
+      "achieved": "Alcançada",
+      "paused": "Pausada",
+      "discontinued": "Descontinuada"
+    }
   },
   "p1Logs": {
     "all": "Todos",
@@ -200,5 +215,40 @@
     "creating": "Criando...",
     "saveChanges": "Salvar Alterações",
     "saving": "Salvando..."
+  },
+  "p1Goals": {
+    "errLoad": "Erro ao carregar metas. Por favor, tente novamente.",
+    "title": "Metas Terapêuticas",
+    "subtitle": "Acompanhe o progresso das metas do PEI",
+    "newGoal": "Nova Meta",
+    "domain": "Domínio:",
+    "status": "Status:",
+    "all": "Todos",
+    "noChildTitle": "Cadastre uma criança para começar",
+    "noChildBody": "As metas terapêuticas ficam vinculadas a uma criança.",
+    "emptyTitle": "Nenhuma meta cadastrada",
+    "emptyBody": "Crie a primeira meta terapêutica para acompanhar o progresso",
+    "createFirst": "Criar primeira meta"
+  },
+  "p1GoalDetail": {
+    "errLoad": "Erro ao carregar a meta. Por favor, tente novamente.",
+    "errDelete": "Erro ao excluir a meta. Tente novamente.",
+    "back": "Voltar",
+    "loading": "Carregando meta...",
+    "achieved": "🎉 Meta alcançada! Reconheça esse progresso.",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "deleting": "Excluindo...",
+    "cancel": "Cancelar",
+    "deleteTitle": "Excluir Meta",
+    "deleteBody": "Tem certeza que deseja excluir esta meta e seu histórico de progresso? Esta ação não pode ser desfeita.",
+    "criteria": "Critério",
+    "lastEntry": "Último registro: {{value}}{{unit}}",
+    "sinceBaseline": " ({{delta}} desde o baseline)",
+    "history": "Histórico de progresso",
+    "logProgress": "Registrar progresso",
+    "entries": "Registros",
+    "noEntries": "Nenhum registro de progresso ainda",
+    "linkedSession": "Sessão vinculada"
   }
 }

@@ -90,7 +90,22 @@
     "loading": "Loading...",
     "all": "All",
     "toChildren": "Go to My Children",
-    "removePhoto": "Remove photo"
+    "removePhoto": "Remove photo",
+    "goalDomain": {
+      "comunicacao": "Communication",
+      "social": "Social",
+      "motor": "Motor",
+      "autocuidado": "Self-care",
+      "academico": "Academic",
+      "comportamental": "Behavioral",
+      "outro": "Other"
+    },
+    "goalStatus": {
+      "active": "Active",
+      "achieved": "Achieved",
+      "paused": "Paused",
+      "discontinued": "Discontinued"
+    }
   },
   "p1Logs": {
     "all": "All",
@@ -200,5 +215,40 @@
     "creating": "Creating...",
     "saveChanges": "Save Changes",
     "saving": "Saving..."
+  },
+  "p1Goals": {
+    "errLoad": "Error loading goals. Please try again.",
+    "title": "Therapy Goals",
+    "subtitle": "Track progress on IEP goals",
+    "newGoal": "New Goal",
+    "domain": "Domain:",
+    "status": "Status:",
+    "all": "All",
+    "noChildTitle": "Add a child to get started",
+    "noChildBody": "Therapy goals are linked to a child.",
+    "emptyTitle": "No goals yet",
+    "emptyBody": "Create the first therapy goal to track progress",
+    "createFirst": "Create first goal"
+  },
+  "p1GoalDetail": {
+    "errLoad": "Error loading the goal. Please try again.",
+    "errDelete": "Error deleting the goal. Please try again.",
+    "back": "Back",
+    "loading": "Loading goal...",
+    "achieved": "🎉 Goal achieved! Celebrate this progress.",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "cancel": "Cancel",
+    "deleteTitle": "Delete Goal",
+    "deleteBody": "Are you sure you want to delete this goal and its progress history? This action cannot be undone.",
+    "criteria": "Criteria",
+    "lastEntry": "Last entry: {{value}}{{unit}}",
+    "sinceBaseline": " ({{delta}} since baseline)",
+    "history": "Progress history",
+    "logProgress": "Log progress",
+    "entries": "Entries",
+    "noEntries": "No progress entries yet",
+    "linkedSession": "Linked session"
   }
 }
