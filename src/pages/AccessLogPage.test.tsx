@@ -6,7 +6,8 @@
  * problema por outro caminho: o campo lido (`occurredAt`) não existia, então
  * toda linha imprimia "Invalid Date".
  */
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, vi, beforeAll, beforeEach } from 'vitest';
+import i18n from '../i18n';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import type { AccessLogEntry } from '../types/accessLog';
@@ -51,6 +52,12 @@ function renderPage(entries: AccessLogEntry[]) {
     </MemoryRouter>,
   );
 }
+
+// O detector de idioma cai no navigator.language do jsdom (en-US); fixa pt-BR
+// porque as asserções são escritas contra o texto principal.
+beforeAll(() => {
+  i18n.changeLanguage('pt-BR');
+});
 
 beforeEach(() => listMock.mockReset());
 

@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Box, Flex } from '@radix-ui/themes';
 import { InfoCircledIcon, PlusIcon, UpdateIcon } from '@radix-ui/react-icons';
 import { logApi } from '../services/api';
-import { LOG_TYPE_LABELS, LOG_TYPES } from '../types/logs';
+import { LOG_TYPES } from '../types/logs';
 import type { CreateLogPayload, DailyLog, LogType } from '../types/logs';
 import { useDomainPage } from '../hooks/useDomainPage';
 import { useDomainResource } from '../hooks/useDomainResource';
@@ -34,13 +36,10 @@ type FilterType = 'all' | LogType;
 
 // Derivado da tabela canônica: um tipo novo em LOG_TYPES aparece no filtro
 // sozinho, em vez de compilar limpo e sumir da tela.
-const FILTER_OPTIONS: { value: FilterType; label: string }[] = [
-  { value: 'all', label: 'Todos' },
-  ...LOG_TYPES.map((value) => ({ value, label: LOG_TYPE_LABELS[value] })),
-];
+const FILTER_VALUES: FilterType[] = ['all', ...LOG_TYPES];
 
-function formatOccurredAt(iso: string): string {
-  return new Date(iso).toLocaleString('pt-BR', {
+function formatOccurredAt(iso: string, locale: string): string {
+  return new Date(iso).toLocaleString(locale, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -50,7 +49,8 @@ function formatOccurredAt(iso: string): string {
 }
 
 export default function LogsPage() {
-  const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
+  const { t, i18n } = useTranslation();
+  const { children, childrenLoaded, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
   const { queuedCount, syncing, flush } = useOfflineLogQueue();
   const toast = useToast();
 
@@ -67,7 +67,7 @@ export default function LogsPage() {
       return result.data;
     },
     [selectedChildId, filter],
-    { errorMessage: 'Erro ao carregar registros. Por favor, tente novamente.' },
+    { errorMessage: t('p1Logs.errLoad') },
   );
 
   const logs = data ?? [];
@@ -97,7 +97,7 @@ export default function LogsPage() {
           });
           await logApi.uploadAttachmentToPresignedUrl(uploadUrl, photo);
         } catch {
-          toast.info('Registro salvo, mas não foi possível anexar a foto. Tente novamente pelo registro.');
+          toast.info(t('p1Logs.photoFail'));
         }
       }
       await fetchLogs();
@@ -111,8 +111,8 @@ export default function LogsPage() {
         queueLog(payload);
         toast.info(
           photo
-            ? 'Sem conexão — registro salvo no aparelho (a foto não foi anexada; adicione-a depois de reconectar)'
-            : 'Sem conexão — registro salvo no aparelho e será enviado ao reconectar',
+            ? t('p1Logs.offlinePhoto')
+            : t('p1Logs.offline'),
         );
         return;
       }
@@ -132,7 +132,7 @@ export default function LogsPage() {
         ),
       );
     } catch {
-      toast.error('Não foi possível remover a foto. Tente novamente.');
+      toast.error(t('p1Logs.removePhotoFail'));
     }
   };
 
@@ -147,10 +147,10 @@ export default function LogsPage() {
       >
         <Box>
           <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
-            Registros Diários
+            {t('p1Logs.title')}
           </GumroadHeading>
           <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7 }}>
-            Acompanhe comportamentos, humor, sono e mais
+            {t('p1Logs.subtitle')}
           </GumroadText>
         </Box>
       </Flex>
@@ -159,13 +159,11 @@ export default function LogsPage() {
         <GumroadCard color="yellow" shadow="sm" padding="md" style={{ marginBottom: spacing.md }}>
           <Flex align="center" justify="between" gap="3" wrap="wrap">
             <GumroadText level="body-sm" as="p">
-              {queuedCount === 1
-                ? '1 registro pendente de sincronização'
-                : `${queuedCount} registros pendentes de sincronização`}
+              {t('p1Logs.pending', { count: queuedCount })}
             </GumroadText>
             <GumroadButton variant="secondary" size="sm" onClick={flush} disabled={syncing}>
-              <UpdateIcon />
-              {syncing ? 'Sincronizando...' : 'Sincronizar agora'}
+              <UpdateIcon aria-hidden="true" />
+              {syncing ? t('p1Logs.syncing') : t('p1Logs.syncNow')}
             </GumroadButton>
           </Flex>
         </GumroadCard>
@@ -178,11 +176,11 @@ export default function LogsPage() {
       />
 
       <Flex align="center" gap="2" mb="5" wrap="wrap">
-        {FILTER_OPTIONS.map(({ value, label }) => (
+        {FILTER_VALUES.map((value) => (
           <FilterPill
             key={value}
             active={filter === value}
-            label={label}
+            label={value === 'all' ? t('p1Logs.all') : t(`p1Common.logType.${value}`)}
             onClick={() => setFilter(value)}
           />
         ))}
@@ -191,22 +189,39 @@ export default function LogsPage() {
       {loading ? (
         <LogsListSkeleton />
       ) : error ? (
-        <ErrorState message={error} onRetry={fetchLogs} />
-      ) : children.length > 0 && logs.length === 0 ? (
+        <ErrorState message={error} onRetry={fetchLogs} retryLabel={t('p1Common.retry')} />
+      ) : !childrenLoaded && children.length === 0 ? null : children.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">
-            <InfoCircledIcon width={40} height={40} />
+            <InfoCircledIcon width={40} height={40} aria-hidden="true" />
             <Box>
               <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
-                Nenhum registro encontrado
+                {t('p1Logs.noChildTitle')}
               </GumroadHeading>
               <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-                Registre comportamentos, humor, sono e alimentação
+                {t('p1Logs.noChildBody')}
+              </GumroadText>
+            </Box>
+            <GumroadButton variant="primary" size="md" asChild>
+              <Link to="/children" style={{ textDecoration: 'none' }}>{t('p1Common.toChildren')}</Link>
+            </GumroadButton>
+          </Flex>
+        </GumroadCard>
+      ) : logs.length === 0 ? (
+        <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
+          <Flex direction="column" align="center" gap="4">
+            <InfoCircledIcon width={40} height={40} aria-hidden="true" />
+            <Box>
+              <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
+                {t('p1Logs.emptyTitle')}
+              </GumroadHeading>
+              <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
+                {t('p1Logs.emptyBody')}
               </GumroadText>
             </Box>
             <GumroadButton variant="primary" size="md" onClick={() => setSheetOpen(true)}>
-              <PlusIcon />
-              Registrar agora
+              <PlusIcon aria-hidden="true" />
+              {t('p1Logs.logNow')}
             </GumroadButton>
           </Flex>
         </GumroadCard>
@@ -221,7 +236,7 @@ export default function LogsPage() {
                     as="p"
                     style={{ opacity: 0.6, fontSize: '12px' }}
                   >
-                    {formatOccurredAt(log.occurredAt)}
+                    {formatOccurredAt(log.occurredAt, i18n.language)}
                   </GumroadText>
                   {log.notes && (
                     <GumroadText
@@ -243,7 +258,7 @@ export default function LogsPage() {
                           <a href={att.url} target="_blank" rel="noopener noreferrer">
                             <img
                               src={att.url}
-                              alt="Foto do registro"
+                              alt={t('p1Logs.photoAlt')}
                               style={{
                                 width: '56px',
                                 height: '56px',
@@ -255,8 +270,9 @@ export default function LogsPage() {
                             />
                           </a>
                           <button
+                            type="button"
                             onClick={() => handleDeleteAttachment(log.id, att.id)}
-                            aria-label="Remover foto"
+                            aria-label={t('p1Common.removePhoto')}
                             style={{
                               position: 'absolute',
                               top: '-6px',
@@ -280,7 +296,7 @@ export default function LogsPage() {
                   )}
                 </Flex>
                 <GumroadBadge color={LOG_TYPE_COLORS[log.logType]}>
-                  {LOG_TYPE_LABELS[log.logType]}
+                  {t(`p1Common.logType.${log.logType}`)}
                 </GumroadBadge>
               </Flex>
             </GumroadCard>
@@ -288,9 +304,11 @@ export default function LogsPage() {
         </Flex>
       )}
 
+      {effectiveChildId && (
       <button
+        type="button"
         onClick={() => setSheetOpen(true)}
-        aria-label="Novo registro"
+        aria-label={t('p1Logs.newLog')}
         style={{
           position: 'fixed',
           bottom: '80px',
@@ -325,8 +343,9 @@ export default function LogsPage() {
           (e.currentTarget as HTMLButtonElement).style.boxShadow = shadows.card;
         }}
       >
-        +
+        <span aria-hidden="true">+</span>
       </button>
+      )}
 
       <QuickLogSheet
         isOpen={sheetOpen && !!effectiveChildId}

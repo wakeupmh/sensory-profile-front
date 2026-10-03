@@ -16,11 +16,15 @@ import { careTeamApi } from '../services/api';
  * successful accept, see CareTeamAcceptPage) or the app reloads.
  */
 let cachedHasCaseload: boolean | null = null;
-let inFlight: Promise<boolean> | null = null;
+let inFlight: Promise<boolean | null> | null = null;
+// De quem é o valor em cache: sem isso, trocar de conta na mesma aba herdava o
+// resultado da conta anterior (links de navegação errados) até recarregar.
+let cachedFor: string | null = null;
 
 export function resetCareTeamCaseloadCache(): void {
   cachedHasCaseload = null;
   inFlight = null;
+  cachedFor = null;
 }
 
 export function useCareTeamCaseload(): boolean {
@@ -29,6 +33,12 @@ export function useCareTeamCaseload(): boolean {
 
   useEffect(() => {
     if (!isLoaded || !session) return;
+    const userId = session.user?.id ?? null;
+    if (cachedFor !== userId) {
+      cachedHasCaseload = null;
+      inFlight = null;
+      cachedFor = userId;
+    }
 
     if (cachedHasCaseload !== null) {
       setHasCaseload(cachedHasCaseload);
@@ -44,16 +54,17 @@ export function useCareTeamCaseload(): boolean {
           return caseload.length > 0;
         } catch {
           // Nav gating fails closed: an error here just keeps the link
-          // hidden, it never surfaces as a page error.
-          return false;
+          // hidden, it never surfaces as a page error. Falha não é cacheada,
+          // para uma queda de rede não esconder o link até recarregar.
+          return null;
         }
       })();
     }
 
     inFlight.then((result) => {
-      cachedHasCaseload = result;
+      if (result !== null && cachedFor === userId) cachedHasCaseload = result;
       inFlight = null;
-      if (!cancelled) setHasCaseload(result);
+      if (!cancelled) setHasCaseload(result ?? false);
     });
 
     return () => {

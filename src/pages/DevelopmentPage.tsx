@@ -1,10 +1,8 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Box, Flex } from '@radix-ui/themes';
 import { milestoneApi, communicationLogApi } from '../services/api';
-import {
-  MILESTONE_STATUS_LABELS,
-  COMMUNICATION_ENTRY_TYPE_LABELS,
-} from '../types/development';
 import { useDomainPage } from '../hooks/useDomainPage';
 import { useDomainResource } from '../hooks/useDomainResource';
 import { ChildSelector } from '../components/domain/ChildSelector';
@@ -19,8 +17,8 @@ import MilestonesPanel from '../components/development/MilestonesPanel';
 import CommunicationLogsPanel from '../components/development/CommunicationLogsPanel';
 import { DomainListSkeleton } from '../components/skeletons/PageSkeletons';
 
-function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString('pt-BR', {
+function formatDateTime(iso: string, locale: string): string {
+  return new Date(iso).toLocaleString(locale, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -30,7 +28,8 @@ function formatDateTime(iso: string): string {
 }
 
 export default function DevelopmentPage() {
-  const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
+  const { t, i18n } = useTranslation();
+  const { children, childrenLoaded, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
 
   const [milestonesPanelOpen, setMilestonesPanelOpen] = useState(false);
   const [commLogsPanelOpen, setCommLogsPanelOpen] = useState(false);
@@ -62,10 +61,10 @@ export default function DevelopmentPage() {
       >
         <Box>
           <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
-            Desenvolvimento
+            {t('p1Development.title')}
           </GumroadHeading>
           <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7 }}>
-            Marcos do desenvolvimento e registros de comunicação
+            {t('p1Development.subtitle')}
           </GumroadText>
         </Box>
       </Flex>
@@ -81,7 +80,23 @@ export default function DevelopmentPage() {
       {loading ? (
         <DomainListSkeleton />
       ) : error ? (
-        <ErrorState message={error} onRetry={fetchAll} />
+        <ErrorState message={error} onRetry={fetchAll} retryLabel={t('p1Common.retry')} />
+      ) : !childrenLoaded && children.length === 0 ? null : children.length === 0 ? (
+        <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
+          <Flex direction="column" align="center" gap="4">
+            <Box>
+              <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
+                {t('p1Common.noChildTitle')}
+              </GumroadHeading>
+              <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
+                {t('p1Development.noChildBody')}
+              </GumroadText>
+            </Box>
+            <GumroadButton variant="primary" size="md" asChild>
+              <Link to="/children" style={{ textDecoration: 'none' }}>{t('p1Common.toChildren')}</Link>
+            </GumroadButton>
+          </Flex>
+        </GumroadCard>
       ) : (
         <Flex direction="column" gap="4">
           {/* Marcos do Desenvolvimento */}
@@ -89,7 +104,7 @@ export default function DevelopmentPage() {
             <Flex justify="between" align="center" mb="3" gap="2">
               <Flex align="center" gap="2">
                 <GumroadHeading level="title-md" as="h2">
-                  Marcos do Desenvolvimento
+                  {t('p1Development.milestones')}
                 </GumroadHeading>
                 <GumroadBadge color="cyan">{milestones.length}</GumroadBadge>
               </Flex>
@@ -99,11 +114,11 @@ export default function DevelopmentPage() {
                 onClick={() => effectiveChildId && setMilestonesPanelOpen(true)}
                 disabled={!effectiveChildId}
               >
-                Gerenciar
+                {t('p1Common.manage')}
               </GumroadButton>
             </Flex>
             {children.length > 0 && milestones.slice(0, 3).length === 0 ? (
-              <p style={emptyStyle}>Nenhum registro</p>
+              <p style={emptyStyle}>{t('p1Development.empty')}</p>
             ) : (
               milestones.slice(0, 3).map((m) => (
                 <div key={m.id} style={previewItemStyle}>
@@ -116,7 +131,7 @@ export default function DevelopmentPage() {
                       fontStyle: 'italic',
                     }}
                   >
-                    — {MILESTONE_STATUS_LABELS[m.status]}
+                    — {t(`p1Common.milestoneStatus.${m.status}`)}
                   </span>
                 </div>
               ))
@@ -128,7 +143,7 @@ export default function DevelopmentPage() {
             <Flex justify="between" align="center" mb="3" gap="2">
               <Flex align="center" gap="2">
                 <GumroadHeading level="title-md" as="h2">
-                  Registros de Comunicação
+                  {t('p1Development.commLogs')}
                 </GumroadHeading>
                 <GumroadBadge color="lavender">{commLogs.length}</GumroadBadge>
               </Flex>
@@ -138,11 +153,11 @@ export default function DevelopmentPage() {
                 onClick={() => effectiveChildId && setCommLogsPanelOpen(true)}
                 disabled={!effectiveChildId}
               >
-                Gerenciar
+                {t('p1Common.manage')}
               </GumroadButton>
             </Flex>
             {children.length > 0 && commLogs.slice(0, 3).length === 0 ? (
-              <p style={emptyStyle}>Nenhum registro</p>
+              <p style={emptyStyle}>{t('p1Development.empty')}</p>
             ) : (
               commLogs.slice(0, 3).map((log) => (
                 <div key={log.id} style={previewItemStyle}>
@@ -159,9 +174,9 @@ export default function DevelopmentPage() {
                       border: `1px solid ${colors.ink}`,
                     }}
                   >
-                    {COMMUNICATION_ENTRY_TYPE_LABELS[log.entryType]}
+                    {t(`p1Common.commType.${log.entryType}`)}
                   </span>
-                  {formatDateTime(log.occurredAt)}
+                  {formatDateTime(log.occurredAt, i18n.language)}
                 </div>
               ))
             )}

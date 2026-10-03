@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { logApi } from '../services/api';
 import { useAuthContext } from '../context/AuthContext';
 import {
@@ -18,16 +18,23 @@ export function useOfflineLogQueue() {
   const { getToken } = useAuthContext();
   const [queue, setQueue] = useState<QueuedLog[]>(() => getQueuedLogs());
   const [syncing, setSyncing] = useState(false);
+  // Guarda em ref: o listener de "online" é registrado uma única vez e enxergava
+  // sempre `syncing === false`, então dois envios simultâneos criavam o mesmo
+  // registro duas vezes no servidor.
+  const syncingRef = useRef(false);
+  const getTokenRef = useRef(getToken);
+  getTokenRef.current = getToken;
 
   useEffect(() => subscribeToLogQueue(() => setQueue(getQueuedLogs())), []);
 
   const flush = useCallback(async () => {
-    if (syncing) return;
+    if (syncingRef.current) return;
     const pending = getQueuedLogs();
     if (pending.length === 0) return;
+    syncingRef.current = true;
     setSyncing(true);
     try {
-      const token = await getToken();
+      const token = await getTokenRef.current();
       for (const entry of pending) {
         try {
           await logApi.createLog(token, entry.payload);
@@ -39,9 +46,10 @@ export function useOfflineLogQueue() {
         }
       }
     } finally {
+      syncingRef.current = false;
       setSyncing(false);
     }
-  }, [getToken, syncing]);
+  }, []);
 
   useEffect(() => {
     flush();

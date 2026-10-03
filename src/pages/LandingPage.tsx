@@ -292,7 +292,7 @@ const LandingPage = () => {
               {t('landing.cta.description')}
             </GumroadText>
             <GumroadButton variant="primary" size="lg" onClick={handleStart}>
-              <StarIcon />
+              <StarIcon aria-hidden="true" />
               {t('landing.cta.button')}
             </GumroadButton>
           </Flex>

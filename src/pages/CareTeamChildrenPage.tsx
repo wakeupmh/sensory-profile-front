@@ -15,9 +15,9 @@ import GumroadHeading, { GumroadText } from '../components/design-system/Gumroad
 import LoadingSpinner from '../components/LoadingSpinner';
 import { ErrorState } from '../components/domain/ErrorState';
 
-function formatDate(iso: string): string {
+function formatDate(iso: string, locale: string): string {
   try {
-    return new Date(iso).toLocaleDateString('pt-BR');
+    return new Date(iso).toLocaleDateString(locale);
   } catch {
     return iso;
   }
@@ -38,7 +38,7 @@ function formatDate(iso: string): string {
  * há nada para "ativar" aqui: é só navegação.
  */
 export default function CareTeamChildrenPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { getToken, isLoaded, session } = useAuthContext();
   const [caseload, setCaseload] = useState<CareTeamCaseloadEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,10 +78,10 @@ export default function CareTeamChildrenPage() {
 
       {loading ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
-          <LoadingSpinner size="large" text="Carregando..." />
+          <LoadingSpinner size="large" text={t('p1Common.loading')} />
         </GumroadCard>
       ) : error ? (
-        <ErrorState message={error} onRetry={fetchAll} />
+        <ErrorState message={error} onRetry={fetchAll} retryLabel={t('p1Common.retry')} />
       ) : caseload.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl">
           <Flex direction="column" align="center" gap="3">
@@ -107,13 +107,13 @@ export default function CareTeamChildrenPage() {
                       display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                     }}
                   >
-                    <PersonIcon />
+                    <PersonIcon aria-hidden="true" />
                   </Box>
                   <Flex direction="column" gap="1">
                     <GumroadHeading level="title-sm" as="h2">{entry.childName}</GumroadHeading>
                     {entry.acceptedAt && (
                       <GumroadText level="caption" as="span" style={{ opacity: 0.65 }}>
-                        {t('careTeam.caseload.acceptedOn', { date: formatDate(entry.acceptedAt) })}
+                        {t('careTeam.caseload.acceptedOn', { date: formatDate(entry.acceptedAt, i18n.language) })}
                       </GumroadText>
                     )}
                   </Flex>

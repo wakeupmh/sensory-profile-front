@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import i18n from 'i18next';
 import { useAuthContext } from '../context/AuthContext';
 
 /**
@@ -45,14 +46,12 @@ export interface DomainResourceOptions {
   enabled?: boolean;
 }
 
-const DEFAULT_ERROR = 'Erro ao carregar dados. Por favor, tente novamente.';
-
 export function useDomainResource<T>(
   load: (token: string | null) => Promise<T>,
   deps: unknown[],
   options: DomainResourceOptions = {},
 ): DomainResource<T> {
-  const { errorMessage = DEFAULT_ERROR, enabled = true } = options;
+  const { errorMessage = i18n.t('p1Hooks.loadError'), enabled = true } = options;
   const { getToken, isLoaded, session } = useAuthContext();
   // O id, e não o objeto `session`: depender da identidade do objeto faz o
   // efeito disparar a cada render em que o contexto devolva um objeto novo,

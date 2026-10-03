@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Box, Flex } from '@radix-ui/themes';
 import { CheckIcon, ExclamationTriangleIcon, GroupIcon } from '@radix-ui/react-icons';
 import { useAuthContext } from '../context/AuthContext';
@@ -13,6 +14,7 @@ import GumroadHeading, { GumroadText } from '../components/design-system/Gumroad
 import { colors, spacing } from '../theme/tokens';
 
 const CaregiverInviteAcceptPage: React.FC = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { getToken } = useAuthContext();
@@ -27,7 +29,7 @@ const CaregiverInviteAcceptPage: React.FC = () => {
   const submit = async (rawToken: string) => {
     const cleaned = rawToken.trim();
     if (!cleaned) {
-      setError('Cole o código de convite recebido.');
+      setError(t('p1CgInvite.pasteCode'));
       return;
     }
     try {
@@ -40,8 +42,8 @@ const CaregiverInviteAcceptPage: React.FC = () => {
       setSuccess({ caregiverName: result.caregiver.caregiverName, child });
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } }).response?.status;
-      if (status === 400) setError('Código inválido ou já utilizado.');
-      else setError('Não foi possível aceitar o convite. Tente novamente.');
+      if (status === 400) setError(t('p1CgInvite.invalidCode'));
+      else setError(t('p1CgInvite.errAccept'));
       console.error(err);
     } finally {
       setSubmitting(false);
@@ -72,11 +74,11 @@ const CaregiverInviteAcceptPage: React.FC = () => {
       <Flex align="center" gap="2" mb="4">
         <GroupIcon width={22} height={22} />
         <GumroadHeading level="display-sm" as="h1">
-          Aceitar convite de cuidador
+          {t('p1CgInvite.title')}
         </GumroadHeading>
       </Flex>
       <GumroadText level="body-md" as="p" color={colors.ink} style={{ opacity: 0.75, marginBottom: spacing.lg }}>
-        Cole abaixo o código de convite que você recebeu para se tornar cuidador(a) de uma criança.
+        {t('p1CgInvite.intro')}
       </GumroadText>
 
       {success ? (
@@ -85,20 +87,19 @@ const CaregiverInviteAcceptPage: React.FC = () => {
             <Flex align="center" gap="2">
               <CheckIcon width={20} height={20} />
               <GumroadHeading level="title-md" as="h2">
-                Convite aceito
+                {t('p1CgInvite.accepted')}
               </GumroadHeading>
             </Flex>
             <GumroadText level="body-md" as="p">
-              Você agora é cuidador(a){success.child ? ` de ${success.child.name}` : ''}. Use o seletor "Visualizando" no
-              topo para atuar em nome dessa criança quando quiser.
+              {t('p1CgInvite.acceptedBody', { of: success.child ? t('p1CgInvite.ofChild', { name: success.child.name }) : '' })}
             </GumroadText>
             {success.child && (
               <GumroadButton variant="primary" size="md" onClick={handleStartCaring}>
-                Começar a cuidar agora
+                {t('p1CgInvite.startNow')}
               </GumroadButton>
             )}
             <GumroadButton variant="secondary" size="md" onClick={() => navigate('/dashboard')}>
-              Ir para o início
+              {t('p1CgInvite.goHome')}
             </GumroadButton>
           </Flex>
         </GumroadCard>
@@ -107,16 +108,16 @@ const CaregiverInviteAcceptPage: React.FC = () => {
           <GumroadCard color="white" shadow="md" padding="md">
             <Flex direction="column" gap="3">
               {error && (
-                <Flex align="center" gap="2" style={{ color: colors['brand-salmon'] }}>
-                  <ExclamationTriangleIcon />
+                <Flex role="alert" align="center" gap="2" style={{ color: colors['brand-salmon'] }}>
+                  <ExclamationTriangleIcon aria-hidden="true" />
                   <GumroadText level="body-sm" as="span">
                     {error}
                   </GumroadText>
                 </Flex>
               )}
               <GumroadInput
-                label="Código de convite"
-                placeholder="Cole o código aqui"
+                label={t('p1CgInvite.codeLabel')}
+                placeholder={t('p1CgInvite.codePh')}
                 value={tokenInput}
                 onChange={(e) => setTokenInput(e.target.value)}
                 required
@@ -126,10 +127,10 @@ const CaregiverInviteAcceptPage: React.FC = () => {
 
           <Flex gap="2" justify="end" mt="4">
             <GumroadButton variant="secondary" size="md" onClick={() => navigate('/dashboard')}>
-              Cancelar
+              {t('p1CgInvite.cancel')}
             </GumroadButton>
             <GumroadButton variant="primary" size="md" type="submit" disabled={submitting}>
-              {submitting ? 'Validando...' : 'Aceitar convite'}
+              {submitting ? t('p1CgInvite.validating') : t('p1CgInvite.accept')}
             </GumroadButton>
           </Flex>
         </form>

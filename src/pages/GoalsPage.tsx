@@ -1,4 +1,6 @@
 import { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Box, Flex } from '@radix-ui/themes';
 import { InfoCircledIcon, PlusIcon } from '@radix-ui/react-icons';
 import { goalApi, goalProgressApi } from '../services/api';
@@ -21,7 +23,8 @@ type DomainFilter = 'all' | GoalDomain;
 type StatusFilter = 'all' | GoalStatus;
 
 export default function GoalsPage() {
-  const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
+  const { t } = useTranslation();
+  const { children, childrenLoaded, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
 
   const [domainFilter, setDomainFilter] = useState<DomainFilter>('all');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
@@ -52,7 +55,7 @@ export default function GoalsPage() {
       return { goals: list, summaries };
     },
     [selectedChildId, domainFilter, statusFilter],
-    { errorMessage: 'Erro ao carregar metas. Por favor, tente novamente.' },
+    { errorMessage: t('p1Goals.errLoad') },
   );
 
   const goals = useMemo(() => data?.goals ?? [], [data]);
@@ -70,53 +73,70 @@ export default function GoalsPage() {
       <Flex justify="between" align={{ initial: 'start', sm: 'center' }} mb="6" gap="4" direction={{ initial: 'column', sm: 'row' }}>
         <Box>
           <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
-            Metas Terapêuticas
+            {t('p1Goals.title')}
           </GumroadHeading>
           <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7 }}>
-            Acompanhe o progresso das metas do PEI
+            {t('p1Goals.subtitle')}
           </GumroadText>
         </Box>
         <GumroadButton variant="primary" size="md" onClick={() => effectiveChildId && setPanelOpen(true)} disabled={!effectiveChildId}>
-          <PlusIcon />
-          Nova Meta
+          <PlusIcon aria-hidden="true" />
+          {t('p1Goals.newGoal')}
         </GumroadButton>
       </Flex>
 
       <ChildSelector children={children} selectedChildId={selectedChildId} onChange={setSelectedChildId} />
 
       <Flex align="center" gap="2" mb="3" wrap="wrap">
-        <GumroadText level="body-sm" as="span" style={{ opacity: 0.7, whiteSpace: 'nowrap' }}>Domínio:</GumroadText>
+        <GumroadText level="body-sm" as="span" style={{ opacity: 0.7, whiteSpace: 'nowrap' }}>{t('p1Goals.domain')}</GumroadText>
         {(['all', ...Object.keys(GOAL_DOMAIN_LABELS)] as DomainFilter[]).map((value) => (
-          <FilterPill key={value} active={domainFilter === value} label={value === 'all' ? 'Todos' : GOAL_DOMAIN_LABELS[value as GoalDomain]} onClick={() => setDomainFilter(value)} />
+          <FilterPill key={value} active={domainFilter === value} label={value === 'all' ? t('p1Goals.all') : t(`p1Common.goalDomain.${value}`)} onClick={() => setDomainFilter(value)} />
         ))}
       </Flex>
 
       <Flex align="center" gap="2" mb="5" wrap="wrap">
-        <GumroadText level="body-sm" as="span" style={{ opacity: 0.7, whiteSpace: 'nowrap' }}>Status:</GumroadText>
+        <GumroadText level="body-sm" as="span" style={{ opacity: 0.7, whiteSpace: 'nowrap' }}>{t('p1Goals.status')}</GumroadText>
         {(['all', ...Object.keys(GOAL_STATUS_LABELS)] as StatusFilter[]).map((value) => (
-          <FilterPill key={value} active={statusFilter === value} label={value === 'all' ? 'Todos' : GOAL_STATUS_LABELS[value as GoalStatus]} onClick={() => setStatusFilter(value)} />
+          <FilterPill key={value} active={statusFilter === value} label={value === 'all' ? t('p1Goals.all') : t(`p1Common.goalStatus.${value}`)} onClick={() => setStatusFilter(value)} />
         ))}
       </Flex>
 
       {loading ? (
         <GoalsListSkeleton />
       ) : error ? (
-        <ErrorState message={error} onRetry={fetchGoals} />
-      ) : children.length > 0 && goals.length === 0 ? (
+        <ErrorState message={error} onRetry={fetchGoals} retryLabel={t('p1Common.retry')} />
+      ) : !childrenLoaded && children.length === 0 ? null : children.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">
-            <InfoCircledIcon width={40} height={40} />
+            <InfoCircledIcon width={40} height={40} aria-hidden="true" />
             <Box>
               <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
-                Nenhuma meta cadastrada
+                {t('p1Goals.noChildTitle')}
               </GumroadHeading>
               <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-                Crie a primeira meta terapêutica para acompanhar o progresso
+                {t('p1Goals.noChildBody')}
+              </GumroadText>
+            </Box>
+            <GumroadButton variant="primary" size="md" asChild>
+              <Link to="/children" style={{ textDecoration: 'none' }}>{t('p1Common.toChildren')}</Link>
+            </GumroadButton>
+          </Flex>
+        </GumroadCard>
+      ) : goals.length === 0 ? (
+        <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
+          <Flex direction="column" align="center" gap="4">
+            <InfoCircledIcon width={40} height={40} aria-hidden="true" />
+            <Box>
+              <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
+                {t('p1Goals.emptyTitle')}
+              </GumroadHeading>
+              <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
+                {t('p1Goals.emptyBody')}
               </GumroadText>
             </Box>
             {effectiveChildId && (
               <GumroadButton variant="primary" size="md" onClick={() => setPanelOpen(true)}>
-                Criar primeira meta
+                {t('p1Goals.createFirst')}
               </GumroadButton>
             )}
           </Flex>

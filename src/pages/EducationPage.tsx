@@ -1,12 +1,9 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Box, Flex } from '@radix-ui/themes';
 import { educationPlanApi, schoolCommApi } from '../services/api';
-import {
-  EDUCATION_PLAN_TYPE_LABELS,
-  EDUCATION_PLAN_TYPE_COLORS,
-  SCHOOL_COMM_TYPE_LABELS,
-  SCHOOL_COMM_TYPE_COLORS,
-} from '../types/education';
+import { EDUCATION_PLAN_TYPE_COLORS, SCHOOL_COMM_TYPE_COLORS } from '../types/education';
 import { useDomainPage } from '../hooks/useDomainPage';
 import { useDomainResource } from '../hooks/useDomainResource';
 import ErrorState from '../components/domain/ErrorState';
@@ -21,8 +18,8 @@ import EducationPlansPanel from '../components/education/EducationPlansPanel';
 import SchoolCommsPanel from '../components/education/SchoolCommsPanel';
 import { DomainListSkeleton } from '../components/skeletons/PageSkeletons';
 
-function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString('pt-BR', {
+function formatDateTime(iso: string, locale: string): string {
+  return new Date(iso).toLocaleString(locale, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -32,7 +29,8 @@ function formatDateTime(iso: string): string {
 }
 
 export default function EducationPage() {
-  const { children, selectedChildId, setSelectedChildId, effectiveChildId } = useDomainPage();
+  const { t, i18n } = useTranslation();
+  const { children, childrenLoaded, selectedChildId, setSelectedChildId, effectiveChildId } = useDomainPage();
 
   const [plansPanelOpen, setPlansPanelOpen] = useState(false);
   const [commsPanelOpen, setCommsPanelOpen] = useState(false);
@@ -69,10 +67,10 @@ export default function EducationPage() {
       >
         <Box>
           <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
-            Educação
+            {t('p1Education.title')}
           </GumroadHeading>
           <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7 }}>
-            Planos educacionais e comunicações com a escola
+            {t('p1Education.subtitle')}
           </GumroadText>
         </Box>
       </Flex>
@@ -88,7 +86,7 @@ export default function EducationPage() {
       {children.length > 0 && !effectiveChildId && (
         <GumroadCard color="cream" shadow="md" padding="lg" style={{ textAlign: 'center' }}>
           <GumroadText level="body-md" style={{ opacity: 0.7 }}>
-            Selecione uma criança para ver os dados educacionais.
+            {t('p1Education.selectChild')}
           </GumroadText>
         </GumroadCard>
       )}
@@ -97,7 +95,23 @@ export default function EducationPage() {
       {loading ? (
         <DomainListSkeleton />
       ) : error ? (
-        <ErrorState message={error} onRetry={reload} />
+        <ErrorState message={error} onRetry={reload} retryLabel={t('p1Common.retry')} />
+      ) : !childrenLoaded && children.length === 0 ? null : children.length === 0 ? (
+        <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
+          <Flex direction="column" align="center" gap="4">
+            <Box>
+              <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
+                {t('p1Common.noChildTitle')}
+              </GumroadHeading>
+              <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
+                {t('p1Education.noChildBody')}
+              </GumroadText>
+            </Box>
+            <GumroadButton variant="primary" size="md" asChild>
+              <Link to="/children" style={{ textDecoration: 'none' }}>{t('p1Common.toChildren')}</Link>
+            </GumroadButton>
+          </Flex>
+        </GumroadCard>
       ) : (
         <Flex direction="column" gap="4">
           {/* Planos Educacionais */}
@@ -105,7 +119,7 @@ export default function EducationPage() {
             <Flex justify="between" align="center" mb="3" gap="2">
               <Flex align="center" gap="2">
                 <GumroadHeading level="title-md" as="h2">
-                  Planos Educacionais
+                  {t('p1Education.plans')}
                 </GumroadHeading>
                 <GumroadBadge color="cyan">{plans.length}</GumroadBadge>
               </Flex>
@@ -115,11 +129,11 @@ export default function EducationPage() {
                 onClick={() => effectiveChildId && setPlansPanelOpen(true)}
                 disabled={!effectiveChildId}
               >
-                Gerenciar
+                {t('p1Common.manage')}
               </GumroadButton>
             </Flex>
             {children.length > 0 && plans.slice(0, 3).length === 0 ? (
-              <p style={emptyStyle}>Nenhum plano cadastrado</p>
+              <p style={emptyStyle}>{t('p1Education.noPlans')}</p>
             ) : (
               plans.slice(0, 3).map((plan) => {
                 const planTypeColors = EDUCATION_PLAN_TYPE_COLORS[plan.planType];
@@ -150,7 +164,7 @@ export default function EducationPage() {
                         border: `1px solid ${colors.ink}`,
                       }}
                     >
-                      {EDUCATION_PLAN_TYPE_LABELS[plan.planType]}
+                      {t(`p1Common.planType.${plan.planType}`)}
                     </span>
                   </div>
                 );
@@ -163,7 +177,7 @@ export default function EducationPage() {
             <Flex justify="between" align="center" mb="3" gap="2">
               <Flex align="center" gap="2">
                 <GumroadHeading level="title-md" as="h2">
-                  Comunicações com a Escola
+                  {t('p1Education.comms')}
                 </GumroadHeading>
                 <GumroadBadge color="lavender">{commsTotal}</GumroadBadge>
               </Flex>
@@ -173,11 +187,11 @@ export default function EducationPage() {
                 onClick={() => effectiveChildId && setCommsPanelOpen(true)}
                 disabled={!effectiveChildId}
               >
-                Gerenciar
+                {t('p1Common.manage')}
               </GumroadButton>
             </Flex>
             {children.length > 0 && comms.slice(0, 3).length === 0 ? (
-              <p style={emptyStyle}>Nenhuma comunicação registrada</p>
+              <p style={emptyStyle}>{t('p1Education.noComms')}</p>
             ) : (
               comms.slice(0, 3).map((comm) => {
                 const commTypeColors = SCHOOL_COMM_TYPE_COLORS[comm.commType];
@@ -196,12 +210,12 @@ export default function EducationPage() {
                         border: `1px solid ${colors.ink}`,
                       }}
                     >
-                      {SCHOOL_COMM_TYPE_LABELS[comm.commType]}
+                      {t(`p1Common.schoolComm.${comm.commType}`)}
                     </span>
                     {comm.subject}
                     {' '}
                     <span style={{ fontSize: '12px', opacity: 0.6 }}>
-                      — {formatDateTime(comm.occurredAt)}
+                      — {formatDateTime(comm.occurredAt, i18n.language)}
                     </span>
                   </div>
                 );

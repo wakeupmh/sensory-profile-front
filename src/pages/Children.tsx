@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { parseLocalDate } from '../utils/date';
 import { Box, Flex, AlertDialog } from '@radix-ui/themes';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { PlusIcon, Pencil1Icon, TrashIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { childApi, ChildData } from '../services/api';
 import { useAuthContext } from '../context/AuthContext';
@@ -17,7 +19,7 @@ import { ChildrenListSkeleton } from '../components/skeletons/PageSkeletons';
 import { ErrorState } from '../components/domain/ErrorState';
 import axios from 'axios';
 
-function calculateAge(birthDate: string): string {
+function calculateAge(birthDate: string, t: TFunction): string {
   const birth = parseLocalDate(birthDate);
   const today = new Date();
   let age = today.getFullYear() - birth.getFullYear();
@@ -25,16 +27,10 @@ function calculateAge(birthDate: string): string {
   if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
     age--;
   }
-  if (age < 0) return '0 anos';
-  if (age === 1) return '1 ano';
-  return `${age} anos`;
+  return t('p1Children.years', { count: Math.max(age, 0) });
 }
 
-const genderLabel: Record<string, string> = {
-  male: 'Masculino',
-  female: 'Feminino',
-  other: 'Outro',
-};
+const GENDER_KEYS = ['male', 'female', 'other'];
 
 const emptyFormValue = (): ChildFormValue => ({
   name: '',
@@ -65,7 +61,9 @@ interface ChildFormModalProps {
 }
 
 // Bottom-sheet modal compartilhado por adicionar/editar criança
-const ChildFormModal = ({ open, title, value, onChange, onSave, onCancel, saving }: ChildFormModalProps) => (
+const ChildFormModal = ({ open, title, value, onChange, onSave, onCancel, saving }: ChildFormModalProps) => {
+  const { t } = useTranslation();
+  return (
   <GumroadModal open={open} onClose={onCancel} title={title} closeDisabled={saving}>
     <ChildForm value={value} onChange={onChange} disabled={saving} />
     <Flex gap="3" mt="4">
@@ -75,16 +73,18 @@ const ChildFormModal = ({ open, title, value, onChange, onSave, onCancel, saving
         onClick={onSave}
         disabled={saving || !value.name || !value.birthDate}
       >
-        {saving ? 'Salvando...' : 'Salvar'}
+        {saving ? t('p1Children.saving') : t('p1Children.save')}
       </GumroadButton>
       <GumroadButton variant="secondary" size="sm" onClick={onCancel} disabled={saving}>
-        Cancelar
+        {t('p1Children.cancel')}
       </GumroadButton>
     </Flex>
   </GumroadModal>
-);
+  );
+};
 
 const Children = () => {
+  const { t } = useTranslation();
   const [children, setChildren] = useState<ChildData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -114,11 +114,11 @@ const Children = () => {
       setChildren(data);
       setError(null);
     } catch {
-      setError('Erro ao carregar crianças. Por favor, tente novamente.');
+      setError(t('p1Children.errLoad'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (isLoaded && session) {
@@ -153,9 +153,9 @@ const Children = () => {
       await fetchChildren();
       setEditingId(null);
       setEditFormValue(emptyFormValue());
-      toast.success('Alterações salvas');
+      toast.success(t('p1Children.toastSaved'));
     } catch {
-      setError('Erro ao salvar criança. Por favor, tente novamente.');
+      setError(t('p1Children.errSave'));
     } finally {
       setEditSaving(false);
     }
@@ -187,9 +187,9 @@ const Children = () => {
       await fetchChildren();
       setAdding(false);
       setAddFormValue(emptyFormValue());
-      toast.success('Criança adicionada');
+      toast.success(t('p1Children.toastAdded'));
     } catch {
-      setError('Erro ao criar criança. Por favor, tente novamente.');
+      setError(t('p1Children.errCreate'));
     } finally {
       setAddSaving(false);
     }
@@ -201,12 +201,12 @@ const Children = () => {
       const token = await getTokenRef.current();
       await childApi.delete(child.id, token);
       setChildren((prev) => prev.filter((c) => c.id !== child.id));
-      toast.success('Criança excluída');
+      toast.success(t('p1Children.toastDeleted'));
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.status === 409) {
-        toast.error('Esta criança possui avaliações e não pode ser excluída.');
+        toast.error(t('p1Children.errHasAssessments'));
       } else {
-        setError('Erro ao excluir criança. Por favor, tente novamente.');
+        setError(t('p1Children.errDelete'));
       }
     } finally {
       setDeleteLoading(null);
@@ -225,10 +225,10 @@ const Children = () => {
       >
         <Box>
           <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
-            Minhas Crianças
+            {t('p1Children.title')}
           </GumroadHeading>
           <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7 }}>
-            Gerencie o cadastro das crianças
+            {t('p1Children.subtitle')}
           </GumroadText>
         </Box>
         <GumroadButton
@@ -237,22 +237,22 @@ const Children = () => {
           onClick={handleStartAdd}
           disabled={adding}
         >
-          <PlusIcon />
-          Adicionar Criança
+          <PlusIcon aria-hidden="true" />
+          {t('p1Children.add')}
         </GumroadButton>
       </Flex>
 
       {/* Error banner */}
       {error && (
         <Box mb="5">
-          <ErrorState message={error} onRetry={fetchChildren} />
+          <ErrorState message={error} onRetry={fetchChildren} retryLabel={t('p1Common.retry')} />
         </Box>
       )}
 
       {/* Add form — bottom-sheet modal */}
       <ChildFormModal
         open={adding}
-        title="Nova Criança"
+        title={t('p1Children.newTitle')}
         value={addFormValue}
         onChange={(field, value) => setAddFormValue((prev) => ({ ...prev, [field]: value }))}
         onSave={handleSaveAdd}
@@ -263,7 +263,7 @@ const Children = () => {
       {/* Edit form — bottom-sheet modal */}
       <ChildFormModal
         open={editingId !== null}
-        title="Editar Criança"
+        title={t('p1Children.editTitle')}
         value={editFormValue}
         onChange={(field, value) => setEditFormValue((prev) => ({ ...prev, [field]: value }))}
         onSave={handleSaveEdit}
@@ -280,16 +280,15 @@ const Children = () => {
             <InfoCircledIcon width={40} height={40} />
             <Box>
               <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
-                Nenhuma criança cadastrada
+                {t('p1Children.emptyTitle')}
               </GumroadHeading>
               <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-                Cadastre a primeira criança para começar a usar avaliações, registros diários,
-                metas e o restante do app.
+                {t('p1Children.emptyBody')}
               </GumroadText>
             </Box>
             <GumroadButton variant="primary" size="md" onClick={handleStartAdd}>
-              <PlusIcon />
-              Adicionar Criança
+              <PlusIcon aria-hidden="true" />
+              {t('p1Children.add')}
             </GumroadButton>
           </Flex>
         </GumroadCard>
@@ -325,7 +324,7 @@ const Children = () => {
                         </GumroadHeading>
                         {child.gender && (
                           <GumroadBadge color="lavender">
-                            {genderLabel[child.gender] ?? child.gender}
+                            {GENDER_KEYS.includes(child.gender) ? t(`p1Children.${child.gender}`) : child.gender}
                           </GumroadBadge>
                         )}
                       </Flex>
@@ -334,17 +333,17 @@ const Children = () => {
                       <Flex direction="column" gap="1">
                         {child.birthDate && (
                           <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-                            <strong>Idade:</strong> {calculateAge(child.birthDate)}
+                            <strong>{t('p1Children.age')}</strong> {calculateAge(child.birthDate, t)}
                           </GumroadText>
                         )}
                         {child.nationalIdentity && (
                           <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-                            <strong>Documento:</strong> {child.nationalIdentity}
+                            <strong>{t('p1Children.document')}</strong> {child.nationalIdentity}
                           </GumroadText>
                         )}
                         {child.otherInfo && (
                           <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-                            <strong>Obs:</strong> {child.otherInfo}
+                            <strong>{t('p1Children.notes')}</strong> {child.otherInfo}
                           </GumroadText>
                         )}
                       </Flex>
@@ -354,19 +353,21 @@ const Children = () => {
                         <GumroadButton variant="primary" size="sm" asChild style={{ flex: 1 }}>
                           <Link
                             to={`/children/${child.id}`}
+                            aria-label={t('p1Children.viewProfileFor', { name: child.name })}
                             style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
                           >
-                            Ver Perfil
+                            {t('p1Children.viewProfile')}
                           </Link>
                         </GumroadButton>
                         <GumroadButton
                           variant="secondary"
                           size="sm"
                           onClick={() => handleStartEdit(child)}
+                          aria-label={t('p1Children.editFor', { name: child.name })}
                           style={{ flex: 1 }}
                         >
-                          <Pencil1Icon />
-                          Editar
+                          <Pencil1Icon aria-hidden="true" />
+                          {t('p1Children.edit')}
                         </GumroadButton>
                         <AlertDialog.Root>
                           <AlertDialog.Trigger>
@@ -374,24 +375,25 @@ const Children = () => {
                               variant="danger"
                               size="sm"
                               disabled={deleteLoading === child.id}
+                              aria-label={t('p1Children.deleteFor', { name: child.name })}
                               style={{ flex: 1 }}
                             >
-                              <TrashIcon />
-                              {deleteLoading === child.id ? 'Excluindo...' : 'Excluir'}
+                              <TrashIcon aria-hidden="true" />
+                              {deleteLoading === child.id ? t('p1Children.deleting') : t('p1Children.delete')}
                             </GumroadButton>
                           </AlertDialog.Trigger>
                           <AlertDialog.Content size="2">
-                            <AlertDialog.Title>Excluir criança</AlertDialog.Title>
+                            <AlertDialog.Title>{t('p1Children.deleteTitle')}</AlertDialog.Title>
                             <AlertDialog.Description size="2">
-                              Excluir {child.name}? Esta ação não pode ser desfeita.
+                              {t('p1Children.deleteConfirm', { name: child.name })}
                             </AlertDialog.Description>
                             <Flex gap="3" mt="4" justify="end">
                               <AlertDialog.Cancel>
-                                <GumroadButton variant="secondary" size="sm">Cancelar</GumroadButton>
+                                <GumroadButton variant="secondary" size="sm">{t('p1Children.cancel')}</GumroadButton>
                               </AlertDialog.Cancel>
                               <AlertDialog.Action>
                                 <GumroadButton variant="danger" size="sm" onClick={() => handleDelete(child)}>
-                                  Excluir
+                                  {t('p1Children.delete')}
                                 </GumroadButton>
                               </AlertDialog.Action>
                             </Flex>

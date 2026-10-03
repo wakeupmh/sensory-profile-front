@@ -9,6 +9,7 @@
  */
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
+import i18n from '../i18n';
 import { useDomainResource } from './useDomainResource';
 
 vi.mock('../context/AuthContext', () => ({
@@ -42,7 +43,10 @@ function Probe({ childId, load }: { childId: string; load: (t: string | null) =>
   );
 }
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.clearAllMocks();
+  i18n.changeLanguage('pt-BR');
+});
 
 describe('useDomainResource — resposta fora de ordem', () => {
   it('a resposta lenta da criança ANTERIOR não sobrescreve a da atual', async () => {

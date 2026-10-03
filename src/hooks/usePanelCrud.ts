@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import i18n from 'i18next';
 
 type PanelView = 'list' | 'add' | 'edit';
 
@@ -45,7 +46,7 @@ export function usePanelCrud<
       const data = await fetchFn();
       setItems(data);
     } catch {
-      setError('Erro ao carregar dados. Por favor, tente novamente.');
+      setError(i18n.t('p1Hooks.loadError'));
     }
   }, [fetchFn]);
 
