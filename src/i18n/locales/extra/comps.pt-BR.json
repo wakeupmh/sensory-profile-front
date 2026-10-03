@@ -291,5 +291,45 @@
       "savePlan": "Salvar plano",
       "addPlan": "Adicionar plano"
     }
+  },
+  "cDocuments": {
+    "resourceType": {
+      "appointment": "Consulta médica",
+      "therapy_session": "Sessão de terapia",
+      "education_plan": "Plano educacional",
+      "school_comm": "Comunicação escolar"
+    },
+    "expiredOn": "Vencido em {{date}}",
+    "expiresOn": "Vence em {{date}}",
+    "removeAria": "Remover documento",
+    "dropzoneAria": "Escolher um arquivo para enviar",
+    "dropzoneTitle": "Arraste um arquivo aqui ou clique para escolher",
+    "dropzoneHint": "PDF, imagem ou vídeo",
+    "loadError": "Não foi possível carregar o arquivo.",
+    "downloadError": "Não foi possível baixar o arquivo. Tente novamente.",
+    "expiryUpdated": "Data de validade atualizada",
+    "expirySaveError": "Não foi possível salvar a data de validade. Tente novamente.",
+    "download": "Baixar",
+    "expiryDate": "Data de validade",
+    "saving": "Salvando...",
+    "save": "Salvar",
+    "loadingPreview": "Carregando preview...",
+    "noPreview": "Pré-visualização não disponível para este tipo de arquivo. Use o botão \"{{action}}\".",
+    "uploaded": "Documento enviado",
+    "uploadError": "Falha no upload. Verifique o arquivo e tente novamente.",
+    "uploadTitle": "Enviar documento",
+    "linkRecord": "Vincular a um registro (opcional)",
+    "none": "Nenhum",
+    "selectRecord": "Selecione o registro",
+    "selectPlaceholder": "Selecione...",
+    "noRecords": "Nenhum registro encontrado para vincular",
+    "expiryOptional": "Data de validade (opcional)",
+    "expiryHint": "Para laudos, receitas e carteirinhas com prazo de validade",
+    "uploadSuccess": "✅ Enviado com sucesso!",
+    "uploadingPct": "Enviando... {{progress}}%",
+    "uploadProgressAria": "Progresso do envio",
+    "sending": "Enviando...",
+    "send": "Enviar",
+    "cancel": "Cancelar"
   }
 }

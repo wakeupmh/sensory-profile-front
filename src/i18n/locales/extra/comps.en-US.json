@@ -291,5 +291,45 @@
       "savePlan": "Save plan",
       "addPlan": "Add plan"
     }
+  },
+  "cDocuments": {
+    "resourceType": {
+      "appointment": "Medical appointment",
+      "therapy_session": "Therapy session",
+      "education_plan": "Education plan",
+      "school_comm": "School communication"
+    },
+    "expiredOn": "Expired on {{date}}",
+    "expiresOn": "Expires on {{date}}",
+    "removeAria": "Remove document",
+    "dropzoneAria": "Choose a file to upload",
+    "dropzoneTitle": "Drag a file here or click to choose",
+    "dropzoneHint": "PDF, image or video",
+    "loadError": "Could not load the file.",
+    "downloadError": "Could not download the file. Please try again.",
+    "expiryUpdated": "Expiry date updated",
+    "expirySaveError": "Could not save the expiry date. Please try again.",
+    "download": "Download",
+    "expiryDate": "Expiry date",
+    "saving": "Saving...",
+    "save": "Save",
+    "loadingPreview": "Loading preview...",
+    "noPreview": "Preview not available for this file type. Use the \"{{action}}\" button.",
+    "uploaded": "Document uploaded",
+    "uploadError": "Upload failed. Check the file and try again.",
+    "uploadTitle": "Upload document",
+    "linkRecord": "Link to a record (optional)",
+    "none": "None",
+    "selectRecord": "Select the record",
+    "selectPlaceholder": "Select...",
+    "noRecords": "No records found to link",
+    "expiryOptional": "Expiry date (optional)",
+    "expiryHint": "For reports, prescriptions and cards with an expiry date",
+    "uploadSuccess": "✅ Uploaded successfully!",
+    "uploadingPct": "Uploading... {{progress}}%",
+    "uploadProgressAria": "Upload progress",
+    "sending": "Uploading...",
+    "send": "Upload",
+    "cancel": "Cancel"
   }
 }

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { colors, shadows, radii, fonts, spacing } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
 import { GumroadText } from '../design-system/GumroadHeading';
@@ -51,6 +53,8 @@ async function fetchOptions(
   resourceType: DocumentResourceType,
   childId: string,
   token: string | null,
+  lang: string,
+  t: TFunction,
 ): Promise<ResourceOption[]> {
   try {
     switch (resourceType) {
@@ -58,25 +62,25 @@ async function fetchOptions(
         const res = await appointmentApi.list(token, { childId });
         return res.data.map((a) => ({
           id: a.id,
-          label: `${new Date(a.occurredAt).toLocaleDateString('pt-BR')} — ${a.specialty}`,
+          label: `${new Date(a.occurredAt).toLocaleDateString(lang)} — ${a.specialty}`,
         }));
       }
       case 'therapy_session': {
         const res = await therapyApi.getSessions(token, { childId, limit: 30 });
         return res.data.map((s) => ({
           id: s.id,
-          label: `${new Date(s.occurredAt).toLocaleDateString('pt-BR')} — ${s.therapyType}`,
+          label: `${new Date(s.occurredAt).toLocaleDateString(lang)} — ${t(`cGoals.therapyType.${s.therapyType}`, { defaultValue: s.therapyType })}`,
         }));
       }
       case 'education_plan': {
         const plans = await educationPlanApi.list(token, { childId });
-        return plans.map((p) => ({ id: p.id, label: `${p.schoolName} — ${p.planType}` }));
+        return plans.map((p) => ({ id: p.id, label: `${p.schoolName} — ${t(`cEducation.planType.${p.planType}`, { defaultValue: p.planType })}` }));
       }
       case 'school_comm': {
         const res = await schoolCommApi.list(token, { childId });
         return res.data.map((c) => ({
           id: c.id,
-          label: `${new Date(c.occurredAt).toLocaleDateString('pt-BR')} — ${c.subject}`,
+          label: `${new Date(c.occurredAt).toLocaleDateString(lang)} — ${c.subject}`,
         }));
       }
       default:
@@ -88,6 +92,7 @@ async function fetchOptions(
 }
 
 const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file, childId, onClose, onUploaded }) => {
+  const { t, i18n } = useTranslation();
   const { getToken } = useAuthContext();
   const toast = useToast();
   const [resourceType, setResourceType] = useState<DocumentResourceType | ''>('');
@@ -120,11 +125,11 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file,
     let cancelled = false;
     (async () => {
       const token = await getToken();
-      const opts = await fetchOptions(resourceType, childId, token);
+      const opts = await fetchOptions(resourceType, childId, token, i18n.language, t);
       if (!cancelled) setOptions(opts);
     })();
     return () => { cancelled = true; };
-  }, [resourceType, childId, getToken]);
+  }, [resourceType, childId, getToken, i18n.language, t]);
 
   if (!file) return null;
 
@@ -144,11 +149,11 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file,
       });
       await documentApi.uploadToPresignedUrl(uploadUrl, file, setProgress);
       setSuccess(true);
-      toast.success('Documento enviado');
+      toast.success(t('cDocuments.uploaded'));
       onUploaded(document);
       window.setTimeout(onClose, 700);
     } catch {
-      setError('Falha no upload. Verifique o arquivo e tente novamente.');
+      setError(t('cDocuments.uploadError'));
     } finally {
       setUploading(false);
     }
@@ -158,7 +163,7 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file,
     <GumroadModal
       open={isOpen}
       onClose={onClose}
-      title="Enviar documento"
+      title={t('cDocuments.uploadTitle')}
       variant="center"
       maxWidth="460px"
       closeDisabled={uploading}
@@ -173,39 +178,39 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file,
 
         <Flex direction="column" gap="3" mb="4">
           <div>
-            <label style={labelStyle} htmlFor="docupload-vincular-a">Vincular a um registro (opcional)</label>
+            <label style={labelStyle} htmlFor="docupload-vincular-a">{t('cDocuments.linkRecord')}</label>
             <select id="docupload-vincular-a"
               value={resourceType}
               onChange={(e) => { setResourceType(e.target.value as DocumentResourceType | ''); setResourceId(''); }}
               style={inputStyle}
               disabled={uploading}
             >
-              <option value="">Nenhum</option>
+              <option value="">{t('cDocuments.none')}</option>
               {(Object.entries(DOCUMENT_RESOURCE_TYPE_LABELS) as [DocumentResourceType, string][]).map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
+                <option key={value} value={value}>{t(`cDocuments.resourceType.${value}`, { defaultValue: label })}</option>
               ))}
             </select>
           </div>
 
           {resourceType && (
             <div>
-              <label style={labelStyle} htmlFor="docupload-selecione-o">Selecione o registro</label>
+              <label style={labelStyle} htmlFor="docupload-selecione-o">{t('cDocuments.selectRecord')}</label>
               <select id="docupload-selecione-o" value={resourceId} onChange={(e) => setResourceId(e.target.value)} style={inputStyle} disabled={uploading}>
-                <option value="">Selecione...</option>
+                <option value="">{t('cDocuments.selectPlaceholder')}</option>
                 {options.map((opt) => (
                   <option key={opt.id} value={opt.id}>{opt.label}</option>
                 ))}
               </select>
               {options.length === 0 && (
                 <GumroadText level="caption" as="p" style={{ opacity: 0.6, marginTop: '4px' }}>
-                  Nenhum registro encontrado para vincular
+                  {t('cDocuments.noRecords')}
                 </GumroadText>
               )}
             </div>
           )}
 
           <div>
-            <label style={labelStyle} htmlFor="docupload-validade">Data de validade (opcional)</label>
+            <label style={labelStyle} htmlFor="docupload-validade">{t('cDocuments.expiryOptional')}</label>
             <input
               id="docupload-validade"
               type="date"
@@ -215,34 +220,34 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, file,
               disabled={uploading}
             />
             <GumroadText level="caption" as="p" style={{ opacity: 0.6, marginTop: '4px' }}>
-              Para laudos, receitas e carteirinhas com prazo de validade
+              {t('cDocuments.expiryHint')}
             </GumroadText>
           </div>
         </Flex>
 
         {uploading && (
           <div style={{ marginBottom: spacing.md }}>
-            <div style={{ width: '100%', height: '18px', border: `2px solid ${colors.ink}`, borderRadius: radii.pill, backgroundColor: colors.surface, overflow: 'hidden' }}>
+            <div role="progressbar" aria-label={t('cDocuments.uploadProgressAria')} aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress} style={{ width: '100%', height: '18px', border: `2px solid ${colors.ink}`, borderRadius: radii.pill, backgroundColor: colors.surface, overflow: 'hidden' }}>
               <div style={{ height: '100%', width: `${progress}%`, backgroundColor: success ? colors['brand-mint'] : colors['brand-cyan'], transition: 'width 0.15s ease' }} />
             </div>
-            <GumroadText level="caption" as="p" style={{ marginTop: '4px', opacity: 0.7 }}>
-              {success ? '✅ Enviado com sucesso!' : `Enviando... ${progress}%`}
+            <GumroadText level="caption" as="p" role="status" style={{ marginTop: '4px', opacity: 0.7 }}>
+              {success ? t('cDocuments.uploadSuccess') : t('cDocuments.uploadingPct', { progress })}
             </GumroadText>
           </div>
         )}
 
         {error && (
-          <GumroadText level="body-sm" as="p" style={{ color: colors.error, marginBottom: spacing.sm }}>
+          <GumroadText level="body-sm" as="p" role="alert" style={{ color: colors.error, marginBottom: spacing.sm }}>
             {error}
           </GumroadText>
         )}
 
         <Flex gap="2">
-          <GumroadButton variant="primary" size="md" onClick={handleUpload} disabled={uploading || success}>
-            {uploading ? 'Enviando...' : 'Enviar'}
+          <GumroadButton variant="primary" size="md" onClick={handleUpload} disabled={success} loading={uploading}>
+            {uploading ? t('cDocuments.sending') : t('cDocuments.send')}
           </GumroadButton>
           <GumroadButton variant="secondary" size="md" onClick={onClose} disabled={uploading}>
-            Cancelar
+            {t('cDocuments.cancel')}
           </GumroadButton>
         </Flex>
     </GumroadModal>
