@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Box, Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
+import { useToast } from '../context/ToastContext';
 import { ArrowLeftIcon, ExclamationTriangleIcon, PersonIcon } from '@radix-ui/react-icons';
 import { professionalApi, childSharesApi, childApi } from '../services/api';
 import { useAuthContext } from '../context/AuthContext';
 import type { Professional } from '../types/professionals';
 import type { ChildShareScope } from '../types/childSharing';
-import { CHILD_SHARE_SCOPE_LABELS, CHILD_SHARE_SCOPES } from '../types/childSharing';
+import { CHILD_SHARE_SCOPES } from '../types/childSharing';
 import { colors, spacing, radii } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
@@ -17,6 +19,8 @@ import ScopePill from '../components/child-profile/ScopePill';
 
 export default function ShareChildPage() {
   const { childId } = useParams<{ childId: string }>();
+  const { t } = useTranslation();
+  const toast = useToast();
   const navigate = useNavigate();
   const { getToken } = useAuthContext();
 
@@ -44,11 +48,11 @@ export default function ShareChildPage() {
       for (const s of shares) map[s.professionalId] = s.scopes;
       setScopesByProfessional(map);
     } catch {
-      setError('Não foi possível carregar profissionais ou compartilhamentos.');
+      setError(t('p2Share.child.loadError'));
     } finally {
       setLoading(false);
     }
-  }, [childId, getToken]);
+  }, [childId, getToken, t]);
 
   useEffect(() => {
     fetchAll();
@@ -68,7 +72,8 @@ export default function ShareChildPage() {
       }
       setScopesByProfessional((prev) => ({ ...prev, [professionalId]: next }));
     } catch {
-      setError('Não foi possível atualizar o compartilhamento. Tente novamente.');
+      // Toast: o estado `error` esconderia a lista de profissionais inteira
+      toast.error(t('p2Share.child.updateError'));
     } finally {
       setBusyId(null);
     }
@@ -82,7 +87,7 @@ export default function ShareChildPage() {
       await childSharesApi.revoke(token, childId, professionalId);
       setScopesByProfessional((prev) => ({ ...prev, [professionalId]: [] }));
     } catch {
-      setError('Não foi possível revogar o acesso. Tente novamente.');
+      toast.error(t('p2Share.child.revokeError'));
     } finally {
       setBusyId(null);
     }
@@ -92,38 +97,39 @@ export default function ShareChildPage() {
     <Box style={{ maxWidth: '720px', margin: '0 auto' }}>
       <Box style={{ marginBottom: spacing.md }}>
         <GumroadButton variant="secondary" size="sm" onClick={() => navigate(childId ? `/children/${childId}` : '/children')}>
-          <ArrowLeftIcon /> Voltar
+          <ArrowLeftIcon /> {t('p2Share.back')}
         </GumroadButton>
       </Box>
 
       <Box style={{ marginBottom: spacing.lg }}>
         <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
-          Compartilhar {childName || 'criança'}
+          {t('p2Share.child.title', { name: childName || t('p2Share.child.fallbackName') })}
         </GumroadHeading>
         <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7 }}>
-          Conceda acesso somente-leitura a domínios inteiros para profissionais cadastrados
+          {t('p2Share.child.subtitle')}
         </GumroadText>
       </Box>
 
       {loading ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
-          <LoadingSpinner size="large" text="Carregando..." />
+          <LoadingSpinner size="large" text={t('p2Share.loading')} />
         </GumroadCard>
       ) : error ? (
         <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
-          <Flex align="center" gap="2">
+          <Flex align="center" gap="3" wrap="wrap">
             <ExclamationTriangleIcon />
             <GumroadText level="body-md" as="p">{error}</GumroadText>
+            <GumroadButton variant="secondary" size="sm" onClick={fetchAll}>{t('p2Share.retry')}</GumroadButton>
           </Flex>
         </GumroadCard>
       ) : professionals.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">
             <GumroadText level="body-sm" as="p" style={{ opacity: 0.75 }}>
-              Você ainda não cadastrou nenhum profissional.
+              {t('p2Share.child.noPros')}
             </GumroadText>
             <GumroadButton variant="primary" size="md" asChild>
-              <Link to="/professionals/new" style={{ textDecoration: 'none' }}>+ Cadastrar profissional</Link>
+              <Link to="/professionals/new" style={{ textDecoration: 'none' }}>{t('p2Share.child.addPro')}</Link>
             </GumroadButton>
           </Flex>
         </GumroadCard>
@@ -152,12 +158,12 @@ export default function ShareChildPage() {
                       )}
                     </Flex>
                     <GumroadBadge color={pro.status === 'accepted' ? 'mint' : 'yellow'}>
-                      {pro.status === 'accepted' ? 'Aceito' : 'Convite pendente'}
+                      {pro.status === 'accepted' ? t('p2Share.accepted') : t('p2Share.pending')}
                     </GumroadBadge>
                   </Flex>
                   {hasAccess && (
-                    <GumroadButton variant="danger" size="sm" onClick={() => revokeAll(pro.id)} disabled={busyId === pro.id}>
-                      Revogar tudo
+                    <GumroadButton variant="danger" size="sm" onClick={() => revokeAll(pro.id)} disabled={busyId === pro.id} aria-label={t('p2Share.child.revokeAllAria', { name: pro.name })}>
+                      {t('p2Share.child.revokeAll')}
                     </GumroadButton>
                   )}
                 </Flex>
@@ -170,7 +176,7 @@ export default function ShareChildPage() {
                   {CHILD_SHARE_SCOPES.map((scope) => (
                     <ScopePill
                       key={scope}
-                      label={CHILD_SHARE_SCOPE_LABELS[scope]}
+                      label={t(`p2Share.scope.${scope}`)}
                       active={scopes.includes(scope)}
                       onClick={() => toggleScope(pro.id, scope)}
                       disabled={busyId === pro.id}

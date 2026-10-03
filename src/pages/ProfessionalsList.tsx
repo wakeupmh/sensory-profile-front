@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useToast } from '../context/ToastContext';
 import { Box, Flex, AlertDialog, Separator } from '@radix-ui/themes';
 import {
   PlusIcon,
@@ -22,6 +24,8 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { colors, spacing, radii, shadows } from '../theme/tokens';
 
 const ProfessionalsList: React.FC = () => {
+  const { t } = useTranslation();
+  const toast = useToast();
   const { getToken, isLoaded, session } = useAuthContext();
   const navigate = useNavigate();
   const getTokenRef = useRef(getToken);
@@ -41,11 +45,11 @@ const ProfessionalsList: React.FC = () => {
       setError(null);
     } catch (err) {
       console.error(err);
-      setError('Não foi possível carregar a lista de profissionais.');
+      setError(t('p2Pros.loadError'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (isLoaded && session) fetchList();
@@ -59,7 +63,8 @@ const ProfessionalsList: React.FC = () => {
       setItems((prev) => prev.filter((p) => p.id !== id));
     } catch (err) {
       console.error(err);
-      setError('Não foi possível remover o profissional.');
+      // Toast, e não `error`: o estado de erro esconderia a lista inteira
+      toast.error(t('p2Pros.removeError'));
     } finally {
       setDeletingId(null);
     }
@@ -76,15 +81,15 @@ const ProfessionalsList: React.FC = () => {
       >
         <Box>
           <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
-            Profissionais
+            {t('p2Pros.title')}
           </GumroadHeading>
           <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7 }}>
-            Gerencie quem pode receber acesso somente-leitura às suas avaliações e anamneses
+            {t('p2Pros.subtitle')}
           </GumroadText>
         </Box>
         <GumroadButton variant="primary" size="md" onClick={() => navigate('/professionals/new')}>
           <PlusIcon />
-          Cadastrar profissional
+          {t('p2Pros.add')}
         </GumroadButton>
       </Flex>
 
@@ -93,16 +98,19 @@ const ProfessionalsList: React.FC = () => {
       {loading ? (
         <GumroadCard color="cream" shadow="md" padding="xl">
           <Flex direction="column" align="center" gap="4">
-            <LoadingSpinner size="large" text="Carregando profissionais..." />
+            <LoadingSpinner size="large" text={t('p2Pros.loading')} />
           </Flex>
         </GumroadCard>
       ) : error ? (
         <GumroadCard role="alert" color="salmon" shadow="md" padding="md">
-          <Flex align="center" gap="2">
+          <Flex align="center" gap="3" wrap="wrap">
             <ExclamationTriangleIcon />
             <GumroadText level="body-md" as="span">
               {error}
             </GumroadText>
+            <GumroadButton variant="secondary" size="sm" onClick={fetchList}>
+              {t('p2Pros.retry')}
+            </GumroadButton>
           </Flex>
         </GumroadCard>
       ) : items.length === 0 ? (
@@ -111,15 +119,15 @@ const ProfessionalsList: React.FC = () => {
             <InfoCircledIcon width={32} height={32} />
             <Box style={{ textAlign: 'center' }}>
               <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
-                Nenhum profissional cadastrado
+                {t('p2Pros.emptyTitle')}
               </GumroadHeading>
               <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7 }}>
-                Cadastre profissionais para depois compartilhar registros específicos com cada um.
+                {t('p2Pros.emptyHint')}
               </GumroadText>
             </Box>
             <GumroadButton variant="primary" size="md" onClick={() => navigate('/professionals/new')}>
               <PlusIcon />
-              Cadastrar primeiro profissional
+              {t('p2Pros.addFirst')}
             </GumroadButton>
           </Flex>
         </GumroadCard>
@@ -179,43 +187,45 @@ const ProfessionalsList: React.FC = () => {
 
                 <Flex gap="2" align="center" wrap="wrap">
                   <GumroadBadge color={p.status === 'accepted' ? 'mint' : 'yellow'}>
-                    {p.status === 'accepted' ? 'Aceito' : 'Convite pendente'}
+                    {p.status === 'accepted' ? t('p2Pros.accepted') : t('p2Pros.pending')}
                   </GumroadBadge>
                   {p.status === 'pending' && (
                     <GumroadButton
                       variant="secondary"
                       size="sm"
+                      aria-label={t('p2Pros.codeAria', { name: p.name })}
                       onClick={() => navigate(`/professionals/${p.id}`)}
                     >
                       <ClipboardIcon />
-                      Ver código
+                      {t('p2Pros.viewCode')}
                     </GumroadButton>
                   )}
                   <GumroadButton variant="secondary" size="sm" asChild>
                     <Link
                       to={`/professionals/${p.id}/edit`}
+                      aria-label={t('p2Pros.editAria', { name: p.name })}
                       style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                     >
                       <Pencil1Icon />
-                      Editar
+                      {t('p2Pros.edit')}
                     </Link>
                   </GumroadButton>
                   <AlertDialog.Root>
                     <AlertDialog.Trigger>
-                      <GumroadButton variant="danger" size="sm">
+                      <GumroadButton variant="danger" size="sm" aria-label={t('p2Pros.deleteAria', { name: p.name })}>
                         <TrashIcon />
-                        Excluir
+                        {t('p2Pros.delete')}
                       </GumroadButton>
                     </AlertDialog.Trigger>
                     <AlertDialog.Content size="2">
-                      <AlertDialog.Title>Excluir profissional</AlertDialog.Title>
+                      <AlertDialog.Title>{t('p2Pros.deleteTitle')}</AlertDialog.Title>
                       <AlertDialog.Description size="2">
-                        Tem certeza? Todos os compartilhamentos concedidos a {p.name} serão revogados.
+                        {t('p2Pros.deleteConfirm', { name: p.name })}
                       </AlertDialog.Description>
                       <Flex gap="3" mt="4" justify="end">
                         <AlertDialog.Cancel>
                           <GumroadButton variant="secondary" size="sm">
-                            Cancelar
+                            {t('p2Pros.cancel')}
                           </GumroadButton>
                         </AlertDialog.Cancel>
                         <AlertDialog.Action>
@@ -225,7 +235,7 @@ const ProfessionalsList: React.FC = () => {
                             disabled={deletingId === p.id}
                             onClick={() => handleDelete(p.id)}
                           >
-                            {deletingId === p.id ? 'Excluindo...' : 'Excluir'}
+                            {deletingId === p.id ? t('p2Pros.deleting') : t('p2Pros.delete')}
                           </GumroadButton>
                         </AlertDialog.Action>
                       </Flex>

@@ -181,7 +181,7 @@ const MyNotesPanel: React.FC<MyNotesPanelProps> = ({ childId, therapySessions = 
 
       {loading ? (
         <LoadingSpinner size="medium" text={t('p2Notes.loading')} />
-      ) : notes.length === 0 ? (
+      ) : notes.length === 0 && !error ? (
         <GumroadText level="body-sm" as="p" style={{ opacity: 0.6, fontStyle: 'italic' }}>
           {t('p2Notes.empty')}
         </GumroadText>

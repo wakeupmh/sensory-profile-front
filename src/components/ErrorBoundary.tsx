@@ -36,7 +36,7 @@ class ErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <Box p="6" style={{ maxWidth: 600, margin: '80px auto' }}>
+        <Box p="6" role="alert" style={{ maxWidth: 600, margin: "80px auto" }}>
           <GumroadCard color="salmon" shadow="md" padding="xl">
             <Flex direction="column" align="center" gap="4" py="6">
               <GumroadHeading level="display-md" as="h1" style={{ textAlign: 'center' }}>

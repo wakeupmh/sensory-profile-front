@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Flex, Tabs } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeftIcon, ExclamationTriangleIcon, EyeOpenIcon } from '@radix-ui/react-icons';
 import { useAuthContext } from '../context/AuthContext';
 import { sharedChildrenApi } from '../services/api';
 import type { ChildShareScope, SharedChildSummary } from '../types/childSharing';
-import { CHILD_SHARE_SCOPE_LABELS } from '../types/childSharing';
 import type {
   ConsolidatedAssessments,
   ConsolidatedLogs,
@@ -37,6 +37,7 @@ interface DomainData {
 const SCOPE_ORDER: ChildShareScope[] = ['assessments', 'daily_logs', 'therapy', 'medical', 'development'];
 
 export default function SharedChildDetailPage() {
+  const { t } = useTranslation();
   const { childId } = useParams<{ childId: string }>();
   const navigate = useNavigate();
   const { getToken } = useAuthContext();
@@ -86,17 +87,17 @@ export default function SharedChildDetailPage() {
       }
       for (let i = 0; i < match.scopes.length; i++) {
         if (results[i].status === 'rejected') {
-          nextErrors[match.scopes[i]] = 'Não foi possível carregar estes dados.';
+          nextErrors[match.scopes[i]] = t('p2Share.detail.domainError');
         }
       }
       setDomainData(nextData);
       setDomainErrors(nextErrors);
     } catch {
-      setError('Não foi possível carregar esta criança. Ela pode não estar mais compartilhada com você.');
+      setError(t('p2Share.detail.loadError'));
     } finally {
       setLoading(false);
     }
-  }, [childId, getToken]);
+  }, [childId, getToken, t]);
 
   useEffect(() => {
     fetchAll();
@@ -106,29 +107,30 @@ export default function SharedChildDetailPage() {
     <Box style={{ maxWidth: '720px', margin: '0 auto' }}>
       <Box style={{ marginBottom: spacing.md }}>
         <GumroadButton variant="secondary" size="sm" onClick={() => navigate('/shared/children')}>
-          <ArrowLeftIcon /> Voltar
+          <ArrowLeftIcon /> {t('p2Share.back')}
         </GumroadButton>
       </Box>
 
       {loading ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
-          <LoadingSpinner size="large" text="Carregando..." />
+          <LoadingSpinner size="large" text={t('p2Share.loading')} />
         </GumroadCard>
       ) : notFound ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="3">
             <ExclamationTriangleIcon width={32} height={32} />
-            <GumroadHeading level="title-md" as="h3">Acesso não encontrado</GumroadHeading>
+            <GumroadHeading level="title-md" as="h3">{t('p2Share.detail.notFoundTitle')}</GumroadHeading>
             <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-              Esta criança não foi compartilhada com você, ou o acesso foi revogado.
+              {t('p2Share.detail.notFound')}
             </GumroadText>
           </Flex>
         </GumroadCard>
       ) : error ? (
         <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
-          <Flex align="center" gap="2">
+          <Flex align="center" gap="3" wrap="wrap">
             <ExclamationTriangleIcon />
             <GumroadText level="body-md" as="p">{error}</GumroadText>
+            <GumroadButton variant="secondary" size="sm" onClick={fetchAll}>{t('p2Share.retry')}</GumroadButton>
           </Flex>
         </GumroadCard>
       ) : child ? (
@@ -146,7 +148,7 @@ export default function SharedChildDetailPage() {
           >
             <EyeOpenIcon />
             <GumroadText level="caption-uppercase" as="span" style={{ fontWeight: 700 }}>
-              Modo visualização — somente leitura
+              {t('p2Share.detail.viewOnly')}
             </GumroadText>
           </Flex>
 
@@ -158,7 +160,7 @@ export default function SharedChildDetailPage() {
             <Tabs.List>
               {SCOPE_ORDER.filter((s) => child.scopes.includes(s)).map((scope) => (
                 <Tabs.Trigger key={scope} value={scope}>
-                  {CHILD_SHARE_SCOPE_LABELS[scope]}
+                  {t(`p2Share.scope.${scope}`)}
                 </Tabs.Trigger>
               ))}
             </Tabs.List>
@@ -168,7 +170,7 @@ export default function SharedChildDetailPage() {
                 <Tabs.Content value="assessments">
                   <DomainTabContent error={domainErrors.assessments}>
                     {domainData.assessments && (
-                      <SectionCard title="Avaliações" icon="🧠" accentColor={colors['brand-cyan']}>
+                      <SectionCard title={t('p2Share.detail.sec.assessments')} icon="🧠" accentColor={colors['brand-cyan']}>
                         <AssessmentsSection data={domainData.assessments} />
                       </SectionCard>
                     )}
@@ -179,7 +181,7 @@ export default function SharedChildDetailPage() {
                 <Tabs.Content value="daily_logs">
                   <DomainTabContent error={domainErrors.daily_logs}>
                     {domainData.daily_logs && (
-                      <SectionCard title="Registros Diários" icon="📋" accentColor={colors['brand-yellow']}>
+                      <SectionCard title={t('p2Share.detail.sec.daily_logs')} icon="📋" accentColor={colors['brand-yellow']}>
                         <LogsSummary data={domainData.daily_logs} />
                       </SectionCard>
                     )}
@@ -190,7 +192,7 @@ export default function SharedChildDetailPage() {
                 <Tabs.Content value="therapy">
                   <DomainTabContent error={domainErrors.therapy}>
                     {domainData.therapy && (
-                      <SectionCard title="Terapia" icon="🏥" accentColor={colors['brand-mint']}>
+                      <SectionCard title={t('p2Share.detail.sec.therapy')} icon="🏥" accentColor={colors['brand-mint']}>
                         <TherapySection data={domainData.therapy} />
                       </SectionCard>
                     )}
@@ -201,7 +203,7 @@ export default function SharedChildDetailPage() {
                 <Tabs.Content value="medical">
                   <DomainTabContent error={domainErrors.medical}>
                     {domainData.medical && (
-                      <SectionCard title="Saúde" icon="💊" accentColor={colors['brand-salmon']}>
+                      <SectionCard title={t('p2Share.detail.sec.medical')} icon="💊" accentColor={colors['brand-salmon']}>
                         <MedicalSection data={domainData.medical} />
                       </SectionCard>
                     )}
@@ -212,7 +214,7 @@ export default function SharedChildDetailPage() {
                 <Tabs.Content value="development">
                   <DomainTabContent error={domainErrors.development}>
                     {domainData.development && (
-                      <SectionCard title="Desenvolvimento" icon="🌱" accentColor="#22c55e">
+                      <SectionCard title={t('p2Share.detail.sec.development')} icon="🌱" accentColor="#22c55e">
                         <DevelopmentSection data={domainData.development} />
                       </SectionCard>
                     )}

@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeftIcon, ChevronRightIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { logApi, milestoneApi, goalApi, goalProgressApi } from '../services/api';
-import { LOG_TYPE_LABELS } from '../types/logs';
 import type { DailyLog, LogType } from '../types/logs';
 import { useAuthContext } from '../context/AuthContext';
 import { useDomainPage } from '../hooks/useDomainPage';
@@ -16,8 +16,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import MoodTrendChart from '../components/recap/MoodTrendChart';
 import type { Goal } from '../types/goals';
 import type { DevelopmentalMilestone } from '../types/development';
-import { MILESTONE_CATEGORY_LABELS } from '../types/development';
-import { getMonthRange, isDateStringInMonth, aggregateLogs } from '../utils/monthlyRecap';
+import { getMonthRange, isDateStringInMonth, aggregateLogs, capitalize } from '../utils/monthlyRecap';
 
 interface GoalWithMonthProgress {
   goal: Goal;
@@ -25,6 +24,7 @@ interface GoalWithMonthProgress {
 }
 
 export default function MonthlyRecapPage() {
+  const { t, i18n } = useTranslation();
   const { isLoaded, session } = useAuthContext();
   const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
 
@@ -35,9 +35,13 @@ export default function MonthlyRecapPage() {
   const [milestonesAchieved, setMilestonesAchieved] = useState<DevelopmentalMilestone[]>([]);
   const [goalsProgress, setGoalsProgress] = useState<GoalWithMonthProgress[]>([]);
 
-  const { monthStart, monthEnd, monthLabel, year, month, daysInMonth } = useMemo(
+  const { monthStart, monthEnd, year, month, daysInMonth } = useMemo(
     () => getMonthRange(monthOffset),
     [monthOffset],
+  );
+  // O rótulo segue o idioma ativo (getMonthRange fixa pt-BR)
+  const monthLabel = capitalize(
+    new Date(year, month, 1).toLocaleDateString(i18n.language, { month: 'long', year: 'numeric' }),
   );
 
   const fetchRecap = useCallback(async () => {
@@ -67,8 +71,8 @@ export default function MonthlyRecapPage() {
         activeGoals.map(async (goal) => {
           const entries = await goalProgressApi.list(token, goal.id);
           const entriesInMonth = entries.filter((e) => {
-            const t = new Date(e.occurredAt).getTime();
-            return t >= monthStart.getTime() && t <= monthEnd.getTime();
+            const ts = new Date(e.occurredAt).getTime();
+            return ts >= monthStart.getTime() && ts <= monthEnd.getTime();
           }).length;
           return { goal, entriesInMonth };
         }),
@@ -80,11 +84,11 @@ export default function MonthlyRecapPage() {
       );
       setGoalsProgress(withProgress);
     } catch {
-      setError('Erro ao carregar o resumo do mês. Por favor, tente novamente.');
+      setError(t('p2Recap.loadError'));
     } finally {
       setLoading(false);
     }
-  }, [effectiveChildId, monthStart, monthEnd, year, month, getTokenRef]);
+  }, [effectiveChildId, monthStart, monthEnd, year, month, getTokenRef, t]);
 
   useEffect(() => {
     if (isLoaded && session) fetchRecap();
@@ -100,20 +104,20 @@ export default function MonthlyRecapPage() {
     <Box style={{ maxWidth: '720px', margin: '0 auto' }}>
       <Box mb="6">
         <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
-          Resumo do mês
+          {t('p2Recap.title')}
         </GumroadHeading>
         <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7 }}>
-          Uma visão geral da atividade registrada, mês a mês
+          {t('p2Recap.subtitle')}
         </GumroadText>
       </Box>
 
-      <ChildSelector children={children} selectedChildId={selectedChildId} onChange={setSelectedChildId} />
+      <ChildSelector children={children} selectedChildId={selectedChildId} onChange={setSelectedChildId} emptyLabel={t('p2Common.allChildren')} />
 
       <Flex align="center" justify="center" gap="3" mb="5">
         <button
           type="button"
           onClick={() => setMonthOffset((o) => o - 1)}
-          aria-label="Mês anterior"
+          aria-label={t('p2Recap.prevMonth')}
           className="press-in"
           style={{
             width: '36px',
@@ -129,14 +133,14 @@ export default function MonthlyRecapPage() {
         >
           <ChevronLeftIcon />
         </button>
-        <GumroadText level="body-md" as="span" style={{ minWidth: '180px', textAlign: 'center', fontWeight: 700 }}>
+        <GumroadText level="body-md" as="span" aria-live="polite" style={{ minWidth: '180px', textAlign: 'center', fontWeight: 700 }}>
           {monthLabel}
         </GumroadText>
         <button
           type="button"
           onClick={() => setMonthOffset((o) => Math.min(o + 1, 0))}
           disabled={monthOffset >= 0}
-          aria-label="Próximo mês"
+          aria-label={t('p2Recap.nextMonth')}
           className="press-in"
           style={{
             width: '36px',
@@ -158,11 +162,11 @@ export default function MonthlyRecapPage() {
       {children.length === 0 ? null : !effectiveChildId ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <GumroadText level="body-md" as="p" style={{ opacity: 0.7 }}>
-            Selecione uma criança para ver o resumo do mês
+            {t('p2Recap.selectChild')}
           </GumroadText>
         </GumroadCard>
       ) : loading ? (
-        <Flex justify="center" py="6"><LoadingSpinner size="medium" text="Carregando resumo..." /></Flex>
+        <Flex justify="center" py="6"><LoadingSpinner size="medium" text={t('p2Recap.loading')} /></Flex>
       ) : error ? (
         <ErrorState message={error} onRetry={fetchRecap} />
       ) : !hasAnyActivity ? (
@@ -170,7 +174,7 @@ export default function MonthlyRecapPage() {
           <Flex direction="column" align="center" gap="3">
             <InfoCircledIcon width={36} height={36} />
             <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-              Nenhuma atividade registrada em {monthLabel.toLowerCase()}
+              {t('p2Recap.noActivity', { month: monthLabel.toLowerCase() })}
             </GumroadText>
           </Flex>
         </GumroadCard>
@@ -178,15 +182,15 @@ export default function MonthlyRecapPage() {
         <Flex direction="column" gap="4">
           <GumroadCard color="white" shadow="md" padding="lg">
             <GumroadHeading level="title-md" as="h2" style={{ marginBottom: spacing.sm }}>
-              Registros diários
+              {t('p2Recap.dailyLogs')}
             </GumroadHeading>
             <GumroadText level="body-md" as="p" style={{ fontWeight: 700, marginBottom: spacing.sm }}>
-              {totalLogs} {totalLogs === 1 ? 'registro' : 'registros'} no mês
+              {t('p2Recap.logCount', { count: totalLogs })}
             </GumroadText>
             <Flex gap="2" wrap="wrap">
               {(Object.entries(countsByType) as [LogType, number][]).map(([type, count]) => (
                 <GumroadBadge key={type} color="cyan">
-                  {LOG_TYPE_LABELS[type]}: {count}
+                  {t(`p2Logs.types.${type}`)}: {count}
                 </GumroadBadge>
               ))}
             </Flex>
@@ -195,10 +199,10 @@ export default function MonthlyRecapPage() {
           {moodByDay.length > 0 && (
             <GumroadCard color="white" shadow="md" padding="lg">
               <Flex align="center" justify="between" mb="2">
-                <GumroadHeading level="title-md" as="h2">Humor</GumroadHeading>
+                <GumroadHeading level="title-md" as="h2">{t('p2Recap.mood')}</GumroadHeading>
                 {moodAverage !== null && (
                   <GumroadText level="body-sm" as="span" style={{ fontWeight: 700 }}>
-                    Média: {moodAverage.toFixed(1)}/5
+                    {t('p2Recap.average', { value: moodAverage.toFixed(1) })}
                   </GumroadText>
                 )}
               </Flex>
@@ -208,18 +212,18 @@ export default function MonthlyRecapPage() {
 
           <GumroadCard color="white" shadow="md" padding="lg">
             <GumroadHeading level="title-md" as="h2" style={{ marginBottom: spacing.sm }}>
-              Marcos alcançados
+              {t('p2Recap.milestones')}
             </GumroadHeading>
             {milestonesAchieved.length === 0 ? (
               <GumroadText level="body-sm" as="p" style={{ opacity: 0.6, fontStyle: 'italic' }}>
-                Nenhum marco alcançado neste mês
+                {t('p2Recap.noMilestones')}
               </GumroadText>
             ) : (
               <Flex direction="column" gap="2">
                 {milestonesAchieved.map((m) => (
                   <Flex key={m.id} align="center" gap="2" wrap="wrap">
                     <GumroadText level="body-sm" as="span" style={{ fontWeight: 600 }}>{m.title}</GumroadText>
-                    <GumroadBadge color="mint">{MILESTONE_CATEGORY_LABELS[m.category]}</GumroadBadge>
+                    <GumroadBadge color="mint">{t(`p2Recap.cat.${m.category}`)}</GumroadBadge>
                   </Flex>
                 ))}
               </Flex>
@@ -228,24 +232,23 @@ export default function MonthlyRecapPage() {
 
           <GumroadCard color="white" shadow="md" padding="lg">
             <GumroadHeading level="title-md" as="h2" style={{ marginBottom: spacing.sm }}>
-              Progresso em metas
+              {t('p2Recap.goals')}
             </GumroadHeading>
             {goalsProgress.length === 0 ? (
               <GumroadText level="body-sm" as="p" style={{ opacity: 0.6, fontStyle: 'italic' }}>
-                Nenhuma meta ativa
+                {t('p2Recap.noGoals')}
               </GumroadText>
             ) : (
               <>
                 <GumroadText level="body-sm" as="p" style={{ marginBottom: spacing.sm }}>
-                  {goalsWithProgress.length} de {goalsProgress.length}{' '}
-                  {goalsProgress.length === 1 ? 'meta ativa teve' : 'metas ativas tiveram'} progresso registrado
+                  {t('p2Recap.goalsSummary', { done: goalsWithProgress.length, count: goalsProgress.length })}
                 </GumroadText>
                 <Flex direction="column" gap="2">
                   {goalsWithProgress.map(({ goal, entriesInMonth }) => (
                     <Flex key={goal.id} align="center" justify="between" gap="2">
                       <GumroadText level="body-sm" as="span">{goal.title}</GumroadText>
                       <GumroadBadge color="lavender">
-                        {entriesInMonth} {entriesInMonth === 1 ? 'registro' : 'registros'}
+                        {t('p2Recap.entries', { count: entriesInMonth })}
                       </GumroadBadge>
                     </Flex>
                   ))}
