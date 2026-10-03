@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Flex } from '@radix-ui/themes';
 import { GroupIcon, ExitIcon } from '@radix-ui/react-icons';
 import { useDelegation } from '../context/DelegationContext';
@@ -5,12 +6,14 @@ import { colors } from '../theme/tokens';
 import { GumroadText } from './design-system/GumroadHeading';
 
 const DelegationBanner: React.FC = () => {
+  const { t } = useTranslation();
   const { delegateChild, stopDelegating } = useDelegation();
 
   if (!delegateChild) return null;
 
   return (
     <Flex
+      role="status"
       align="center"
       justify="center"
       gap="3"
@@ -21,11 +24,12 @@ const DelegationBanner: React.FC = () => {
         padding: '8px 16px',
       }}
     >
-      <GroupIcon />
+      <GroupIcon aria-hidden="true" />
       <GumroadText level="caption-uppercase" as="span" style={{ fontWeight: 700 }}>
-        Modo cuidador — gerenciando dados de {delegateChild.name}
+        {t('delegation.banner', { name: delegateChild.name })}
       </GumroadText>
       <button
+        type="button"
         onClick={stopDelegating}
         style={{
           display: 'inline-flex',
@@ -40,8 +44,8 @@ const DelegationBanner: React.FC = () => {
           cursor: 'pointer',
         }}
       >
-        <ExitIcon width={12} height={12} />
-        Sair do modo cuidador
+        <ExitIcon width={12} height={12} aria-hidden="true" />
+        {t('delegation.exit')}
       </button>
     </Flex>
   );

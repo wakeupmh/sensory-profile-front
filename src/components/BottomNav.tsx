@@ -4,30 +4,13 @@ import { useTranslation } from 'react-i18next';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useAuthContext } from '../context/AuthContext';
 import { Box } from '@radix-ui/themes';
-import {
-  HomeIcon,
-  PersonIcon,
-  ExitIcon,
-  ActivityLogIcon,
-  HeartIcon,
-  PlusCircledIcon,
-  BarChartIcon,
-  ReaderIcon,
-  ClipboardIcon,
-  PlusIcon,
-  DotsHorizontalIcon,
-  Cross2Icon,
-  TargetIcon,
-  ArchiveIcon,
-  CalendarIcon,
-  GearIcon,
-  MagnifyingGlassIcon,
-  SpeakerLoudIcon,
-  BadgeIcon,
-} from '@radix-ui/react-icons';
+import { ExitIcon, DotsHorizontalIcon, Cross2Icon, MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { colors, zIndex, typography, shadows } from '../theme/tokens';
 import GlobalSearch from './GlobalSearch';
 import { useCareTeamCaseload } from '../hooks/useCareTeamCaseload';
+import { useClinicMembership } from '../hooks/useClinicMembership';
+import { PRIMARY_ITEMS, buildMoreGroups, isNavItemActive } from './navConfig';
+import type { NavItem } from './navConfig';
 
 const BottomNav: React.FC = () => {
   const { t } = useTranslation();
@@ -35,34 +18,13 @@ const BottomNav: React.FC = () => {
   const navigate = useNavigate();
   const { signOut, session } = useAuthContext();
   const hasCareTeamCaseload = useCareTeamCaseload();
+  const belongsToClinic = useClinicMembership();
   const [moreOpen, setMoreOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
-  const isActive = (path: string) => {
-    if (path === '/dashboard') return location.pathname === '/dashboard';
-    return location.pathname.startsWith(path);
-  };
+  const isActive = (item: NavItem) => isNavItemActive(location.pathname, item);
 
-  const primaryTabs = [
-    { path: '/dashboard', labelKey: 'nav.dashboard', icon: HomeIcon },
-    { path: '/children', labelKey: 'nav.children', icon: PersonIcon },
-    { path: '/logs', labelKey: 'nav.logs', icon: ActivityLogIcon },
-    { path: '/medical', labelKey: 'nav.medical', icon: PlusCircledIcon },
-  ];
-
-  const moreTabs = [
-    { path: '/relato-do-dia', labelKey: 'nav.dailyReport', icon: SpeakerLoudIcon },
-    { path: '/therapy', labelKey: 'nav.therapy', icon: HeartIcon },
-    { path: '/development', labelKey: 'nav.development', icon: BarChartIcon },
-    { path: '/education', labelKey: 'nav.education', icon: ReaderIcon },
-    { path: '/goals', labelKey: 'nav.goals', icon: TargetIcon },
-    { path: '/documents', labelKey: 'nav.documents', icon: ArchiveIcon },
-    { path: '/monthly-recap', labelKey: 'nav.monthlyRecap', icon: CalendarIcon },
-    { path: '/assessment/new', labelKey: 'nav.newAssessment', icon: PlusIcon },
-    { path: '/anamneses', labelKey: 'nav.anamneses', icon: ClipboardIcon },
-    { path: '/settings', labelKey: 'nav.settings', icon: GearIcon },
-    ...(hasCareTeamCaseload ? [{ path: '/care-team/children', labelKey: 'nav.careTeamCaseload', icon: BadgeIcon }] : []),
-  ];
+  const moreGroups = buildMoreGroups({ careTeam: hasCareTeamCaseload, clinics: belongsToClinic });
 
   const handleSignOut = () => signOut().then(() => navigate('/sign-in', { replace: true }));
 
@@ -74,11 +36,11 @@ const BottomNav: React.FC = () => {
     gap: '2px',
     textDecoration: 'none',
     color: colors.ink,
-    padding: '8px 12px',
+    padding: '8px 8px',
     borderRadius: '12px',
     background: active ? colors['brand-cyan'] : 'transparent',
     transition: 'background 0.15s ease',
-    minWidth: '56px',
+    minWidth: '52px',
     minHeight: '52px',
     fontFamily: typography.caption.font,
     fontSize: '11px',
@@ -104,7 +66,7 @@ const BottomNav: React.FC = () => {
     borderRadius: '10px',
   };
 
-  const isMoreActive = moreTabs.some((tab) => isActive(tab.path.split('?')[0]));
+  const isMoreActive = moreGroups.some((g) => g.items.some(isActive));
 
   return (
     <>
@@ -133,6 +95,8 @@ const BottomNav: React.FC = () => {
               borderRadius: '16px',
               boxShadow: shadows.card,
               padding: '8px',
+              maxHeight: 'calc(100dvh - 72px - 16px)',
+              overflowY: 'auto',
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 12px 8px' }}>
@@ -141,6 +105,7 @@ const BottomNav: React.FC = () => {
               </Dialog.Title>
               <Dialog.Close asChild>
                 <button
+                  type="button"
                   aria-label={t('nav.close')}
                   style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: '4px' }}
                 >
@@ -149,6 +114,7 @@ const BottomNav: React.FC = () => {
               </Dialog.Close>
             </div>
             <button
+              type="button"
               onClick={() => {
                 setMoreOpen(false);
                 setSearchOpen(true);
@@ -156,25 +122,45 @@ const BottomNav: React.FC = () => {
               style={moreItemStyle}
             >
               <MagnifyingGlassIcon width={20} height={20} />
-              <span>Buscar</span>
+              <span>{t('navExtra.search')}</span>
             </button>
-            {moreTabs.map((tab) => {
-              const Icon = tab.icon;
-              const active = isActive(tab.path.split('?')[0]);
-              return (
-                <Link
-                  key={tab.path}
-                  to={tab.path}
-                  style={{ ...moreItemStyle, background: active ? colors['brand-cyan'] : 'transparent' }}
-                  onClick={() => setMoreOpen(false)}
+            {moreGroups.map((group) => (
+              <div key={group.id} role="group" aria-labelledby={`more-${group.id}`}>
+                <div
+                  id={`more-${group.id}`}
+                  style={{
+                    fontFamily: typography.caption.font,
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    letterSpacing: '0.06em',
+                    textTransform: 'uppercase',
+                    color: colors['ink-muted'],
+                    padding: '8px 20px 2px',
+                  }}
                 >
-                  <Icon width={20} height={20} />
-                  <span>{t(tab.labelKey)}</span>
-                </Link>
-              );
-            })}
+                  {t(group.labelKey)}
+                </div>
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item);
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      style={{ ...moreItemStyle, background: active ? colors['brand-cyan'] : 'transparent' }}
+                      aria-current={active ? 'page' : undefined}
+                      onClick={() => setMoreOpen(false)}
+                    >
+                      <Icon width={20} height={20} />
+                      <span>{t(item.labelKey)}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            ))}
             {session && (
               <button
+                type="button"
                 onClick={() => { setMoreOpen(false); handleSignOut(); }}
                 style={{ ...moreItemStyle, color: colors['brand-salmon'] }}
               >
@@ -214,8 +200,8 @@ const BottomNav: React.FC = () => {
               margin: '0 auto',
             }}
           >
-            {primaryTabs.map((tab) => {
-              const active = isActive(tab.path.split('?')[0]);
+            {PRIMARY_ITEMS.map((tab) => {
+              const active = isActive(tab);
               const Icon = tab.icon;
               return (
                 <Link
@@ -231,9 +217,11 @@ const BottomNav: React.FC = () => {
             })}
 
             <button
+              type="button"
               onClick={() => setMoreOpen((v) => !v)}
               style={tabStyle(isMoreActive || moreOpen)}
               aria-expanded={moreOpen}
+              aria-haspopup="dialog"
             >
               <DotsHorizontalIcon width={22} height={22} style={{ flexShrink: 0 }} />
               <span>{t('nav.more')}</span>

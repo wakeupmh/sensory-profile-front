@@ -1,1 +1,49 @@
-{}
+{
+  "navExtra": {
+    "search": "Search",
+    "skipToContent": "Skip to content",
+    "groups": {
+      "daily": "Daily log",
+      "health": "Health and therapies",
+      "sharing": "Sharing",
+      "account": "Account"
+    },
+    "toast": {
+      "close": "Dismiss notification",
+      "region": "Notifications"
+    }
+  },
+  "home": {
+    "subtitle": "Summary of your recent assessments and shortcuts",
+    "recent": "Recent assessments",
+    "viewAll": "View all assessments ({{count}})",
+    "retry": "Try again",
+    "dismiss": "Dismiss",
+    "noChildrenDescription": "Add your first child to get started — then you can run assessments, log daily life and track progress."
+  },
+  "search": {
+    "placeholder": "Search children, logs, documents…",
+    "inputLabel": "Search children, logs, documents",
+    "minChars": "Type at least {{count}} characters to search.",
+    "loading": "Searching…",
+    "error": "Could not search right now. Please try again.",
+    "noResults": "No results for \"{{query}}\".",
+    "sections": {
+      "children": "Children",
+      "logs": "Logs",
+      "documents": "Documents"
+    }
+  },
+  "notFound": {
+    "title": "Not Found",
+    "message": "The resource you are looking for was not found.",
+    "back": "Back to the home page"
+  },
+  "delegation": {
+    "banner": "Caregiver mode — managing data for {{name}}",
+    "exit": "Exit caregiver mode",
+    "switcherLabel": "Viewing",
+    "myChildren": "Viewing: My children",
+    "caregiverOption": "Viewing: {{name}} (caregiver)"
+  }
+}

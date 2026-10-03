@@ -1,4 +1,5 @@
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Flex } from '@radix-ui/themes';
 import GumroadCard from './design-system/GumroadCard';
 import GumroadButton from './design-system/GumroadButton';
@@ -12,12 +13,12 @@ interface NotFoundProps {
 }
 
 const NotFound: React.FC<NotFoundProps> = ({
-  title = 'Não Encontrado',
-  message = 'O recurso que você está procurando não foi encontrado.',
-  buttonText = 'Voltar para a página inicial',
-  redirectTo = '/',
+  title,
+  message,
+  buttonText,
+  redirectTo = '/dashboard',
 }) => {
-  const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <GumroadCard color="cream" shadow="md" padding="xl">
@@ -33,13 +34,15 @@ const NotFound: React.FC<NotFoundProps> = ({
           404
         </GumroadHeading>
         <GumroadHeading level="display-md" as="h2">
-          {title}
+          {title ?? t('notFound.title')}
         </GumroadHeading>
         <GumroadText level="body-md" as="p" style={{ textAlign: 'center', maxWidth: '400px', opacity: 0.8 }}>
-          {message}
+          {message ?? t('notFound.message')}
         </GumroadText>
-        <GumroadButton variant="primary" size="md" onClick={() => navigate(redirectTo)}>
-          {buttonText}
+        <GumroadButton variant="primary" size="md" asChild>
+          <Link to={redirectTo} style={{ textDecoration: 'none' }}>
+            {buttonText ?? t('notFound.back')}
+          </Link>
         </GumroadButton>
       </Flex>
     </GumroadCard>
