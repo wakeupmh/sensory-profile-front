@@ -30,16 +30,12 @@ import ChildForm, { ChildFormValue } from '../components/sensory-profile/ChildFo
 import { ChildProfileSkeleton } from '../components/skeletons/PageSkeletons';
 import type { ChildProfile } from '../types/child';
 
-const PERIOD_OPTIONS = [
-  { label: '30 dias', value: 30 },
-  { label: '60 dias', value: 60 },
-  { label: '90 dias', value: 90 },
-];
+const PERIOD_OPTIONS = [30, 60, 90];
 
-function formatDOB(dob: string | null): string | null {
+function formatDOB(dob: string | null, locale: string): string | null {
   if (!dob) return null;
   const d = new Date(dob + 'T12:00:00');
-  return d.toLocaleDateString('pt-BR');
+  return d.toLocaleDateString(locale);
 }
 
 function childProfileToFormValue(profile: ChildProfile): ChildFormValue {
@@ -55,7 +51,7 @@ function childProfileToFormValue(profile: ChildProfile): ChildFormValue {
 const ChildProfilePage = () => {
   const { childId } = useParams<{ childId: string }>();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { getToken } = useAuthContext();
   const toast = useToast();
   const getTokenRef = useRef(getToken);
@@ -75,9 +71,9 @@ const ChildProfilePage = () => {
       const token = await getTokenRef.current();
       const { downloadUrl } = await dataExportApi.request(token, childId);
       window.open(downloadUrl, '_blank', 'noopener,noreferrer');
-      toast.success('Exportação pronta', 'O download foi aberto em uma nova aba');
+      toast.success(t('p1Profile.exportReady'), t('p1Profile.exportReadyDesc'));
     } catch {
-      toast.error('Não foi possível gerar a exportação. Tente novamente.');
+      toast.error(t('p1Profile.exportFail'));
     } finally {
       setExporting(false);
     }
@@ -97,11 +93,11 @@ const ChildProfilePage = () => {
       const data = await childApi.getProfile(childId, token, period);
       setProfile(data);
     } catch {
-      setError('Erro ao carregar perfil da criança. Por favor, tente novamente.');
+      setError(t('p1Profile.errLoad'));
     } finally {
       setLoading(false);
     }
-  }, [childId]);
+  }, [childId, t]);
 
   useEffect(() => {
     fetchProfile(periodDays);
@@ -123,7 +119,7 @@ const ChildProfilePage = () => {
     const isDirty =
       editBaseline !== null &&
       JSON.stringify(editFormValue) !== JSON.stringify(editBaseline);
-    if (isDirty && !window.confirm('Descartar alterações?')) {
+    if (isDirty && !window.confirm(t('p1Profile.discard'))) {
       return;
     }
     setIsEditing(false);
@@ -146,7 +142,7 @@ const ChildProfilePage = () => {
       setEditBaseline(null);
       await fetchProfile(periodDays);
     } catch {
-      setError('Erro ao salvar criança. Por favor, tente novamente.');
+      setError(t('p1Profile.errSave'));
     } finally {
       setEditSaving(false);
     }
@@ -160,8 +156,8 @@ const ChildProfilePage = () => {
       {/* Back button */}
       <Box style={{ marginBottom: spacing.md }}>
         <GumroadButton variant="secondary" size="sm" onClick={() => navigate('/children')}>
-          <ArrowLeftIcon />
-          Voltar
+          <ArrowLeftIcon aria-hidden="true" />
+          {t('p1Profile.back')}
         </GumroadButton>
       </Box>
 
@@ -185,7 +181,7 @@ const ChildProfilePage = () => {
                 </GumroadHeading>
                 {child.dateOfBirth && (
                   <GumroadText level="body-sm" as="p" style={{ opacity: 0.75 }}>
-                    Nascimento: {formatDOB(child.dateOfBirth)}
+                    {t('p1Profile.birth', { date: formatDOB(child.dateOfBirth, i18n.language) })}
                   </GumroadText>
                 )}
               </Box>
@@ -193,43 +189,43 @@ const ChildProfilePage = () => {
                 <Flex gap="2" wrap="wrap">
                   <GumroadButton variant="secondary" size="sm" asChild>
                     <Link to={`/children/${childId}/share`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                      <Share1Icon />
-                      Compartilhar
+                      <Share1Icon aria-hidden="true" />
+                      {t('p1Profile.share')}
                     </Link>
                   </GumroadButton>
                   <GumroadButton variant="secondary" size="sm" asChild>
                     <Link to={`/children/${childId}/caregivers`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                      <GroupIcon />
-                      Cuidadores
+                      <GroupIcon aria-hidden="true" />
+                      {t('p1Profile.caregivers')}
                     </Link>
                   </GumroadButton>
                   <GumroadButton variant="secondary" size="sm" asChild>
                     <Link to={`/children/${childId}/care-team`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                      <BadgeIcon />
+                      <BadgeIcon aria-hidden="true" />
                       {t('careTeam.manage.childLinkButton')}
                     </Link>
                   </GumroadButton>
                   <GumroadButton variant="secondary" size="sm" asChild>
                     <Link to={`/children/${childId}/team-notes`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                      <ChatBubbleIcon />
-                      Notas da equipe
+                      <ChatBubbleIcon aria-hidden="true" />
+                      {t('p1Profile.teamNotes')}
                     </Link>
                   </GumroadButton>
                   <GumroadButton variant="secondary" size="sm" asChild>
                     <Link to={`/children/${childId}/access-log`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                      <ActivityLogIcon />
-                      Histórico de acesso
+                      <ActivityLogIcon aria-hidden="true" />
+                      {t('p1Profile.accessLog')}
                     </Link>
                   </GumroadButton>
                   <GumroadButton variant="secondary" size="sm" asChild>
                     <Link to={`/children/${childId}/ficha`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                      <IdCardIcon />
-                      Ficha da criança
+                      <IdCardIcon aria-hidden="true" />
+                      {t('p1Profile.ficha')}
                     </Link>
                   </GumroadButton>
                   <GumroadButton variant="secondary" size="sm" onClick={handleStartEdit}>
-                    <Pencil1Icon />
-                    Editar
+                    <Pencil1Icon aria-hidden="true" />
+                    {t('p1Profile.edit')}
                   </GumroadButton>
                 </Flex>
               )}
@@ -264,10 +260,10 @@ const ChildProfilePage = () => {
                     onClick={handleSaveEdit}
                     disabled={editSaving || !editFormValue.name}
                   >
-                    {editSaving ? 'Salvando...' : 'Salvar'}
+                    {editSaving ? t('p1Profile.saving') : t('p1Profile.save')}
                   </GumroadButton>
                   <GumroadButton variant="secondary" size="sm" onClick={handleCancelEdit} disabled={editSaving}>
-                    Cancelar
+                    {t('p1Profile.cancel')}
                   </GumroadButton>
                 </Flex>
               </Box>
@@ -284,13 +280,15 @@ const ChildProfilePage = () => {
           {/* Period selector */}
           <Box style={{ marginBottom: spacing.lg }}>
             <GumroadText level="body-sm" as="p" style={{ marginBottom: spacing.xs, opacity: 0.7, fontWeight: 600 }}>
-              Período das estatísticas
+              {t('p1Profile.periodLabel')}
             </GumroadText>
             <Flex gap="2" wrap="wrap">
-              {PERIOD_OPTIONS.map((opt) => (
+              {PERIOD_OPTIONS.map((days) => (
                 <button
-                  key={opt.value}
-                  onClick={() => handlePeriodChange(opt.value)}
+                  key={days}
+                  type="button"
+                  aria-pressed={periodDays === days}
+                  onClick={() => handlePeriodChange(days)}
                   style={{
                     padding: '6px 16px',
                     border: `2px solid ${colors.ink}`,
@@ -299,12 +297,12 @@ const ChildProfilePage = () => {
                     fontFamily: 'Inter, sans-serif',
                     fontSize: '13px',
                     fontWeight: 600,
-                    backgroundColor: periodDays === opt.value ? colors.ink : 'transparent',
-                    color: periodDays === opt.value ? '#FFFEF5' : colors.ink,
+                    backgroundColor: periodDays === days ? colors.ink : 'transparent',
+                    color: periodDays === days ? '#FFFEF5' : colors.ink,
                     transition: 'background-color 0.12s ease',
                   }}
                 >
-                  {opt.label}
+                  {t('p1Profile.days', { count: days })}
                 </button>
               ))}
             </Flex>
@@ -314,7 +312,7 @@ const ChildProfilePage = () => {
           {stats && (
             <Box style={{ marginBottom: spacing.lg }}>
               <GumroadHeading level="title-lg" as="h2" style={{ marginBottom: spacing.md }}>
-                Resumo
+                {t('p1Profile.summary')}
               </GumroadHeading>
               <div
                 style={{
@@ -324,42 +322,42 @@ const ChildProfilePage = () => {
                 }}
               >
                 <DomainStatsCard
-                  label="Avaliações"
+                  label={t('p1Profile.assessments')}
                   count={stats.assessmentCount}
                   icon="🧠"
                   href={`/dashboard?childId=${childId}`}
                   accentColor="#C7B8FF"
                 />
                 <DomainStatsCard
-                  label="Registros"
+                  label={t('p1Profile.logs')}
                   count={stats.logCount}
                   icon="📋"
                   href={`/logs?childId=${childId}`}
                   accentColor="#FFD93D"
                 />
                 <DomainStatsCard
-                  label="Sessões"
+                  label={t('p1Profile.sessions')}
                   count={stats.therapySessionCount}
                   icon="💉"
                   href={`/therapy?childId=${childId}`}
                   accentColor="#4ECDC4"
                 />
                 <DomainStatsCard
-                  label="Medicamentos"
+                  label={t('p1Profile.medications')}
                   count={stats.activeMedicationCount}
                   icon="💊"
                   href={`/medical?childId=${childId}`}
                   accentColor="#FF6B6B"
                 />
                 <DomainStatsCard
-                  label="Marcos alcançados"
+                  label={t('p1Profile.milestones')}
                   count={stats.achievedMilestoneCount}
                   icon="🌱"
                   href={`/development?childId=${childId}`}
                   accentColor="#B8F0C7"
                 />
                 <DomainStatsCard
-                  label="Planos educacionais"
+                  label={t('p1Profile.eduPlans')}
                   count={stats.educationPlanCount}
                   icon="🎒"
                   href={`/education?childId=${childId}`}
@@ -373,25 +371,25 @@ const ChildProfilePage = () => {
           <Flex gap="3" wrap="wrap" style={{ marginBottom: spacing.xl }}>
             <GumroadButton variant="primary" size="md" asChild>
               <Link to={`/consolidated/${childId}`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                📊 Ver Relatório Consolidado
+                <span aria-hidden="true">📊</span> {t('p1Profile.consolidated')}
               </Link>
             </GumroadButton>
             <GumroadButton variant="secondary" size="md" asChild>
               <Link to={`/goals?childId=${childId}`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                🎯 Metas Terapêuticas
+                <span aria-hidden="true">🎯</span> {t('p1Profile.goals')}
               </Link>
             </GumroadButton>
             <GumroadButton variant="secondary" size="md" asChild>
               <Link to={`/documents?childId=${childId}`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                🗂️ Documentos
+                <span aria-hidden="true">🗂️</span> {t('p1Profile.documents')}
               </Link>
             </GumroadButton>
             <GumroadButton variant="secondary" size="md" onClick={() => setBriefModalOpen(true)}>
-              🩺 Preparar consulta
+              <span aria-hidden="true">🩺</span> {t('p1Profile.prepConsult')}
             </GumroadButton>
             <GumroadButton variant="secondary" size="md" onClick={handleExportData} disabled={exporting}>
-              <DownloadIcon />
-              {exporting ? 'Gerando exportação...' : 'Exportar meus dados'}
+              <DownloadIcon aria-hidden="true" />
+              {exporting ? t('p1Profile.exporting') : t('p1Profile.export')}
             </GumroadButton>
           </Flex>
 
@@ -405,16 +403,19 @@ const ChildProfilePage = () => {
           {/* Timeline */}
           <Box>
             <GumroadHeading level="title-lg" as="h2" style={{ marginBottom: spacing.md }}>
-              Linha do Tempo
+              {t('p1Profile.timeline')}
             </GumroadHeading>
             {childId && <UnifiedTimeline childId={childId} />}
           </Box>
         </>
       ) : !error ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
-          <GumroadText level="body-md" as="p" style={{ opacity: 0.7 }}>
-            Criança não encontrada.
+          <GumroadText level="body-md" as="p" style={{ opacity: 0.7, marginBottom: spacing.md }}>
+            {t('p1Profile.notFound')}
           </GumroadText>
+          <GumroadButton variant="primary" size="sm" asChild>
+            <Link to="/children" style={{ textDecoration: 'none' }}>{t('p1Profile.toChildren')}</Link>
+          </GumroadButton>
         </GumroadCard>
       ) : null}
 
