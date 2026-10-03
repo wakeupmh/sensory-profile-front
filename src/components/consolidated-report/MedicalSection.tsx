@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ConsolidatedMedical } from '../../types/consolidatedReport';
 import { colors, itemCardStyle } from '../../theme/tokens';
 
@@ -7,6 +8,7 @@ interface Props {
 }
 
 const MedicalSection: React.FC<Props> = ({ data }) => {
+  const { t, i18n } = useTranslation();
   const isEmpty =
     data.activeMedications.length === 0 &&
     data.comorbidities.length === 0 &&
@@ -15,7 +17,7 @@ const MedicalSection: React.FC<Props> = ({ data }) => {
   if (isEmpty) {
     return (
       <p style={{ fontSize: '0.9rem', opacity: 0.6, margin: 0 }}>
-        Nenhum dado médico registrado.
+        {t('cConsolidated.medicalEmpty')}
       </p>
     );
   }
@@ -26,7 +28,7 @@ const MedicalSection: React.FC<Props> = ({ data }) => {
       {data.activeMedications.length > 0 && (
         <div>
           <p style={{ fontWeight: 700, fontSize: '0.85rem', margin: '0 0 6px', opacity: 0.8 }}>
-            Medicações ativas
+            {t('cConsolidated.activeMedications')}
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {data.activeMedications.map((m) => (
@@ -67,7 +69,7 @@ const MedicalSection: React.FC<Props> = ({ data }) => {
       {data.comorbidities.length > 0 && (
         <div>
           <p style={{ fontWeight: 700, fontSize: '0.85rem', margin: '0 0 6px', opacity: 0.8 }}>
-            Comorbidades
+            {t('cConsolidated.comorbidities')}
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
             {data.comorbidities.map((c) => (
@@ -99,7 +101,7 @@ const MedicalSection: React.FC<Props> = ({ data }) => {
       {data.recentAppointments.length > 0 && (
         <div>
           <p style={{ fontWeight: 700, fontSize: '0.85rem', margin: '0 0 6px', opacity: 0.8 }}>
-            Consultas recentes
+            {t('cConsolidated.recentAppointments')}
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {data.recentAppointments.map((a) => (
@@ -117,11 +119,11 @@ const MedicalSection: React.FC<Props> = ({ data }) => {
                 <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{a.specialty}</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span style={{ fontSize: '0.78rem', opacity: 0.6 }}>
-                    {new Date(a.occurredAt).toLocaleDateString('pt-BR')}
+                    {new Date(a.occurredAt).toLocaleDateString(i18n.language)}
                   </span>
                   {a.followUpDate && (
                     <span style={{ fontSize: '0.75rem', opacity: 0.55 }}>
-                      Retorno: {new Date(a.followUpDate).toLocaleDateString('pt-BR')}
+                      {t('cConsolidated.followUp', { date: new Date(a.followUpDate).toLocaleDateString(i18n.language) })}
                     </span>
                   )}
                 </div>

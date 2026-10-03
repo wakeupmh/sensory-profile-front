@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ConsolidatedLogs } from '../../types/consolidatedReport';
 import { LOG_TYPE_LABELS } from '../../types/consolidatedReport';
 import { colors, fonts } from '../../theme/tokens';
@@ -17,6 +18,7 @@ const LOG_COLORS: Record<string, string> = {
 };
 
 const LogsSummary: React.FC<Props> = ({ data }) => {
+  const { t } = useTranslation();
   const entries = Object.entries(data.byType).filter(([, count]) => count > 0);
 
   return (
@@ -32,13 +34,13 @@ const LogsSummary: React.FC<Props> = ({ data }) => {
       >
         {data.totalCount}{' '}
         <span style={{ fontSize: '0.95rem', fontWeight: 600, opacity: 0.7 }}>
-          {data.totalCount === 1 ? 'registro total' : 'registros totais'}
+          {t('cConsolidated.logsTotal', { count: data.totalCount })}
         </span>
       </div>
 
       {entries.length === 0 ? (
         <p style={{ fontSize: '0.9rem', opacity: 0.6, margin: 0 }}>
-          Nenhum registro diário no período.
+          {t('cConsolidated.logsEmpty')}
         </p>
       ) : (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
@@ -57,8 +59,8 @@ const LogsSummary: React.FC<Props> = ({ data }) => {
                 gap: '4px',
               }}
             >
-              <span>{LOG_TYPE_LABELS[type as LogType] ?? type}</span>
-              <span style={{ opacity: 0.75 }}>· {count}x</span>
+              <span>{t(`cConsolidated.logType.${type}`, { defaultValue: LOG_TYPE_LABELS[type as LogType] ?? type })}</span>
+              <span style={{ opacity: 0.75 }}>· {t('cConsolidated.times', { count })}</span>
             </div>
           ))}
         </div>
