@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import i18n from '../../i18n';
@@ -26,11 +26,8 @@ describe('traduções extras (comps)', () => {
 });
 
 describe('design system i18n/a11y', () => {
-  beforeAll(async () => {
+  beforeEach(async () => {
     await i18n.changeLanguage('en-US');
-  });
-  afterAll(async () => {
-    await i18n.changeLanguage('pt-BR');
   });
 
   it('GumroadModal traduz o botão de fechar', () => {
