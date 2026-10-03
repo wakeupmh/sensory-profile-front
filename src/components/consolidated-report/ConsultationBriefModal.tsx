@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { Box, Flex } from '@radix-ui/themes';
 import { CheckIcon, CopyIcon, FileTextIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { consultationBriefApi, AIRateLimitError } from '../../services/api';
@@ -8,6 +10,7 @@ import { colors, radii, fonts, spacing } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
 import GumroadHeading, { GumroadText } from '../design-system/GumroadHeading';
 import GumroadModal from '../design-system/GumroadModal';
+import { AI_RATE_LIMIT_PER_HOUR } from '../../types/aiSummaries';
 
 interface ConsultationBriefModalProps {
   isOpen: boolean;
@@ -16,11 +19,7 @@ interface ConsultationBriefModalProps {
   childName?: string;
 }
 
-const PERIOD_OPTIONS = [
-  { label: '30 dias', value: 30 },
-  { label: '60 dias', value: 60 },
-  { label: '90 dias', value: 90 },
-];
+const PERIOD_OPTIONS = [30, 60, 90];
 
 function useCountdown(retryAt: number | null) {
   const [now, setNow] = useState(Date.now());
@@ -33,17 +32,17 @@ function useCountdown(retryAt: number | null) {
   return Math.max(0, Math.ceil((retryAt - now) / 1000));
 }
 
-function buildPlainText(brief: ConsultationBrief, childName?: string): string {
+function buildPlainText(brief: ConsultationBrief, t: TFunction, childName?: string): string {
   const lines = [
-    childName ? `Pauta de consulta — ${childName}` : 'Pauta de consulta',
+    childName ? t('cConsolidated.brief.titleWithName', { name: childName }) : t('cConsolidated.brief.title'),
     '',
-    'O QUE MUDOU DESDE A ÚLTIMA CONSULTA',
+    t('cConsolidated.brief.whatChanged').toUpperCase(),
     brief.whatChanged || '—',
     '',
-    'MEDICAMENTOS / TRATAMENTOS ATUAIS',
+    t('cConsolidated.brief.currentTreatments').toUpperCase(),
     brief.currentTreatments || '—',
     '',
-    'PERGUNTAS SUGERIDAS PARA O MÉDICO',
+    t('cConsolidated.brief.questions').toUpperCase(),
     ...(brief.suggestedQuestions.length > 0 ? brief.suggestedQuestions.map((q, i) => `${i + 1}. ${q}`) : ['—']),
   ];
   return lines.join('\n');
@@ -59,6 +58,7 @@ const sectionTitleStyle: React.CSSProperties = {
 };
 
 const ConsultationBriefModal: React.FC<ConsultationBriefModalProps> = ({ isOpen, onClose, childId, childName }) => {
+  const { t } = useTranslation();
   const { getToken } = useAuthContext();
   const [periodDays, setPeriodDays] = useState(60);
   const [generating, setGenerating] = useState(false);
@@ -92,10 +92,10 @@ const ConsultationBriefModal: React.FC<ConsultationBriefModalProps> = ({ isOpen,
         if (err.info.retryAfterSeconds) {
           setRetryAt(Date.now() + err.info.retryAfterSeconds * 1000);
         } else {
-          setError('Limite de 5 gerações por hora atingido. Tente novamente mais tarde.');
+          setError(t('cConsolidated.brief.rateLimit', { limit: AI_RATE_LIMIT_PER_HOUR }));
         }
       } else {
-        setError('Erro ao gerar a pauta de consulta. Tente novamente.');
+        setError(t('cConsolidated.brief.genError'));
       }
     } finally {
       setGenerating(false);
@@ -105,11 +105,11 @@ const ConsultationBriefModal: React.FC<ConsultationBriefModalProps> = ({ isOpen,
   const handleCopy = async () => {
     if (!brief) return;
     try {
-      await navigator.clipboard.writeText(buildPlainText(brief, childName));
+      await navigator.clipboard.writeText(buildPlainText(brief, t, childName));
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
-      setError('Não foi possível copiar automaticamente. Selecione o texto manualmente.');
+      setError(t('cConsolidated.brief.copyError'));
     }
   };
 
@@ -140,23 +140,24 @@ const ConsultationBriefModal: React.FC<ConsultationBriefModalProps> = ({ isOpen,
     <GumroadModal
       open={isOpen}
       onClose={onClose}
-      title="Preparar consulta"
+      title={t('cConsolidated.brief.modalTitle')}
       variant="center"
       maxWidth="560px"
     >
         {!brief && (
           <>
             <GumroadText level="body-sm" as="p" style={{ opacity: 0.75, marginBottom: spacing.md }}>
-              Gera uma pauta curta para levar impressa (ou ler) na consulta médica: o que mudou, tratamentos atuais e
-              perguntas sugeridas.
+              {t('cConsolidated.brief.intro')}
             </GumroadText>
 
             <Flex align="center" gap="2" wrap="wrap" mb="4">
-              <GumroadText level="caption" as="span" style={{ color: colors['ink-muted'] }}>Período:</GumroadText>
+              <GumroadText level="caption" as="span" style={{ color: colors['ink-muted'] }}>{t('cConsolidated.brief.period')}</GumroadText>
               {PERIOD_OPTIONS.map((opt) => (
                 <button
-                  key={opt.value}
-                  onClick={() => setPeriodDays(opt.value)}
+                  key={opt}
+                  type="button"
+                  aria-pressed={periodDays === opt}
+                  onClick={() => setPeriodDays(opt)}
                   style={{
                     padding: '4px 14px',
                     border: `2px solid ${colors.ink}`,
@@ -164,43 +165,48 @@ const ConsultationBriefModal: React.FC<ConsultationBriefModalProps> = ({ isOpen,
                     cursor: 'pointer',
                     fontSize: '13px',
                     fontWeight: 700,
-                    backgroundColor: periodDays === opt.value ? colors.ink : colors.canvas,
-                    color: periodDays === opt.value ? colors.canvas : colors.ink,
+                    backgroundColor: periodDays === opt ? colors.ink : colors.canvas,
+                    color: periodDays === opt ? colors.canvas : colors.ink,
                   }}
                 >
-                  {opt.label}
+                  {t('cConsolidated.summary.days', { count: opt })}
                 </button>
               ))}
             </Flex>
 
             {error && (
-              <GumroadText level="body-sm" as="p" style={{ color: colors.error, marginBottom: spacing.sm }}>
+              <GumroadText level="body-sm" as="p" role="alert" style={{ color: colors.error, marginBottom: spacing.sm }}>
                 {error}
               </GumroadText>
             )}
             {retryAt && (
-              <GumroadText level="body-sm" as="p" style={{ color: colors.ink, opacity: 0.75, marginBottom: spacing.sm }}>
-                Você já gerou muitas pautas nesta hora. Tente novamente em {retrySeconds}s.
+              <GumroadText level="body-sm" as="p" role="status" style={{ color: colors.ink, opacity: 0.75, marginBottom: spacing.sm }}>
+                {t('cConsolidated.brief.tooMany', { seconds: retrySeconds })}
               </GumroadText>
             )}
 
-            <GumroadButton variant="primary" size="md" onClick={handleGenerate} disabled={generating || retrySeconds > 0}>
-              {generating ? 'Gerando...' : retrySeconds > 0 ? `Tente em ${retrySeconds}s` : 'Gerar pauta'}
+            <GumroadButton variant="primary" size="md" onClick={handleGenerate} disabled={retrySeconds > 0} loading={generating}>
+              {generating ? t('cConsolidated.summary.generating') : retrySeconds > 0 ? t('cConsolidated.summary.tryIn', { seconds: retrySeconds }) : t('cConsolidated.brief.generate')}
             </GumroadButton>
           </>
         )}
 
         {brief && (
           <>
+            {error && (
+              <GumroadText level="body-sm" as="p" role="alert" style={{ color: colors.error, marginBottom: spacing.sm }}>
+                {error}
+              </GumroadText>
+            )}
             <Flex gap="2" mb="4" wrap="wrap">
               <GumroadButton variant="secondary" size="sm" onClick={handlePrint}>
-                <FileTextIcon /> Imprimir
+                <FileTextIcon aria-hidden="true" /> {t('cConsolidated.brief.print')}
               </GumroadButton>
               <GumroadButton variant="secondary" size="sm" onClick={handleCopy}>
-                {copied ? <CheckIcon /> : <CopyIcon />} {copied ? 'Copiado!' : 'Copiar texto'}
+                {copied ? <CheckIcon aria-hidden="true" /> : <CopyIcon aria-hidden="true" />} <span role="status">{copied ? t('cConsolidated.brief.copied') : t('cConsolidated.brief.copy')}</span>
               </GumroadButton>
               <GumroadButton variant="secondary" size="sm" onClick={() => setBrief(null)}>
-                Gerar novamente
+                {t('cConsolidated.brief.regenerate')}
               </GumroadButton>
             </Flex>
 
@@ -215,25 +221,25 @@ const ConsultationBriefModal: React.FC<ConsultationBriefModalProps> = ({ isOpen,
               }}
             >
               <GumroadHeading level="title-md" as="h2" style={{ marginBottom: spacing.md, fontFamily: 'inherit' }}>
-                {childName ? `Pauta de consulta — ${childName}` : 'Pauta de consulta'}
+                {childName ? t('cConsolidated.brief.titleWithName', { name: childName }) : t('cConsolidated.brief.title')}
               </GumroadHeading>
 
               <Box style={{ marginBottom: spacing.md }}>
-                <div style={sectionTitleStyle}>O que mudou desde a última consulta</div>
+                <div style={sectionTitleStyle}>{t('cConsolidated.brief.whatChanged')}</div>
                 <GumroadText level="body-sm" as="p" style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>
                   {brief.whatChanged || '—'}
                 </GumroadText>
               </Box>
 
               <Box style={{ marginBottom: spacing.md }}>
-                <div style={sectionTitleStyle}>Medicamentos / tratamentos atuais</div>
+                <div style={sectionTitleStyle}>{t('cConsolidated.brief.currentTreatments')}</div>
                 <GumroadText level="body-sm" as="p" style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>
                   {brief.currentTreatments || '—'}
                 </GumroadText>
               </Box>
 
               <Box>
-                <div style={sectionTitleStyle}>Perguntas sugeridas para o médico</div>
+                <div style={sectionTitleStyle}>{t('cConsolidated.brief.questions')}</div>
                 {brief.suggestedQuestions.length > 0 ? (
                   <ol style={{ margin: 0, paddingLeft: '20px', fontFamily: 'inherit' }}>
                     {brief.suggestedQuestions.map((q, i) => (
@@ -247,9 +253,9 @@ const ConsultationBriefModal: React.FC<ConsultationBriefModalProps> = ({ isOpen,
             </Box>
 
             <Flex align="center" gap="2" mt="3" style={{ color: colors['ink-muted'] }}>
-              <InfoCircledIcon />
+              <InfoCircledIcon aria-hidden="true" />
               <GumroadText level="caption" as="span">
-                Gerado por IA a partir dos seus dados — revise antes de usar na consulta.
+                {t('cConsolidated.brief.disclaimer')}
               </GumroadText>
             </Flex>
           </>

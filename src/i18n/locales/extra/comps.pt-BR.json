@@ -1,1 +1,656 @@
-{}
+{
+  "cDesignSystem": {
+    "close": "Fechar",
+    "stepOfLabel": "Etapa {{current}} de {{total}}: {{label}}",
+    "stepOf": "Etapa {{current}} de {{total}}",
+    "goToStep": "Ir para a etapa {{number}}: {{label}}",
+    "dictateStopAria": "Parar o ditado de {{field}}",
+    "dictateStartAria": "Ditar {{field}} por voz",
+    "dictateWait": "O texto aparece aqui em instantes.",
+    "dictate": {
+      "idle": "Ditar",
+      "recording": "Parar",
+      "sending": "Enviando…",
+      "transcribing": "Transcrevendo…"
+    }
+  },
+  "cDomain": {
+    "retry": "Tentar novamente",
+    "noChildrenTitle": "Nenhuma criança cadastrada",
+    "noChildrenDesc": "Cadastre uma criança para começar a usar esta área.",
+    "addChild": "Adicionar Criança",
+    "selectChild": "Selecionar criança",
+    "allChildren": "Todas as crianças"
+  },
+  "cGoals": {
+    "status": {
+      "active": "Ativa",
+      "achieved": "Alcançada",
+      "paused": "Pausada",
+      "discontinued": "Descontinuada"
+    },
+    "domain": {
+      "comunicacao": "Comunicação",
+      "social": "Social",
+      "motor": "Motor",
+      "autocuidado": "Autocuidado",
+      "academico": "Acadêmico",
+      "comportamental": "Comportamental",
+      "outro": "Outro"
+    },
+    "therapyType": {
+      "aba": "ABA",
+      "ot": "Terapia Ocupacional",
+      "fonoaudiologia": "Fonoaudiologia",
+      "psicologia": "Psicologia",
+      "fisioterapia": "Fisioterapia"
+    },
+    "sinceStart_one": "{{delta}} desde o início ({{count}} registro)",
+    "sinceStart_other": "{{delta}} desde o início ({{count}} registros)",
+    "saving": "Salvando...",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "editGoal": "Editar Meta",
+    "newGoal": "Nova Meta",
+    "progressAria": "Progresso da meta",
+    "baselineLabel": "Baseline",
+    "targetLabel": "Meta",
+    "noProgress": "Sem registros de progresso ainda",
+    "chartAria_one": "Gráfico de progresso com {{count}} registro; baseline {{baseline}}, meta {{target}}",
+    "chartAria_other": "Gráfico de progresso com {{count}} registros; baseline {{baseline}}, meta {{target}}",
+    "chartBaseline": "baseline",
+    "chartTarget": "meta",
+    "chartRange": "Faixa: {{min}} a {{max}}",
+    "form": {
+      "title": "Título da meta",
+      "titlePh": "Ex: Ampliar vocabulário funcional",
+      "domain": "Domínio",
+      "status": "Status",
+      "criteria": "Critério de domínio",
+      "criteriaPh": "Ex: Critério de sucesso, contexto de aplicação...",
+      "description": "Descrição",
+      "descriptionPh": "Detalhes adicionais sobre a meta...",
+      "baseline": "Baseline",
+      "target": "Meta",
+      "unit": "Unidade",
+      "unitPh": "Ex: palavras",
+      "startDate": "Data de início",
+      "targetDate": "Data alvo"
+    },
+    "progressForm": {
+      "title": "Registrar progresso",
+      "value": "Valor",
+      "date": "Data",
+      "linkSession": "Vincular à sessão de terapia (opcional)",
+      "none": "Nenhuma",
+      "notes": "Observação",
+      "notesPh": "Contexto do registro..."
+    }
+  },
+  "cChildProfile": {
+    "timelineType": {
+      "assessment": "Avaliação",
+      "log": "Registro",
+      "therapy": "Terapia",
+      "medical_appointment": "Consulta",
+      "communication": "Comunicação",
+      "school_comm": "Escola",
+      "milestone": "Marco"
+    },
+    "loadError": "Erro ao carregar linha do tempo. Por favor, tente novamente.",
+    "loading": "Carregando linha do tempo...",
+    "empty": "Nenhum evento registrado ainda.",
+    "loadingMore": "Carregando...",
+    "loadMore": "Carregar mais",
+    "countOf": "{{shown}} de {{total}} eventos"
+  },
+  "cInsights": {
+    "weekday": [
+      "Dom",
+      "Seg",
+      "Ter",
+      "Qua",
+      "Qui",
+      "Sex",
+      "Sáb"
+    ],
+    "hourShort": "{{hour}}h",
+    "notEnoughData": "Sem dados suficientes",
+    "loadError": "Erro ao carregar insights de comportamento. Tente novamente.",
+    "title": "Insights de Comportamento",
+    "days": "{{count}} dias",
+    "loading": "Carregando insights...",
+    "emptyTitle": "Nenhum registro ABC no período",
+    "emptyDesc": "Registre antecedente, comportamento e consequência para ver os insights aqui.",
+    "createFirst": "Criar primeiro registro",
+    "occurrences": "Ocorrências no período",
+    "vsPrevious": "{{percent}}% vs. período anterior",
+    "avgIntensity": "Intensidade média",
+    "byWeekday": "Por dia da semana",
+    "byHour": "Por hora do dia",
+    "topAntecedents": "Top antecedentes",
+    "topBehaviors": "Top comportamentos",
+    "recent": "Ocorrências recentes",
+    "antecedent": "Antecedente",
+    "behavior": "Comportamento",
+    "consequence": "Consequência",
+    "intensity": "Intensidade {{value}}"
+  },
+  "cDevelopment": {
+    "entryType": {
+      "vocabulary": "Vocabulário",
+      "aac_usage": "Uso de CAA",
+      "verbal_speech": "Fala Verbal",
+      "signs": "Sinais/Libras",
+      "other": "Outro"
+    },
+    "milestoneStatus": {
+      "not_yet": "Ainda não",
+      "in_progress": "Em progresso",
+      "achieved": "Conquistado",
+      "regressed": "Regressão"
+    },
+    "milestoneCategory": {
+      "motor_gross": "Motor Grosso",
+      "motor_fine": "Motor Fino",
+      "language": "Linguagem",
+      "communication": "Comunicação",
+      "social": "Social",
+      "cognitive": "Cognitivo",
+      "self_care": "Autocuidado",
+      "other": "Outro"
+    },
+    "wordsBadge": "Palavras: {{count}}",
+    "editLogAria": "Editar registro de {{date}}",
+    "removeLogAria": "Remover registro de {{date}}",
+    "achievedOn": "✓ Conquistado em: {{date}}",
+    "targetOn": "Meta: {{date}}",
+    "editMilestoneAria": "Editar marco {{title}}",
+    "removeMilestoneAria": "Remover marco {{title}}",
+    "saving": "Salvando...",
+    "cancel": "Cancelar",
+    "removing": "Removendo...",
+    "confirm": "Confirmar",
+    "changesSaved": "Alterações salvas",
+    "saveError": "Não foi possível salvar. Tente novamente.",
+    "removeError": "Não foi possível remover. Tente novamente.",
+    "milestonesTitle": "Marcos do Desenvolvimento",
+    "addMilestone": "Adicionar Marco",
+    "noMilestones": "Nenhum marco cadastrado",
+    "removeMilestoneConfirm": "Remover \"{{title}}\" ({{status}})?",
+    "milestoneAdded": "Marco adicionado",
+    "milestoneRemoved": "Marco removido",
+    "newMilestone": "Novo Marco",
+    "editMilestone": "Editar Marco",
+    "logsTitle": "Registros de Comunicação",
+    "addLog": "Adicionar Registro",
+    "noLogs": "Nenhum registro de comunicação",
+    "removeLogConfirm": "Remover registro de {{type}} em {{date}}?",
+    "logAdded": "Registro adicionado",
+    "logRemoved": "Registro removido",
+    "newLog": "Novo Registro de Comunicação",
+    "editLog": "Editar Registro de Comunicação",
+    "form": {
+      "dateTime": "Data e hora",
+      "type": "Tipo",
+      "select": "Selecionar...",
+      "words": "Vocabulário estimado (palavras)",
+      "wordsPh": "Ex: 50",
+      "description": "Descrição / Observações",
+      "descriptionPh": "Descreva a interação ou observação...",
+      "notes": "Notas adicionais",
+      "notesPh": "Informações adicionais...",
+      "saveLog": "Salvar Registro",
+      "name": "Nome",
+      "namePh": "Nome do marco",
+      "category": "Categoria",
+      "status": "Status",
+      "achievedDate": "Data de conquista",
+      "targetDate": "Data meta",
+      "milestoneNotes": "Notas",
+      "milestoneNotesPh": "Observações sobre este marco...",
+      "saveMilestone": "Salvar Marco"
+    }
+  },
+  "cEducation": {
+    "commType": {
+      "reuniao": "Reunião",
+      "bilhete": "Bilhete/Comunicado",
+      "email": "E-mail",
+      "telefone": "Ligação telefônica",
+      "incidente": "Incidente",
+      "relatorio": "Relatório escolar",
+      "outro": "Outro"
+    },
+    "planType": {
+      "pei": "PEI",
+      "pei_simplificado": "PEI Simplificado",
+      "adaptacao_curricular": "Adaptação Curricular",
+      "plano_aee": "Plano AEE",
+      "outro": "Outro"
+    },
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "saving": "Salvando...",
+    "loading": "Carregando...",
+    "loadMore": "Carregar mais",
+    "changesSaved": "Alterações salvas",
+    "saveError": "Não foi possível salvar. Tente novamente.",
+    "removeError": "Não foi possível remover. Tente novamente.",
+    "removeCommConfirm": "Remover comunicação \"{{subject}}\"?",
+    "removePlanConfirm": "Remover plano \"{{school}} — {{year}}\"?",
+    "followUpOn": "Retorno em",
+    "start": "Início",
+    "review": "Revisão",
+    "end": "Encerramento",
+    "editCommAria": "Editar comunicação {{subject}}",
+    "removeCommAria": "Remover comunicação {{subject}}",
+    "editPlanAria": "Editar plano {{school}}",
+    "removePlanAria": "Remover plano {{school}}",
+    "plansTitle": "Planos Educacionais",
+    "addPlan": "Adicionar Plano",
+    "noPlans": "Nenhum plano cadastrado",
+    "planAdded": "Plano adicionado",
+    "planRemoved": "Plano removido",
+    "newPlan": "Novo Plano",
+    "editPlan": "Editar Plano",
+    "commsTitle": "Comunicações com a Escola",
+    "addComm": "Adicionar Comunicação",
+    "noComms": "Nenhuma comunicação registrada",
+    "commAdded": "Comunicação adicionada",
+    "commRemoved": "Comunicação removida",
+    "newComm": "Nova Comunicação",
+    "editComm": "Editar Comunicação",
+    "form": {
+      "select": "Selecionar...",
+      "notes": "Observações",
+      "notesPh": "Observações adicionais...",
+      "dateTime": "Data e hora",
+      "commType": "Tipo de comunicação",
+      "subject": "Assunto",
+      "subjectPh": "Resumo da comunicação",
+      "description": "Descrição",
+      "descriptionPh": "Detalhes da comunicação...",
+      "attendees": "Participantes",
+      "attendeesPh": "Ex: Professora Ana, coordenadora, responsável",
+      "followUpDate": "Data de retorno",
+      "saveComm": "Salvar comunicação",
+      "addComm": "Adicionar comunicação",
+      "schoolName": "Nome da escola",
+      "schoolNamePh": "Ex: EMEF João da Silva",
+      "academicYear": "Ano letivo",
+      "academicYearPh": "2024 ou 2024/2025",
+      "planType": "Tipo de plano",
+      "startDate": "Data de início",
+      "reviewDate": "Data de revisão",
+      "endDate": "Data de encerramento",
+      "goals": "Objetivos e metas",
+      "goalsPh": "Descreva os objetivos e metas do plano...",
+      "accommodations": "Adaptações e acomodações",
+      "accommodationsPh": "Liste as adaptações e acomodações previstas...",
+      "savePlan": "Salvar plano",
+      "addPlan": "Adicionar plano"
+    }
+  },
+  "cDocuments": {
+    "resourceType": {
+      "appointment": "Consulta médica",
+      "therapy_session": "Sessão de terapia",
+      "education_plan": "Plano educacional",
+      "school_comm": "Comunicação escolar"
+    },
+    "expiredOn": "Vencido em {{date}}",
+    "expiresOn": "Vence em {{date}}",
+    "removeAria": "Remover documento",
+    "dropzoneAria": "Escolher um arquivo para enviar",
+    "dropzoneTitle": "Arraste um arquivo aqui ou clique para escolher",
+    "dropzoneHint": "PDF, imagem ou vídeo",
+    "loadError": "Não foi possível carregar o arquivo.",
+    "downloadError": "Não foi possível baixar o arquivo. Tente novamente.",
+    "expiryUpdated": "Data de validade atualizada",
+    "expirySaveError": "Não foi possível salvar a data de validade. Tente novamente.",
+    "download": "Baixar",
+    "expiryDate": "Data de validade",
+    "saving": "Salvando...",
+    "save": "Salvar",
+    "loadingPreview": "Carregando preview...",
+    "noPreview": "Pré-visualização não disponível para este tipo de arquivo. Use o botão \"{{action}}\".",
+    "uploaded": "Documento enviado",
+    "uploadError": "Falha no upload. Verifique o arquivo e tente novamente.",
+    "uploadTitle": "Enviar documento",
+    "linkRecord": "Vincular a um registro (opcional)",
+    "none": "Nenhum",
+    "selectRecord": "Selecione o registro",
+    "selectPlaceholder": "Selecione...",
+    "noRecords": "Nenhum registro encontrado para vincular",
+    "expiryOptional": "Data de validade (opcional)",
+    "expiryHint": "Para laudos, receitas e carteirinhas com prazo de validade",
+    "uploadSuccess": "✅ Enviado com sucesso!",
+    "uploadingPct": "Enviando... {{progress}}%",
+    "uploadProgressAria": "Progresso do envio",
+    "sending": "Enviando...",
+    "send": "Enviar",
+    "cancel": "Cancelar"
+  },
+  "cConsolidated": {
+    "logType": {
+      "abc": "ABC (Comportamento)",
+      "mood": "Humor",
+      "sleep": "Sono",
+      "food": "Alimentação",
+      "toileting": "Banheiro"
+    },
+    "logsTotal_zero": "registros totais",
+    "logsTotal_one": "registro total",
+    "logsTotal_other": "registros totais",
+    "times": "{{count}}x",
+    "logsEmpty": "Nenhum registro diário no período.",
+    "assessmentsEmpty": "Nenhuma avaliação registrada no período.",
+    "assessmentsDone_one": "avaliação realizada",
+    "assessmentsDone_other": "avaliações realizadas",
+    "instrument": {
+      "crianca-3-14": "Perfil Sensorial 2 (3-14)",
+      "crianca-pequena": "Perfil Sensorial 2 (Criança Pequena)",
+      "atec": "ATEC",
+      "mchat-r": "M-CHAT-R",
+      "mchat-rf-followup": "M-CHAT-R/F Seguimento"
+    },
+    "milestones": "Marcos de desenvolvimento",
+    "milestonesTotal": "{{count}} total",
+    "milestoneStats": {
+      "achieved": "Alcançados",
+      "inProgress": "Em progresso",
+      "notYet": "Não iniciados",
+      "regressed": "Em regressão"
+    },
+    "recentCommLogs": "Registros de comunicação recentes",
+    "developmentEmpty": "Nenhum dado de desenvolvimento registrado.",
+    "educationEmpty": "Nenhum dado educacional registrado.",
+    "educationPlans": "Planos educacionais",
+    "recentComms": "Comunicações recentes",
+    "sessionsInPeriod_zero": "sessões no período",
+    "sessionsInPeriod_one": "sessão no período",
+    "sessionsInPeriod_other": "sessões no período",
+    "noSessions": "Sem sessões registradas.",
+    "activeTherapists": "Terapeutas ativos",
+    "recentSessions": "Sessões recentes",
+    "minutes": "{{count}} min",
+    "medicalEmpty": "Nenhum dado médico registrado.",
+    "activeMedications": "Medicações ativas",
+    "comorbidities": "Comorbidades",
+    "recentAppointments": "Consultas recentes",
+    "followUp": "Retorno: {{date}}",
+    "chat": {
+      "rateLimitSeconds": "Limite de perguntas atingido. Tente novamente em {{seconds}}s.",
+      "rateLimitHour": "Limite de 5 perguntas por hora atingido. Tente novamente mais tarde.",
+      "error": "Erro ao processar a pergunta. Tente novamente.",
+      "title": "Perguntar à IA",
+      "intro": "Pergunte sobre o histórico registrado. A resposta é baseada apenas nos dados do sistema.",
+      "logAria": "Conversa com a IA",
+      "thinking": "Pensando...",
+      "inputLabel": "Sua pergunta",
+      "wait": "Aguarde {{seconds}}s para perguntar novamente",
+      "placeholder": "Ex: Como está o sono nas últimas semanas?",
+      "send": "Enviar pergunta",
+      "fieldLabel": "pergunta",
+      "disclaimer": "A IA pode errar e não substitui a avaliação de um profissional."
+    },
+    "summary": {
+      "loadError": "Erro ao carregar o histórico de resumos.",
+      "rateLimit": "Limite de {{limit}} gerações por hora atingido. Tente novamente mais tarde.",
+      "genError": "Erro ao gerar resumo com IA. Tente novamente.",
+      "quota": "{{remaining}} de {{limit}} gerações restantes nesta hora",
+      "title": "Resumos de IA",
+      "days": "{{count}} dias",
+      "intro": "Resumo em português, gerado por IA a partir dos dados registrados no sistema — útil para compartilhar com a equipe terapêutica.",
+      "generating": "Gerando...",
+      "tryIn": "Tente em {{seconds}}s",
+      "generate": "Gerar novo resumo",
+      "rateLimitRetry": "Limite de {{limit}} gerações por hora atingido. Tente novamente em {{seconds}}s.",
+      "loading": "Carregando histórico...",
+      "empty": "Nenhum resumo gerado ainda. Clique em \"{{action}}\" para começar.",
+      "collapse": "Recolher ▲",
+      "readMore": "Ler mais ▼",
+      "disclaimer": "Gerado por IA a partir dos seus dados — pode conter imprecisões e não substitui avaliação profissional."
+    },
+    "brief": {
+      "titleWithName": "Pauta de consulta — {{name}}",
+      "title": "Pauta de consulta",
+      "whatChanged": "O que mudou desde a última consulta",
+      "currentTreatments": "Medicamentos / tratamentos atuais",
+      "questions": "Perguntas sugeridas para o médico",
+      "rateLimit": "Limite de {{limit}} gerações por hora atingido. Tente novamente mais tarde.",
+      "genError": "Erro ao gerar a pauta de consulta. Tente novamente.",
+      "copyError": "Não foi possível copiar automaticamente. Selecione o texto manualmente.",
+      "modalTitle": "Preparar consulta",
+      "intro": "Gera uma pauta curta para levar impressa (ou ler) na consulta médica: o que mudou, tratamentos atuais e perguntas sugeridas.",
+      "period": "Período:",
+      "tooMany": "Você já gerou muitas pautas nesta hora. Tente novamente em {{seconds}}s.",
+      "generate": "Gerar pauta",
+      "print": "Imprimir",
+      "copied": "Copiado!",
+      "copy": "Copiar texto",
+      "regenerate": "Gerar novamente",
+      "disclaimer": "Gerado por IA a partir dos seus dados — revise antes de usar na consulta."
+    },
+    "share": {
+      "loadError": "Erro ao carregar links compartilhados.",
+      "createError": "Erro ao gerar link de compartilhamento.",
+      "copyAfterCreateError": "Link criado, mas não foi possível copiá-lo automaticamente. Use o botão Copiar.",
+      "deleteError": "Erro ao excluir link.",
+      "copyError": "Erro ao copiar o link.",
+      "title": "Compartilhar com Equipe",
+      "validity": "Validade (dias):",
+      "create": "Gerar Link de Compartilhamento",
+      "lastDays": "Link dos últimos {{count}} dias",
+      "expired": "Expirado",
+      "validUntil": "Válido até {{date}}",
+      "copying": "Copiando…",
+      "copied": "Copiado!",
+      "copy": "Copiar",
+      "deleting": "Excluindo...",
+      "delete": "Excluir",
+      "deleteTitle": "Excluir link de compartilhamento?",
+      "deleteDesc": "Esta ação não pode ser desfeita.",
+      "cancel": "Cancelar"
+    },
+    "wordsCount_one": "{{count}} palavra",
+    "wordsCount_other": "{{count}} palavras"
+  },
+  "cAnamnese": {
+    "f": {
+      "mainComplaint": {
+        "label": "Queixa principal:",
+        "placeholder": "Motivo da procura, principais preocupações"
+      },
+      "complaintOnset": {
+        "label": "Quando começou:",
+        "placeholder": "Ex: há 6 meses"
+      },
+      "previousTreatments": {
+        "label": "Tratamentos anteriores:",
+        "placeholder": "Descreva tratamentos já realizados"
+      },
+      "plannedPregnancy": {
+        "label": "Gravidez planejada:"
+      },
+      "deliveryType": {
+        "label": "Tipo de parto:"
+      },
+      "prenatalCareDetails": {
+        "label": "Pré-natal:",
+        "placeholder": "Acompanhamento, número de consultas, exames"
+      },
+      "complications": {
+        "label": "Intercorrências na gestação:",
+        "placeholder": "Hipertensão, diabetes, sangramento, etc."
+      },
+      "medicationsDuringPregnancy": {
+        "label": "Medicações durante a gestação:",
+        "placeholder": "Liste medicações utilizadas"
+      },
+      "gestationalAgeWeeks": {
+        "label": "Idade gestacional (semanas):"
+      },
+      "birthWeightGrams": {
+        "label": "Peso ao nascer (g):"
+      },
+      "birthLengthCm": {
+        "label": "Comprimento ao nascer (cm):"
+      },
+      "apgar1min": {
+        "label": "Apgar 1º minuto:"
+      },
+      "apgar5min": {
+        "label": "Apgar 5º minuto:"
+      },
+      "neonatalIntercurrences": {
+        "label": "Intercorrências neonatais:",
+        "placeholder": "UTI neonatal, icterícia, etc."
+      },
+      "heldHeadMonths": {
+        "label": "Sustentou a cabeça (meses):"
+      },
+      "sattMonths": {
+        "label": "Sentou sem apoio (meses):"
+      },
+      "crawledMonths": {
+        "label": "Engatinhou (meses):"
+      },
+      "walkedMonths": {
+        "label": "Andou (meses):"
+      },
+      "firstWordsMonths": {
+        "label": "Primeiras palavras (meses):"
+      },
+      "firstSentencesMonths": {
+        "label": "Primeiras frases (meses):"
+      },
+      "sphincterControlMonths": {
+        "label": "Controle de esfíncter (meses):"
+      },
+      "currentMotorObservations": {
+        "label": "Observações motoras atuais:",
+        "placeholder": "Coordenação, equilíbrio, preferência manual, etc."
+      },
+      "currentLanguageObservations": {
+        "label": "Observações de linguagem atuais:",
+        "placeholder": "Compreensão, expressão, articulação"
+      },
+      "allergies": {
+        "label": "Alergias:"
+      },
+      "chronicConditions": {
+        "label": "Condições crônicas / diagnósticos:"
+      },
+      "currentMedications": {
+        "label": "Medicações em uso:"
+      },
+      "pastSurgeries": {
+        "label": "Cirurgias prévias:"
+      },
+      "hospitalizations": {
+        "label": "Internações:"
+      },
+      "recurrentIllnesses": {
+        "label": "Doenças recorrentes:",
+        "placeholder": "Otites, crises convulsivas, etc."
+      },
+      "sleepPattern": {
+        "label": "Padrão de sono:"
+      },
+      "feedingPattern": {
+        "label": "Padrão alimentar:"
+      },
+      "attendsSchool": {
+        "label": "Frequenta escola:"
+      },
+      "shift": {
+        "label": "Turno:"
+      },
+      "schoolName": {
+        "label": "Nome da escola:"
+      },
+      "grade": {
+        "label": "Série / nível:"
+      },
+      "academicPerformance": {
+        "label": "Desempenho acadêmico:"
+      },
+      "socialBehaviorAtSchool": {
+        "label": "Comportamento social na escola:"
+      },
+      "hasSupportTeacher": {
+        "label": "Possui professor de apoio:"
+      },
+      "supportDetails": {
+        "label": "Detalhes do apoio:"
+      },
+      "livesWith": {
+        "label": "Mora com:",
+        "placeholder": "Ex: pai, mãe e irmãos"
+      },
+      "parentsMaritalStatus": {
+        "label": "Estado civil dos pais:"
+      },
+      "siblings": {
+        "label": "Irmãos (quantidade / idades):"
+      },
+      "familyHistoryOfDisorders": {
+        "label": "Histórico familiar de transtornos:"
+      },
+      "socioeconomicNotes": {
+        "label": "Contexto socioeconômico:"
+      },
+      "additionalNotes": {
+        "label": "Observações adicionais:"
+      }
+    },
+    "sec": {
+      "complaint": "Queixa Principal",
+      "gestation": "Gestação e Parto",
+      "development": "Desenvolvimento",
+      "health": "Saúde",
+      "school": "Escola",
+      "family": "Família e Contexto"
+    },
+    "clinicalHistory": "Histórico Clínico",
+    "opt": {
+      "yes": "Sim",
+      "no": "Não",
+      "vaginal": "Vaginal",
+      "cesarean": "Cesárea",
+      "forceps": "Fórceps",
+      "other": "Outro",
+      "morning": "Manhã",
+      "afternoon": "Tarde",
+      "full": "Integral"
+    },
+    "selector": {
+      "loadError": "Não foi possível carregar anamneses existentes.",
+      "detailError": "Erro ao carregar dados da anamnese selecionada.",
+      "title": "Usar anamnese existente",
+      "intro": "Selecione uma anamnese já cadastrada para preencher automaticamente os dados da criança e do responsável. Ao selecionar, os campos abaixo serão sobrescritos.",
+      "loading": "Carregando anamneses...",
+      "loadingDetail": "Carregando dados selecionados...",
+      "placeholder": "Selecione uma anamnese",
+      "manual": "— Preencher manualmente —",
+      "empty": "Nenhuma anamnese cadastrada ainda.",
+      "create": "+ Criar anamnese"
+    },
+    "share": {
+      "generateError": "Erro ao gerar link de compartilhamento.",
+      "revokeError": "Erro ao revogar link.",
+      "clipboardUnavailable": "Copie o link manualmente (clipboard indisponível).",
+      "copyManually": "Copie o link manualmente.",
+      "title": "Compartilhar anamnese",
+      "intro": "Gere um link somente-leitura para compartilhar com outros profissionais.",
+      "linkLabel": "Link de compartilhamento",
+      "copied": "Copiado!",
+      "copy": "Copiar",
+      "revoke": "Revogar",
+      "generating": "Gerando...",
+      "generate": "Gerar link de compartilhamento"
+    }
+  }
+}

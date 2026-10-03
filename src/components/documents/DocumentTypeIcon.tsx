@@ -9,7 +9,7 @@ interface DocumentTypeIconProps {
 
 const DocumentTypeIcon: React.FC<DocumentTypeIconProps> = ({ mimeType, size = 28 }) => {
   const kind = getDocumentKind(mimeType);
-  const props = { width: size, height: size };
+  const props = { width: size, height: size, 'aria-hidden': true as const };
   switch (kind) {
     case 'pdf':
       return <FileTextIcon {...props} />;

@@ -35,7 +35,7 @@ const SectionCard: React.FC<SectionCardProps> = ({
           gap: '8px',
         }}
       >
-        {icon && <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>{icon}</span>}
+        {icon && <span aria-hidden="true" style={{ fontSize: '1.2rem', lineHeight: 1 }}>{icon}</span>}
         <h2
           style={{
             fontFamily: fonts.display,

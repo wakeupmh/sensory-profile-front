@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { childApi } from '../../services/api';
 import { useAuthContext } from '../../context/AuthContext';
 import { spacing } from '../../theme/tokens';
@@ -18,6 +19,7 @@ interface UnifiedTimelineProps {
 }
 
 const UnifiedTimeline: React.FC<UnifiedTimelineProps> = ({ childId }) => {
+  const { t } = useTranslation();
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -48,12 +50,12 @@ const UnifiedTimeline: React.FC<UnifiedTimelineProps> = ({ childId }) => {
         setEvents(result.data);
       }
     } catch {
-      setError('Erro ao carregar linha do tempo. Por favor, tente novamente.');
+      setError(t('cChildProfile.loadError'));
     } finally {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [childId]);
+  }, [childId, t]);
 
   useEffect(() => {
     setEvents([]);
@@ -70,7 +72,7 @@ const UnifiedTimeline: React.FC<UnifiedTimelineProps> = ({ childId }) => {
   if (loading) {
     return (
       <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
-        <LoadingSpinner size="large" text="Carregando linha do tempo..." />
+        <LoadingSpinner size="large" text={t('cChildProfile.loading')} />
       </GumroadCard>
     );
   }
@@ -83,7 +85,7 @@ const UnifiedTimeline: React.FC<UnifiedTimelineProps> = ({ childId }) => {
     return (
       <GumroadCard color="cream" shadow="md" padding="lg" style={{ textAlign: 'center' }}>
         <GumroadText level="body-md" as="p" style={{ opacity: 0.7 }}>
-          Nenhum evento registrado ainda.
+          {t('cChildProfile.empty')}
         </GumroadText>
       </GumroadCard>
     );
@@ -105,13 +107,13 @@ const UnifiedTimeline: React.FC<UnifiedTimelineProps> = ({ childId }) => {
             onClick={handleLoadMore}
             disabled={loadingMore}
           >
-            {loadingMore ? 'Carregando...' : 'Carregar mais'}
+            {loadingMore ? t('cChildProfile.loadingMore') : t('cChildProfile.loadMore')}
           </GumroadButton>
         </Box>
       )}
 
       <GumroadText level="body-sm" as="p" style={{ opacity: 0.5, textAlign: 'center', marginTop: spacing.sm }}>
-        {events.length} de {total} eventos
+        {t('cChildProfile.countOf', { shown: events.length, total })}
       </GumroadText>
     </Box>
   );

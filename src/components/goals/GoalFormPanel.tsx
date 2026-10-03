@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import GumroadModal from '../design-system/GumroadModal';
 import GoalForm from './GoalForm';
 import type { Goal, CreateGoalPayload, UpdateGoalPayload } from '../../types/goals';
@@ -12,6 +13,7 @@ interface GoalFormPanelProps {
 }
 
 const GoalFormPanel: React.FC<GoalFormPanelProps> = ({ isOpen, onClose, childId, goal, onSubmit }) => {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (payload: CreateGoalPayload | UpdateGoalPayload) => {
@@ -24,7 +26,7 @@ const GoalFormPanel: React.FC<GoalFormPanelProps> = ({ isOpen, onClose, childId,
   };
 
   return (
-    <GumroadModal open={isOpen} onClose={onClose} title={goal ? 'Editar Meta' : 'Nova Meta'}>
+    <GumroadModal open={isOpen} onClose={onClose} title={goal ? t('cGoals.editGoal') : t('cGoals.newGoal')}>
       <GoalForm childId={childId} initialValues={goal ?? {}} onSubmit={handleSubmit} onCancel={onClose} loading={isLoading} />
     </GumroadModal>
   );

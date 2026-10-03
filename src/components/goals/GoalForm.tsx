@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
 import type { Goal, CreateGoalPayload, UpdateGoalPayload, GoalDomain, GoalStatus } from '../../types/goals';
@@ -48,6 +49,7 @@ const domainOptions = Object.entries(GOAL_DOMAIN_LABELS) as [GoalDomain, string]
 const statusOptions = Object.entries(GOAL_STATUS_LABELS) as [GoalStatus, string][];
 
 const GoalForm: React.FC<GoalFormProps> = ({ childId, initialValues = {}, onSubmit, onCancel, loading = false }) => {
+  const { t } = useTranslation();
   const [title, setTitle] = useState(initialValues.title ?? '');
   const [domain, setDomain] = useState<GoalDomain>(initialValues.domain ?? 'comunicacao');
   const [description, setDescription] = useState(initialValues.description ?? '');
@@ -90,14 +92,14 @@ const GoalForm: React.FC<GoalFormProps> = ({ childId, initialValues = {}, onSubm
       <Flex direction="column" gap="3">
         <div>
           <label style={labelStyle} htmlFor="goal-titulo-da">
-            Título da meta <span style={{ color: colors.error }} aria-hidden="true">*</span>
+            {t('cGoals.form.title')} <span style={{ color: colors.error }} aria-hidden="true">*</span>
           </label>
           <input id="goal-titulo-da"
             type="text"
             maxLength={255}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Ex: Ampliar vocabulário funcional"
+            placeholder={t('cGoals.form.titlePh')}
             style={inputStyle}
             required
           />
@@ -105,48 +107,48 @@ const GoalForm: React.FC<GoalFormProps> = ({ childId, initialValues = {}, onSubm
 
         <Flex gap="3">
           <div style={{ flex: 1 }}>
-            <label style={labelStyle} htmlFor="goal-dominio">Domínio</label>
+            <label style={labelStyle} htmlFor="goal-dominio">{t('cGoals.form.domain')}</label>
             <select id="goal-dominio" value={domain} onChange={(e) => setDomain(e.target.value as GoalDomain)} style={inputStyle}>
               {domainOptions.map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
+                <option key={value} value={value}>{t(`cGoals.domain.${value}`, { defaultValue: label })}</option>
               ))}
             </select>
           </div>
           <div style={{ flex: 1 }}>
-            <label style={labelStyle} htmlFor="goal-status">Status</label>
+            <label style={labelStyle} htmlFor="goal-status">{t('cGoals.form.status')}</label>
             <select id="goal-status" value={status} onChange={(e) => setStatus(e.target.value as GoalStatus)} style={inputStyle}>
               {statusOptions.map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
+                <option key={value} value={value}>{t(`cGoals.status.${value}`, { defaultValue: label })}</option>
               ))}
             </select>
           </div>
         </Flex>
 
         <div>
-          <label style={labelStyle} htmlFor="goal-criterio-de">Critério de domínio</label>
+          <label style={labelStyle} htmlFor="goal-criterio-de">{t('cGoals.form.criteria')}</label>
           <textarea id="goal-criterio-de"
             maxLength={1000}
             value={criteria}
             onChange={(e) => setCriteria(e.target.value)}
-            placeholder="Ex: Critério de sucesso, contexto de aplicação..."
+            placeholder={t('cGoals.form.criteriaPh')}
             style={textareaStyle}
           />
         </div>
 
         <div>
-          <label style={labelStyle} htmlFor="goal-descricao">Descrição</label>
+          <label style={labelStyle} htmlFor="goal-descricao">{t('cGoals.form.description')}</label>
           <textarea id="goal-descricao"
             maxLength={1000}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Detalhes adicionais sobre a meta..."
+            placeholder={t('cGoals.form.descriptionPh')}
             style={textareaStyle}
           />
         </div>
 
         <Flex gap="3">
           <div style={{ flex: 1 }}>
-            <label style={labelStyle} htmlFor="goal-baseline">Baseline</label>
+            <label style={labelStyle} htmlFor="goal-baseline">{t('cGoals.form.baseline')}</label>
             <input id="goal-baseline"
               type="number"
               step="any"
@@ -157,7 +159,7 @@ const GoalForm: React.FC<GoalFormProps> = ({ childId, initialValues = {}, onSubm
           </div>
           <div style={{ flex: 1 }}>
             <label style={labelStyle} htmlFor="goal-meta">
-              Meta <span style={{ color: colors.error }} aria-hidden="true">*</span>
+              {t('cGoals.form.target')} <span style={{ color: colors.error }} aria-hidden="true">*</span>
             </label>
             <input id="goal-meta"
               type="number"
@@ -169,13 +171,13 @@ const GoalForm: React.FC<GoalFormProps> = ({ childId, initialValues = {}, onSubm
             />
           </div>
           <div style={{ flex: 1 }}>
-            <label style={labelStyle} htmlFor="goal-unidade">Unidade</label>
+            <label style={labelStyle} htmlFor="goal-unidade">{t('cGoals.form.unit')}</label>
             <input id="goal-unidade"
               type="text"
               maxLength={30}
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
-              placeholder="Ex: palavras"
+              placeholder={t('cGoals.form.unitPh')}
               style={inputStyle}
             />
           </div>
@@ -183,21 +185,21 @@ const GoalForm: React.FC<GoalFormProps> = ({ childId, initialValues = {}, onSubm
 
         <Flex gap="3">
           <div style={{ flex: 1 }}>
-            <label style={labelStyle} htmlFor="goal-data-de">Data de início</label>
+            <label style={labelStyle} htmlFor="goal-data-de">{t('cGoals.form.startDate')}</label>
             <input id="goal-data-de" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} style={inputStyle} />
           </div>
           <div style={{ flex: 1 }}>
-            <label style={labelStyle} htmlFor="goal-data-alvo">Data alvo</label>
+            <label style={labelStyle} htmlFor="goal-data-alvo">{t('cGoals.form.targetDate')}</label>
             <input id="goal-data-alvo" type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} style={inputStyle} />
           </div>
         </Flex>
 
         <Flex gap="2" mt="2">
-          <GumroadButton variant="primary" size="md" type="submit" disabled={isDisabled}>
-            {submitting || loading ? 'Salvando...' : 'Salvar'}
+          <GumroadButton variant="primary" size="md" type="submit" disabled={isDisabled} loading={submitting || loading}>
+            {submitting || loading ? t('cGoals.saving') : t('cGoals.save')}
           </GumroadButton>
           <GumroadButton variant="secondary" size="md" type="button" onClick={onCancel}>
-            Cancelar
+            {t('cGoals.cancel')}
           </GumroadButton>
         </Flex>
       </Flex>

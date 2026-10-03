@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { PlusIcon } from '@radix-ui/react-icons';
 import GumroadButton from '../design-system/GumroadButton';
 import GumroadCard from '../design-system/GumroadCard';
@@ -33,6 +34,7 @@ const EducationPlansPanel: React.FC<EducationPlansPanelProps> = ({
   onMutate,
 }) => {
   const { getToken } = useAuthContext();
+  const { t } = useTranslation();
   const toast = useToast();
 
   const fetchFn = useCallback(async () => {
@@ -60,7 +62,9 @@ const EducationPlansPanel: React.FC<EducationPlansPanelProps> = ({
       await fetchPlans();
       onMutate?.();
       setView('list');
-      toast.success('Plano adicionado');
+      toast.success(t('cEducation.planAdded'));
+    } catch {
+      toast.error(t('cEducation.saveError'));
     } finally {
       setIsLoading(false);
     }
@@ -76,7 +80,9 @@ const EducationPlansPanel: React.FC<EducationPlansPanelProps> = ({
       onMutate?.();
       setView('list');
       setEditingPlan(null);
-      toast.success('Alterações salvas');
+      toast.success(t('cEducation.changesSaved'));
+    } catch {
+      toast.error(t('cEducation.saveError'));
     } finally {
       setIsLoading(false);
     }
@@ -89,14 +95,16 @@ const EducationPlansPanel: React.FC<EducationPlansPanelProps> = ({
       await educationPlanApi.delete(token, id);
       await fetchPlans();
       onMutate?.();
-      toast.success('Plano removido');
+      toast.success(t('cEducation.planRemoved'));
+    } catch {
+      toast.error(t('cEducation.removeError'));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <GumroadModal open={isOpen} onClose={onClose} title="Planos Educacionais">
+    <GumroadModal open={isOpen} onClose={onClose} title={t('cEducation.plansTitle')}>
       <>
 
         {view === 'list' && (
@@ -108,8 +116,8 @@ const EducationPlansPanel: React.FC<EducationPlansPanelProps> = ({
               style={{ width: '100%', marginBottom: '16px' }}
             >
               <Flex align="center" gap="1">
-                <PlusIcon />
-                Adicionar Plano
+                <PlusIcon aria-hidden="true" />
+                {t('cEducation.addPlan')}
               </Flex>
             </GumroadButton>
 
@@ -122,7 +130,7 @@ const EducationPlansPanel: React.FC<EducationPlansPanelProps> = ({
             {!error && plans.length === 0 ? (
               <GumroadCard color="cream" padding="lg" style={{ textAlign: 'center' }}>
                 <GumroadText level="body-md" style={{ opacity: 0.7 }}>
-                  Nenhum plano cadastrado
+                  {t('cEducation.noPlans')}
                 </GumroadText>
               </GumroadCard>
             ) : (
@@ -143,7 +151,7 @@ const EducationPlansPanel: React.FC<EducationPlansPanelProps> = ({
         {view === 'add' && (
           <>
             <GumroadHeading level="title-md" style={{ marginBottom: '16px' }}>
-              Novo Plano
+              {t('cEducation.newPlan')}
             </GumroadHeading>
             <EducationPlanForm
               initial={{ childId }}
@@ -158,7 +166,7 @@ const EducationPlansPanel: React.FC<EducationPlansPanelProps> = ({
         {view === 'edit' && (
           <>
             <GumroadHeading level="title-md" style={{ marginBottom: '16px' }}>
-              Editar Plano
+              {t('cEducation.editPlan')}
             </GumroadHeading>
             <EducationPlanForm
               initial={editingPlan ?? {}}

@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { UploadIcon } from '@radix-ui/react-icons';
+import { useTranslation } from 'react-i18next';
 import { colors, radii, spacing } from '../../theme/tokens';
 import GumroadHeading from '../design-system/GumroadHeading';
 
@@ -9,6 +10,7 @@ interface UploadDropzoneProps {
 }
 
 const UploadDropzone: React.FC<UploadDropzoneProps> = ({ onFileSelected, disabled }) => {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
 
@@ -19,7 +21,17 @@ const UploadDropzone: React.FC<UploadDropzoneProps> = ({ onFileSelected, disable
 
   return (
     <div
+      role="button"
+      tabIndex={disabled ? -1 : 0}
+      aria-disabled={disabled || undefined}
+      aria-label={t('cDocuments.dropzoneAria')}
       onClick={() => !disabled && inputRef.current?.click()}
+      onKeyDown={(e) => {
+        if (!disabled && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          inputRef.current?.click();
+        }
+      }}
       onDragOver={(e) => { e.preventDefault(); if (!disabled) setDragging(true); }}
       onDragLeave={() => setDragging(false)}
       onDrop={(e) => {
@@ -43,14 +55,16 @@ const UploadDropzone: React.FC<UploadDropzoneProps> = ({ onFileSelected, disable
         type="file"
         accept="application/pdf,image/*,video/*"
         style={{ display: 'none' }}
+        tabIndex={-1}
+        aria-hidden="true"
         onChange={(e) => handleFiles(e.target.files)}
         disabled={disabled}
       />
-      <UploadIcon width={32} height={32} style={{ marginBottom: '8px' }} />
+      <UploadIcon width={32} height={32} aria-hidden="true" style={{ marginBottom: '8px' }} />
       <GumroadHeading level="title-sm" as="h3">
-        Arraste um arquivo aqui ou clique para escolher
+        {t('cDocuments.dropzoneTitle')}
       </GumroadHeading>
-      <p style={{ fontSize: '13px', opacity: 0.6, marginTop: '4px' }}>PDF, imagem ou vídeo</p>
+      <p style={{ fontSize: '13px', opacity: 0.6, marginTop: '4px' }}>{t('cDocuments.dropzoneHint')}</p>
     </div>
   );
 };

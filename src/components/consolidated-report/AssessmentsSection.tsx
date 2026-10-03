@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ConsolidatedAssessments } from '../../types/consolidatedReport';
 import { INSTRUMENT_LABELS } from '../../types/consolidatedReport';
 import { colors, fonts } from '../../theme/tokens';
@@ -8,10 +9,11 @@ interface Props {
 }
 
 const AssessmentsSection: React.FC<Props> = ({ data }) => {
+  const { t, i18n } = useTranslation();
   if (data.count === 0) {
     return (
       <p style={{ color: colors.ink, opacity: 0.6, fontSize: '0.9rem', margin: 0 }}>
-        Nenhuma avaliação registrada no período.
+        {t('cConsolidated.assessmentsEmpty')}
       </p>
     );
   }
@@ -31,7 +33,7 @@ const AssessmentsSection: React.FC<Props> = ({ data }) => {
           marginBottom: '14px',
         }}
       >
-        {data.count} {data.count === 1 ? 'avaliação realizada' : 'avaliações realizadas'}
+        {data.count} {t('cConsolidated.assessmentsDone', { count: data.count })}
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -51,12 +53,12 @@ const AssessmentsSection: React.FC<Props> = ({ data }) => {
             }}
           >
             <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>
-              {INSTRUMENT_LABELS[a.instrumentId] ?? a.instrumentId}
+              {t(`cConsolidated.instrument.${a.instrumentId}`, { defaultValue: INSTRUMENT_LABELS[a.instrumentId] ?? a.instrumentId })}
             </span>
             <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
               {a.completedAt && (
                 <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>
-                  {new Date(a.completedAt).toLocaleDateString('pt-BR')}
+                  {new Date(a.completedAt).toLocaleDateString(i18n.language)}
                 </span>
               )}
               <span

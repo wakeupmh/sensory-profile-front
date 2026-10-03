@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { Pencil2Icon, TrashIcon } from '@radix-ui/react-icons';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import GumroadCard from '../design-system/GumroadCard';
@@ -18,8 +19,8 @@ interface SchoolCommCardProps {
   onDelete: (id: string) => void;
 }
 
-function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString('pt-BR', {
+function formatDateTime(iso: string, lang: string): string {
+  return new Date(iso).toLocaleString(lang, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -28,8 +29,8 @@ function formatDateTime(iso: string): string {
   });
 }
 
-function formatDate(isoDate: string): string {
-  return new Date(isoDate + 'T00:00:00').toLocaleDateString('pt-BR', {
+function formatDate(isoDate: string, lang: string): string {
+  return new Date(isoDate + 'T00:00:00').toLocaleDateString(lang, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -51,15 +52,16 @@ const iconBtnStyle: React.CSSProperties = {
 };
 
 const SchoolCommCard: React.FC<SchoolCommCardProps> = ({ comm, onEdit, onDelete }) => {
+  const { t, i18n } = useTranslation();
   const [confirming, setConfirming] = useState(false);
 
   const commTypeColors = SCHOOL_COMM_TYPE_COLORS[comm.commType];
 
   if (confirming) {
     return (
-      <GumroadCard color="salmon" padding="md" shadow="md">
+      <GumroadCard color="salmon" padding="md" shadow="md" role="alert">
         <GumroadText level="body-md">
-          Remover comunicação "{comm.subject}"?
+          {t('cEducation.removeCommConfirm', { subject: comm.subject })}
         </GumroadText>
         <Flex gap="2" mt="2">
           <GumroadButton
@@ -67,14 +69,14 @@ const SchoolCommCard: React.FC<SchoolCommCardProps> = ({ comm, onEdit, onDelete 
             size="sm"
             onClick={() => onDelete(comm.id)}
           >
-            Confirmar
+            {t('cEducation.confirm')}
           </GumroadButton>
           <GumroadButton
             variant="ghost"
             size="sm"
             onClick={() => setConfirming(false)}
           >
-            Cancelar
+            {t('cEducation.cancel')}
           </GumroadButton>
         </Flex>
       </GumroadCard>
@@ -86,7 +88,7 @@ const SchoolCommCard: React.FC<SchoolCommCardProps> = ({ comm, onEdit, onDelete 
       <Flex justify="between" align="start">
         <Flex direction="column" gap="1" style={{ flex: 1, minWidth: 0 }}>
           <GumroadText level="body-sm" style={{ opacity: 0.6 }}>
-            {formatDateTime(comm.occurredAt)}
+            {formatDateTime(comm.occurredAt, i18n.language)}
           </GumroadText>
 
           <Flex gap="2" wrap="wrap" style={{ marginTop: '2px' }}>
@@ -103,7 +105,7 @@ const SchoolCommCard: React.FC<SchoolCommCardProps> = ({ comm, onEdit, onDelete 
                 border: `1.5px solid ${colors.ink}`,
               }}
             >
-              {SCHOOL_COMM_TYPE_LABELS[comm.commType]}
+              {t(`cEducation.commType.${comm.commType}`, { defaultValue: SCHOOL_COMM_TYPE_LABELS[comm.commType] })}
             </span>
           </Flex>
 
@@ -119,25 +121,27 @@ const SchoolCommCard: React.FC<SchoolCommCardProps> = ({ comm, onEdit, onDelete 
 
           {comm.followUpDate && (
             <GumroadText level="body-sm" style={{ opacity: 0.7, marginTop: '2px' }}>
-              <strong>Retorno em:</strong> {formatDate(comm.followUpDate)}
+              <strong>{t('cEducation.followUpOn')}:</strong> {formatDate(comm.followUpDate, i18n.language)}
             </GumroadText>
           )}
         </Flex>
 
         <Flex gap="2" style={{ marginLeft: '12px', flexShrink: 0 }}>
           <button
+            type="button"
             style={iconBtnStyle}
             onClick={() => onEdit(comm)}
-            aria-label="Editar comunicação"
+            aria-label={t('cEducation.editCommAria', { subject: comm.subject })}
           >
-            <Pencil2Icon />
+            <Pencil2Icon aria-hidden="true" />
           </button>
           <button
+            type="button"
             style={iconBtnStyle}
             onClick={() => setConfirming(true)}
-            aria-label="Remover comunicação"
+            aria-label={t('cEducation.removeCommAria', { subject: comm.subject })}
           >
-            <TrashIcon />
+            <TrashIcon aria-hidden="true" />
           </button>
         </Flex>
       </Flex>

@@ -31,7 +31,7 @@ const DomainStatsCard: React.FC<DomainStatsCardProps> = ({ label, count, icon, h
       }}
     >
       <Flex align="center" gap="2" style={{ marginBottom: '8px' }}>
-        <span style={{ fontSize: '20px' }}>{icon}</span>
+        <span aria-hidden="true" style={{ fontSize: '20px' }}>{icon}</span>
         <GumroadText level="body-sm" as="span" style={{ opacity: 0.7, fontWeight: 600 }}>
           {label}
         </GumroadText>

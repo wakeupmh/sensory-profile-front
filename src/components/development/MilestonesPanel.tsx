@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { PlusIcon } from '@radix-ui/react-icons';
 import GumroadButton from '../design-system/GumroadButton';
 import GumroadCard from '../design-system/GumroadCard';
@@ -34,6 +35,7 @@ const MilestonesPanel: React.FC<MilestonesPanelProps> = ({
   onMutate,
   getToken,
 }) => {
+  const { t } = useTranslation();
   const toast = useToast();
 
   const fetchFn = useCallback(async () => {
@@ -64,7 +66,9 @@ const MilestonesPanel: React.FC<MilestonesPanelProps> = ({
       await fetchMilestones();
       onMutate?.();
       setView('list');
-      toast.success('Marco adicionado');
+      toast.success(t('cDevelopment.milestoneAdded'));
+    } catch {
+      toast.error(t('cDevelopment.saveError'));
     } finally {
       setIsLoading(false);
     }
@@ -80,7 +84,9 @@ const MilestonesPanel: React.FC<MilestonesPanelProps> = ({
       onMutate?.();
       setView('list');
       setEditingMilestone(null);
-      toast.success('Alterações salvas');
+      toast.success(t('cDevelopment.changesSaved'));
+    } catch {
+      toast.error(t('cDevelopment.saveError'));
     } finally {
       setIsLoading(false);
     }
@@ -95,7 +101,9 @@ const MilestonesPanel: React.FC<MilestonesPanelProps> = ({
       await fetchMilestones();
       onMutate?.();
       setDeletingId(null);
-      toast.success('Marco removido');
+      toast.success(t('cDevelopment.milestoneRemoved'));
+    } catch {
+      toast.error(t('cDevelopment.removeError'));
     } finally {
       setIsLoading(false);
     }
@@ -104,7 +112,7 @@ const MilestonesPanel: React.FC<MilestonesPanelProps> = ({
   const deletingMilestone = milestones.find((m) => m.id === deletingId);
 
   return (
-    <GumroadModal open={isOpen} onClose={onClose} title="Marcos do Desenvolvimento">
+    <GumroadModal open={isOpen} onClose={onClose} title={t('cDevelopment.milestonesTitle')}>
       <>
 
         {view === 'list' && (
@@ -116,8 +124,8 @@ const MilestonesPanel: React.FC<MilestonesPanelProps> = ({
               style={{ width: '100%', marginBottom: '16px' }}
             >
               <Flex align="center" gap="1">
-                <PlusIcon />
-                Adicionar Marco
+                <PlusIcon aria-hidden="true" />
+                {t('cDevelopment.addMilestone')}
               </Flex>
             </GumroadButton>
 
@@ -130,16 +138,16 @@ const MilestonesPanel: React.FC<MilestonesPanelProps> = ({
             {!error && milestones.length === 0 ? (
               <GumroadCard color="cream" padding="lg" style={{ textAlign: 'center' }}>
                 <GumroadText level="body-md" style={{ opacity: 0.7 }}>
-                  Nenhum marco cadastrado
+                  {t('cDevelopment.noMilestones')}
                 </GumroadText>
               </GumroadCard>
             ) : (
               <Flex direction="column" gap="3">
                 {milestones.map((m) =>
                   deletingId === m.id ? (
-                    <GumroadCard key={m.id} color="salmon" padding="md" shadow="md">
+                    <GumroadCard key={m.id} color="salmon" padding="md" shadow="md" role="alert">
                       <GumroadText level="body-md">
-                        Remover "{deletingMilestone?.title}" ({MILESTONE_STATUS_LABELS[m.status]})?
+                        {t('cDevelopment.removeMilestoneConfirm', { title: deletingMilestone?.title, status: t(`cDevelopment.milestoneStatus.${m.status}`, { defaultValue: MILESTONE_STATUS_LABELS[m.status] }) })}
                       </GumroadText>
                       <Flex gap="2" mt="2">
                         <GumroadButton
@@ -148,14 +156,14 @@ const MilestonesPanel: React.FC<MilestonesPanelProps> = ({
                           onClick={handleConfirmDelete}
                           disabled={isLoading}
                         >
-                          {isLoading ? 'Removendo...' : 'Confirmar'}
+                          {isLoading ? t('cDevelopment.removing') : t('cDevelopment.confirm')}
                         </GumroadButton>
                         <GumroadButton
                           variant="ghost"
                           size="sm"
                           onClick={() => setDeletingId(null)}
                         >
-                          Cancelar
+                          {t('cDevelopment.cancel')}
                         </GumroadButton>
                       </Flex>
                     </GumroadCard>
@@ -176,7 +184,7 @@ const MilestonesPanel: React.FC<MilestonesPanelProps> = ({
         {view === 'add' && (
           <>
             <GumroadHeading level="title-md" style={{ marginBottom: '16px' }}>
-              Novo Marco
+              {t('cDevelopment.newMilestone')}
             </GumroadHeading>
             <MilestoneForm
               initialValues={{ childId }}
@@ -190,7 +198,7 @@ const MilestonesPanel: React.FC<MilestonesPanelProps> = ({
         {view === 'edit' && (
           <>
             <GumroadHeading level="title-md" style={{ marginBottom: '16px' }}>
-              Editar Marco
+              {t('cDevelopment.editMilestone')}
             </GumroadHeading>
             <MilestoneForm
               initialValues={editingMilestone ?? {}}
