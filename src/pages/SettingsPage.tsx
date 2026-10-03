@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Box, Flex, Switch } from '@radix-ui/themes';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ExclamationTriangleIcon, EnvelopeClosedIcon, BellIcon, GlobeIcon, SunIcon, MoonIcon, DesktopIcon, DownloadIcon } from '@radix-ui/react-icons';
 import { notificationApi, accountApi } from '../services/api';
@@ -127,9 +128,9 @@ export default function SettingsPage() {
       const token = await getTokenRef.current();
       const { downloadUrl } = await accountApi.exportAll(token);
       window.open(downloadUrl, '_blank', 'noopener,noreferrer');
-      toast.success('Exportação pronta', 'O download foi aberto em uma nova aba');
+      toast.success(t('p2Settings.exportReadyTitle'), t('p2Settings.exportReadyDesc'));
     } catch {
-      toast.error('Não foi possível gerar a exportação. Tente novamente.');
+      toast.error(t('p2Settings.exportError'));
     } finally {
       setExporting(false);
     }
@@ -153,7 +154,7 @@ export default function SettingsPage() {
         <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, marginBottom: spacing.md }}>
           {t('settings.appearance.description')}
         </GumroadText>
-        <Flex gap="2" wrap="wrap" role="radiogroup" aria-label={t('settings.appearance.groupLabel')}>
+        <Flex gap="2" wrap="wrap" role="group" aria-label={t('settings.appearance.groupLabel')}>
           {APPEARANCE_OPTIONS.map((opt) => (
             <GumroadButton
               key={opt.value}
@@ -180,7 +181,7 @@ export default function SettingsPage() {
         <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, marginBottom: spacing.md }}>
           {t('settings.language.description')}
         </GumroadText>
-        <Flex gap="2" wrap="wrap" role="radiogroup" aria-label={t('settings.language.groupLabel')}>
+        <Flex gap="2" wrap="wrap" role="group" aria-label={t('settings.language.groupLabel')}>
           {LANGUAGE_OPTIONS.map((opt) => (
             <GumroadButton
               key={opt.value}
@@ -200,9 +201,12 @@ export default function SettingsPage() {
         <Flex justify="center" py="6"><LoadingSpinner size="medium" text={t('settings.loading')} /></Flex>
       ) : error ? (
         <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
-          <Flex align="center" gap="2">
+          <Flex align="center" gap="2" wrap="wrap">
             <ExclamationTriangleIcon />
             <GumroadText level="body-md" as="p">{error}</GumroadText>
+            <GumroadButton variant="secondary" size="sm" onClick={fetchPreferences}>
+              {t('p2Settings.retry')}
+            </GumroadButton>
           </Flex>
         </GumroadCard>
       ) : preferences ? (
@@ -286,16 +290,19 @@ export default function SettingsPage() {
 
       <GumroadCard color="white" shadow="md" padding="lg" style={{ marginTop: spacing.lg }}>
         <GumroadHeading level="title-md" as="h2" style={{ marginBottom: spacing.xs }}>
-          Privacidade e dados
+          {t('p2Settings.privacy.title')}
         </GumroadHeading>
         <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, marginBottom: spacing.md }}>
-          Baixe uma cópia de tudo que sua conta possui — todas as crianças, avaliações, registros,
-          anamneses, documentos e demais dados — em um único arquivo.
+          {t('p2Settings.privacy.description')}
         </GumroadText>
         <GumroadButton variant="secondary" size="md" onClick={handleExportAll} disabled={exporting}>
           <DownloadIcon />
-          {exporting ? 'Gerando exportação...' : 'Exportar todos os meus dados'}
+          {exporting ? t('p2Settings.privacy.exporting') : t('p2Settings.privacy.export')}
         </GumroadButton>
+        <Flex gap="4" wrap="wrap" mt="3">
+          <Link to="/privacidade" style={{ color: colors.ink, fontSize: '14px' }}>{t('p2Settings.privacy.policy')}</Link>
+          <Link to="/termos" style={{ color: colors.ink, fontSize: '14px' }}>{t('p2Settings.privacy.terms')}</Link>
+        </Flex>
       </GumroadCard>
 
       <GumroadCard
@@ -305,11 +312,10 @@ export default function SettingsPage() {
         style={{ marginTop: spacing.lg, border: `2px solid ${colors['brand-salmon']}` }}
       >
         <GumroadHeading level="title-md" as="h2" style={{ marginBottom: spacing.xs }}>
-          Zona de risco
+          {t('p2Settings.danger.title')}
         </GumroadHeading>
         <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, marginBottom: spacing.md }}>
-          Excluir sua conta apaga permanentemente todas as crianças cadastradas e tudo ligado a elas.
-          Essa ação não pode ser desfeita.
+          {t('p2Settings.danger.description')}
         </GumroadText>
         <GumroadButton
           variant="secondary"
@@ -317,7 +323,7 @@ export default function SettingsPage() {
           onClick={() => setDeleteModalOpen(true)}
           style={{ borderColor: colors['brand-salmon'], color: colors['brand-salmon'] }}
         >
-          Excluir minha conta
+          {t('p2Settings.danger.button')}
         </GumroadButton>
       </GumroadCard>
 

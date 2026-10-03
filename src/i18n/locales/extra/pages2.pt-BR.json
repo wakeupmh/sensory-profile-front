@@ -218,6 +218,247 @@
     }
   },
   "p2Common": {
-    "allChildren": "Todas as crianças"
+    "allChildren": "Todas as crianças",
+    "loading": "Carregando…"
+  },
+  "p2Therapy": {
+    "types": {
+      "aba": {
+        "label": "ABA",
+        "subtitle": "Análise do Comportamento Aplicada",
+        "short": "ABA"
+      },
+      "ot": {
+        "label": "OT",
+        "subtitle": "Terapia Ocupacional",
+        "short": "OT"
+      },
+      "fonoaudiologia": {
+        "label": "Fonoaudiologia",
+        "subtitle": "Linguagem e Comunicação",
+        "short": "Fono"
+      },
+      "psicologia": {
+        "label": "Psicologia",
+        "subtitle": "Suporte Psicológico",
+        "short": "Psico"
+      },
+      "fisioterapia": {
+        "label": "Fisioterapia",
+        "subtitle": "Desenvolvimento Motor",
+        "short": "Fisio"
+      }
+    },
+    "save": "Salvar",
+    "saving": "Salvando...",
+    "cancel": "Cancelar",
+    "back": "← Voltar",
+    "changesSaved": "Alterações salvas",
+    "saveError": "Não foi possível salvar. Tente novamente.",
+    "removeError": "Não foi possível remover. Tente novamente.",
+    "session": {
+      "title": "Nova Sessão",
+      "dateTime": "Data e hora",
+      "therapist": "Terapeuta",
+      "noTherapist": "Sem terapeuta",
+      "duration": "Duração (minutos)",
+      "durationPh": "Ex: 50",
+      "notes": "Observações",
+      "notesPh": "Observações sobre a sessão...",
+      "save": "Salvar Sessão",
+      "error": "Erro ao salvar sessão. Tente novamente.",
+      "invalidDate": "Informe uma data e hora válidas.",
+      "saved": "Sessão salva"
+    },
+    "card": {
+      "editAria": "Editar terapeuta",
+      "removeAria": "Remover terapeuta"
+    },
+    "form": {
+      "name": "Nome",
+      "namePh": "Nome do terapeuta",
+      "specialty": "Especialidade",
+      "select": "Selecionar...",
+      "phone": "Telefone",
+      "phonePh": "(11) 99999-9999",
+      "email": "E-mail",
+      "emailPh": "terapeuta@exemplo.com",
+      "notes": "Observações",
+      "notesPh": "Informações adicionais..."
+    },
+    "panel": {
+      "title": "Terapeutas",
+      "add": "Adicionar Terapeuta",
+      "empty": "Nenhum terapeuta cadastrado",
+      "confirm": "Remover {{name}}?",
+      "confirmBtn": "Confirmar",
+      "new": "Novo Terapeuta",
+      "edit": "Editar Terapeuta",
+      "added": "Terapeuta adicionado",
+      "removed": "Terapeuta removido"
+    },
+    "page": {
+      "title": "Sessões de Terapia",
+      "subtitle": "Acompanhe as terapias da criança",
+      "therapists": "Terapeutas",
+      "all": "Todos",
+      "loadError": "Erro ao carregar sessões. Por favor, tente novamente.",
+      "empty": "Nenhuma sessão encontrada",
+      "emptyHint": "Registre as sessões de terapia da criança",
+      "emptyFiltered": "Tente outro filtro ou registre uma nova sessão.",
+      "register": "Registrar sessão",
+      "newAria": "Nova sessão",
+      "minutes": "{{count}} min"
+    }
+  },
+  "p2Settings": {
+    "retry": "Tentar novamente",
+    "exportReadyTitle": "Exportação pronta",
+    "exportReadyDesc": "O download foi aberto em uma nova aba",
+    "exportError": "Não foi possível gerar a exportação. Tente novamente.",
+    "privacy": {
+      "title": "Privacidade e dados",
+      "description": "Baixe uma cópia de tudo que sua conta possui — todas as crianças, avaliações, registros, anamneses, documentos e demais dados — em um único arquivo.",
+      "exporting": "Gerando exportação...",
+      "export": "Exportar todos os meus dados",
+      "policy": "Política de privacidade",
+      "terms": "Termos de uso"
+    },
+    "danger": {
+      "title": "Zona de risco",
+      "description": "Excluir sua conta apaga permanentemente todas as crianças cadastradas e tudo ligado a elas. Essa ação não pode ser desfeita.",
+      "button": "Excluir minha conta"
+    },
+    "delete": {
+      "phrase": "excluir minha conta",
+      "title": "Excluir minha conta",
+      "warning": "Isso apaga permanentemente todas as crianças cadastradas e tudo ligado a elas (avaliações, registros, documentos, terapia, saúde, metas), além de anamneses, profissionais cadastrados e rascunhos.",
+      "irreversible": "Não pode ser desfeito.",
+      "typePrompt": "Digite <strong>{{phrase}}</strong> abaixo para confirmar.",
+      "confirmLabel": "Confirmação",
+      "cancel": "Cancelar",
+      "deleting": "Excluindo...",
+      "confirm": "Excluir permanentemente",
+      "error": "Não foi possível excluir a conta agora. Tente novamente."
+    }
+  },
+  "p2SignIn": {
+    "appName": "Perfil Sensorial",
+    "signInLoading": "Entrando...",
+    "signUpLoading": "Criando conta...",
+    "signUpConfirmation": "Verifique seu e-mail para o link de confirmação",
+    "forgotLoading": "Enviando instruções...",
+    "forgotConfirmation": "Verifique seu e-mail para o link de redefinição de senha",
+    "updatePassword": {
+      "password": "Nova senha",
+      "placeholder": "Sua nova senha",
+      "button": "Atualizar senha",
+      "loading": "Atualizando senha...",
+      "confirmation": "Sua senha foi atualizada"
+    },
+    "privacy": "Política de privacidade",
+    "terms": "Termos de uso",
+    "backHome": "Voltar ao início"
+  },
+  "p2Sharing": {
+    "token": {
+      "pending": "Convite pendente",
+      "sendTo": "Envie este código de convite para <strong>{{name}}</strong>. Ele(a) deve fazer login e usar a página \"Aceitar convite\" para vincular a conta.",
+      "sendGeneric": "Envie este código de convite para o profissional. Ele(a) deve fazer login e usar a página \"Aceitar convite\" para vincular a conta.",
+      "codeLabel": "Código de convite",
+      "copied": "Copiado!",
+      "copy": "Copiar código",
+      "copyFailed": "Não foi possível copiar. Selecione o código e copie manualmente.",
+      "rotating": "Gerando...",
+      "rotate": "Gerar novo código",
+      "rotateError": "Não foi possível gerar um novo código. Tente novamente.",
+      "oneUse": "Cada código só pode ser usado uma vez. Se for perdido, gere um novo."
+    },
+    "panel": {
+      "loadError": "Não foi possível carregar profissionais ou compartilhamentos.",
+      "grantError": "Não foi possível compartilhar com este profissional.",
+      "revokeError": "Não foi possível remover este compartilhamento.",
+      "title": "Compartilhar com profissionais",
+      "description": "Conceda acesso somente-leitura a profissionais já cadastrados na sua agenda. Eles veem apenas o que você compartilhar explicitamente.",
+      "loading": "Carregando...",
+      "retry": "Tentar novamente",
+      "noPros": "Você ainda não cadastrou nenhum profissional.",
+      "addPro": "+ Cadastrar profissional",
+      "noShares": "Nenhum profissional tem acesso a este registro ainda.",
+      "removedPro": "Profissional removido",
+      "accepted": "Aceito",
+      "pendingInvite": "Convite pendente",
+      "pendingInviteParen": " (convite pendente)",
+      "revoke": "Revogar",
+      "revokeAria": "Revogar acesso de {{name}}",
+      "grantTo": "Conceder acesso a",
+      "selectPro": "Selecione um profissional",
+      "sharing": "Compartilhando...",
+      "share": "Compartilhar"
+    }
+  },
+  "p2Notes": {
+    "title": "Minhas notas",
+    "placeholder": "Escreva uma anotação sobre esta criança...",
+    "newNoteLabel": "Nova nota",
+    "linkSession": "Vincular a uma sessão (opcional)",
+    "adding": "Salvando...",
+    "add": "Adicionar nota",
+    "loading": "Carregando notas...",
+    "empty": "Você ainda não escreveu notas sobre esta criança.",
+    "editLabel": "Editar nota",
+    "saving": "Salvando...",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "removeAria": "Remover nota",
+    "loadError": "Erro ao carregar suas notas.",
+    "saveError": "Erro ao salvar a nota. Tente novamente.",
+    "updateError": "Erro ao atualizar a nota. Tente novamente.",
+    "removeError": "Erro ao remover a nota. Tente novamente.",
+    "retry": "Tentar novamente"
+  },
+  "p2Recap": {
+    "noMood": "Sem registros de humor neste mês",
+    "chartLabel": "Gráfico de humor médio por dia no mês",
+    "barTitle": "Dia {{day}}: humor médio {{avg}}"
+  },
+  "p2Reminders": {
+    "title": "Próximos lembretes",
+    "new": "Novo",
+    "loading": "Carregando...",
+    "loadError": "Erro ao carregar lembretes. Tente novamente.",
+    "retry": "Tentar novamente",
+    "updateError": "Não foi possível atualizar o lembrete.",
+    "empty": "Nenhum lembrete nos próximos {{days}} dias",
+    "done": "Marcar como feito",
+    "dismiss": "Dispensar lembrete",
+    "addToCalendar": "Adicionar ao calendário",
+    "icsName": "lembrete-{{id}}",
+    "origin": {
+      "manual": "Manual",
+      "medical": "Retorno médico",
+      "school": "Escola",
+      "milestone": "Marco",
+      "medication": "Medicação",
+      "document": "Documento"
+    },
+    "modal": {
+      "title": "Novo lembrete",
+      "titleField": "Título",
+      "titlePh": "Ex: Levar exame para a fono",
+      "date": "Data",
+      "notes": "Observações",
+      "notesPh": "Detalhes adicionais...",
+      "save": "Salvar",
+      "saving": "Salvando...",
+      "cancel": "Cancelar",
+      "saveError": "Não foi possível salvar o lembrete. Tente novamente."
+    }
+  },
+  "p2Boundary": {
+    "title": "Algo deu errado",
+    "message": "Ocorreu um erro inesperado. Por favor, tente recarregar a página ou voltar para a página inicial.",
+    "reload": "Recarregar Página",
+    "home": "Voltar para Início"
   }
 }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Flex } from '@radix-ui/themes';
+import i18n from '../i18n';
 
 import GumroadCard from './design-system/GumroadCard';
 import GumroadButton from './design-system/GumroadButton';
@@ -39,11 +40,10 @@ class ErrorBoundary extends React.Component<
           <GumroadCard color="salmon" shadow="md" padding="xl">
             <Flex direction="column" align="center" gap="4" py="6">
               <GumroadHeading level="display-md" as="h1" style={{ textAlign: 'center' }}>
-                Algo deu errado
+                {i18n.t('p2Boundary.title')}
               </GumroadHeading>
               <GumroadText level="body-md" as="p" style={{ textAlign: 'center', opacity: 0.8 }}>
-                Ocorreu um erro inesperado. Por favor, tente recarregar a
-                página ou voltar para a página inicial.
+                {i18n.t('p2Boundary.message')}
               </GumroadText>
               {this.state.error && (
                 <GumroadText
@@ -56,10 +56,10 @@ class ErrorBoundary extends React.Component<
               )}
               <Flex gap="3" mt="2" wrap="wrap" justify="center">
                 <GumroadButton variant="primary" size="md" onClick={() => window.location.reload()}>
-                  Recarregar Página
+                  {i18n.t('p2Boundary.reload')}
                 </GumroadButton>
                 <GumroadButton variant="secondary" size="md" onClick={this.handleReset}>
-                  Voltar para Início
+                  {i18n.t('p2Boundary.home')}
                 </GumroadButton>
               </Flex>
             </Flex>

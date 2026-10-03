@@ -218,6 +218,247 @@
     }
   },
   "p2Common": {
-    "allChildren": "All children"
+    "allChildren": "All children",
+    "loading": "Loading…"
+  },
+  "p2Therapy": {
+    "types": {
+      "aba": {
+        "label": "ABA",
+        "subtitle": "Applied Behavior Analysis",
+        "short": "ABA"
+      },
+      "ot": {
+        "label": "OT",
+        "subtitle": "Occupational Therapy",
+        "short": "OT"
+      },
+      "fonoaudiologia": {
+        "label": "Speech Therapy",
+        "subtitle": "Language and Communication",
+        "short": "Speech"
+      },
+      "psicologia": {
+        "label": "Psychology",
+        "subtitle": "Psychological Support",
+        "short": "Psych"
+      },
+      "fisioterapia": {
+        "label": "Physical Therapy",
+        "subtitle": "Motor Development",
+        "short": "PT"
+      }
+    },
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "back": "← Back",
+    "changesSaved": "Changes saved",
+    "saveError": "Could not save. Please try again.",
+    "removeError": "Could not remove. Please try again.",
+    "session": {
+      "title": "New Session",
+      "dateTime": "Date and time",
+      "therapist": "Therapist",
+      "noTherapist": "No therapist",
+      "duration": "Duration (minutes)",
+      "durationPh": "E.g. 50",
+      "notes": "Notes",
+      "notesPh": "Notes about the session...",
+      "save": "Save Session",
+      "error": "Could not save the session. Please try again.",
+      "invalidDate": "Enter a valid date and time.",
+      "saved": "Session saved"
+    },
+    "card": {
+      "editAria": "Edit therapist",
+      "removeAria": "Remove therapist"
+    },
+    "form": {
+      "name": "Name",
+      "namePh": "Therapist name",
+      "specialty": "Specialty",
+      "select": "Select...",
+      "phone": "Phone",
+      "phonePh": "(555) 123-4567",
+      "email": "Email",
+      "emailPh": "therapist@example.com",
+      "notes": "Notes",
+      "notesPh": "Additional information..."
+    },
+    "panel": {
+      "title": "Therapists",
+      "add": "Add Therapist",
+      "empty": "No therapists registered",
+      "confirm": "Remove {{name}}?",
+      "confirmBtn": "Confirm",
+      "new": "New Therapist",
+      "edit": "Edit Therapist",
+      "added": "Therapist added",
+      "removed": "Therapist removed"
+    },
+    "page": {
+      "title": "Therapy Sessions",
+      "subtitle": "Keep track of the child's therapies",
+      "therapists": "Therapists",
+      "all": "All",
+      "loadError": "Could not load sessions. Please try again.",
+      "empty": "No sessions found",
+      "emptyHint": "Record the child's therapy sessions",
+      "emptyFiltered": "Try another filter or record a new session.",
+      "register": "Record session",
+      "newAria": "New session",
+      "minutes": "{{count}} min"
+    }
+  },
+  "p2Settings": {
+    "retry": "Try again",
+    "exportReadyTitle": "Export ready",
+    "exportReadyDesc": "The download opened in a new tab",
+    "exportError": "Could not generate the export. Please try again.",
+    "privacy": {
+      "title": "Privacy and data",
+      "description": "Download a copy of everything your account holds — all children, assessments, logs, anamneses, documents and other data — in a single file.",
+      "exporting": "Generating export...",
+      "export": "Export all my data",
+      "policy": "Privacy policy",
+      "terms": "Terms of service"
+    },
+    "danger": {
+      "title": "Danger zone",
+      "description": "Deleting your account permanently erases all registered children and everything linked to them. This cannot be undone.",
+      "button": "Delete my account"
+    },
+    "delete": {
+      "phrase": "delete my account",
+      "title": "Delete my account",
+      "warning": "This permanently erases all registered children and everything linked to them (assessments, logs, documents, therapy, health, goals), as well as anamneses, registered professionals and drafts.",
+      "irreversible": "This cannot be undone.",
+      "typePrompt": "Type <strong>{{phrase}}</strong> below to confirm.",
+      "confirmLabel": "Confirmation",
+      "cancel": "Cancel",
+      "deleting": "Deleting...",
+      "confirm": "Delete permanently",
+      "error": "Could not delete the account right now. Please try again."
+    }
+  },
+  "p2SignIn": {
+    "appName": "Sensory Profile",
+    "signInLoading": "Signing in...",
+    "signUpLoading": "Creating account...",
+    "signUpConfirmation": "Check your email for the confirmation link",
+    "forgotLoading": "Sending instructions...",
+    "forgotConfirmation": "Check your email for the password reset link",
+    "updatePassword": {
+      "password": "New password",
+      "placeholder": "Your new password",
+      "button": "Update password",
+      "loading": "Updating password...",
+      "confirmation": "Your password has been updated"
+    },
+    "privacy": "Privacy policy",
+    "terms": "Terms of service",
+    "backHome": "Back to home"
+  },
+  "p2Sharing": {
+    "token": {
+      "pending": "Pending invitation",
+      "sendTo": "Send this invitation code to <strong>{{name}}</strong>. They must sign in and use the \"Accept invitation\" page to link their account.",
+      "sendGeneric": "Send this invitation code to the professional. They must sign in and use the \"Accept invitation\" page to link their account.",
+      "codeLabel": "Invitation code",
+      "copied": "Copied!",
+      "copy": "Copy code",
+      "copyFailed": "Could not copy. Select the code and copy it manually.",
+      "rotating": "Generating...",
+      "rotate": "Generate new code",
+      "rotateError": "Could not generate a new code. Please try again.",
+      "oneUse": "Each code can only be used once. If it is lost, generate a new one."
+    },
+    "panel": {
+      "loadError": "Could not load professionals or shares.",
+      "grantError": "Could not share with this professional.",
+      "revokeError": "Could not remove this share.",
+      "title": "Share with professionals",
+      "description": "Grant read-only access to professionals already in your directory. They only see what you explicitly share.",
+      "loading": "Loading...",
+      "retry": "Try again",
+      "noPros": "You have not registered any professionals yet.",
+      "addPro": "+ Register professional",
+      "noShares": "No professional has access to this record yet.",
+      "removedPro": "Removed professional",
+      "accepted": "Accepted",
+      "pendingInvite": "Pending invitation",
+      "pendingInviteParen": " (pending invitation)",
+      "revoke": "Revoke",
+      "revokeAria": "Revoke access for {{name}}",
+      "grantTo": "Grant access to",
+      "selectPro": "Select a professional",
+      "sharing": "Sharing...",
+      "share": "Share"
+    }
+  },
+  "p2Notes": {
+    "title": "My notes",
+    "placeholder": "Write a note about this child...",
+    "newNoteLabel": "New note",
+    "linkSession": "Link to a session (optional)",
+    "adding": "Saving...",
+    "add": "Add note",
+    "loading": "Loading notes...",
+    "empty": "You have not written any notes about this child yet.",
+    "editLabel": "Edit note",
+    "saving": "Saving...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "removeAria": "Remove note",
+    "loadError": "Error loading your notes.",
+    "saveError": "Error saving the note. Please try again.",
+    "updateError": "Error updating the note. Please try again.",
+    "removeError": "Error removing the note. Please try again.",
+    "retry": "Try again"
+  },
+  "p2Recap": {
+    "noMood": "No mood logs this month",
+    "chartLabel": "Chart of average mood per day this month",
+    "barTitle": "Day {{day}}: average mood {{avg}}"
+  },
+  "p2Reminders": {
+    "title": "Upcoming reminders",
+    "new": "New",
+    "loading": "Loading...",
+    "loadError": "Error loading reminders. Please try again.",
+    "retry": "Try again",
+    "updateError": "Could not update the reminder.",
+    "empty": "No reminders in the next {{days}} days",
+    "done": "Mark as done",
+    "dismiss": "Dismiss reminder",
+    "addToCalendar": "Add to calendar",
+    "icsName": "reminder-{{id}}",
+    "origin": {
+      "manual": "Manual",
+      "medical": "Medical follow-up",
+      "school": "School",
+      "milestone": "Milestone",
+      "medication": "Medication",
+      "document": "Document"
+    },
+    "modal": {
+      "title": "New reminder",
+      "titleField": "Title",
+      "titlePh": "E.g. Bring the test results to speech therapy",
+      "date": "Date",
+      "notes": "Notes",
+      "notesPh": "Additional details...",
+      "save": "Save",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "saveError": "Could not save the reminder. Please try again."
+    }
+  },
+  "p2Boundary": {
+    "title": "Something went wrong",
+    "message": "An unexpected error occurred. Please try reloading the page or going back to the home page.",
+    "reload": "Reload Page",
+    "home": "Back to Home"
   }
 }
