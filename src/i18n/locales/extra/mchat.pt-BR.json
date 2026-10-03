@@ -72,7 +72,9 @@
       "childAge": "Idade da criança é obrigatória",
       "allItems": "Todos os itens são obrigatórios. Volte e responda os itens que faltam.",
       "sectionItems_one": "Falta responder {{count}} item desta etapa.",
-      "sectionItems_other": "Faltam responder {{count}} itens desta etapa."
+      "sectionItems_other": "Faltam responder {{count}} itens desta etapa.",
+      "unansweredItems_one": "Falta responder 1 item: {{items}}.",
+      "unansweredItems_other": "Faltam responder {{count}} itens: {{items}}."
     },
     "errors": {
       "load": "Erro ao carregar avaliação. Por favor, tente novamente.",

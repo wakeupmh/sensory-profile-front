@@ -396,14 +396,20 @@ const SensoryProfileForm: React.FC = () => {
     if (!formData.caregiver?.relationship) return fail(t('assessmentForm.validation.caregiverRelationship'));
     if (!formData.caregiver?.contact) return fail(t('assessmentForm.validation.caregiverContact'));
 
+    // Todos os itens de todas as seções são obrigatórios (a API rejeita respostas incompletas)
+    const unanswered: string[] = [];
     for (const section of effectiveSections) {
-      const sectionData = formData.sections?.[section.key];
-      if (!sectionData) continue;
-      for (const item of sectionData.items) {
+      const items = formData.sections?.[section.key]?.items ?? section.items.map((i) => ({ ...i, response: null }));
+      items.forEach((item, idx) => {
         if (!item.response) {
-          return fail(t('assessmentForm.validation.allItems'));
+          unanswered.push(
+            section.items.length === 1 ? section.title : effectiveSections.length > 1 ? `${section.title} (${idx + 1})` : String(idx + 1),
+          );
         }
-      }
+      });
+    }
+    if (unanswered.length > 0) {
+      return fail(t('assessmentForm.validation.unansweredItems', { count: unanswered.length, items: unanswered.join(', ') }));
     }
 
     return true;

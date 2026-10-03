@@ -72,7 +72,9 @@
       "childAge": "Child age is required",
       "allItems": "All items are required. Go back and answer the missing items.",
       "sectionItems_one": "{{count}} item in this step is still unanswered.",
-      "sectionItems_other": "{{count}} items in this step are still unanswered."
+      "sectionItems_other": "{{count}} items in this step are still unanswered.",
+      "unansweredItems_one": "1 item is still unanswered: {{items}}.",
+      "unansweredItems_other": "{{count}} items are still unanswered: {{items}}."
     },
     "errors": {
       "load": "Error loading the assessment. Please try again.",
