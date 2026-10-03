@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AlertDialog, Box, Flex } from '@radix-ui/themes';
 import {
   CheckIcon,
   Cross2Icon,
-  ExclamationTriangleIcon,
   InfoCircledIcon,
   Pencil1Icon,
   SpeakerLoudIcon,
@@ -16,6 +17,7 @@ import { LOG_TYPE_LABELS } from '../types/logs';
 import { useDomainPage } from '../hooks/useDomainPage';
 import { useToast } from '../context/ToastContext';
 import { ChildSelector } from '../components/domain/ChildSelector';
+import { ErrorState } from '../components/domain/ErrorState';
 import { colors, spacing, shadows, radii, fonts } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
@@ -42,11 +44,11 @@ function readStringList(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string') : [];
 }
 
-const STATUS_LABELS: Record<DailyReport['status'], string> = {
-  draft: 'Aguardando áudio',
-  transcribing: 'Transcrevendo…',
-  ready: 'Pronto',
-  failed: 'Falhou',
+const STATUS_KEYS: Record<DailyReport['status'], string> = {
+  draft: 'p1Daily.statusDraft',
+  transcribing: 'p1Daily.statusTranscribing',
+  ready: 'p1Daily.statusReady',
+  failed: 'p1Daily.statusFailed',
 };
 
 /** Transcrever alguns minutos leva dezenas de segundos; 4s é o meio-termo. */
@@ -66,8 +68,8 @@ function today(): string {
   return new Date(now.getTime() - offset).toISOString().slice(0, 10);
 }
 
-function formatReportDate(date: string): string {
-  return new Date(`${date}T12:00:00`).toLocaleDateString('pt-BR', {
+function formatReportDate(date: string, locale: string): string {
+  return new Date(`${date}T12:00:00`).toLocaleDateString(locale, {
     weekday: 'short',
     day: '2-digit',
     month: 'short',
@@ -75,6 +77,7 @@ function formatReportDate(date: string): string {
 }
 
 export default function DailyReportPage() {
+  const { t, i18n } = useTranslation();
   const { isLoaded, session } = useAuthContext();
   const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
   const toast = useToast();
@@ -111,11 +114,11 @@ export default function DailyReportPage() {
       setReports(await dailyReportApi.list(token, effectiveChildId));
       setError(null);
     } catch {
-      setError('Erro ao carregar os relatos. Por favor, tente novamente.');
+      setError(t('p1Daily.errLoad'));
     } finally {
       setLoading(false);
     }
-  }, [effectiveChildId, getTokenRef]);
+  }, [effectiveChildId, getTokenRef, t]);
 
   useEffect(() => {
     if (isLoaded && session) fetchReports();
@@ -202,7 +205,7 @@ export default function DailyReportPage() {
     // e dispará-lo antes garantiria um "arquivo não encontrado".
     const started = await dailyReportApi.startTranscription(token, report.id);
     setReports((prev) => [started, ...prev.filter((r) => r.id !== started.id)]);
-    toast.info('Gravação enviada', 'A transcrição leva alguns instantes.');
+    toast.info(t('p1Daily.uploaded'), t('p1Daily.uploadedDesc'));
   };
 
   /**
@@ -219,7 +222,7 @@ export default function DailyReportPage() {
       // Volta para `transcribing`, e o polling desta tela assume daqui.
       setReports((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
     } catch {
-      toast.error('Não foi possível reprocessar a gravação.');
+      toast.error(t('p1Daily.retryFail'));
     } finally {
       setRetrying(null);
     }
@@ -241,7 +244,7 @@ export default function DailyReportPage() {
       const { url } = await dailyReportApi.getAudioUrl(token, report.id);
       setAudioUrls((prev) => ({ ...prev, [report.id]: url }));
     } catch {
-      toast.error('Não foi possível carregar a gravação.');
+      toast.error(t('p1Daily.audioFail'));
     } finally {
       setLoadingAudio(null);
     }
@@ -253,9 +256,9 @@ export default function DailyReportPage() {
       const token = await getTokenRef.current();
       await dailyReportApi.remove(token, report.id);
       setReports((prev) => prev.filter((r) => r.id !== report.id));
-      toast.success('Relato removido.');
+      toast.success(t('p1Daily.removed'));
     } catch {
-      toast.error('Não foi possível remover o relato.');
+      toast.error(t('p1Daily.removeFail'));
     }
   };
 
@@ -283,9 +286,9 @@ export default function DailyReportPage() {
       });
       setSavedLogs((prev) => new Set(prev).add(key));
       setEditingSuggestion((prev) => (prev === key ? null : prev));
-      toast.success('Registro salvo.');
+      toast.success(t('p1Daily.logSaved'));
     } catch {
-      toast.error('Não foi possível salvar o registro.');
+      toast.error(t('p1Daily.logSaveFail'));
     } finally {
       setSavingLog(null);
     }
@@ -305,7 +308,7 @@ export default function DailyReportPage() {
   const handleSaveTranscript = async (report: DailyReport) => {
     const transcript = transcriptDraft.trim();
     if (!transcript) {
-      toast.error('A transcrição não pode ficar vazia.');
+      toast.error(t('p1Daily.transcriptEmpty'));
       return;
     }
     setSavingTranscript(true);
@@ -328,11 +331,11 @@ export default function DailyReportPage() {
       setEditingTranscriptId(null);
       toast.success(
         updated.structured
-          ? 'Transcrição atualizada e o resumo foi reorganizado.'
-          : 'Transcrição atualizada. Não foi possível reorganizar o resumo agora.',
+          ? t('p1Daily.transcriptUpdated')
+          : t('p1Daily.transcriptUpdatedNoSummary'),
       );
     } catch {
-      toast.error('Não foi possível salvar a transcrição.');
+      toast.error(t('p1Daily.transcriptSaveFail'));
     } finally {
       setSavingTranscript(false);
     }
@@ -344,10 +347,10 @@ export default function DailyReportPage() {
     <Box>
       <Box mb="6">
         <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
-          Relato do Dia
+          {t('p1Daily.title')}
         </GumroadHeading>
         <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7 }}>
-          Conte em voz alta como foi o dia — nós transcrevemos e organizamos
+          {t('p1Daily.subtitle')}
         </GumroadText>
       </Box>
 
@@ -355,29 +358,41 @@ export default function DailyReportPage() {
 
       {loading ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
-          <LoadingSpinner size="large" text="Carregando relatos..." />
+          <LoadingSpinner size="large" text={t('p1Daily.loadingReports')} />
         </GumroadCard>
       ) : error ? (
-        <GumroadCard color="salmon" shadow="md" padding="lg">
-          <Flex align="center" gap="2">
-            <ExclamationTriangleIcon />
-            <GumroadText level="body-md" as="p">{error}</GumroadText>
-          </Flex>
-        </GumroadCard>
-      ) : children.length > 0 && reports.length === 0 ? (
+        <ErrorState message={error} onRetry={fetchReports} />
+      ) : children.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">
-            <InfoCircledIcon width={40} height={40} />
+            <InfoCircledIcon width={40} height={40} aria-hidden="true" />
             <Box>
               <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
-                Nenhum relato ainda
+                {t('p1Daily.noChildTitle')}
               </GumroadHeading>
               <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-                Grave um áudio de dois minutos contando como foi o dia. É mais rápido que digitar.
+                {t('p1Daily.noChildBody')}
+              </GumroadText>
+            </Box>
+            <GumroadButton variant="primary" size="md" asChild>
+              <Link to="/children" style={{ textDecoration: 'none' }}>{t('p1Common.toChildren')}</Link>
+            </GumroadButton>
+          </Flex>
+        </GumroadCard>
+      ) : reports.length === 0 ? (
+        <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
+          <Flex direction="column" align="center" gap="4">
+            <InfoCircledIcon width={40} height={40} aria-hidden="true" />
+            <Box>
+              <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
+                {t('p1Daily.emptyTitle')}
+              </GumroadHeading>
+              <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
+                {t('p1Daily.emptyBody')}
               </GumroadText>
             </Box>
             <GumroadButton variant="primary" size="md" onClick={() => setRecorderOpen(true)} disabled={!effectiveChildId}>
-              Gravar o relato de hoje
+              {t('p1Daily.recordToday')}
             </GumroadButton>
           </Flex>
         </GumroadCard>
@@ -390,29 +405,29 @@ export default function DailyReportPage() {
                 <Flex justify="between" align="start" gap="2">
                   <Box style={{ flex: 1, minWidth: 0 }}>
                     <GumroadText level="body-sm" as="p" style={{ opacity: 0.6, fontSize: '12px' }}>
-                      {formatReportDate(report.reportDate)}
+                      {formatReportDate(report.reportDate, i18n.language)}
                     </GumroadText>
                     <GumroadText level="body-sm" as="p">
                       {report.status === 'ready'
                         ? report.structured?.summary ?? report.transcript ?? ''
                         : report.status === 'failed'
-                          ? report.error ?? 'A transcrição falhou.'
+                          ? report.error ?? t('p1Daily.failedText')
                           : pollTimedOut
-                            ? 'A transcrição está demorando mais que o esperado. Atualize a página para verificar de novo.'
-                            : 'Estamos transcrevendo a gravação…'}
+                            ? t('p1Daily.slowText')
+                            : t('p1Daily.transcribingText')}
                     </GumroadText>
                   </Box>
                   <GumroadBadge
                     color={report.status === 'ready' ? 'mint' : report.status === 'failed' ? 'salmon' : 'yellow'}
                   >
-                    {STATUS_LABELS[report.status]}
+                    {t(STATUS_KEYS[report.status])}
                   </GumroadBadge>
                 </Flex>
 
                 <Flex gap="2" mt="3" wrap="wrap">
                   {report.status === 'ready' && (
-                    <GumroadButton variant="secondary" size="sm" onClick={() => setExpandedId(expanded ? null : report.id)}>
-                      {expanded ? 'Ocultar detalhes' : 'Ver relatório'}
+                    <GumroadButton variant="secondary" size="sm" aria-expanded={expanded} onClick={() => setExpandedId(expanded ? null : report.id)}>
+                      {expanded ? t('p1Daily.hideDetails') : t('p1Daily.viewReport')}
                     </GumroadButton>
                   )}
                   {report.status === 'failed' && report.hasAudio && (
@@ -422,8 +437,8 @@ export default function DailyReportPage() {
                       disabled={retrying === report.id}
                       onClick={() => handleRetry(report)}
                     >
-                      <UpdateIcon />
-                      {retrying === report.id ? 'Reenviando…' : 'Tentar novamente'}
+                      <UpdateIcon aria-hidden="true" />
+                      {retrying === report.id ? t('p1Daily.resending') : t('p1Daily.retry')}
                     </GumroadButton>
                   )}
                   {report.hasAudio && !audioUrls[report.id] && (
@@ -433,13 +448,13 @@ export default function DailyReportPage() {
                       disabled={loadingAudio === report.id}
                       onClick={() => handlePlayAudio(report)}
                     >
-                      <SpeakerLoudIcon />
-                      {loadingAudio === report.id ? 'Carregando…' : 'Ouvir'}
+                      <SpeakerLoudIcon aria-hidden="true" />
+                      {loadingAudio === report.id ? t('p1Daily.loadingAudio') : t('p1Daily.listen')}
                     </GumroadButton>
                   )}
                   <GumroadButton variant="ghost" size="sm" onClick={() => setDeleting(report)}>
-                    <TrashIcon />
-                    Excluir
+                    <TrashIcon aria-hidden="true" />
+                    {t('p1Daily.delete')}
                   </GumroadButton>
                 </Flex>
 
@@ -459,7 +474,7 @@ export default function DailyReportPage() {
                           delete next[report.id];
                           return next;
                         });
-                        toast.error('A gravação expirou. Toque em "Ouvir" novamente.');
+                        toast.error(t('p1Daily.audioExpired'));
                       }}
                     >
                       <track kind="captions" />
@@ -471,7 +486,7 @@ export default function DailyReportPage() {
                   <Box mt="4" style={{ borderTop: `2px solid ${colors.ink}`, paddingTop: spacing.md }}>
                     {readStringList(report.structured?.highlights).length > 0 ? (
                       <Box mb="3">
-                        <GumroadHeading level="title-sm" as="h4">Destaques</GumroadHeading>
+                        <GumroadHeading level="title-sm" as="h4">{t('p1Daily.highlights')}</GumroadHeading>
                         <ul style={{ margin: 0, paddingLeft: '20px' }}>
                           {readStringList(report.structured?.highlights).map((item, i) => (
                             <li key={i}><GumroadText level="body-sm">{item}</GumroadText></li>
@@ -482,7 +497,7 @@ export default function DailyReportPage() {
 
                     {readStringList(report.structured?.concerns).length > 0 ? (
                       <Box mb="3">
-                        <GumroadHeading level="title-sm" as="h4">Pontos de atenção</GumroadHeading>
+                        <GumroadHeading level="title-sm" as="h4">{t('p1Daily.concerns')}</GumroadHeading>
                         <ul style={{ margin: 0, paddingLeft: '20px' }}>
                           {readStringList(report.structured?.concerns).map((item, i) => (
                             <li key={i}><GumroadText level="body-sm">{item}</GumroadText></li>
@@ -493,9 +508,9 @@ export default function DailyReportPage() {
 
                     {readSuggestedLogs(report).length > 0 ? (
                       <Box mb="3">
-                        <GumroadHeading level="title-sm" as="h4">Registros sugeridos</GumroadHeading>
+                        <GumroadHeading level="title-sm" as="h4">{t('p1Daily.suggested')}</GumroadHeading>
                         <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, marginBottom: spacing.sm }}>
-                          Nada é salvo sem a sua confirmação.
+                          {t('p1Daily.nothingSaved')}
                         </GumroadText>
                         <Flex direction="column" gap="2">
                           {readSuggestedLogs(report).map((suggestion, i) => {
@@ -515,7 +530,7 @@ export default function DailyReportPage() {
                                 <Flex justify="between" align="center" gap="2" wrap="wrap">
                                   <Flex align="center" gap="2" style={{ flex: 1, minWidth: 0 }}>
                                     <GumroadBadge color="lavender">
-                                      {LOG_TYPE_LABELS[suggestion.logType]}
+                                      {t(`p1Common.logType.${suggestion.logType}`)}
                                     </GumroadBadge>
                                     <GumroadText level="body-sm">{suggestion.notes ?? ''}</GumroadText>
                                   </Flex>
@@ -526,7 +541,7 @@ export default function DailyReportPage() {
                                         size="sm"
                                         onClick={() => setEditingSuggestion(editing ? null : key)}
                                       >
-                                        <Pencil1Icon /> {editing ? 'Fechar' : 'Ajustar'}
+                                        <Pencil1Icon aria-hidden="true" /> {editing ? t('p1Daily.close') : t('p1Daily.adjust')}
                                       </GumroadButton>
                                     )}
                                     <GumroadButton
@@ -535,7 +550,7 @@ export default function DailyReportPage() {
                                       disabled={saved || savingLog === key}
                                       onClick={() => handleConfirmLog(report, suggestion, i)}
                                     >
-                                      {saved ? <><CheckIcon /> Salvo</> : savingLog === key ? 'Salvando…' : 'Salvar registro'}
+                                      {saved ? <><CheckIcon aria-hidden="true" /> {t('p1Daily.saved')}</> : savingLog === key ? t('p1Daily.saving') : t('p1Daily.saveLog')}
                                     </GumroadButton>
                                   </Flex>
                                 </Flex>
@@ -558,7 +573,7 @@ export default function DailyReportPage() {
                     {report.transcript && (
                       <Box>
                         <Flex justify="between" align="center" mb="1">
-                          <GumroadHeading level="title-sm" as="h4">Transcrição</GumroadHeading>
+                          <GumroadHeading level="title-sm" as="h4">{t('p1Daily.transcript')}</GumroadHeading>
                           {editingTranscriptId !== report.id && (
                             <GumroadButton
                               variant="ghost"
@@ -568,7 +583,7 @@ export default function DailyReportPage() {
                                 setTranscriptDraft(report.transcript ?? '');
                               }}
                             >
-                              <Pencil1Icon /> Corrigir
+                              <Pencil1Icon aria-hidden="true" /> {t('p1Daily.correct')}
                             </GumroadButton>
                           )}
                         </Flex>
@@ -578,6 +593,7 @@ export default function DailyReportPage() {
                               value={transcriptDraft}
                               onChange={(e) => setTranscriptDraft(e.target.value)}
                               autoFocus
+                              aria-label={t('p1Daily.transcriptLabel')}
                               style={{
                                 width: '100%',
                                 minHeight: '140px',
@@ -595,8 +611,7 @@ export default function DailyReportPage() {
                               }}
                             />
                             <GumroadText level="body-sm" as="p" style={{ opacity: 0.65, marginTop: spacing.xxs }}>
-                              Corrija nomes, remédios ou termos que a transcrição automática errou. O resumo da IA
-                              é reorganizado a partir do texto corrigido.
+                              {t('p1Daily.correctHint')}
                             </GumroadText>
                             <Flex gap="2" mt="2">
                               <GumroadButton
@@ -605,7 +620,7 @@ export default function DailyReportPage() {
                                 disabled={savingTranscript}
                                 onClick={() => handleSaveTranscript(report)}
                               >
-                                {savingTranscript ? 'Salvando…' : 'Salvar correção'}
+                                {savingTranscript ? t('p1Daily.saving') : t('p1Daily.saveCorrection')}
                               </GumroadButton>
                               <GumroadButton
                                 variant="secondary"
@@ -613,7 +628,7 @@ export default function DailyReportPage() {
                                 disabled={savingTranscript}
                                 onClick={() => setEditingTranscriptId(null)}
                               >
-                                <Cross2Icon /> Cancelar
+                                <Cross2Icon aria-hidden="true" /> {t('p1Daily.cancel')}
                               </GumroadButton>
                             </Flex>
                           </Box>
@@ -634,8 +649,9 @@ export default function DailyReportPage() {
 
       {effectiveChildId && (
         <button
+          type="button"
           onClick={() => setRecorderOpen(true)}
-          aria-label="Gravar relato do dia"
+          aria-label={t('p1Daily.recordAria')}
           style={{
             position: 'fixed',
             bottom: '80px',
@@ -654,7 +670,7 @@ export default function DailyReportPage() {
             zIndex: 100,
           }}
         >
-          <SpeakerLoudIcon width={24} height={24} />
+          <SpeakerLoudIcon width={24} height={24} aria-hidden="true" />
         </button>
       )}
 
@@ -668,19 +684,19 @@ export default function DailyReportPage() {
 
       <AlertDialog.Root open={!!deleting} onOpenChange={(open) => !open && setDeleting(null)}>
         <AlertDialog.Content size="2">
-          <AlertDialog.Title>Excluir relato</AlertDialog.Title>
+          <AlertDialog.Title>{t('p1Daily.deleteTitle')}</AlertDialog.Title>
           <AlertDialog.Description size="2">
             {deleting?.status === 'ready'
-              ? 'A transcrição, o relatório e a gravação deste dia serão apagados. Esta ação não pode ser desfeita.'
-              : 'Este relato e a gravação dele serão apagados. Esta ação não pode ser desfeita.'}
+              ? t('p1Daily.deleteReady')
+              : t('p1Daily.deleteOther')}
           </AlertDialog.Description>
           <Flex gap="3" mt="4" justify="end">
             <AlertDialog.Cancel>
-              <GumroadButton variant="secondary" size="sm">Cancelar</GumroadButton>
+              <GumroadButton variant="secondary" size="sm">{t('p1Daily.cancel')}</GumroadButton>
             </AlertDialog.Cancel>
             <AlertDialog.Action>
               <GumroadButton variant="danger" size="sm" onClick={() => deleting && handleDelete(deleting)}>
-                Excluir
+                {t('p1Daily.delete')}
               </GumroadButton>
             </AlertDialog.Action>
           </Flex>
