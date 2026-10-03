@@ -515,5 +515,8 @@
     "cancel": "Cancelar",
     "validating": "Validando...",
     "accept": "Aceitar convite"
+  },
+  "p1Hooks": {
+    "loadError": "Erro ao carregar dados. Por favor, tente novamente."
   }
 }

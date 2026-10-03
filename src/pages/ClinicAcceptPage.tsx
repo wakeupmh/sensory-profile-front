@@ -81,7 +81,7 @@ const ClinicAcceptPage: React.FC = () => {
         <GumroadCard color="mint" shadow="md" padding="lg">
           <Flex direction="column" gap="3" align="start">
             <Flex align="center" gap="2">
-              <CheckIcon />
+              <CheckIcon aria-hidden="true" />
               <GumroadText level="body-md" as="p">
                 {t('clinic.accept.success', { role: success })}
               </GumroadText>
@@ -108,7 +108,7 @@ const ClinicAcceptPage: React.FC = () => {
             />
             {error && (
               <Flex align="center" gap="2" style={{ marginTop: spacing.sm, color: colors['brand-salmon'] }}>
-                <ExclamationTriangleIcon />
+                <ExclamationTriangleIcon aria-hidden="true" />
                 <GumroadText level="body-sm" as="p">{error}</GumroadText>
               </Flex>
             )}

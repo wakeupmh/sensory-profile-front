@@ -34,9 +34,9 @@ const STATUS_BADGE_COLOR: Record<CareTeamDisplayStatus, 'mint' | 'yellow' | 'pea
   revoked: 'cream',
 };
 
-function formatDate(iso: string): string {
+function formatDate(iso: string, locale: string): string {
   try {
-    return new Date(iso).toLocaleDateString('pt-BR');
+    return new Date(iso).toLocaleDateString(locale);
   } catch {
     return iso;
   }
@@ -201,13 +201,13 @@ export default function CareTeamPage() {
     <Box style={{ maxWidth: '720px', margin: '0 auto' }}>
       <Box style={{ marginBottom: spacing.md }}>
         <GumroadButton variant="secondary" size="sm" onClick={() => navigate(childId ? `/children/${childId}` : '/children')}>
-          <ArrowLeftIcon /> {t('careTeam.manage.back')}
+          <ArrowLeftIcon aria-hidden="true" /> {t('careTeam.manage.back')}
         </GumroadButton>
       </Box>
 
       <Box style={{ marginBottom: spacing.lg }}>
         <Flex align="center" gap="2" mb="1">
-          <BadgeIcon />
+          <BadgeIcon aria-hidden="true" />
           <GumroadHeading level="display-sm" as="h1">
             {childName ? t('careTeam.manage.titleWithChild', { name: childName }) : t('careTeam.manage.title')}
           </GumroadHeading>
@@ -240,7 +240,7 @@ export default function CareTeamPage() {
               />
             </Box>
             <GumroadButton variant="primary" size="md" type="submit" disabled={inviting || !nameInput.trim() || !roleInput}>
-              <PlusIcon /> {inviting ? t('careTeam.manage.inviteForm.submitting') : t('careTeam.manage.inviteForm.submit')}
+              <PlusIcon aria-hidden="true" /> {inviting ? t('careTeam.manage.inviteForm.submitting') : t('careTeam.manage.inviteForm.submit')}
             </GumroadButton>
           </Flex>
         </form>
@@ -272,7 +272,7 @@ export default function CareTeamPage() {
             />
             <Flex gap="2" wrap="wrap" align="center" justify="between">
               <GumroadButton variant="primary" size="sm" onClick={handleCopyLink}>
-                {copied ? <CheckIcon /> : <CopyIcon />}
+                {copied ? <CheckIcon aria-hidden="true" /> : <CopyIcon aria-hidden="true" />}
                 {copied ? t('careTeam.manage.inviteSuccess.copied') : t('careTeam.manage.inviteSuccess.copy')}
               </GumroadButton>
               <GumroadButton variant="secondary" size="sm" onClick={() => setJustInvited(null)}>
@@ -301,7 +301,7 @@ export default function CareTeamPage() {
       {error && (
         <GumroadCard role="alert" color="salmon" shadow="sm" padding="md" style={{ marginBottom: spacing.md }}>
           <Flex align="center" gap="2">
-            <ExclamationTriangleIcon />
+            <ExclamationTriangleIcon aria-hidden="true" />
             <GumroadText level="body-sm" as="span">{error}</GumroadText>
           </Flex>
         </GumroadCard>
@@ -309,7 +309,7 @@ export default function CareTeamPage() {
 
       {loading ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
-          <LoadingSpinner size="large" text="Carregando..." />
+          <LoadingSpinner size="large" text={t('p1Common.loading')} />
         </GumroadCard>
       ) : members.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
@@ -386,7 +386,7 @@ function CareTeamMemberCard({
   onReinvite: () => void;
   reinviting: boolean;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   // Expirado já não concede nada — o convite não pode mais ser aceito (o
   // backend confere a validade no aceite). "Revogar" só faz sentido para um
   // acesso que ainda está de pé ou que ainda pode vir a ser aceito.
@@ -416,14 +416,14 @@ function CareTeamMemberCard({
             </Flex>
             <GumroadText level="caption" as="span" style={{ opacity: 0.6 }}>
               {status === 'active' && member.acceptedAt
-                ? t('careTeam.manage.memberCard.acceptedOn', { date: formatDate(member.acceptedAt) })
+                ? t('careTeam.manage.memberCard.acceptedOn', { date: formatDate(member.acceptedAt, i18n.language) })
                 : status === 'pending' && member.invitationExpiresAt
-                  ? t('careTeam.manage.memberCard.expiresOn', { date: formatDate(member.invitationExpiresAt) })
+                  ? t('careTeam.manage.memberCard.expiresOn', { date: formatDate(member.invitationExpiresAt, i18n.language) })
                   : status === 'expired' && member.invitationExpiresAt
-                    ? t('careTeam.manage.memberCard.expiredOn', { date: formatDate(member.invitationExpiresAt) })
+                    ? t('careTeam.manage.memberCard.expiredOn', { date: formatDate(member.invitationExpiresAt, i18n.language) })
                     : status === 'revoked' && member.revokedAt
-                      ? t('careTeam.manage.memberCard.revokedOn', { date: formatDate(member.revokedAt) })
-                      : t('careTeam.manage.memberCard.invitedOn', { date: formatDate(member.createdAt) })}
+                      ? t('careTeam.manage.memberCard.revokedOn', { date: formatDate(member.revokedAt, i18n.language) })
+                      : t('careTeam.manage.memberCard.invitedOn', { date: formatDate(member.createdAt, i18n.language) })}
             </GumroadText>
           </Flex>
         </Flex>

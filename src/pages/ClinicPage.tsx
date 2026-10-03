@@ -121,7 +121,7 @@ export default function ClinicPage({ clinicId, clinicName }: { clinicId: string;
   );
 
   if (loading) return <LoadingSpinner />;
-  if (error) return <ErrorState message={error} onRetry={reload} />;
+  if (error) return <ErrorState message={error} onRetry={reload} retryLabel={t('p1Common.retry')} />;
 
   const sorted = [...roster].sort(
     (a, b) =>
@@ -163,7 +163,7 @@ export default function ClinicPage({ clinicId, clinicName }: { clinicId: string;
               />
             </Box>
             <GumroadButton type="submit" variant="primary" disabled={!nameInput.trim() || inviting}>
-              <PlusIcon /> {inviting ? t('clinic.form.inviting') : t('clinic.form.invite')}
+              <PlusIcon aria-hidden="true" /> {inviting ? t('clinic.form.inviting') : t('clinic.form.invite')}
             </GumroadButton>
           </Flex>
         </form>
@@ -194,7 +194,7 @@ export default function ClinicPage({ clinicId, clinicName }: { clinicId: string;
               {buildInviteLink(justInvited.invitationToken)}
             </code>
             <GumroadButton variant="secondary" size="sm" onClick={handleCopy}>
-              {copied ? <><CheckIcon /> {t('clinic.invite.copied')}</> : <><CopyIcon /> {t('clinic.invite.copy')}</>}
+              {copied ? <><CheckIcon aria-hidden="true" /> {t('clinic.invite.copied')}</> : <><CopyIcon aria-hidden="true" /> {t('clinic.invite.copy')}</>}
             </GumroadButton>
           </Flex>
         </GumroadCard>
