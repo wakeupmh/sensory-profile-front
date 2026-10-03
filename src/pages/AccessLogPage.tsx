@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { Box, Flex } from '@radix-ui/themes';
 import {
   ArrowLeftIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  ExclamationTriangleIcon,
   EyeOpenIcon,
   InfoCircledIcon,
   Pencil1Icon,
@@ -19,16 +20,17 @@ import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { ErrorState } from '../components/domain/ErrorState';
 
 const LIMIT = 20;
 
-function formatDate(iso: string | null | undefined): string {
+function formatDate(iso: string | null | undefined, locale: string): string {
   if (!iso) return '—';
   const date = new Date(iso);
   // Um campo ausente virava "Invalid Date" em toda linha da tabela. Numa
   // trilha de auditoria, "—" é honesto; "Invalid Date" é só ruído.
   if (Number.isNaN(date.getTime())) return '—';
-  return date.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return date.toLocaleString(locale, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 // Os valores gravados pelo backend são o nome da coleção da rota
@@ -36,45 +38,20 @@ function formatDate(iso: string | null | undefined): string {
 // controllers escrevem à mão. O fallback mostra o valor cru em vez de
 // esconder a linha: uma trilha de auditoria não pode omitir o que não
 // reconhece.
-const RESOURCE_TYPE_LABELS: Record<string, string> = {
-  access_logs: 'Histórico de acesso',
-  anamnese: 'Anamnese',
-  anamneses: 'Anamneses',
-  assessment: 'Avaliação',
-  assessments: 'Avaliações',
-  care_team: 'Equipe de cuidado',
-  caregivers: 'Cuidadores',
-  communication_logs: 'Comunicação',
-  comorbidities: 'Comorbidades',
-  daily_logs: 'Registros diários',
-  daily_reports: 'Relatos do dia',
-  developmental_milestones: 'Marcos do desenvolvimento',
-  development: 'Desenvolvimento',
-  documents: 'Documentos',
-  education_plans: 'Plano educacional',
-  goals: 'Objetivos',
-  medical: 'Saúde',
-  medical_appointments: 'Consultas',
-  medications: 'Medicações',
-  professional_note: 'Nota profissional',
-  professional_notes: 'Notas profissionais',
-  reminders: 'Lembretes',
-  school_communications: 'Comunicação escolar',
-  therapy: 'Terapia',
-  therapy_sessions: 'Sessões de terapia',
-};
+const KNOWN_RESOURCE_TYPES = new Set(['access_logs', 'anamnese', 'anamneses', 'assessment', 'assessments', 'care_team', 'caregivers', 'communication_logs', 'comorbidities', 'daily_logs', 'daily_reports', 'developmental_milestones', 'development', 'documents', 'education_plans', 'goals', 'medical', 'medical_appointments', 'medications', 'professional_note', 'professional_notes', 'reminders', 'school_communications', 'therapy', 'therapy_sessions']);
 
 /**
  * "Você" só quando é mesmo você. A tela dizia "Você" em qualquer linha sem
  * nome resolvido, que é o caso da maioria — inclusive das ações de terceiros,
  * exatamente as que esta tela existe para mostrar.
  */
-function actorLabel(entry: AccessLogEntry, currentUserId: string | undefined): string {
-  if (currentUserId && entry.actorUserId === currentUserId) return 'Você';
-  return entry.actorName ?? 'Outro usuário';
+function actorLabel(entry: AccessLogEntry, currentUserId: string | undefined, t: TFunction): string {
+  if (currentUserId && entry.actorUserId === currentUserId) return t('p1AccessLog.you');
+  return entry.actorName ?? t('p1AccessLog.otherUser');
 }
 
 export default function AccessLogPage() {
+  const { t, i18n } = useTranslation();
   const { childId } = useParams<{ childId: string }>();
   const navigate = useNavigate();
   const { getToken, session } = useAuthContext();
@@ -96,11 +73,11 @@ export default function AccessLogPage() {
       setEntries(result.data);
       setTotal(result.total);
     } catch {
-      setError('Erro ao carregar o histórico de acesso. Tente novamente.');
+      setError(t('p1AccessLog.errLoad'));
     } finally {
       setLoading(false);
     }
-  }, [childId, page, getToken]);
+  }, [childId, page, getToken, t]);
 
   useEffect(() => {
     fetchLogs();
@@ -112,37 +89,32 @@ export default function AccessLogPage() {
     <Box style={{ maxWidth: '820px', margin: '0 auto' }}>
       <Box style={{ marginBottom: spacing.md }}>
         <GumroadButton variant="secondary" size="sm" onClick={() => navigate(childId ? `/children/${childId}` : '/children')}>
-          <ArrowLeftIcon /> Voltar
+          <ArrowLeftIcon aria-hidden="true" /> {t('p1AccessLog.back')}
         </GumroadButton>
       </Box>
 
       <Box style={{ marginBottom: spacing.lg }}>
         <Flex align="center" gap="2" mb="1">
-          <LockClosedIcon />
-          <GumroadHeading level="display-sm" as="h1">Histórico de acesso</GumroadHeading>
+          <LockClosedIcon aria-hidden="true" />
+          <GumroadHeading level="display-sm" as="h1">{t('p1AccessLog.title')}</GumroadHeading>
         </Flex>
         <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7 }}>
-          Veja exatamente quem acessou os dados desta criança, o quê e quando — total transparência.
+          {t('p1AccessLog.subtitle')}
         </GumroadText>
       </Box>
 
       {loading ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
-          <LoadingSpinner size="large" text="Carregando..." />
+          <LoadingSpinner size="large" text={t('p1AccessLog.loading')} />
         </GumroadCard>
       ) : error ? (
-        <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
-          <Flex align="center" gap="2">
-            <ExclamationTriangleIcon />
-            <GumroadText level="body-md" as="p">{error}</GumroadText>
-          </Flex>
-        </GumroadCard>
+        <ErrorState message={error} onRetry={fetchLogs} retryLabel={t('p1Common.retry')} />
       ) : entries.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="3">
-            <InfoCircledIcon width={32} height={32} />
+            <InfoCircledIcon width={32} height={32} aria-hidden="true" />
             <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-              Nenhum acesso registrado ainda.
+              {t('p1AccessLog.empty')}
             </GumroadText>
           </Flex>
         </GumroadCard>
@@ -152,23 +124,23 @@ export default function AccessLogPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '520px' }}>
               <thead>
                 <tr>
-                  <th style={thStyle}>Quem</th>
-                  <th style={thStyle}>O quê</th>
-                  <th style={thStyle}>Quando</th>
-                  <th style={thStyle}>Ação</th>
+                  <th scope="col" style={thStyle}>{t('p1AccessLog.who')}</th>
+                  <th scope="col" style={thStyle}>{t('p1AccessLog.what')}</th>
+                  <th scope="col" style={thStyle}>{t('p1AccessLog.when')}</th>
+                  <th scope="col" style={thStyle}>{t('p1AccessLog.action')}</th>
                 </tr>
               </thead>
               <tbody>
                 {entries.map((entry, idx) => (
                   <tr key={entry.id} style={{ backgroundColor: idx % 2 === 0 ? colors.surface : colors['surface-cream'] }}>
-                    <td style={tdStyle}>{actorLabel(entry, currentUserId)}</td>
-                    <td style={tdStyle}>{RESOURCE_TYPE_LABELS[entry.resourceType] ?? entry.resourceType}</td>
-                    <td style={tdStyle}>{formatDate(entry.createdAt)}</td>
+                    <td style={tdStyle}>{actorLabel(entry, currentUserId, t)}</td>
+                    <td style={tdStyle}>{KNOWN_RESOURCE_TYPES.has(entry.resourceType) ? t(`p1AccessLog.resource.${entry.resourceType}`) : entry.resourceType}</td>
+                    <td style={tdStyle}>{formatDate(entry.createdAt, i18n.language)}</td>
                     <td style={tdStyle}>
                       <Flex align="center" gap="1">
-                        {entry.action === 'write' ? <Pencil1Icon /> : <EyeOpenIcon />}
+                        {entry.action === 'write' ? <Pencil1Icon aria-hidden="true" /> : <EyeOpenIcon aria-hidden="true" />}
                         <GumroadText level="caption" as="span">
-                          {entry.action === 'write' ? 'Escrita' : 'Leitura'}
+                          {entry.action === 'write' ? t('p1AccessLog.write') : t('p1AccessLog.read')}
                         </GumroadText>
                       </Flex>
                     </td>
@@ -180,14 +152,14 @@ export default function AccessLogPage() {
 
           <Flex justify="between" align="center" mt="4">
             <GumroadText level="caption" as="span" style={{ opacity: 0.6 }}>
-              Página {page} de {totalPages} · {total} registro{total === 1 ? '' : 's'}
+              {t('p1AccessLog.pageInfo', { page, pages: totalPages, count: total })}
             </GumroadText>
             <Flex gap="2">
               <GumroadButton variant="secondary" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
-                <ChevronLeftIcon /> Anterior
+                <ChevronLeftIcon aria-hidden="true" /> {t('p1AccessLog.prev')}
               </GumroadButton>
               <GumroadButton variant="secondary" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
-                Próxima <ChevronRightIcon />
+                {t('p1AccessLog.next')} <ChevronRightIcon aria-hidden="true" />
               </GumroadButton>
             </Flex>
           </Flex>
