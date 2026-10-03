@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { parseLocalDate } from '../../utils/date';
 import { Flex, Box } from '@radix-ui/themes';
 import { childApi, ChildData } from '../../services/api';
@@ -22,12 +23,6 @@ function computeAge(birthDate: string): number {
   return age;
 }
 
-const genderLabel: Record<string, string> = {
-  male: 'Masculino',
-  female: 'Feminino',
-  other: 'Outro',
-};
-
 const EMPTY_FORM: ChildFormValue = {
   name: '',
   birthDate: '',
@@ -38,6 +33,12 @@ const EMPTY_FORM: ChildFormValue = {
 
 const ChildPicker: React.FC<ChildPickerProps> = ({ selectedId, onSelect }) => {
   const { getToken } = useAuthContext();
+  const { t } = useTranslation();
+  const genderLabel: Record<string, string> = {
+    male: t('assessmentForm.fields.male'),
+    female: t('assessmentForm.fields.female'),
+    other: t('assessmentForm.fields.other'),
+  };
 
   const [children, setChildren] = useState<ChildData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,22 +47,28 @@ const ChildPicker: React.FC<ChildPickerProps> = ({ selectedId, onSelect }) => {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [missingSelected, setMissingSelected] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  // A lista é buscada uma vez; selecionar uma criança não deve recarregá-la
+  const selectedIdRef = useRef(selectedId);
+  selectedIdRef.current = selectedId;
 
   const load = useCallback(async () => {
     try {
       setLoading(true);
+      setLoadError(false);
       const token = await getToken();
       const list = await childApi.list(token);
       setChildren(list);
-      if (selectedId && list.length > 0 && !list.find((c) => c.id === selectedId)) {
+      const current = selectedIdRef.current;
+      if (current && list.length > 0 && !list.find((c) => c.id === current)) {
         setMissingSelected(true);
       }
     } catch {
-      // fail silently — UI shows empty state
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
-  }, [getToken, selectedId]);
+  }, [getToken]);
 
   useEffect(() => {
     load();
@@ -73,7 +80,7 @@ const ChildPicker: React.FC<ChildPickerProps> = ({ selectedId, onSelect }) => {
 
   const handleSave = async () => {
     if (!formValue.name || !formValue.birthDate || !formValue.gender) {
-      setSaveError('Nome, data de nascimento e gênero são obrigatórios.');
+      setSaveError(t('assessmentForm.childPicker.requiredFields'));
       return;
     }
     try {
@@ -94,7 +101,7 @@ const ChildPicker: React.FC<ChildPickerProps> = ({ selectedId, onSelect }) => {
       setMissingSelected(false);
       onSelect(newChild);
     } catch {
-      setSaveError('Erro ao salvar criança. Tente novamente.');
+      setSaveError(t('assessmentForm.childPicker.saveError'));
     } finally {
       setSaving(false);
     }
@@ -108,8 +115,8 @@ const ChildPicker: React.FC<ChildPickerProps> = ({ selectedId, onSelect }) => {
 
   if (loading) {
     return (
-      <Box style={{ padding: spacing.lg }}>
-        <GumroadText level="body-md">Carregando...</GumroadText>
+      <Box role="status" style={{ padding: spacing.lg }}>
+        <GumroadText level="body-md">{t('assessmentForm.childPicker.loading')}</GumroadText>
       </Box>
     );
   }
@@ -117,7 +124,7 @@ const ChildPicker: React.FC<ChildPickerProps> = ({ selectedId, onSelect }) => {
   return (
     <Box>
       <GumroadHeading level="title-lg" as="h2" style={{ marginBottom: '16px' }}>
-        Selecionar Criança
+        {t('assessmentForm.childPicker.title')}
       </GumroadHeading>
 
       {missingSelected && (
@@ -131,15 +138,28 @@ const ChildPicker: React.FC<ChildPickerProps> = ({ selectedId, onSelect }) => {
           }}
         >
           <GumroadText level="body-sm" style={{ color: colors.ink }}>
-            A criança selecionada anteriormente foi removida. Por favor, selecione outra.
+            {t('assessmentForm.childPicker.removed')}
           </GumroadText>
         </Box>
       )}
 
-      {children.length === 0 && !showForm && (
+      {loadError && (
+        <Box role="alert" style={{ marginBottom: spacing.md }}>
+          <GumroadText level="body-md" style={{ color: colors.error }}>
+            {t('assessmentForm.childPicker.loadError')}
+          </GumroadText>
+          <Box mt="2">
+            <GumroadButton variant="secondary" size="sm" onClick={load}>
+              {t('assessmentForm.childPicker.retry')}
+            </GumroadButton>
+          </Box>
+        </Box>
+      )}
+
+      {children.length === 0 && !showForm && !loadError && (
         <Box style={{ marginBottom: spacing.md }}>
-          <GumroadText level="body-md" style={{ color: '#666' }}>
-            Nenhuma criança cadastrada. Clique em &ldquo;Nova Criança&rdquo; para começar.
+          <GumroadText level="body-md" style={{ color: colors['ink-muted'] }}>
+            {t('assessmentForm.childPicker.empty')}
           </GumroadText>
         </Box>
       )}
@@ -160,6 +180,8 @@ const ChildPicker: React.FC<ChildPickerProps> = ({ selectedId, onSelect }) => {
           return (
             <button
               key={child.id}
+              type="button"
+              aria-pressed={isSelected}
               onClick={() => {
                 setMissingSelected(false);
                 onSelect(child);
@@ -191,6 +213,7 @@ const ChildPicker: React.FC<ChildPickerProps> = ({ selectedId, onSelect }) => {
               {/* Checkmark when selected */}
               {isSelected && (
                 <span
+                  aria-hidden="true"
                   style={{
                     position: 'absolute',
                     top: '8px',
@@ -219,7 +242,7 @@ const ChildPicker: React.FC<ChildPickerProps> = ({ selectedId, onSelect }) => {
 
               {age !== null && (
                 <div style={{ fontSize: '13px', color: colors.ink, marginBottom: '4px' }}>
-                  {age} {age === 1 ? 'ano' : 'anos'}
+                  {age} {age === 1 ? t('assessmentForm.childPicker.year') : t('assessmentForm.childPicker.years')}
                 </div>
               )}
 
@@ -244,6 +267,8 @@ const ChildPicker: React.FC<ChildPickerProps> = ({ selectedId, onSelect }) => {
 
         {/* "Nova Criança" card */}
         <button
+          type="button"
+          aria-expanded={showForm}
           onClick={() => setShowForm((v) => !v)}
           style={{
             backgroundColor: showForm ? colors['brand-yellow'] : colors.canvas,
@@ -279,7 +304,7 @@ const ChildPicker: React.FC<ChildPickerProps> = ({ selectedId, onSelect }) => {
               color: colors.ink,
             }}
           >
-            Nova Criança
+            {t('assessmentForm.childPicker.newChild')}
           </span>
         </button>
       </div>
@@ -297,23 +322,23 @@ const ChildPicker: React.FC<ChildPickerProps> = ({ selectedId, onSelect }) => {
           }}
         >
           <GumroadHeading level="title-md" as="h3" style={{ marginBottom: '16px' }}>
-            Nova Criança
+            {t('assessmentForm.childPicker.newChild')}
           </GumroadHeading>
 
           <ChildForm value={formValue} onChange={handleFormChange} disabled={saving} />
 
           {saveError && (
-            <Box mt="2">
-              <GumroadText level="body-sm" style={{ color: colors['brand-salmon'] }}>{saveError}</GumroadText>
+            <Box mt="2" role="alert">
+              <GumroadText level="body-sm" style={{ color: colors.error }}>{saveError}</GumroadText>
             </Box>
           )}
 
           <Flex gap="3" mt="4" justify="end">
             <GumroadButton variant="secondary" size="sm" onClick={handleCancel} disabled={saving}>
-              Cancelar
+              {t('assessmentForm.buttons.cancel')}
             </GumroadButton>
             <GumroadButton variant="primary" size="sm" onClick={handleSave} disabled={saving}>
-              {saving ? 'Salvando...' : 'Salvar'}
+              {saving ? t('assessmentForm.saving') : t('assessmentForm.childPicker.save')}
             </GumroadButton>
           </Flex>
         </Box>

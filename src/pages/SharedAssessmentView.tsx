@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Box, Flex, Separator } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeftIcon, ExclamationTriangleIcon, FileTextIcon } from '@radix-ui/react-icons';
 import { useAuthContext } from '../context/AuthContext';
 import { sharedApi } from '../services/api';
@@ -20,6 +21,9 @@ const SharedAssessmentView: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { getToken } = useAuthContext();
+  const { t } = useTranslation();
+  const tRef = useRef(t);
+  tRef.current = t;
   const fetchedRef = useRef(false);
 
   const [formData, setFormData] = useState<FormData | null>(null);
@@ -89,8 +93,8 @@ const SharedAssessmentView: React.FC = () => {
         const status = err?.response?.status;
         setError(
           status === 404
-            ? 'Você não tem acesso a esta avaliação ou ela não existe mais.'
-            : 'Não foi possível carregar a avaliação.',
+            ? tRef.current('assessmentReport.shared.noAccess')
+            : tRef.current('assessmentReport.shared.loadError'),
         );
       } finally {
         setLoading(false);
@@ -104,19 +108,19 @@ const SharedAssessmentView: React.FC = () => {
     <Box style={{ maxWidth: 1080, margin: '0 auto' }}>
       <Flex align="center" justify="between" mb="4" wrap="wrap" gap="3">
         <GumroadButton variant="secondary" size="sm" onClick={() => navigate('/shared')}>
-          <ChevronLeftIcon /> Voltar
+          <ChevronLeftIcon aria-hidden="true" /> {t('assessmentForm.buttons.back')}
         </GumroadButton>
-        <GumroadBadge color="lavender">Compartilhado com você</GumroadBadge>
+        <GumroadBadge color="lavender">{t('assessmentReport.shared.badge')}</GumroadBadge>
       </Flex>
 
       <Flex align="center" gap="2" mb="2">
         <FileTextIcon width={22} height={22} />
         <GumroadHeading level="display-sm" as="h1">
-          Avaliação Sensorial
+          {t('assessmentReport.shared.title')}
         </GumroadHeading>
       </Flex>
       <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7, marginBottom: spacing.md }}>
-        Visualização somente-leitura do relatório.
+        {t('assessmentReport.shared.readOnly')}
       </GumroadText>
 
       <Separator size="4" mb="4" />
@@ -124,7 +128,7 @@ const SharedAssessmentView: React.FC = () => {
       {loading ? (
         <GumroadCard color="cream" shadow="md" padding="xl">
           <Flex direction="column" align="center" gap="3" py="9">
-            <LoadingSpinner size="large" text="Carregando..." />
+            <LoadingSpinner size="large" text={t('assessmentForm.childPicker.loading')} />
           </Flex>
         </GumroadCard>
       ) : error ? (

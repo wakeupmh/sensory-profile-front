@@ -152,6 +152,124 @@
           "description": "If you cannot answer because you have not observed the behavior or think the item does not apply to your child, select Not applicable."
         }
       }
+    },
+    "fields": {
+      "male": "Male",
+      "female": "Female",
+      "other": "Other",
+      "childName": "Child's Name:",
+      "fullName": "Full name",
+      "birthDate": "Date of Birth:",
+      "gender": "Gender:",
+      "nationalId": "National ID (RG/CPF):",
+      "nationalIdPlaceholder": "RG or CPF",
+      "otherInfo": "Other Information:",
+      "otherInfoPlaceholder": "Relevant additional information",
+      "childData": "Child Information",
+      "age": "Age:",
+      "examinerData": "Examiner Information",
+      "examinerName": "Examiner Name:",
+      "examinerNamePlaceholder": "Examiner name",
+      "profession": "Role/Profession:",
+      "professionPlaceholder": "Role or profession",
+      "contact": "Contact:",
+      "contactPlaceholder": "Phone or email",
+      "contactPlaceholderCaregiver": "Phone or email",
+      "mother": "Mother",
+      "father": "Father",
+      "grandparent": "Grandparent",
+      "sibling": "Sibling",
+      "caregiverData": "Caregiver Information",
+      "caregiverName": "Caregiver Name:",
+      "caregiverNamePlaceholder": "Caregiver name",
+      "relationship": "Relationship to the Child:"
+    },
+    "childPicker": {
+      "requiredFields": "Name, date of birth and gender are required.",
+      "saveError": "Error saving the child. Please try again.",
+      "loading": "Loading...",
+      "title": "Select Child",
+      "removed": "The previously selected child was removed. Please select another.",
+      "loadError": "Could not load the registered children.",
+      "retry": "Try again",
+      "empty": "No children registered. Click “New Child” to get started.",
+      "year": "year",
+      "years": "years",
+      "newChild": "New Child",
+      "save": "Save"
+    }
+  },
+  "assessmentReport": {
+    "title": "Assessment Report",
+    "source": "Source:",
+    "insufficientData": "Insufficient data",
+    "name": "Name:",
+    "notInformedM": "Not provided",
+    "notInformedF": "Not provided",
+    "years": "{{count}} years",
+    "additionalInfo": "Additional Information:",
+    "profession": "Profession:",
+    "relationship": "Relationship:",
+    "relations": {
+      "father": "Father",
+      "mother": "Mother",
+      "grandparent": "Grandparent",
+      "other_relative": "Other Relative",
+      "sibling": "Sibling",
+      "other": "Other"
+    },
+    "quadrants": {
+      "title": "Sensory Processing Quadrants",
+      "intro": "The four quadrants describe patterns in how the child processes sensory stimuli in daily life.",
+      "seeking": {
+        "title": "Sensory Seeking",
+        "description": "Actively seeks more sensory experiences than is typical for the age."
+      },
+      "avoiding": {
+        "title": "Sensory Avoiding",
+        "description": "Tries to reduce contact with sensory stimuli they find unpleasant."
+      },
+      "sensitivity": {
+        "title": "Sensory Sensitivity",
+        "description": "Notices and reacts more strongly to stimuli that other children barely perceive."
+      },
+      "registration": {
+        "title": "Sensory Registration",
+        "description": "Tends not to notice stimuli that other children notice; reduced sensory registration."
+      }
+    },
+    "scores": {
+      "title": "Score Summary",
+      "normed": "Scores are classified by comparing the child's performance with other children of the same age range.",
+      "banded": "Scores show the frequency observed per section, according to the bands defined by this instrument.",
+      "section": "Section",
+      "raw": "Raw Score",
+      "classification": "Classification"
+    },
+    "normalCurve": "Normal Curve and Classification System",
+    "details": {
+      "title": "Response Details",
+      "value": "Value",
+      "unanswered": "Not answered"
+    },
+    "date": "Assessment Date:",
+    "signature": "Examiner Signature",
+    "page": {
+      "loadError": "Error loading the assessment. Please try again.",
+      "backToAssessment": "Back to Assessment",
+      "backToHome": "Back to Home"
+    },
+    "shared": {
+      "noAccess": "You do not have access to this assessment or it no longer exists.",
+      "loadError": "Could not load the assessment.",
+      "badge": "Shared with you",
+      "title": "Sensory Assessment",
+      "readOnly": "Read-only view of the report."
+    },
+    "pdf": {
+      "error": "Error generating the PDF. Please try again.",
+      "generating": "Generating PDF...",
+      "generate": "Generate PDF"
     }
   }
 }
