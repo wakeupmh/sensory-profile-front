@@ -482,5 +482,38 @@
     "emergencyPh": "Name, relationship and phone",
     "generated": "Generated on {{date}}",
     "backToChildren": "Back to children"
+  },
+  "p1Invite": {
+    "pasteCode": "Paste the invitation code you received from the patient.",
+    "invalidCode": "Invalid or already used code.",
+    "errAccept": "Could not accept the invitation. Please try again.",
+    "title": "Accept invitation",
+    "intro": "Paste below the invitation code you received to access shared records.",
+    "accepted": "Invitation accepted",
+    "acceptedBody": "You can now access the records shared with you{{as}}.",
+    "asName": " as {{name}}",
+    "viewShared": "View shared records",
+    "codeLabel": "Invitation code",
+    "codePh": "Paste the code here",
+    "cancel": "Cancel",
+    "validating": "Validating...",
+    "accept": "Accept invitation"
+  },
+  "p1CgInvite": {
+    "pasteCode": "Paste the invitation code you received.",
+    "invalidCode": "Invalid or already used code.",
+    "errAccept": "Could not accept the invitation. Please try again.",
+    "title": "Accept caregiver invitation",
+    "intro": "Paste below the invitation code you received to become a child's caregiver.",
+    "accepted": "Invitation accepted",
+    "acceptedBody": "You are now a caregiver{{of}}. Use the \"Viewing\" selector at the top to act on behalf of this child whenever you like.",
+    "ofChild": " of {{name}}",
+    "startNow": "Start caring now",
+    "goHome": "Go to home",
+    "codeLabel": "Invitation code",
+    "codePh": "Paste the code here",
+    "cancel": "Cancel",
+    "validating": "Validating...",
+    "accept": "Accept invitation"
   }
 }

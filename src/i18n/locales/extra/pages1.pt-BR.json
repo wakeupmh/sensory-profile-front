@@ -482,5 +482,38 @@
     "emergencyPh": "Nome, parentesco e telefone",
     "generated": "Gerado em {{date}}",
     "backToChildren": "Voltar para crianças"
+  },
+  "p1Invite": {
+    "pasteCode": "Cole o código de convite recebido do paciente.",
+    "invalidCode": "Código inválido ou já utilizado.",
+    "errAccept": "Não foi possível aceitar o convite. Tente novamente.",
+    "title": "Aceitar convite",
+    "intro": "Cole abaixo o código de convite que você recebeu para acessar registros compartilhados.",
+    "accepted": "Convite aceito",
+    "acceptedBody": "Você agora pode acessar os registros compartilhados com você{{as}}.",
+    "asName": " como {{name}}",
+    "viewShared": "Ver registros compartilhados",
+    "codeLabel": "Código de convite",
+    "codePh": "Cole o código aqui",
+    "cancel": "Cancelar",
+    "validating": "Validando...",
+    "accept": "Aceitar convite"
+  },
+  "p1CgInvite": {
+    "pasteCode": "Cole o código de convite recebido.",
+    "invalidCode": "Código inválido ou já utilizado.",
+    "errAccept": "Não foi possível aceitar o convite. Tente novamente.",
+    "title": "Aceitar convite de cuidador",
+    "intro": "Cole abaixo o código de convite que você recebeu para se tornar cuidador(a) de uma criança.",
+    "accepted": "Convite aceito",
+    "acceptedBody": "Você agora é cuidador(a){{of}}. Use o seletor \"Visualizando\" no topo para atuar em nome dessa criança quando quiser.",
+    "ofChild": " de {{name}}",
+    "startNow": "Começar a cuidar agora",
+    "goHome": "Ir para o início",
+    "codeLabel": "Código de convite",
+    "codePh": "Cole o código aqui",
+    "cancel": "Cancelar",
+    "validating": "Validando...",
+    "accept": "Aceitar convite"
   }
 }
