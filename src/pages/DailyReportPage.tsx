@@ -426,7 +426,7 @@ export default function DailyReportPage() {
 
                 <Flex gap="2" mt="3" wrap="wrap">
                   {report.status === 'ready' && (
-                    <GumroadButton variant="secondary" size="sm" aria-expanded={expanded} onClick={() => setExpandedId(expanded ? null : report.id)}>
+                    <GumroadButton variant="secondary" size="sm" onClick={() => setExpandedId(expanded ? null : report.id)}>
                       {expanded ? t('p1Daily.hideDetails') : t('p1Daily.viewReport')}
                     </GumroadButton>
                   )}

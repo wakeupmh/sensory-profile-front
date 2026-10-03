@@ -2,6 +2,7 @@
 import * as React from 'react';
 import { useState, FormEvent, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Box, Flex } from '@radix-ui/themes';
 import { useAuthContext } from '../context/AuthContext';
 
@@ -23,17 +24,20 @@ import GumroadHeading, { GumroadText } from '../components/design-system/Gumroad
 import GumroadStepper from '../components/design-system/GumroadStepper';
 import { useDraftPersistence } from '../hooks/useDraftPersistence';
 
-const STEPS = [
-  { key: 'child', label: 'Criança' },
-  { key: 'caregiver', label: 'Responsável' },
-  { key: 'clinical', label: 'Histórico Clínico' },
-];
 
 const AnamneseForm: React.FC = () => {
+  const { t } = useTranslation();
+  const STEPS = [
+    { key: 'child', label: t('p1AnamneseForm.stepChild') },
+    { key: 'caregiver', label: t('p1AnamneseForm.stepCaregiver') },
+    { key: 'clinical', label: t('p1AnamneseForm.stepClinical') },
+  ];
   const { formData, setFormData, updateFormData } = useAnamneseForm();
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Falha ao salvar não pode trocar o formulário por uma tela de erro: o usuário perderia o que digitou.
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [shareToken, setShareToken] = useState<string | null>(null);
@@ -109,7 +113,7 @@ const AnamneseForm: React.FC = () => {
         if (err.response && err.response.status === 404) {
           setNotFound(true);
         } else {
-          setError('Erro ao carregar anamnese. Por favor, tente novamente.');
+          setError(t('p1AnamneseForm.errLoad'));
         }
         console.error(err);
       } finally {
@@ -123,14 +127,14 @@ const AnamneseForm: React.FC = () => {
   const validateStep = (step: number): boolean => {
     setValidationError(null);
     if (step === 0) {
-      if (!formData.child?.selectedChildId) { setValidationError('Selecione ou cadastre uma criança'); return false; }
+      if (!formData.child?.selectedChildId) { setValidationError(t('p1AnamneseForm.vChild')); return false; }
     } else if (step === 1) {
-      if (!formData.caregiver?.name) { setValidationError('Nome do responsável é obrigatório'); return false; }
-      if (!formData.caregiver?.relationship) { setValidationError('Relação do responsável é obrigatória'); return false; }
-      if (!formData.caregiver?.contact) { setValidationError('Contato do responsável é obrigatório'); return false; }
+      if (!formData.caregiver?.name) { setValidationError(t('p1AnamneseForm.vCgName')); return false; }
+      if (!formData.caregiver?.relationship) { setValidationError(t('p1AnamneseForm.vCgRel')); return false; }
+      if (!formData.caregiver?.contact) { setValidationError(t('p1AnamneseForm.vCgContact')); return false; }
     } else if (step === 2) {
       if (!formData.clinicalHistory?.queixa?.mainComplaint) {
-        setValidationError('Queixa principal é obrigatória');
+        setValidationError(t('p1AnamneseForm.vComplaint'));
         return false;
       }
     }
@@ -139,15 +143,15 @@ const AnamneseForm: React.FC = () => {
 
   const validateForm = (): boolean => {
     setValidationError(null);
-    if (!formData.child?.name) { setValidationError('Nome da criança é obrigatório'); return false; }
-    if (!formData.child?.birthDate) { setValidationError('Data de nascimento da criança é obrigatória'); return false; }
-    if (!formData.child?.gender) { setValidationError('Gênero da criança é obrigatório'); return false; }
-    if (!formData.child?.age) { setValidationError('Idade da criança é obrigatória'); return false; }
-    if (!formData.caregiver?.name) { setValidationError('Nome do responsável é obrigatório'); return false; }
-    if (!formData.caregiver?.relationship) { setValidationError('Relação do responsável é obrigatória'); return false; }
-    if (!formData.caregiver?.contact) { setValidationError('Contato do responsável é obrigatório'); return false; }
+    if (!formData.child?.name) { setValidationError(t('p1AnamneseForm.vName')); return false; }
+    if (!formData.child?.birthDate) { setValidationError(t('p1AnamneseForm.vBirth')); return false; }
+    if (!formData.child?.gender) { setValidationError(t('p1AnamneseForm.vGender')); return false; }
+    if (!formData.child?.age) { setValidationError(t('p1AnamneseForm.vAge')); return false; }
+    if (!formData.caregiver?.name) { setValidationError(t('p1AnamneseForm.vCgName')); return false; }
+    if (!formData.caregiver?.relationship) { setValidationError(t('p1AnamneseForm.vCgRel')); return false; }
+    if (!formData.caregiver?.contact) { setValidationError(t('p1AnamneseForm.vCgContact')); return false; }
     if (!formData.clinicalHistory?.queixa?.mainComplaint) {
-      setValidationError('Queixa principal é obrigatória');
+      setValidationError(t('p1AnamneseForm.vComplaint'));
       return false;
     }
     return true;
@@ -181,6 +185,7 @@ const AnamneseForm: React.FC = () => {
 
     try {
       setSubmitting(true);
+      setSaveError(null);
       const token = await getToken();
       const payload = {
         child: formData.child,
@@ -197,7 +202,7 @@ const AnamneseForm: React.FC = () => {
 
       navigate('/anamneses');
     } catch (err) {
-      setError('Erro ao salvar anamnese. Por favor, tente novamente.');
+      setSaveError(t('p1AnamneseForm.errSave'));
       console.error(err);
     } finally {
       setSubmitting(false);
@@ -205,9 +210,9 @@ const AnamneseForm: React.FC = () => {
   };
 
   const getTitle = () => {
-    if (isNewMode) return 'Nova Anamnese';
-    if (isEditMode) return 'Editar Anamnese';
-    return 'Visualizar Anamnese';
+    if (isNewMode) return t('p1AnamneseForm.titleNew');
+    if (isEditMode) return t('p1AnamneseForm.titleEdit');
+    return t('p1AnamneseForm.titleView');
   };
 
   const disabled = isViewMode;
@@ -217,7 +222,7 @@ const AnamneseForm: React.FC = () => {
       <Box width="100%">
         <GumroadCard color="cream" shadow="md" padding="xl">
           <Flex align="center" justify="center" direction="column" gap="3" py="9">
-            <LoadingSpinner size="large" text="Carregando anamnese..." />
+            <LoadingSpinner size="large" text={t('p1AnamneseForm.loading')} />
           </Flex>
         </GumroadCard>
       </Box>
@@ -227,8 +232,8 @@ const AnamneseForm: React.FC = () => {
   if (notFound) {
     return (
       <NotFound
-        title="Anamnese não encontrada"
-        message="A anamnese que você está procurando não existe ou foi removida."
+        title={t('p1AnamneseForm.notFoundTitle')}
+        message={t('p1AnamneseForm.notFoundMsg')}
       />
     );
   }
@@ -240,7 +245,7 @@ const AnamneseForm: React.FC = () => {
           <Flex align="center" justify="center" direction="column" gap="3" py="9">
             <GumroadText level="body-md" as="p">{error}</GumroadText>
             <GumroadButton variant="secondary" size="md" onClick={() => navigate('/anamneses')}>
-              Voltar
+              {t('p1AnamneseForm.back')}
             </GumroadButton>
           </Flex>
         </GumroadCard>
@@ -264,11 +269,11 @@ const AnamneseForm: React.FC = () => {
           <Flex gap="3" wrap="wrap">
             {isViewMode && (
               <GumroadButton variant="secondary" size="sm" onClick={() => navigate(`/anamnese/${id}/edit`)}>
-                Editar
+                {t('p1AnamneseForm.edit')}
               </GumroadButton>
             )}
             <GumroadButton variant="secondary" size="sm" onClick={() => navigate('/anamneses')}>
-              Voltar
+              {t('p1AnamneseForm.back')}
             </GumroadButton>
           </Flex>
         </Flex>
@@ -293,9 +298,19 @@ const AnamneseForm: React.FC = () => {
         {validationError && (
           <GumroadCard color="salmon" shadow="sm" padding="md" style={{ marginBottom: spacing.lg }}>
             <GumroadText level="body-md" as="p" style={{ fontWeight: 600 }}>
-              Erros de validação: {validationError}
+              {t('p1AnamneseForm.validation', { message: validationError })}
             </GumroadText>
           </GumroadCard>
+        )}
+
+        {saveError && (
+          <div role="alert">
+            <GumroadCard color="salmon" shadow="sm" padding="md" style={{ marginBottom: spacing.lg }}>
+              <GumroadText level="body-md" as="p" style={{ fontWeight: 600 }}>
+                {saveError}
+              </GumroadText>
+            </GumroadCard>
+          </div>
         )}
 
         {isViewMode && id && (
@@ -387,35 +402,35 @@ const AnamneseForm: React.FC = () => {
           {isNewMode ? (
             <>
               <GumroadButton variant="secondary" size="md" onClick={() => navigate('/anamneses')}>
-                Cancelar
+                {t('p1AnamneseForm.cancel')}
               </GumroadButton>
               {currentStep > 0 && (
                 <GumroadButton variant="secondary" size="md" onClick={handleBack}>
-                  Voltar
+                  {t('p1AnamneseForm.back')}
                 </GumroadButton>
               )}
               {currentStep < STEPS.length - 1 ? (
                 <GumroadButton variant="primary" size="md" onClick={handleNext}>
-                  Próximo
+                  {t('p1AnamneseForm.next')}
                 </GumroadButton>
               ) : (
                 <GumroadButton variant="primary" size="md" type="submit" disabled={submitting}>
-                  {submitting ? 'Criando...' : 'Criar Anamnese'}
+                  {submitting ? t('p1AnamneseForm.creating') : t('p1AnamneseForm.create')}
                 </GumroadButton>
               )}
             </>
           ) : !isViewMode ? (
             <>
               <GumroadButton variant="secondary" size="md" onClick={() => navigate('/anamneses')}>
-                Cancelar
+                {t('p1AnamneseForm.cancel')}
               </GumroadButton>
               <GumroadButton variant="primary" size="md" type="submit" disabled={submitting}>
-                {submitting ? 'Salvando...' : 'Salvar Alterações'}
+                {submitting ? t('p1AnamneseForm.saving') : t('p1AnamneseForm.saveChanges')}
               </GumroadButton>
             </>
           ) : (
             <GumroadButton variant="secondary" size="md" onClick={() => navigate('/anamneses')}>
-              Voltar
+              {t('p1AnamneseForm.back')}
             </GumroadButton>
           )}
         </Flex>
