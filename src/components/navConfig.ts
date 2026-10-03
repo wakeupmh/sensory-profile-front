@@ -21,7 +21,7 @@ import {
   BadgeIcon,
 } from '@radix-ui/react-icons';
 
-export type NavIcon = React.ComponentType<React.SVGProps<SVGSVGElement>>;
+export type NavIcon = React.ComponentType<{ width?: number; height?: number; style?: React.CSSProperties; 'aria-hidden'?: boolean | 'true' | 'false' }>;
 
 export interface NavItem {
   path: string;
