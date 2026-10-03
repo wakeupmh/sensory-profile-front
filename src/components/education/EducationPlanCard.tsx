@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { Pencil2Icon, TrashIcon } from '@radix-ui/react-icons';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import GumroadCard from '../design-system/GumroadCard';
@@ -18,8 +19,8 @@ interface EducationPlanCardProps {
   onDelete: (id: string) => void;
 }
 
-function formatDate(isoDate: string): string {
-  return new Date(isoDate + 'T00:00:00').toLocaleDateString('pt-BR', {
+function formatDate(isoDate: string, lang: string): string {
+  return new Date(isoDate + 'T00:00:00').toLocaleDateString(lang, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -41,6 +42,7 @@ const iconBtnStyle: React.CSSProperties = {
 };
 
 const EducationPlanCard: React.FC<EducationPlanCardProps> = ({ plan, onEdit, onDelete }) => {
+  const { t, i18n } = useTranslation();
   const [confirming, setConfirming] = useState(false);
 
   const planTypeColors = EDUCATION_PLAN_TYPE_COLORS[plan.planType];
@@ -53,9 +55,9 @@ const EducationPlanCard: React.FC<EducationPlanCardProps> = ({ plan, onEdit, onD
 
   if (confirming) {
     return (
-      <GumroadCard color="salmon" padding="md" shadow="md">
+      <GumroadCard color="salmon" padding="md" shadow="md" role="alert">
         <GumroadText level="body-md">
-          Remover plano "{plan.schoolName} — {plan.academicYear}"?
+          {t('cEducation.removePlanConfirm', { school: plan.schoolName, year: plan.academicYear })}
         </GumroadText>
         <Flex gap="2" mt="2">
           <GumroadButton
@@ -63,14 +65,14 @@ const EducationPlanCard: React.FC<EducationPlanCardProps> = ({ plan, onEdit, onD
             size="sm"
             onClick={() => onDelete(plan.id)}
           >
-            Confirmar
+            {t('cEducation.confirm')}
           </GumroadButton>
           <GumroadButton
             variant="ghost"
             size="sm"
             onClick={() => setConfirming(false)}
           >
-            Cancelar
+            {t('cEducation.cancel')}
           </GumroadButton>
         </Flex>
       </GumroadCard>
@@ -117,22 +119,22 @@ const EducationPlanCard: React.FC<EducationPlanCardProps> = ({ plan, onEdit, onD
                 border: `1.5px solid ${colors.ink}`,
               }}
             >
-              {EDUCATION_PLAN_TYPE_LABELS[plan.planType]}
+              {t(`cEducation.planType.${plan.planType}`, { defaultValue: EDUCATION_PLAN_TYPE_LABELS[plan.planType] })}
             </span>
           </Flex>
 
           <Flex gap="3" wrap="wrap" style={{ marginTop: '6px' }}>
             <GumroadText level="body-sm" style={{ opacity: 0.7 }}>
-              <strong>Início:</strong> {formatDate(plan.startDate)}
+              <strong>{t('cEducation.start')}:</strong> {formatDate(plan.startDate, i18n.language)}
             </GumroadText>
             {plan.reviewDate && (
               <GumroadText level="body-sm" style={{ opacity: 0.7 }}>
-                <strong>Revisão:</strong> {formatDate(plan.reviewDate)}
+                <strong>{t('cEducation.review')}:</strong> {formatDate(plan.reviewDate, i18n.language)}
               </GumroadText>
             )}
             {plan.endDate && (
               <GumroadText level="body-sm" style={{ opacity: 0.7 }}>
-                <strong>Encerramento:</strong> {formatDate(plan.endDate)}
+                <strong>{t('cEducation.end')}:</strong> {formatDate(plan.endDate, i18n.language)}
               </GumroadText>
             )}
           </Flex>
@@ -146,18 +148,20 @@ const EducationPlanCard: React.FC<EducationPlanCardProps> = ({ plan, onEdit, onD
 
         <Flex gap="2" style={{ marginLeft: '12px', flexShrink: 0 }}>
           <button
+            type="button"
             style={iconBtnStyle}
             onClick={() => onEdit(plan)}
-            aria-label="Editar plano"
+            aria-label={t('cEducation.editPlanAria', { school: plan.schoolName })}
           >
-            <Pencil2Icon />
+            <Pencil2Icon aria-hidden="true" />
           </button>
           <button
+            type="button"
             style={iconBtnStyle}
             onClick={() => setConfirming(true)}
-            aria-label="Remover plano"
+            aria-label={t('cEducation.removePlanAria', { school: plan.schoolName })}
           >
-            <TrashIcon />
+            <TrashIcon aria-hidden="true" />
           </button>
         </Flex>
       </Flex>
