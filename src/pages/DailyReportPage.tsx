@@ -79,7 +79,7 @@ function formatReportDate(date: string, locale: string): string {
 export default function DailyReportPage() {
   const { t, i18n } = useTranslation();
   const { isLoaded, session } = useAuthContext();
-  const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
+  const { children, childrenLoaded, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
   const toast = useToast();
 
   const [reports, setReports] = useState<DailyReport[]>([]);
@@ -362,7 +362,7 @@ export default function DailyReportPage() {
         </GumroadCard>
       ) : error ? (
         <ErrorState message={error} onRetry={fetchReports} retryLabel={t('p1Common.retry')} />
-      ) : children.length === 0 ? (
+      ) : !childrenLoaded && children.length === 0 ? null : children.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">
             <InfoCircledIcon width={40} height={40} aria-hidden="true" />

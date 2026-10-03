@@ -24,7 +24,7 @@ type StatusFilter = 'all' | GoalStatus;
 
 export default function GoalsPage() {
   const { t } = useTranslation();
-  const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
+  const { children, childrenLoaded, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
 
   const [domainFilter, setDomainFilter] = useState<DomainFilter>('all');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
@@ -105,7 +105,7 @@ export default function GoalsPage() {
         <GoalsListSkeleton />
       ) : error ? (
         <ErrorState message={error} onRetry={fetchGoals} retryLabel={t('p1Common.retry')} />
-      ) : children.length === 0 ? (
+      ) : !childrenLoaded && children.length === 0 ? null : children.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">
             <InfoCircledIcon width={40} height={40} aria-hidden="true" />

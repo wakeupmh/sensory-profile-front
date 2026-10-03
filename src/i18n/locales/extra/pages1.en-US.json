@@ -106,7 +106,46 @@
       "paused": "Paused",
       "discontinued": "Discontinued"
     },
-    "retry": "Try again"
+    "retry": "Try again",
+    "sections": {
+      "assessments": "Assessments",
+      "dailyLogs": "Daily Logs",
+      "therapy": "Therapy",
+      "health": "Health",
+      "development": "Development",
+      "education": "Education"
+    },
+    "milestoneStatus": {
+      "not_yet": "Not yet",
+      "in_progress": "In progress",
+      "achieved": "Achieved",
+      "regressed": "Regressed"
+    },
+    "commType": {
+      "vocabulary": "Vocabulary",
+      "aac_usage": "AAC use",
+      "verbal_speech": "Verbal speech",
+      "signs": "Signs",
+      "other": "Other"
+    },
+    "planType": {
+      "pei": "IEP",
+      "pei_simplificado": "Simplified IEP",
+      "adaptacao_curricular": "Curriculum Adaptation",
+      "plano_aee": "AEE Plan",
+      "outro": "Other"
+    },
+    "schoolComm": {
+      "reuniao": "Meeting",
+      "bilhete": "Note/Notice",
+      "email": "Email",
+      "telefone": "Phone call",
+      "incidente": "Incident",
+      "relatorio": "School report",
+      "outro": "Other"
+    },
+    "manage": "Manage",
+    "noChildTitle": "Add a child to get started"
   },
   "p1Logs": {
     "all": "All",
@@ -358,5 +397,60 @@
     "revokeTitle": "Revoke caregiver",
     "revokeBody": "Are you sure? {{name}} will immediately lose access to this child.",
     "cancel": "Cancel"
+  },
+  "p1Consolidated": {
+    "errLoad": "Error loading the consolidated report. Please try again.",
+    "days": "{{count}} days",
+    "back": "Back",
+    "title": "Consolidated Report",
+    "period": "Period: {{from}} to {{to}} · Generated on {{generated}}",
+    "periodLabel": "Period:",
+    "loading": "Loading consolidated report...",
+    "retry": "Try again"
+  },
+  "p1ConsolidatedShared": {
+    "loading": "Loading shared report...",
+    "invalidTitle": "Invalid or expired link",
+    "invalidBody": "This sharing link is no longer valid. Ask the responsible family for a new link.",
+    "goHome": "Go to home page",
+    "title": "Follow-up Report — {{name}}",
+    "sharedBy": "Shared by family · Read-only view",
+    "period": "Period: {{from}} to {{to}}"
+  },
+  "p1Development": {
+    "title": "Development",
+    "subtitle": "Developmental milestones and communication logs",
+    "milestones": "Developmental Milestones",
+    "commLogs": "Communication Logs",
+    "empty": "No entries",
+    "noChildBody": "Milestones and communication logs are linked to a child."
+  },
+  "p1Education": {
+    "title": "Education",
+    "subtitle": "Education plans and school communications",
+    "selectChild": "Select a child to see the education data.",
+    "plans": "Education Plans",
+    "comms": "School Communications",
+    "noPlans": "No plans yet",
+    "noComms": "No communications recorded",
+    "noChildBody": "Education plans and school communications are linked to a child."
+  },
+  "p1Documents": {
+    "errLoad": "Error loading documents. Please try again.",
+    "tooLarge": "File too large. The maximum size is 25MB.",
+    "badType": "Unsupported file type. Upload a PDF, image or video.",
+    "deleted": "Document deleted",
+    "deleteFail": "Could not delete the document. Please try again.",
+    "title": "Documents",
+    "subtitle": "Exams, reports, photos and videos of the child",
+    "expiring_one": "{{count}} document expired or expiring soon",
+    "expiring_other": "{{count}} documents expired or expiring soon",
+    "noChildBody": "Documents are linked to a child.",
+    "selectChild": "Select a child to see the documents",
+    "empty": "No documents uploaded yet",
+    "deleteTitle": "Delete document",
+    "deleteBody": "Are you sure you want to delete this document? This action cannot be undone.",
+    "cancel": "Cancel",
+    "delete": "Delete"
   }
 }

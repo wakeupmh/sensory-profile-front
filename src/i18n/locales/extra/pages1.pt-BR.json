@@ -106,7 +106,46 @@
       "paused": "Pausada",
       "discontinued": "Descontinuada"
     },
-    "retry": "Tentar novamente"
+    "retry": "Tentar novamente",
+    "sections": {
+      "assessments": "Avaliações",
+      "dailyLogs": "Registros Diários",
+      "therapy": "Terapia",
+      "health": "Saúde",
+      "development": "Desenvolvimento",
+      "education": "Educação"
+    },
+    "milestoneStatus": {
+      "not_yet": "Ainda não",
+      "in_progress": "Em progresso",
+      "achieved": "Conquistado",
+      "regressed": "Regressão"
+    },
+    "commType": {
+      "vocabulary": "Vocabulário",
+      "aac_usage": "Uso de CAA",
+      "verbal_speech": "Fala Verbal",
+      "signs": "Sinais/Libras",
+      "other": "Outro"
+    },
+    "planType": {
+      "pei": "PEI",
+      "pei_simplificado": "PEI Simplificado",
+      "adaptacao_curricular": "Adaptação Curricular",
+      "plano_aee": "Plano AEE",
+      "outro": "Outro"
+    },
+    "schoolComm": {
+      "reuniao": "Reunião",
+      "bilhete": "Bilhete/Comunicado",
+      "email": "E-mail",
+      "telefone": "Ligação telefônica",
+      "incidente": "Incidente",
+      "relatorio": "Relatório escolar",
+      "outro": "Outro"
+    },
+    "manage": "Gerenciar",
+    "noChildTitle": "Cadastre uma criança para começar"
   },
   "p1Logs": {
     "all": "Todos",
@@ -358,5 +397,60 @@
     "revokeTitle": "Revogar cuidador",
     "revokeBody": "Tem certeza? {{name}} perderá imediatamente o acesso a esta criança.",
     "cancel": "Cancelar"
+  },
+  "p1Consolidated": {
+    "errLoad": "Erro ao carregar o relatório consolidado. Tente novamente.",
+    "days": "{{count}} dias",
+    "back": "Voltar",
+    "title": "Relatório Consolidado",
+    "period": "Período: {{from}} a {{to}} · Gerado em {{generated}}",
+    "periodLabel": "Período:",
+    "loading": "Carregando relatório consolidado...",
+    "retry": "Tentar novamente"
+  },
+  "p1ConsolidatedShared": {
+    "loading": "Carregando relatório compartilhado...",
+    "invalidTitle": "Link inválido ou expirado",
+    "invalidBody": "Este link de compartilhamento não é mais válido. Solicite um novo link à família responsável.",
+    "goHome": "Ir para o início",
+    "title": "Relatório de Acompanhamento — {{name}}",
+    "sharedBy": "Compartilhado por família · Visualização somente-leitura",
+    "period": "Período: {{from}} a {{to}}"
+  },
+  "p1Development": {
+    "title": "Desenvolvimento",
+    "subtitle": "Marcos do desenvolvimento e registros de comunicação",
+    "milestones": "Marcos do Desenvolvimento",
+    "commLogs": "Registros de Comunicação",
+    "empty": "Nenhum registro",
+    "noChildBody": "Marcos e registros de comunicação ficam vinculados a uma criança."
+  },
+  "p1Education": {
+    "title": "Educação",
+    "subtitle": "Planos educacionais e comunicações com a escola",
+    "selectChild": "Selecione uma criança para ver os dados educacionais.",
+    "plans": "Planos Educacionais",
+    "comms": "Comunicações com a Escola",
+    "noPlans": "Nenhum plano cadastrado",
+    "noComms": "Nenhuma comunicação registrada",
+    "noChildBody": "Planos educacionais e comunicações com a escola ficam vinculados a uma criança."
+  },
+  "p1Documents": {
+    "errLoad": "Erro ao carregar documentos. Por favor, tente novamente.",
+    "tooLarge": "Arquivo muito grande. O tamanho máximo é 25MB.",
+    "badType": "Tipo de arquivo não suportado. Envie PDF, imagem ou vídeo.",
+    "deleted": "Documento excluído",
+    "deleteFail": "Não foi possível excluir o documento. Tente novamente.",
+    "title": "Documentos",
+    "subtitle": "Exames, laudos, fotos e vídeos da criança",
+    "expiring_one": "{{count}} documento vencido ou vencendo em breve",
+    "expiring_other": "{{count}} documentos vencidos ou vencendo em breve",
+    "noChildBody": "Os documentos ficam vinculados a uma criança.",
+    "selectChild": "Selecione uma criança para ver os documentos",
+    "empty": "Nenhum documento enviado ainda",
+    "deleteTitle": "Excluir documento",
+    "deleteBody": "Tem certeza que deseja excluir este documento? Esta ação não pode ser desfeita.",
+    "cancel": "Cancelar",
+    "delete": "Excluir"
   }
 }
