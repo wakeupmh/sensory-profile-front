@@ -1,13 +1,11 @@
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
-import { LOG_TYPE_EMOJI, LOG_TYPE_LABELS, LOG_TYPES } from '../../types/logs';
+import { LOG_TYPE_EMOJI, LOG_TYPES } from '../../types/logs';
 import type { LogType } from '../../types/logs';
 
-// Derivado da tabela canônica — antes esta lista era uma sexta cópia dos
-// nomes, e com rótulos que discordavam das outras cinco.
 const LOG_TYPE_OPTIONS = LOG_TYPES.map((type) => ({
   type,
-  label: LOG_TYPE_LABELS[type],
   emoji: LOG_TYPE_EMOJI[type],
 }));
 
@@ -17,9 +15,10 @@ interface LogTypeSelectorProps {
 }
 
 export default function LogTypeSelector({ selected, onSelect }: LogTypeSelectorProps) {
+  const { t } = useTranslation();
   return (
     <Flex direction="column" gap="2">
-      {LOG_TYPE_OPTIONS.map(({ type, label, emoji }, i) => {
+      {LOG_TYPE_OPTIONS.map(({ type, emoji }, i) => {
         const isActive = selected === type;
         return (
           <button
@@ -56,8 +55,8 @@ export default function LogTypeSelector({ selected, onSelect }: LogTypeSelectorP
               e.currentTarget.style.boxShadow = shadows.button;
             }}
           >
-            <span style={{ fontSize: '20px', lineHeight: 1 }}>{emoji}</span>
-            {label}
+            <span style={{ fontSize: '20px', lineHeight: 1 }} aria-hidden="true">{emoji}</span>
+            {t(`p2Logs.types.${type}`)}
           </button>
         );
       })}

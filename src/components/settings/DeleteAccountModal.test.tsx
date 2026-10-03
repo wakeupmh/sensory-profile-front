@@ -1,4 +1,5 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, vi, beforeAll, beforeEach } from 'vitest';
+import i18n from '../../i18n';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import DeleteAccountModal from './DeleteAccountModal';
@@ -16,6 +17,11 @@ vi.mock('../../services/api', () => ({
 }));
 
 describe('DeleteAccountModal', () => {
+  // O detector de idioma segue o navegador (jsdom é en-US); os textos esperados aqui são PT-BR
+  beforeAll(async () => {
+    await i18n.changeLanguage('pt-BR');
+  });
+
   beforeEach(() => {
     getTokenMock.mockClear();
     signOutMock.mockClear();

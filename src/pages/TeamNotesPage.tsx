@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeftIcon, ChatBubbleIcon, ExclamationTriangleIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { useAuthContext } from '../context/AuthContext';
 import { childNotesApi } from '../services/api';
@@ -11,11 +12,12 @@ import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
 import LoadingSpinner from '../components/LoadingSpinner';
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+function formatDate(iso: string, lang: string): string {
+  return new Date(iso).toLocaleString(lang, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 export default function TeamNotesPage() {
+  const { t, i18n } = useTranslation();
   const { childId } = useParams<{ childId: string }>();
   const navigate = useNavigate();
   const { getToken } = useAuthContext();
@@ -33,11 +35,11 @@ export default function TeamNotesPage() {
       const list = await childNotesApi.list(token, childId);
       setNotes([...list].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
     } catch {
-      setError('Erro ao carregar as notas da equipe. Tente novamente.');
+      setError(t('p2Team.loadError'));
     } finally {
       setLoading(false);
     }
-  }, [childId, getToken]);
+  }, [childId, getToken, t]);
 
   useEffect(() => {
     fetchNotes();
@@ -47,28 +49,29 @@ export default function TeamNotesPage() {
     <Box style={{ maxWidth: '720px', margin: '0 auto' }}>
       <Box style={{ marginBottom: spacing.md }}>
         <GumroadButton variant="secondary" size="sm" onClick={() => navigate(childId ? `/children/${childId}` : '/children')}>
-          <ArrowLeftIcon /> Voltar
+          <ArrowLeftIcon /> {t('p2Team.back')}
         </GumroadButton>
       </Box>
 
       <Box style={{ marginBottom: spacing.lg }}>
         <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
-          Notas da equipe
+          {t('p2Team.title')}
         </GumroadHeading>
         <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7 }}>
-          Anotações que profissionais com acesso a esta criança deixaram — somente leitura
+          {t('p2Team.subtitle')}
         </GumroadText>
       </Box>
 
       {loading ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
-          <LoadingSpinner size="large" text="Carregando..." />
+          <LoadingSpinner size="large" text={t('p2Team.loading')} />
         </GumroadCard>
       ) : error ? (
         <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
-          <Flex align="center" gap="2">
+          <Flex align="center" gap="3" wrap="wrap">
             <ExclamationTriangleIcon />
             <GumroadText level="body-md" as="p">{error}</GumroadText>
+            <GumroadButton variant="secondary" size="sm" onClick={fetchNotes}>{t('p2Team.retry')}</GumroadButton>
           </Flex>
         </GumroadCard>
       ) : notes.length === 0 ? (
@@ -76,7 +79,7 @@ export default function TeamNotesPage() {
           <Flex direction="column" align="center" gap="3">
             <InfoCircledIcon width={32} height={32} />
             <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-              Nenhum profissional deixou notas sobre esta criança ainda.
+              {t('p2Team.empty')}
             </GumroadText>
           </Flex>
         </GumroadCard>
@@ -88,14 +91,14 @@ export default function TeamNotesPage() {
                 <Flex align="center" gap="2">
                   <ChatBubbleIcon width={14} height={14} />
                   <GumroadText level="body-sm" as="span" style={{ fontWeight: 700 }}>
-                    {note.professionalName ?? 'Profissional'}
+                    {note.professionalName ?? t('p2Team.professional')}
                   </GumroadText>
                 </Flex>
                 {note.professionalProfession && (
                   <GumroadText level="caption" as="span" style={{ opacity: 0.6 }}>{note.professionalProfession}</GumroadText>
                 )}
                 <GumroadText level="body-sm" as="p" style={{ whiteSpace: 'pre-wrap' }}>{note.content}</GumroadText>
-                <GumroadText level="caption" as="span" style={{ opacity: 0.55 }}>{formatDate(note.createdAt)}</GumroadText>
+                <GumroadText level="caption" as="span" style={{ opacity: 0.55 }}>{formatDate(note.createdAt, i18n.language)}</GumroadText>
               </Flex>
             </GumroadCard>
           ))}

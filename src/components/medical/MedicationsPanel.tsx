@@ -1,5 +1,6 @@
 import React from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { PlusIcon } from '@radix-ui/react-icons';
 import GumroadButton from '../design-system/GumroadButton';
 import GumroadCard from '../design-system/GumroadCard';
@@ -32,6 +33,7 @@ const MedicationsPanel: React.FC<MedicationsPanelProps> = ({
   onDelete,
 }) => {
   const toast = useToast();
+  const { t } = useTranslation();
   const {
     editingItem: editingMedication,
     setEditingItem: setEditingMedication,
@@ -49,7 +51,9 @@ const MedicationsPanel: React.FC<MedicationsPanelProps> = ({
     try {
       await onAdd(payload as CreateMedicationPayload);
       setView('list');
-      toast.success('Medicamento adicionado');
+      toast.success(t('p2Medical.meds.added'));
+    } catch {
+      toast.error(t('p2Medical.saveError'));
     } finally {
       setIsLoading(false);
     }
@@ -62,7 +66,9 @@ const MedicationsPanel: React.FC<MedicationsPanelProps> = ({
       await onEdit(editingMedication.id, payload as UpdateMedicationPayload);
       setView('list');
       setEditingMedication(null);
-      toast.success('Alterações salvas');
+      toast.success(t('p2Medical.changesSaved'));
+    } catch {
+      toast.error(t('p2Medical.saveError'));
     } finally {
       setIsLoading(false);
     }
@@ -74,14 +80,16 @@ const MedicationsPanel: React.FC<MedicationsPanelProps> = ({
     try {
       await onDelete(deletingId);
       setDeletingId(null);
-      toast.success('Medicamento removido');
+      toast.success(t('p2Medical.meds.removed'));
+    } catch {
+      toast.error(t('p2Medical.removeError'));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <GumroadModal open={isOpen} onClose={onClose} title="Medicamentos">
+    <GumroadModal open={isOpen} onClose={onClose} title={t('p2Medical.meds.title')}>
       <>
         {view === 'list' && (
           <>
@@ -93,14 +101,14 @@ const MedicationsPanel: React.FC<MedicationsPanelProps> = ({
             >
               <Flex align="center" gap="1">
                 <PlusIcon />
-                Adicionar Medicamento
+                {t('p2Medical.meds.add')}
               </Flex>
             </GumroadButton>
 
             {medications.length === 0 ? (
               <GumroadCard color="cream" padding="lg" style={{ textAlign: 'center' }}>
                 <GumroadText level="body-md" style={{ opacity: 0.7 }}>
-                  Nenhum medicamento cadastrado
+                  {t('p2Medical.meds.empty')}
                 </GumroadText>
               </GumroadCard>
             ) : (
@@ -109,7 +117,7 @@ const MedicationsPanel: React.FC<MedicationsPanelProps> = ({
                   deletingId === med.id ? (
                     <GumroadCard key={med.id} color="salmon" padding="md" shadow="md">
                       <GumroadText level="body-md">
-                        Remover {med.name}?
+                        {t('p2Medical.meds.confirm', { name: med.name })}
                       </GumroadText>
                       <Flex gap="2" mt="2">
                         <GumroadButton
@@ -118,14 +126,14 @@ const MedicationsPanel: React.FC<MedicationsPanelProps> = ({
                           onClick={handleConfirmDelete}
                           disabled={isLoading}
                         >
-                          Remover
+                          {t('p2Medical.remove')}
                         </GumroadButton>
                         <GumroadButton
                           variant="ghost"
                           size="sm"
                           onClick={() => setDeletingId(null)}
                         >
-                          Cancelar
+                          {t('p2Medical.cancel')}
                         </GumroadButton>
                       </Flex>
                     </GumroadCard>
@@ -146,7 +154,7 @@ const MedicationsPanel: React.FC<MedicationsPanelProps> = ({
         {view === 'add' && (
           <>
             <GumroadHeading level="title-md" style={{ marginBottom: '16px' }}>
-              Novo Medicamento
+              {t('p2Medical.meds.new')}
             </GumroadHeading>
             <MedicationForm
               childId={childId}
@@ -160,7 +168,7 @@ const MedicationsPanel: React.FC<MedicationsPanelProps> = ({
         {view === 'edit' && (
           <>
             <GumroadHeading level="title-md" style={{ marginBottom: '16px' }}>
-              Editar Medicamento
+              {t('p2Medical.meds.edit')}
             </GumroadHeading>
             <MedicationForm
               childId={childId}

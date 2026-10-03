@@ -1,5 +1,6 @@
 import React from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { PlusIcon } from '@radix-ui/react-icons';
 import GumroadButton from '../design-system/GumroadButton';
 import GumroadCard from '../design-system/GumroadCard';
@@ -32,6 +33,7 @@ const ComorbiditiesPanel: React.FC<ComorbiditiesPanelProps> = ({
   onDelete,
 }) => {
   const toast = useToast();
+  const { t } = useTranslation();
   const {
     editingItem: editingComorbidity,
     setEditingItem: setEditingComorbidity,
@@ -49,7 +51,9 @@ const ComorbiditiesPanel: React.FC<ComorbiditiesPanelProps> = ({
     try {
       await onAdd(payload as CreateComorbidityPayload);
       setView('list');
-      toast.success('Diagnóstico adicionado');
+      toast.success(t('p2Medical.comorb.added'));
+    } catch {
+      toast.error(t('p2Medical.saveError'));
     } finally {
       setIsLoading(false);
     }
@@ -62,7 +66,9 @@ const ComorbiditiesPanel: React.FC<ComorbiditiesPanelProps> = ({
       await onEdit(editingComorbidity.id, payload as Omit<CreateComorbidityPayload, 'childId'>);
       setView('list');
       setEditingComorbidity(null);
-      toast.success('Alterações salvas');
+      toast.success(t('p2Medical.changesSaved'));
+    } catch {
+      toast.error(t('p2Medical.saveError'));
     } finally {
       setIsLoading(false);
     }
@@ -74,14 +80,16 @@ const ComorbiditiesPanel: React.FC<ComorbiditiesPanelProps> = ({
     try {
       await onDelete(deletingId);
       setDeletingId(null);
-      toast.success('Diagnóstico removido');
+      toast.success(t('p2Medical.comorb.removed'));
+    } catch {
+      toast.error(t('p2Medical.removeError'));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <GumroadModal open={isOpen} onClose={onClose} title="Diagnósticos">
+    <GumroadModal open={isOpen} onClose={onClose} title={t('p2Medical.comorb.title')}>
       <>
 
         {view === 'list' && (
@@ -94,14 +102,14 @@ const ComorbiditiesPanel: React.FC<ComorbiditiesPanelProps> = ({
             >
               <Flex align="center" gap="1">
                 <PlusIcon />
-                Adicionar Diagnóstico
+                {t('p2Medical.comorb.add')}
               </Flex>
             </GumroadButton>
 
             {comorbidities.length === 0 ? (
               <GumroadCard color="cream" padding="lg" style={{ textAlign: 'center' }}>
                 <GumroadText level="body-md" style={{ opacity: 0.7 }}>
-                  Nenhum diagnóstico cadastrado
+                  {t('p2Medical.comorb.empty')}
                 </GumroadText>
               </GumroadCard>
             ) : (
@@ -110,7 +118,7 @@ const ComorbiditiesPanel: React.FC<ComorbiditiesPanelProps> = ({
                   deletingId === c.id ? (
                     <GumroadCard key={c.id} color="salmon" padding="md" shadow="md">
                       <GumroadText level="body-md">
-                        Remover {c.conditionName}?
+                        {t('p2Medical.meds.confirm', { name: c.conditionName })}
                       </GumroadText>
                       <Flex gap="2" mt="2">
                         <GumroadButton
@@ -119,14 +127,14 @@ const ComorbiditiesPanel: React.FC<ComorbiditiesPanelProps> = ({
                           onClick={handleConfirmDelete}
                           disabled={isLoading}
                         >
-                          Remover
+                          {t('p2Medical.remove')}
                         </GumroadButton>
                         <GumroadButton
                           variant="ghost"
                           size="sm"
                           onClick={() => setDeletingId(null)}
                         >
-                          Cancelar
+                          {t('p2Medical.cancel')}
                         </GumroadButton>
                       </Flex>
                     </GumroadCard>
@@ -147,7 +155,7 @@ const ComorbiditiesPanel: React.FC<ComorbiditiesPanelProps> = ({
         {view === 'add' && (
           <>
             <GumroadHeading level="title-md" style={{ marginBottom: '16px' }}>
-              Novo Diagnóstico
+              {t('p2Medical.comorb.new')}
             </GumroadHeading>
             <ComorbidityForm
               childId={childId}
@@ -161,7 +169,7 @@ const ComorbiditiesPanel: React.FC<ComorbiditiesPanelProps> = ({
         {view === 'edit' && (
           <>
             <GumroadHeading level="title-md" style={{ marginBottom: '16px' }}>
-              Editar Diagnóstico
+              {t('p2Medical.comorb.edit')}
             </GumroadHeading>
             <ComorbidityForm
               childId={childId}

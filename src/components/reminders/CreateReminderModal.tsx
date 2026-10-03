@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
+import { useToast } from '../../context/ToastContext';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
 import GumroadModal from '../design-system/GumroadModal';
@@ -44,6 +46,8 @@ const labelStyle: React.CSSProperties = {
 };
 
 const CreateReminderModal: React.FC<CreateReminderModalProps> = ({ isOpen, onClose, childId, onSubmit }) => {
+  const { t } = useTranslation();
+  const toast = useToast();
   const [title, setTitle] = useState('');
   const [dueAt, setDueAt] = useState('');
   const [notes, setNotes] = useState('');
@@ -73,6 +77,8 @@ const CreateReminderModal: React.FC<CreateReminderModalProps> = ({ isOpen, onClo
       });
       reset();
       onClose();
+    } catch {
+      toast.error(t('p2Reminders.modal.saveError'));
     } finally {
       setSubmitting(false);
     }
@@ -82,7 +88,7 @@ const CreateReminderModal: React.FC<CreateReminderModalProps> = ({ isOpen, onClo
     <GumroadModal
       open={isOpen}
       onClose={handleClose}
-      title="Novo lembrete"
+      title={t('p2Reminders.modal.title')}
       variant="center"
       maxWidth="440px"
     >
@@ -90,21 +96,21 @@ const CreateReminderModal: React.FC<CreateReminderModalProps> = ({ isOpen, onClo
           <Flex direction="column" gap="3">
             <div>
               <label style={labelStyle} htmlFor="reminder-titulo">
-                Título <span style={{ color: colors.error }} aria-hidden="true">*</span>
+                {t('p2Reminders.modal.titleField')} <span style={{ color: colors.error }} aria-hidden="true">*</span>
               </label>
               <input id="reminder-titulo"
                 type="text"
                 maxLength={255}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Ex: Levar exame para a fono"
+                placeholder={t('p2Reminders.modal.titlePh')}
                 style={inputStyle}
                 required
               />
             </div>
             <div>
               <label style={labelStyle} htmlFor="reminder-data">
-                Data <span style={{ color: colors.error }} aria-hidden="true">*</span>
+                {t('p2Reminders.modal.date')} <span style={{ color: colors.error }} aria-hidden="true">*</span>
               </label>
               <input id="reminder-data"
                 type="date"
@@ -116,7 +122,7 @@ const CreateReminderModal: React.FC<CreateReminderModalProps> = ({ isOpen, onClo
             </div>
             <div>
               <label style={labelStyle} htmlFor="reminder-observacoes-500">
-                Observações
+                {t('p2Reminders.modal.notes')}
                 <span style={{ fontWeight: 400, color: colors['ink-muted'], marginLeft: '6px' }}>
                   ({notes.length}/500)
                 </span>
@@ -125,16 +131,16 @@ const CreateReminderModal: React.FC<CreateReminderModalProps> = ({ isOpen, onClo
                 maxLength={500}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Detalhes adicionais..."
+                placeholder={t('p2Reminders.modal.notesPh')}
                 style={textareaStyle}
               />
             </div>
             <Flex gap="2" mt="2">
               <GumroadButton variant="primary" size="md" type="submit" disabled={submitting || !title.trim() || !dueAt}>
-                {submitting ? 'Salvando...' : 'Salvar'}
+                {submitting ? t('p2Reminders.modal.saving') : t('p2Reminders.modal.save')}
               </GumroadButton>
               <GumroadButton variant="secondary" size="md" type="button" onClick={handleClose}>
-                Cancelar
+                {t('p2Reminders.modal.cancel')}
               </GumroadButton>
             </Flex>
           </Flex>

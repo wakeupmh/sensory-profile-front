@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
+import { useToast } from '../../context/ToastContext';
 import { CalendarIcon, CheckIcon, Cross2Icon, ExclamationTriangleIcon, PlusIcon } from '@radix-ui/react-icons';
 import { reminderApi } from '../../services/api';
 import { useAuthContext } from '../../context/AuthContext';
 import type { CreateReminderPayload, UpcomingReminder } from '../../types/reminders';
-import { REMINDER_ORIGIN_ICONS, REMINDER_ORIGIN_LABELS } from '../../types/reminders';
+import { REMINDER_ORIGIN_ICONS } from '../../types/reminders';
 import { colors, radii, shadows } from '../../theme/tokens';
 import { generateICS, downloadICS, dateOnlyFromISOString } from '../../utils/ics';
 import GumroadCard from '../design-system/GumroadCard';
@@ -18,11 +20,13 @@ interface RemindersWidgetProps {
   days?: number;
 }
 
-function formatDueAt(iso: string): string {
-  return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+function formatDueAt(iso: string, lang: string): string {
+  return new Date(iso).toLocaleDateString(lang, { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
 const RemindersWidget: React.FC<RemindersWidgetProps> = ({ childId, days = 14 }) => {
+  const { t, i18n } = useTranslation();
+  const toast = useToast();
   const { getToken } = useAuthContext();
   const [reminders, setReminders] = useState<UpcomingReminder[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,11 +44,11 @@ const RemindersWidget: React.FC<RemindersWidgetProps> = ({ childId, days = 14 })
       const data = await reminderApi.getUpcoming(token, childId, days);
       setReminders(data);
     } catch {
-      setError('Erro ao carregar lembretes. Tente novamente.');
+      setError(t('p2Reminders.loadError'));
     } finally {
       setLoading(false);
     }
-  }, [childId, days, getToken]);
+  }, [childId, days, getToken, t]);
 
   useEffect(() => {
     fetchReminders();
@@ -65,7 +69,8 @@ const RemindersWidget: React.FC<RemindersWidgetProps> = ({ childId, days = 14 })
         await reminderApi.update(token, item.id, { status });
         setReminders((prev) => prev.filter((r) => r.id !== item.id));
       } catch {
-        setError('Não foi possível atualizar o lembrete.');
+        // Erro de ação vira toast: o estado `error` esconderia a lista inteira
+        toast.error(t('p2Reminders.updateError'));
         setCompletingIds((prev) => {
           const next = new Set(prev);
           next.delete(item.id);
@@ -87,10 +92,10 @@ const RemindersWidget: React.FC<RemindersWidgetProps> = ({ childId, days = 14 })
     const ics = generateICS({
       uid: item.id,
       title: item.title,
-      description: REMINDER_ORIGIN_LABELS[item.origin],
+      description: t(`p2Reminders.origin.${item.origin}`),
       date: dateOnlyFromISOString(item.dueAt),
     });
-    downloadICS(`lembrete-${item.id}`, ics);
+    downloadICS(t('p2Reminders.icsName', { id: item.id }), ics);
   };
 
   if (!childId) return null;
@@ -99,24 +104,29 @@ const RemindersWidget: React.FC<RemindersWidgetProps> = ({ childId, days = 14 })
     <GumroadCard color="cream" shadow="md" padding="lg">
       <Flex justify="between" align="center" mb="3" gap="2">
         <GumroadHeading level="title-md" as="h2">
-          Próximos lembretes
+          {t('p2Reminders.title')}
         </GumroadHeading>
         <GumroadButton variant="secondary" size="sm" onClick={() => setModalOpen(true)}>
           <PlusIcon />
-          Novo
+          {t('p2Reminders.new')}
         </GumroadButton>
       </Flex>
 
       {loading ? (
-        <LoadingSpinner size="medium" text="Carregando..." />
+        <LoadingSpinner size="medium" text={t('p2Reminders.loading')} />
       ) : error ? (
-        <Flex align="center" gap="2" style={{ color: colors.error }}>
-          <ExclamationTriangleIcon />
-          <GumroadText level="body-sm" as="span">{error}</GumroadText>
+        <Flex align="center" gap="3" wrap="wrap" role="alert" style={{ color: colors.error }}>
+          <Flex align="center" gap="2">
+            <ExclamationTriangleIcon />
+            <GumroadText level="body-sm" as="span">{error}</GumroadText>
+          </Flex>
+          <GumroadButton variant="secondary" size="sm" onClick={fetchReminders}>
+            {t('p2Reminders.retry')}
+          </GumroadButton>
         </Flex>
       ) : sorted.length === 0 ? (
         <GumroadText level="body-sm" as="p" style={{ opacity: 0.6, fontStyle: 'italic' }}>
-          Nenhum lembrete nos próximos {days} dias
+          {t('p2Reminders.empty', { days })}
         </GumroadText>
       ) : (
         <Flex direction="column" gap="2">
@@ -139,8 +149,9 @@ const RemindersWidget: React.FC<RemindersWidgetProps> = ({ childId, days = 14 })
               >
                 {item.origin === 'manual' ? (
                   <button
+                    type="button"
                     onClick={() => handleAction(item, 'done')}
-                    aria-label="Marcar como feito"
+                    aria-label={t('p2Reminders.done')}
                     disabled={isCompleting}
                     style={{
                       width: '28px',
@@ -158,7 +169,7 @@ const RemindersWidget: React.FC<RemindersWidgetProps> = ({ childId, days = 14 })
                     {isCompleting && <CheckIcon />}
                   </button>
                 ) : (
-                  <span style={{ fontSize: '18px', flexShrink: 0 }}>{REMINDER_ORIGIN_ICONS[item.origin]}</span>
+                  <span aria-hidden="true" style={{ fontSize: '18px', flexShrink: 0 }}>{REMINDER_ORIGIN_ICONS[item.origin]}</span>
                 )}
 
                 <Box style={{ flex: 1, minWidth: 0 }}>
@@ -176,7 +187,7 @@ const RemindersWidget: React.FC<RemindersWidgetProps> = ({ childId, days = 14 })
                   </GumroadText>
                   <Flex align="center" gap="2" wrap="wrap">
                     <GumroadText level="caption" as="span" style={{ opacity: 0.65 }}>
-                      {formatDueAt(item.dueAt)}
+                      {formatDueAt(item.dueAt, i18n.language)}
                     </GumroadText>
                     <span
                       style={{
@@ -191,15 +202,16 @@ const RemindersWidget: React.FC<RemindersWidgetProps> = ({ childId, days = 14 })
                         backgroundColor: item.origin === 'manual' ? colors['brand-lavender'] : colors['surface-cream'],
                       }}
                     >
-                      {REMINDER_ORIGIN_ICONS[item.origin]} {REMINDER_ORIGIN_LABELS[item.origin]}
+                      <span aria-hidden="true">{REMINDER_ORIGIN_ICONS[item.origin]}</span> {t(`p2Reminders.origin.${item.origin}`)}
                     </span>
                   </Flex>
                 </Box>
 
                 <button
+                  type="button"
                   onClick={() => handleAddToCalendar(item)}
-                  aria-label="Adicionar ao calendário"
-                  title="Adicionar ao calendário"
+                  aria-label={t('p2Reminders.addToCalendar')}
+                  title={t('p2Reminders.addToCalendar')}
                   style={{
                     width: '28px',
                     height: '28px',
@@ -218,8 +230,9 @@ const RemindersWidget: React.FC<RemindersWidgetProps> = ({ childId, days = 14 })
 
                 {item.origin === 'manual' && (
                   <button
+                    type="button"
                     onClick={() => handleAction(item, 'dismissed')}
-                    aria-label="Dispensar lembrete"
+                    aria-label={t('p2Reminders.dismiss')}
                     disabled={isCompleting}
                     style={{
                       width: '28px',

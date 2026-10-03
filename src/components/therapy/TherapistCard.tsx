@@ -1,5 +1,6 @@
 import React from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { Pencil1Icon, TrashIcon } from '@radix-ui/react-icons';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import GumroadCard from '../design-system/GumroadCard';
@@ -22,14 +23,6 @@ const SPECIALTY_COLORS = {
   fisioterapia: 'mint',
 } as const;
 
-const SPECIALTY_LABELS = {
-  aba: 'ABA',
-  ot: 'OT',
-  fonoaudiologia: 'Fonoaudiologia',
-  psicologia: 'Psicologia',
-  fisioterapia: 'Fisioterapia',
-} as const;
-
 const iconBtnStyle: React.CSSProperties = {
   width: '32px',
   height: '32px',
@@ -45,6 +38,7 @@ const iconBtnStyle: React.CSSProperties = {
 };
 
 const TherapistCard: React.FC<TherapistCardProps> = ({ therapist, onEdit, onDelete }) => {
+  const { t } = useTranslation();
   return (
     <GumroadCard color="white" padding="md" shadow="md">
       <Flex justify="between" align="start">
@@ -53,7 +47,7 @@ const TherapistCard: React.FC<TherapistCardProps> = ({ therapist, onEdit, onDele
             {therapist.name}
           </GumroadHeading>
           <GumroadBadge color={SPECIALTY_COLORS[therapist.specialty]}>
-            {SPECIALTY_LABELS[therapist.specialty]}
+            {t(`p2Therapy.types.${therapist.specialty}.label`)}
           </GumroadBadge>
           {therapist.phone && (
             <GumroadText level="body-sm" style={{ opacity: 0.7 }}>
@@ -70,14 +64,16 @@ const TherapistCard: React.FC<TherapistCardProps> = ({ therapist, onEdit, onDele
           <button
             style={iconBtnStyle}
             onClick={() => onEdit(therapist)}
-            aria-label="Editar terapeuta"
+            type="button"
+            aria-label={t('p2Therapy.card.editAria')}
           >
             <Pencil1Icon />
           </button>
           <button
             style={iconBtnStyle}
             onClick={() => onDelete(therapist.id)}
-            aria-label="Remover terapeuta"
+            type="button"
+            aria-label={t('p2Therapy.card.removeAria')}
           >
             <TrashIcon />
           </button>

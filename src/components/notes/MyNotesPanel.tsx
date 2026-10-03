@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { ChatBubbleIcon, ExclamationTriangleIcon, Pencil1Icon, PlusIcon, TrashIcon } from '@radix-ui/react-icons';
 import { sharedNotesApi } from '../../services/api';
 import { useAuthContext } from '../../context/AuthContext';
@@ -31,11 +32,12 @@ const textareaStyle: React.CSSProperties = {
   boxSizing: 'border-box',
 };
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+function formatDate(iso: string, lang: string): string {
+  return new Date(iso).toLocaleString(lang, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 const MyNotesPanel: React.FC<MyNotesPanelProps> = ({ childId, therapySessions = [] }) => {
+  const { t, i18n } = useTranslation();
   const { getToken } = useAuthContext();
   const [notes, setNotes] = useState<ProfessionalNote[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,11 +60,11 @@ const MyNotesPanel: React.FC<MyNotesPanelProps> = ({ childId, therapySessions = 
       const list = await sharedNotesApi.list(token, childId);
       setNotes([...list].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
     } catch {
-      setError('Erro ao carregar suas notas.');
+      setError(t('p2Notes.loadError'));
     } finally {
       setLoading(false);
     }
-  }, [childId, getToken]);
+  }, [childId, getToken, t]);
 
   useEffect(() => {
     fetchNotes();
@@ -83,7 +85,7 @@ const MyNotesPanel: React.FC<MyNotesPanelProps> = ({ childId, therapySessions = 
       setContent('');
       setLinkedSessionId('');
     } catch {
-      setError('Erro ao salvar a nota. Tente novamente.');
+      setError(t('p2Notes.saveError'));
     } finally {
       setSubmitting(false);
     }
@@ -103,7 +105,7 @@ const MyNotesPanel: React.FC<MyNotesPanelProps> = ({ childId, therapySessions = 
       setNotes((prev) => prev.map((n) => (n.id === id ? updated : n)));
       setEditingId(null);
     } catch {
-      setError('Erro ao atualizar a nota. Tente novamente.');
+      setError(t('p2Notes.updateError'));
     } finally {
       setSavingEditId(null);
     }
@@ -116,7 +118,7 @@ const MyNotesPanel: React.FC<MyNotesPanelProps> = ({ childId, therapySessions = 
       await sharedNotesApi.delete(token, id);
       setNotes((prev) => prev.filter((n) => n.id !== id));
     } catch {
-      setError('Erro ao remover a nota. Tente novamente.');
+      setError(t('p2Notes.removeError'));
     } finally {
       setDeletingId(null);
     }
@@ -126,7 +128,7 @@ const MyNotesPanel: React.FC<MyNotesPanelProps> = ({ childId, therapySessions = 
     <Box>
       <Flex align="center" gap="2" mb="3">
         <ChatBubbleIcon />
-        <GumroadHeading level="title-lg" as="h2">Minhas notas</GumroadHeading>
+        <GumroadHeading level="title-lg" as="h2">{t('p2Notes.title')}</GumroadHeading>
       </Flex>
 
       <form onSubmit={handleAdd}>
@@ -134,7 +136,8 @@ const MyNotesPanel: React.FC<MyNotesPanelProps> = ({ childId, therapySessions = 
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value.slice(0, 4000))}
-            placeholder="Escreva uma anotação sobre esta criança..."
+            placeholder={t('p2Notes.placeholder')}
+            aria-label={t('p2Notes.newNoteLabel')}
             style={textareaStyle}
             maxLength={4000}
           />
@@ -143,6 +146,7 @@ const MyNotesPanel: React.FC<MyNotesPanelProps> = ({ childId, therapySessions = 
             {therapySessions.length > 0 && (
               <select
                 value={linkedSessionId}
+                aria-label={t('p2Notes.linkSession')}
                 onChange={(e) => setLinkedSessionId(e.target.value)}
                 style={{
                   height: '36px',
@@ -153,33 +157,33 @@ const MyNotesPanel: React.FC<MyNotesPanelProps> = ({ childId, therapySessions = 
                   fontSize: '13px',
                 }}
               >
-                <option value="">Vincular a uma sessão (opcional)</option>
+                <option value="">{t('p2Notes.linkSession')}</option>
                 {therapySessions.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {new Date(s.occurredAt).toLocaleDateString('pt-BR')} — {s.therapyType}
+                    {new Date(s.occurredAt).toLocaleDateString(i18n.language)} — {i18n.exists(`p2Therapy.types.${s.therapyType}.label`) ? t(`p2Therapy.types.${s.therapyType}.label`) : s.therapyType}
                   </option>
                 ))}
               </select>
             )}
           </Flex>
           <GumroadButton variant="primary" size="sm" type="submit" disabled={submitting || !content.trim()} style={{ alignSelf: 'flex-start' }}>
-            <PlusIcon /> {submitting ? 'Salvando...' : 'Adicionar nota'}
+            <PlusIcon /> {submitting ? t('p2Notes.adding') : t('p2Notes.add')}
           </GumroadButton>
         </Flex>
       </form>
 
       {error && (
-        <Flex align="center" gap="2" style={{ color: colors['brand-salmon'] }} mb="3">
+        <Flex align="center" gap="2" role="alert" style={{ color: colors['brand-salmon'] }} mb="3">
           <ExclamationTriangleIcon />
           <GumroadText level="body-sm" as="span">{error}</GumroadText>
         </Flex>
       )}
 
       {loading ? (
-        <LoadingSpinner size="medium" text="Carregando notas..." />
-      ) : notes.length === 0 ? (
+        <LoadingSpinner size="medium" text={t('p2Notes.loading')} />
+      ) : notes.length === 0 && !error ? (
         <GumroadText level="body-sm" as="p" style={{ opacity: 0.6, fontStyle: 'italic' }}>
-          Você ainda não escreveu notas sobre esta criança.
+          {t('p2Notes.empty')}
         </GumroadText>
       ) : (
         <Flex gap="3" wrap="wrap">
@@ -190,15 +194,16 @@ const MyNotesPanel: React.FC<MyNotesPanelProps> = ({ childId, therapySessions = 
                   <textarea
                     value={editContent}
                     onChange={(e) => setEditContent(e.target.value.slice(0, 4000))}
+                    aria-label={t('p2Notes.editLabel')}
                     style={{ ...textareaStyle, minHeight: '60px', backgroundColor: colors.canvas }}
                     maxLength={4000}
                   />
                   <Flex gap="2">
                     <GumroadButton variant="primary" size="sm" onClick={() => handleSaveEdit(note.id)} disabled={savingEditId === note.id}>
-                      {savingEditId === note.id ? 'Salvando...' : 'Salvar'}
+                      {savingEditId === note.id ? t('p2Notes.saving') : t('p2Notes.save')}
                     </GumroadButton>
                     <GumroadButton variant="secondary" size="sm" onClick={() => setEditingId(null)}>
-                      Cancelar
+                      {t('p2Notes.cancel')}
                     </GumroadButton>
                   </Flex>
                 </Flex>
@@ -206,11 +211,12 @@ const MyNotesPanel: React.FC<MyNotesPanelProps> = ({ childId, therapySessions = 
                 <Flex direction="column" gap="2">
                   <GumroadText level="body-sm" as="p" style={{ whiteSpace: 'pre-wrap' }}>{note.content}</GumroadText>
                   <Flex justify="between" align="center">
-                    <GumroadText level="caption" as="span" style={{ opacity: 0.55 }}>{formatDate(note.createdAt)}</GumroadText>
+                    <GumroadText level="caption" as="span" style={{ opacity: 0.55 }}>{formatDate(note.createdAt, i18n.language)}</GumroadText>
                     <Flex gap="1">
                       <button
                         onClick={() => startEdit(note)}
-                        aria-label="Editar nota"
+                        type="button"
+                        aria-label={t('p2Notes.editLabel')}
                         style={{ width: '26px', height: '26px', border: `1.5px solid ${colors.ink}`, borderRadius: radii.sm, backgroundColor: colors.canvas, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                       >
                         <Pencil1Icon width={12} height={12} />
@@ -218,7 +224,8 @@ const MyNotesPanel: React.FC<MyNotesPanelProps> = ({ childId, therapySessions = 
                       <button
                         onClick={() => handleDelete(note.id)}
                         disabled={deletingId === note.id}
-                        aria-label="Remover nota"
+                        type="button"
+                        aria-label={t('p2Notes.removeAria')}
                         style={{ width: '26px', height: '26px', border: `1.5px solid ${colors.ink}`, borderRadius: radii.sm, backgroundColor: colors.canvas, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                       >
                         <TrashIcon width={12} height={12} />
