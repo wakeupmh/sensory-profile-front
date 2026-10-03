@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
 import { Table, Box } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { SensoryItem, FrequencyResponse } from './types';
 import FastRadioCards from './FastRadioCards';
 import { colors, typography } from '../../theme/tokens';
@@ -13,14 +14,38 @@ interface SensoryItemsTableProps {
   allowedValues?: string[];
 }
 
-const frequencyOptions = [
-  { value: "não se aplica", label: "Não se aplica" },
-  { value: "quase nunca", label: "Quase Nunca" },
-  { value: "ocasionalmente", label: "Ocasionalmente" },
-  { value: "metade do tempo", label: "Metade do Tempo" },
-  { value: "frequentemente", label: "Frequentemente" },
-  { value: "quase sempre", label: "Quase Sempre" },
-];
+const frequencyOptionKeys = [
+  ['não se aplica', 'notApplicable'],
+  ['quase nunca', 'almostNever'],
+  ['ocasionalmente', 'occasionally'],
+  ['metade do tempo', 'halfTheTime'],
+  ['frequentemente', 'frequently'],
+  ['quase sempre', 'almostAlways'],
+] as const;
+
+// Orientação opcional do item (ex.: roteiro de sondagem), legível em telas estreitas
+const GuidanceBlock: React.FC<{ lines: string[]; title: string }> = ({ lines, title }) => (
+  <div
+    style={{
+      marginTop: '8px',
+      padding: '12px 14px',
+      border: `2px solid ${colors.ink}`,
+      borderRadius: '8px',
+      backgroundColor: colors['surface-cream'],
+      color: colors.ink,
+      fontFamily: typography['body-sm'].font,
+      fontSize: '14px',
+      lineHeight: 1.55,
+    }}
+  >
+    <div style={{ fontWeight: 700, marginBottom: '4px', fontFamily: typography['title-sm'].font }}>{title}</div>
+    {lines.map((line, i) => (
+      <p key={i} style={{ margin: i === 0 ? 0 : '6px 0 0', fontWeight: i === 0 ? 600 : 400 }}>
+        {line}
+      </p>
+    ))}
+  </div>
+);
 
 const descriptionStyle: React.CSSProperties = {
   fontSize: '16px',
@@ -30,6 +55,14 @@ const descriptionStyle: React.CSSProperties = {
 };
 
 const SensoryItemsTable: React.FC<SensoryItemsTableProps> = memo(({ items, onResponseChange, disabled, scale, allowedValues }) => {
+  const { t } = useTranslation();
+  const frequencyOptions = frequencyOptionKeys.map(([value, key]) => ({
+    value,
+    label: t(`assessmentForm.frequency.${key}`),
+  }));
+  // Escala sim/não ou passou/falhou não é de frequência
+  const isBinaryScale = (scale?.options.length ?? 0) > 0 && (scale?.options.length ?? 0) <= 2;
+  const guidanceTitle = t('assessmentForm.guidanceTitle');
   return (
     <>
       {/* Mobile: card list */}
@@ -69,10 +102,16 @@ const SensoryItemsTable: React.FC<SensoryItemsTableProps> = memo(({ items, onRes
               }}>
                 {item.id}.
               </span>
-              <span style={descriptionStyle}>{item.description}</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <span style={descriptionStyle}>{item.description}</span>
+                {item.guidance && item.guidance.length > 0 && (
+                  <GuidanceBlock lines={item.guidance} title={guidanceTitle} />
+                )}
+              </div>
             </div>
             <FastRadioCards
               name={`item-${item.id}`}
+              ariaLabel={`${t('assessmentForm.item')} ${item.id}`}
               options={frequencyOptions}
               scale={scale}
               allowedValues={allowedValues}
@@ -89,10 +128,11 @@ const SensoryItemsTable: React.FC<SensoryItemsTableProps> = memo(({ items, onRes
       <Table.Root variant="surface" className="sensory-table-desktop">
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeaderCell width="5%">Item</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell width="35%">Descrição</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell width="60%" align="center">
-              Frequência <span style={{ color: 'red' }}>*</span>
+            <Table.ColumnHeaderCell width="5%">{t('assessmentForm.item')}</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell width={isBinaryScale ? '55%' : '35%'}>{t('assessmentForm.description')}</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell width={isBinaryScale ? '40%' : '60%'} align="center">
+              {isBinaryScale ? t('assessmentForm.answer') : t('assessmentForm.frequency.label')}{' '}
+              <span aria-hidden="true" style={{ color: colors.error }}>*</span>
             </Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
@@ -102,11 +142,15 @@ const SensoryItemsTable: React.FC<SensoryItemsTableProps> = memo(({ items, onRes
               <Table.Cell>{item.id}</Table.Cell>
               <Table.Cell>
                 <span style={descriptionStyle}>{item.description}</span>
+                {item.guidance && item.guidance.length > 0 && (
+                  <GuidanceBlock lines={item.guidance} title={guidanceTitle} />
+                )}
               </Table.Cell>
               <Table.Cell>
                 <Box>
                   <FastRadioCards
                     name={`item-${item.id}-desktop`}
+                    ariaLabel={`${t('assessmentForm.item')} ${item.id}`}
                     options={frequencyOptions}
                     scale={scale}
                     allowedValues={allowedValues}

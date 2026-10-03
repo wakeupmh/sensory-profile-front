@@ -3,6 +3,7 @@ import { ReactNode, Suspense, lazy } from "react";
 import LoadingSpinner from './components/LoadingSpinner';
 import Layout from './components/Layout';
 import LandingPage from './pages/LandingPage';
+import NotFound from './components/NotFound';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useAuthContext } from './context/AuthContext';
 
@@ -84,6 +85,7 @@ function App() {
 
             <Route path="/" element={<Layout />}>
               <Route path="/dashboard" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+              <Route path="/assessments" element={<ProtectedRoute><Home /></ProtectedRoute>} />
               <Route path="/assessment/new" element={<ProtectedRoute><SensoryProfileForm /></ProtectedRoute>} />
               <Route path="/assessment/:id" element={<ProtectedRoute><SensoryProfileForm /></ProtectedRoute>} />
               <Route path="/assessment/:id/edit" element={<ProtectedRoute><SensoryProfileForm /></ProtectedRoute>} />
@@ -131,6 +133,7 @@ function App() {
               <Route path="/shared/assessment/:id" element={<ProtectedRoute><SharedAssessmentView /></ProtectedRoute>} />
               <Route path="/shared/children" element={<ProtectedRoute><SharedChildrenList /></ProtectedRoute>} />
               <Route path="/shared/children/:childId" element={<ProtectedRoute><SharedChildDetailPage /></ProtectedRoute>} />
+              <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>
         </Suspense>

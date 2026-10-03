@@ -1,4 +1,5 @@
 import { Box, Flex, Text } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { colors } from '../theme/tokens';
@@ -37,6 +38,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   color = colors['brand-cyan'],
   text,
 }) => {
+  const { t } = useTranslation();
   return (
     <Flex direction="column" align="center" justify="center" gap="3" role="status">
       <SpinnerContainer size={size} color={color} aria-hidden="true" />
@@ -45,7 +47,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
           {text}
         </Text>
       ) : (
-        <span className="sr-only">Carregando…</span>
+        <span className="sr-only">{t('p2Common.loading')}</span>
       )}
     </Flex>
   );

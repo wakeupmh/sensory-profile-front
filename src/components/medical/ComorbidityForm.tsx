@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
 import type { Comorbidity, CreateComorbidityPayload } from '../../types/medical';
@@ -56,6 +57,7 @@ const ComorbidityForm: React.FC<ComorbidityFormProps> = ({
   onCancel,
   loading = false,
 }) => {
+  const { t } = useTranslation();
   const [conditionName, setConditionName] = useState(initialValues.conditionName ?? '');
   const [icdCode, setIcdCode] = useState(initialValues.icdCode ?? '');
   const [diagnosisDate, setDiagnosisDate] = useState(initialValues.diagnosisDate ?? '');
@@ -88,34 +90,34 @@ const ComorbidityForm: React.FC<ComorbidityFormProps> = ({
       <Flex direction="column" gap="3">
         <div>
           <label style={labelStyle} htmlFor="comorb-condicao-diagnostico">
-            Condição / Diagnóstico <span style={{ color: colors.error }} aria-hidden="true">*</span>
+            {t('p2Medical.comorb.form.condition')} <span style={{ color: colors.error }} aria-hidden="true">*</span>
           </label>
           <input id="comorb-condicao-diagnostico"
             type="text"
             maxLength={255}
             value={conditionName}
             onChange={(e) => setConditionName(e.target.value)}
-            placeholder="Ex: Transtorno do Espectro Autista"
+            placeholder={t('p2Medical.comorb.form.conditionPh')}
             style={inputStyle}
             required
           />
         </div>
 
         <div>
-          <label style={labelStyle} htmlFor="comorb-codigo-cid">Código CID</label>
+          <label style={labelStyle} htmlFor="comorb-codigo-cid">{t('p2Medical.comorb.form.icd')}</label>
           <input id="comorb-codigo-cid"
             type="text"
             maxLength={20}
             value={icdCode}
             onChange={(e) => setIcdCode(e.target.value)}
-            placeholder="Ex: F84.0"
+            placeholder={t('p2Medical.comorb.form.icdPh')}
             style={inputStyle}
           />
         </div>
 
         <Flex gap="3">
           <div style={{ flex: 1 }}>
-            <label style={labelStyle} htmlFor="comorb-data-do">Data do diagnóstico</label>
+            <label style={labelStyle} htmlFor="comorb-data-do">{t('p2Medical.comorb.form.date')}</label>
             <input id="comorb-data-do"
               type="date"
               value={diagnosisDate}
@@ -124,36 +126,36 @@ const ComorbidityForm: React.FC<ComorbidityFormProps> = ({
             />
           </div>
           <div style={{ flex: 1 }}>
-            <label style={labelStyle} htmlFor="comorb-medico-diagnosticador">Médico diagnosticador</label>
+            <label style={labelStyle} htmlFor="comorb-medico-diagnosticador">{t('p2Medical.comorb.form.doctor')}</label>
             <input id="comorb-medico-diagnosticador"
               type="text"
               maxLength={255}
               value={diagnosingDoctor}
               onChange={(e) => setDiagnosingDoctor(e.target.value)}
-              placeholder="Nome do médico"
+              placeholder={t('p2Medical.comorb.form.doctorPh')}
               style={inputStyle}
             />
           </div>
         </Flex>
 
         <div>
-          <label style={labelStyle} htmlFor="comorb-observacoes">Observações</label>
+          <label style={labelStyle} htmlFor="comorb-observacoes">{t('p2Medical.comorb.form.notes')}</label>
           <textarea id="comorb-observacoes"
             maxLength={2000}
             rows={3}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Informações adicionais..."
+            placeholder={t('p2Medical.comorb.form.notesPh')}
             style={textareaStyle}
           />
         </div>
 
         <Flex gap="2" mt="2">
           <GumroadButton variant="primary" size="md" type="submit" disabled={isDisabled}>
-            {submitting || loading ? 'Salvando...' : 'Salvar'}
+            {submitting || loading ? t('p2Medical.saving') : t('p2Medical.save')}
           </GumroadButton>
           <GumroadButton variant="ghost" size="md" type="button" onClick={onCancel}>
-            Cancelar
+            {t('p2Medical.cancel')}
           </GumroadButton>
         </Flex>
       </Flex>

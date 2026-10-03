@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { colors, fonts } from '../../theme/tokens';
 
 export interface DayMood {
@@ -18,10 +19,11 @@ const PAD_Y = 20;
 const MAX_LEVEL = 5;
 
 const MoodTrendChart: React.FC<MoodTrendChartProps> = ({ data, daysInMonth }) => {
+  const { t } = useTranslation();
   if (data.length === 0) {
     return (
       <p style={{ fontFamily: fonts.body, fontSize: '13px', opacity: 0.6, fontStyle: 'italic' }}>
-        Sem registros de humor neste mês
+        {t('p2Recap.noMood')}
       </p>
     );
   }
@@ -37,7 +39,7 @@ const MoodTrendChart: React.FC<MoodTrendChartProps> = ({ data, daysInMonth }) =>
       viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
       style={{ display: 'block', overflow: 'visible' }}
       role="img"
-      aria-label="Gráfico de humor médio por dia no mês"
+      aria-label={t('p2Recap.chartLabel')}
     >
       {data.map(({ day, average }) => {
         const x = PAD_X + ((day - 1) / daysInMonth) * usableWidth;
@@ -55,7 +57,7 @@ const MoodTrendChart: React.FC<MoodTrendChartProps> = ({ data, daysInMonth }) =>
             strokeWidth={1.5}
             rx={2}
           >
-            <title>{`Dia ${day}: humor médio ${average.toFixed(1)}`}</title>
+            <title>{t('p2Recap.barTitle', { day, avg: average.toFixed(1) })}</title>
           </rect>
         );
       })}

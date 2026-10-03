@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, Flex, Heading, Text } from '@radix-ui/themes';
 import { listInstruments } from '../../instruments';
 import { colors, radii, shadows } from '../../theme/tokens';
@@ -9,26 +10,28 @@ interface InstrumentPickerProps {
   disabled?: boolean;
 }
 
-const formatAgeRange = (minMonths: number, maxMonths: number): string => {
+const formatAgeRange = (minMonths: number, maxMonths: number, allAges: string): string => {
   if (maxMonths >= 9000) {
-    return minMonths <= 0 ? 'Todas as idades' : `${minMonths}m+`;
+    return minMonths <= 0 ? allAges : `${minMonths}m+`;
   }
   const toLabel = (m: number) => (m >= 12 ? `${Math.floor(m / 12)}a` : `${m}m`);
   return `${toLabel(minMonths)}–${toLabel(maxMonths)}`;
 };
 
 const InstrumentPicker: React.FC<InstrumentPickerProps> = memo(({ value, onChange, disabled }) => {
-  const instruments = listInstruments();
+  const { t } = useTranslation();
+  // Instrumentos de acompanhamento só são abertos a partir da avaliação-mãe
+  const instruments = listInstruments().filter((i) => !i.parentInstrumentId || i.id === value);
 
   return (
     <Card mb="4">
       <Flex direction="column" gap="2" mb="3">
-        <Heading size="4">Instrumento</Heading>
+        <Heading size="4">{t('assessmentForm.picker.title')}</Heading>
         <Text size="2" color="gray">
-          Escolha o questionário adequado à faixa etária. Ao trocar, as respostas já preenchidas desta avaliação serão reiniciadas.
+          {t('assessmentForm.picker.help')}
         </Text>
       </Flex>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
+      <div role="radiogroup" aria-label={t('assessmentForm.picker.title')} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(240px, 100%), 1fr))', gap: '12px' }}>
         {instruments.map((i) => {
           const isSelected = value === i.id;
           return (
@@ -58,8 +61,9 @@ const InstrumentPicker: React.FC<InstrumentPickerProps> = memo(({ value, onChang
               }}
             >
               <span style={{ fontWeight: 700, fontSize: '14px', color: 'inherit' }}>{i.name}</span>
-              <span style={{ fontSize: '12px', opacity: isSelected ? 0.85 : 0.6 }}>
-                Faixa etária: {formatAgeRange(i.ageRange.minMonths, i.ageRange.maxMonths)} · {i.sections.length} seções
+              <span style={{ fontSize: '12px', opacity: isSelected ? 0.9 : 0.75 }}>
+                {t('assessmentForm.picker.ageRange')}: {formatAgeRange(i.ageRange.minMonths, i.ageRange.maxMonths, t('assessmentForm.picker.allAges'))}
+                {i.sections.length > 0 && ` · ${t('assessmentForm.picker.sections', { count: i.sections.length })}`}
               </span>
               <span style={{ fontSize: '13px', marginTop: '4px', color: 'inherit' }}>{i.description}</span>
             </button>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Flex } from '@radix-ui/themes';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
@@ -59,6 +60,7 @@ const MilestoneForm: React.FC<MilestoneFormProps> = ({
   onCancel,
   loading = false,
 }) => {
+  const { t } = useTranslation();
   const [title, setTitle] = useState(initialValues.title ?? '');
   const [category, setCategory] = useState<MilestoneCategory | ''>(initialValues.category ?? '');
   const [status, setStatus] = useState<MilestoneStatus>(initialValues.status ?? 'not_yet');
@@ -93,14 +95,14 @@ const MilestoneForm: React.FC<MilestoneFormProps> = ({
       <Flex direction="column" gap="3">
         <div>
           <label style={labelStyle} htmlFor="milestone-nome">
-            Nome <span style={{ color: colors.error }} aria-hidden="true">*</span>
+            {t('cDevelopment.form.name')} <span style={{ color: colors.error }} aria-hidden="true">*</span>
           </label>
           <input id="milestone-nome"
             type="text"
             maxLength={255}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Nome do marco"
+            placeholder={t('cDevelopment.form.namePh')}
             style={inputStyle}
             required
           />
@@ -109,7 +111,7 @@ const MilestoneForm: React.FC<MilestoneFormProps> = ({
         <Flex gap="3">
           <div style={{ flex: 1 }}>
             <label style={labelStyle} htmlFor="milestone-categoria">
-              Categoria <span style={{ color: colors.error }} aria-hidden="true">*</span>
+              {t('cDevelopment.form.category')} <span style={{ color: colors.error }} aria-hidden="true">*</span>
             </label>
             <select id="milestone-categoria"
               value={category}
@@ -117,11 +119,11 @@ const MilestoneForm: React.FC<MilestoneFormProps> = ({
               style={{ ...inputStyle, cursor: 'pointer' }}
               required
             >
-              <option value="">Selecionar...</option>
+              <option value="">{t('cDevelopment.form.select')}</option>
               {(Object.entries(MILESTONE_CATEGORY_LABELS) as [MilestoneCategory, string][]).map(
                 ([value, label]) => (
                   <option key={value} value={value}>
-                    {label}
+                    {t(`cDevelopment.milestoneCategory.${value}`, { defaultValue: label })}
                   </option>
                 )
               )}
@@ -129,7 +131,7 @@ const MilestoneForm: React.FC<MilestoneFormProps> = ({
           </div>
 
           <div style={{ flex: 1 }}>
-            <label style={labelStyle} htmlFor="milestone-status">Status</label>
+            <label style={labelStyle} htmlFor="milestone-status">{t('cDevelopment.form.status')}</label>
             <select id="milestone-status"
               value={status}
               onChange={(e) => setStatus(e.target.value as MilestoneStatus)}
@@ -138,7 +140,7 @@ const MilestoneForm: React.FC<MilestoneFormProps> = ({
               {(Object.entries(MILESTONE_STATUS_LABELS) as [MilestoneStatus, string][]).map(
                 ([value, label]) => (
                   <option key={value} value={value}>
-                    {label}
+                    {t(`cDevelopment.milestoneStatus.${value}`, { defaultValue: label })}
                   </option>
                 )
               )}
@@ -148,7 +150,7 @@ const MilestoneForm: React.FC<MilestoneFormProps> = ({
 
         <Flex gap="3">
           <div style={{ flex: 1 }}>
-            <label style={labelStyle} htmlFor="milestone-data-de">Data de conquista</label>
+            <label style={labelStyle} htmlFor="milestone-data-de">{t('cDevelopment.form.achievedDate')}</label>
             <input id="milestone-data-de"
               type="date"
               value={achievedDate ?? ''}
@@ -157,7 +159,7 @@ const MilestoneForm: React.FC<MilestoneFormProps> = ({
             />
           </div>
           <div style={{ flex: 1 }}>
-            <label style={labelStyle} htmlFor="milestone-data-meta">Data meta</label>
+            <label style={labelStyle} htmlFor="milestone-data-meta">{t('cDevelopment.form.targetDate')}</label>
             <input id="milestone-data-meta"
               type="date"
               value={targetDate ?? ''}
@@ -169,7 +171,7 @@ const MilestoneForm: React.FC<MilestoneFormProps> = ({
 
         <div>
           <label style={labelStyle} htmlFor="milestone-notas-2000">
-            Notas
+            {t('cDevelopment.form.milestoneNotes')}
             <span style={{ fontWeight: 400, color: colors['ink-muted'], marginLeft: '6px' }}>
               ({(notes ?? '').length}/2000)
             </span>
@@ -179,17 +181,17 @@ const MilestoneForm: React.FC<MilestoneFormProps> = ({
             rows={3}
             value={notes ?? ''}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Observações sobre este marco..."
+            placeholder={t('cDevelopment.form.milestoneNotesPh')}
             style={textareaStyle}
           />
         </div>
 
         <Flex gap="2" mt="2">
-          <GumroadButton variant="primary" size="md" type="submit" disabled={isDisabled}>
-            {submitting || loading ? 'Salvando...' : 'Salvar Marco'}
+          <GumroadButton variant="primary" size="md" type="submit" disabled={isDisabled} loading={submitting || loading}>
+            {submitting || loading ? t('cDevelopment.saving') : t('cDevelopment.form.saveMilestone')}
           </GumroadButton>
           <GumroadButton variant="ghost" size="md" type="button" onClick={onCancel}>
-            Cancelar
+            {t('cDevelopment.cancel')}
           </GumroadButton>
         </Flex>
       </Flex>

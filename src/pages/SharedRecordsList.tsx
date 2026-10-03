@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Flex, Separator, Tabs } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import {
   ClipboardIcon,
   FileTextIcon,
@@ -23,6 +24,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { colors, spacing } from '../theme/tokens';
 
 const SharedRecordsList: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const { getToken, isLoaded, session } = useAuthContext();
   const getTokenRef = useRef(getToken);
   getTokenRef.current = getToken;
@@ -31,25 +33,35 @@ const SharedRecordsList: React.FC = () => {
   const [assessments, setAssessments] = useState<SharedAssessmentSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [partialError, setPartialError] = useState(false);
 
   const fetchAll = useCallback(async () => {
     try {
       setLoading(true);
       const token = await getTokenRef.current();
-      const [a, b] = await Promise.all([
-        sharedApi.listAnamneses(token).catch(() => [] as SharedAnamneseSummary[]),
-        sharedApi.listAssessments(token).catch(() => [] as SharedAssessmentSummary[]),
+      // allSettled: uma lista que falha não deve virar "nada compartilhado"
+      const [a, b] = await Promise.allSettled([
+        sharedApi.listAnamneses(token),
+        sharedApi.listAssessments(token),
       ]);
-      setAnamneses(a);
-      setAssessments(b);
+      const anamneseList = a.status === 'fulfilled' ? a.value : [];
+      const assessmentList = b.status === 'fulfilled' ? b.value : [];
+      const anyFailed = a.status === 'rejected' || b.status === 'rejected';
+      // Nada para mostrar e algo falhou: é erro, não "nada compartilhado"
+      if (anyFailed && anamneseList.length + assessmentList.length === 0) {
+        throw a.status === 'rejected' ? a.reason : (b as PromiseRejectedResult).reason;
+      }
+      setAnamneses(anamneseList);
+      setAssessments(assessmentList);
+      setPartialError(anyFailed);
       setError(null);
     } catch (err) {
       console.error(err);
-      setError('Não foi possível carregar os registros compartilhados.');
+      setError(t('p2Share.records.loadError'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (isLoaded && session) fetchAll();
@@ -61,10 +73,10 @@ const SharedRecordsList: React.FC = () => {
     <Box>
       <Box mb="6">
         <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
-          Compartilhados comigo
+          {t('p2Share.records.title')}
         </GumroadHeading>
         <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7 }}>
-          Registros que pacientes ou familiares concederam acesso a você
+          {t('p2Share.records.subtitle')}
         </GumroadText>
       </Box>
 
@@ -73,16 +85,17 @@ const SharedRecordsList: React.FC = () => {
       {loading ? (
         <GumroadCard color="cream" shadow="md" padding="xl">
           <Flex direction="column" align="center" gap="4">
-            <LoadingSpinner size="large" text="Carregando..." />
+            <LoadingSpinner size="large" text={t('p2Share.loading')} />
           </Flex>
         </GumroadCard>
       ) : error ? (
         <GumroadCard role="alert" color="salmon" shadow="md" padding="md">
-          <Flex align="center" gap="2">
+          <Flex align="center" gap="3" wrap="wrap">
             <ExclamationTriangleIcon />
             <GumroadText level="body-md" as="span">
               {error}
             </GumroadText>
+            <GumroadButton variant="secondary" size="sm" onClick={fetchAll}>{t('p2Share.retry')}</GumroadButton>
           </Flex>
         </GumroadCard>
       ) : totalShared === 0 ? (
@@ -91,30 +104,40 @@ const SharedRecordsList: React.FC = () => {
             <InfoCircledIcon width={32} height={32} />
             <Box style={{ textAlign: 'center' }}>
               <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
-                Nada compartilhado ainda
+                {t('p2Share.records.emptyTitle')}
               </GumroadHeading>
               <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7 }}>
-                Quando alguém compartilhar uma anamnese ou avaliação com você, ela aparecerá aqui.
+                {t('p2Share.records.emptyHint')}
               </GumroadText>
             </Box>
             <GumroadButton variant="secondary" size="md" asChild>
               <Link to="/invite/accept" style={{ textDecoration: 'none' }}>
-                Tem um código de convite?
+                {t('p2Share.records.haveCode')}
               </Link>
             </GumroadButton>
           </Flex>
         </GumroadCard>
       ) : (
+        <>
+        {partialError && (
+          <GumroadCard role="alert" color="yellow" shadow="sm" padding="sm" style={{ marginBottom: spacing.md }}>
+            <Flex align="center" gap="3" wrap="wrap">
+              <ExclamationTriangleIcon />
+              <GumroadText level="body-sm" as="span">{t('p2Share.records.partialError')}</GumroadText>
+              <GumroadButton variant="secondary" size="sm" onClick={fetchAll}>{t('p2Share.retry')}</GumroadButton>
+            </Flex>
+          </GumroadCard>
+        )}
         <Tabs.Root defaultValue={anamneses.length > 0 ? 'anamneses' : 'assessments'}>
           <Tabs.List>
             <Tabs.Trigger value="anamneses">
-              Anamneses
+              {t('p2Share.records.anamneses')}
               <GumroadBadge color="cream" style={{ marginLeft: 8 }}>
                 {anamneses.length}
               </GumroadBadge>
             </Tabs.Trigger>
             <Tabs.Trigger value="assessments">
-              Avaliações
+              {t('p2Share.records.assessments')}
               <GumroadBadge color="cream" style={{ marginLeft: 8 }}>
                 {assessments.length}
               </GumroadBadge>
@@ -126,7 +149,7 @@ const SharedRecordsList: React.FC = () => {
               {anamneses.length === 0 ? (
                 <GumroadCard color="cream" shadow="sm" padding="md">
                   <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7 }}>
-                    Nenhuma anamnese foi compartilhada com você ainda.
+                    {t('p2Share.records.noAnamneses')}
                   </GumroadText>
                 </GumroadCard>
               ) : (
@@ -134,10 +157,10 @@ const SharedRecordsList: React.FC = () => {
                   {anamneses.map((a) => (
                     <SharedRow
                       key={a.id}
-                      title={a.title || 'Anamnese'}
+                      title={a.title || t('p2Share.records.anamnese')}
                       to={`/shared/anamnese/${a.id}`}
                       icon={<ClipboardIcon />}
-                      meta={`Criada em ${formatDate(a.createdAt)} · Compartilhada em ${formatDate(a.grantedAt)}`}
+                      meta={t('p2Share.records.meta', { created: formatDate(a.createdAt, i18n.language), shared: formatDate(a.grantedAt, i18n.language) })}
                     />
                   ))}
                 </Flex>
@@ -148,7 +171,7 @@ const SharedRecordsList: React.FC = () => {
               {assessments.length === 0 ? (
                 <GumroadCard color="cream" shadow="sm" padding="md">
                   <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7 }}>
-                    Nenhuma avaliação foi compartilhada com você ainda.
+                    {t('p2Share.records.noAssessments')}
                   </GumroadText>
                 </GumroadCard>
               ) : (
@@ -158,10 +181,10 @@ const SharedRecordsList: React.FC = () => {
                     return (
                       <SharedRow
                         key={a.id}
-                        title={a.childName || 'Avaliação'}
+                        title={a.childName || t('p2Share.records.assessment')}
                         to={`/shared/assessment/${a.id}`}
                         icon={<FileTextIcon />}
-                        meta={`Criada em ${formatDate(a.createdAt)} · Compartilhada em ${formatDate(a.grantedAt)}`}
+                        meta={t('p2Share.records.meta', { created: formatDate(a.createdAt, i18n.language), shared: formatDate(a.grantedAt, i18n.language) })}
                         badge={instrumentLabel}
                       />
                     );
@@ -171,14 +194,15 @@ const SharedRecordsList: React.FC = () => {
             </Tabs.Content>
           </Box>
         </Tabs.Root>
+        </>
       )}
     </Box>
   );
 };
 
-const formatDate = (iso: string): string => {
+const formatDate = (iso: string, lang: string): string => {
   try {
-    return new Date(iso).toLocaleDateString('pt-BR');
+    return new Date(iso).toLocaleDateString(lang);
   } catch {
     return iso;
   }
@@ -190,7 +214,9 @@ const SharedRow: React.FC<{
   icon: React.ReactNode;
   meta: string;
   badge?: string | null;
-}> = ({ title, to, icon, meta, badge }) => (
+}> = ({ title, to, icon, meta, badge }) => {
+  const { t } = useTranslation();
+  return (
   <GumroadCard color="white" shadow="md" padding="md">
     <Flex
       justify="between"
@@ -226,14 +252,15 @@ const SharedRow: React.FC<{
       <Flex gap="2" align="center" wrap="wrap">
         {badge && <GumroadBadge color="lavender">{badge}</GumroadBadge>}
         <GumroadButton variant="primary" size="sm" asChild>
-          <Link to={to} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          <Link to={to} aria-label={t('p2Share.records.openAria', { title })} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
             <EyeOpenIcon />
-            Abrir
+            {t('p2Share.records.open')}
           </Link>
         </GumroadButton>
       </Flex>
     </Flex>
   </GumroadCard>
-);
+  );
+};
 
 export default SharedRecordsList;

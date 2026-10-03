@@ -3,81 +3,15 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthContext } from '../context/AuthContext';
 import { Box, Flex } from '@radix-ui/themes';
-import {
-  HomeIcon,
-  FileTextIcon,
-  ClipboardIcon,
-  PersonIcon,
-  ExitIcon,
-  ActivityLogIcon,
-  PlusCircledIcon,
-  HeartIcon,
-  BarChartIcon,
-  ReaderIcon,
-  ChevronDownIcon,
-  Share1Icon,
-  EnvelopeOpenIcon,
-  EyeOpenIcon,
-  TargetIcon,
-  ArchiveIcon,
-  GroupIcon,
-  CalendarIcon,
-  GearIcon,
-  MagnifyingGlassIcon,
-  SpeakerLoudIcon,
-  BadgeIcon,
-} from '@radix-ui/react-icons';
+import { ExitIcon, ChevronDownIcon, MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { colors, typography, zIndex, shadows } from '../theme/tokens';
 import GumroadButton from './design-system/GumroadButton';
 import DelegationSwitcher from './DelegationSwitcher';
 import GlobalSearch from './GlobalSearch';
 import { useCareTeamCaseload } from '../hooks/useCareTeamCaseload';
 import { useClinicMembership } from '../hooks/useClinicMembership';
-
-type NavItem = { path: string; match: string; labelKey: string; icon: React.ComponentType<{ width?: number; height?: number }> };
-
-// Links mais usados ficam inline; o resto vai para o menu "Mais" (espelha a navegação mobile)
-const PRIMARY: NavItem[] = [
-  { path: '/dashboard', match: '/dashboard', labelKey: 'nav.dashboard', icon: HomeIcon },
-  { path: '/assessment/new', match: '/assessment', labelKey: 'nav.assessments', icon: FileTextIcon },
-  { path: '/anamneses', match: '/anamnese', labelKey: 'nav.anamneses', icon: ClipboardIcon },
-  { path: '/children', match: '/children', labelKey: 'nav.children', icon: PersonIcon },
-];
-
-const SECONDARY: NavItem[] = [
-  { path: '/logs', match: '/logs', labelKey: 'nav.logs', icon: ActivityLogIcon },
-  { path: '/relato-do-dia', match: '/relato-do-dia', labelKey: 'nav.dailyReport', icon: SpeakerLoudIcon },
-  { path: '/medical', match: '/medical', labelKey: 'nav.medical', icon: PlusCircledIcon },
-  { path: '/therapy', match: '/therapy', labelKey: 'nav.therapy', icon: HeartIcon },
-  { path: '/development', match: '/development', labelKey: 'nav.development', icon: BarChartIcon },
-  { path: '/education', match: '/education', labelKey: 'nav.education', icon: ReaderIcon },
-  { path: '/goals', match: '/goals', labelKey: 'nav.goals', icon: TargetIcon },
-  { path: '/documents', match: '/documents', labelKey: 'nav.documents', icon: ArchiveIcon },
-  { path: '/monthly-recap', match: '/monthly-recap', labelKey: 'nav.monthlyRecap', icon: CalendarIcon },
-  { path: '/professionals', match: '/professionals', labelKey: 'nav.professionals', icon: Share1Icon },
-  { path: '/shared', match: '/shared', labelKey: 'nav.sharedWithMe', icon: EyeOpenIcon },
-  { path: '/shared/children', match: '/shared/children', labelKey: 'nav.sharedChildren', icon: GroupIcon },
-  { path: '/invite/accept', match: '/invite', labelKey: 'nav.acceptInvite', icon: EnvelopeOpenIcon },
-  { path: '/settings', match: '/settings', labelKey: 'nav.settings', icon: GearIcon },
-];
-
-// Só entra na navegação quando a conta tem pelo menos um atendimento — ver
-// useCareTeamCaseload.
-const CARE_TEAM_CASELOAD_ITEM: NavItem = {
-  path: '/care-team/children',
-  match: '/care-team/children',
-  labelKey: 'nav.careTeamCaseload',
-  icon: BadgeIcon,
-};
-
-// Mesma regra da equipe de cuidado: só aparece para quem faz parte de alguma
-// clínica, para uma conta de responsável não ganhar um link morto.
-const CLINICS_ITEM: NavItem = {
-  path: '/clinics',
-  match: '/clinics',
-  labelKey: 'nav.clinics',
-  icon: GroupIcon,
-};
+import { PRIMARY_ITEMS, buildMoreGroups, isNavItemActive } from './navConfig';
+import type { NavItem } from './navConfig';
 
 const Menu: React.FC = () => {
   const { t } = useTranslation();
@@ -90,18 +24,11 @@ const Menu: React.FC = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
-  const secondaryItems = [
-    ...SECONDARY,
-    ...(hasCareTeamCaseload ? [CARE_TEAM_CASELOAD_ITEM] : []),
-    ...(belongsToClinic ? [CLINICS_ITEM] : []),
-  ];
+  const moreGroups = buildMoreGroups({ careTeam: hasCareTeamCaseload, clinics: belongsToClinic });
 
   const handleSignOut = () => signOut().then(() => navigate('/sign-in', { replace: true }));
 
-  const isActive = (path: string) => {
-    if (path === '/dashboard') return location.pathname === '/dashboard';
-    return location.pathname.startsWith(path);
-  };
+  const isActive = (item: NavItem) => isNavItemActive(location.pathname, item);
 
   // Fecha o dropdown ao navegar
   useEffect(() => {
@@ -166,7 +93,7 @@ const Menu: React.FC = () => {
     transition: 'background 0.12s ease',
   });
 
-  const isSecondaryActive = secondaryItems.some((t) => isActive(t.match));
+  const isSecondaryActive = moreGroups.some((g) => g.items.some(isActive));
 
   return (
     <Box
@@ -206,26 +133,34 @@ const Menu: React.FC = () => {
             {/* Desktop nav links */}
             <Flex asChild gap="2" align="center" display={{ initial: 'none', md: 'flex' }}>
               <nav aria-label={t('nav.mainNavLabel')}>
-                {PRIMARY.map(({ path, match, labelKey, icon: Icon }) => (
+                {PRIMARY_ITEMS.map((item) => (
                   <Link
-                    key={path}
-                    to={path}
-                    style={navLinkStyle(isActive(match))}
-                    aria-current={isActive(match) ? 'page' : undefined}
+                    key={item.path}
+                    to={item.path}
+                    style={navLinkStyle(isActive(item))}
+                    aria-current={isActive(item) ? 'page' : undefined}
                   >
-                    <Icon width={16} height={16} />
-                    {t(labelKey)}
+                    <item.icon width={16} height={16} />
+                    {t(item.labelKey)}
                   </Link>
                 ))}
 
                 {/* "Mais" — padrão de navegação com disclosure (WAI), sem roles de menu */}
-                <div ref={moreRef} style={{ position: 'relative' }}>
+                <div
+                  ref={moreRef}
+                  style={{ position: 'relative' }}
+                  onBlur={(e) => {
+                    // Foco saiu do disclosure (Tab para fora): fecha
+                    if (moreOpen && !e.currentTarget.contains(e.relatedTarget as Node | null)) setMoreOpen(false);
+                  }}
+                >
                   <button
+                    type="button"
                     ref={moreButtonRef}
                     onClick={() => setMoreOpen((v) => !v)}
                     style={navLinkStyle(isSecondaryActive || moreOpen)}
                     aria-expanded={moreOpen}
-                    aria-controls="menu-mais"
+                    aria-controls={moreOpen ? 'menu-mais' : undefined}
                   >
                     {t('nav.more')}
                     <ChevronDownIcon
@@ -243,7 +178,9 @@ const Menu: React.FC = () => {
                         position: 'absolute',
                         top: 'calc(100% + 10px)',
                         left: 0,
-                        minWidth: '220px',
+                        minWidth: '240px',
+                        maxHeight: 'calc(100vh - 100px)',
+                        overflowY: 'auto',
                         background: colors.surface,
                         border: `2px solid ${colors.ink}`,
                         borderRadius: '14px',
@@ -254,16 +191,34 @@ const Menu: React.FC = () => {
                         gap: '2px',
                       }}
                     >
-                      {secondaryItems.map(({ path, match, labelKey, icon: Icon }) => (
-                        <Link
-                          key={path}
-                          to={path}
-                          style={moreItemStyle(isActive(match))}
-                          aria-current={isActive(match) ? 'page' : undefined}
-                        >
-                          <Icon width={18} height={18} />
-                          {t(labelKey)}
-                        </Link>
+                      {moreGroups.map((group) => (
+                        <div key={group.id} role="group" aria-labelledby={`menu-mais-${group.id}`}>
+                          <div
+                            id={`menu-mais-${group.id}`}
+                            style={{
+                              fontFamily: typography.caption.font,
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              letterSpacing: '0.06em',
+                              textTransform: 'uppercase',
+                              color: colors['ink-muted'],
+                              padding: '8px 14px 4px',
+                            }}
+                          >
+                            {t(group.labelKey)}
+                          </div>
+                          {group.items.map((item) => (
+                            <Link
+                              key={item.path}
+                              to={item.path}
+                              style={moreItemStyle(isActive(item))}
+                              aria-current={isActive(item) ? 'page' : undefined}
+                            >
+                              <item.icon width={18} height={18} />
+                              {t(item.labelKey)}
+                            </Link>
+                          ))}
+                        </div>
                       ))}
                     </div>
                   )}
@@ -279,7 +234,7 @@ const Menu: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setSearchOpen(true)}
-                aria-label="Buscar"
+                aria-label={t('navExtra.search')}
                 style={{
                   ...navLinkStyle(false),
                   padding: '8px',

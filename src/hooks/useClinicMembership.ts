@@ -12,11 +12,15 @@ import { clinicApi } from '../services/api';
  * apenas mantém o link escondido, nunca vira erro de página.
  */
 let cached: boolean | null = null;
-let inFlight: Promise<boolean> | null = null;
+let inFlight: Promise<boolean | null> | null = null;
+// De quem é o valor em cache: sem isso, trocar de conta na mesma aba herdava o
+// resultado da conta anterior (links de navegação errados) até recarregar.
+let cachedFor: string | null = null;
 
 export function resetClinicMembershipCache(): void {
   cached = null;
   inFlight = null;
+  cachedFor = null;
 }
 
 export function useClinicMembership(): boolean {
@@ -25,6 +29,12 @@ export function useClinicMembership(): boolean {
 
   useEffect(() => {
     if (!isLoaded || !session) return;
+    const userId = session.user?.id ?? null;
+    if (cachedFor !== userId) {
+      cached = null;
+      inFlight = null;
+      cachedFor = userId;
+    }
 
     if (cached !== null) {
       setBelongs(cached);
@@ -38,15 +48,15 @@ export function useClinicMembership(): boolean {
           const token = await getToken();
           return (await clinicApi.listMine(token)).length > 0;
         } catch {
-          return false;
+          return null;
         }
       })();
     }
 
     inFlight.then((result) => {
-      cached = result;
+      if (result !== null && cachedFor === userId) cached = result;
       inFlight = null;
-      if (!cancelled) setBelongs(result);
+      if (!cancelled) setBelongs(result ?? false);
     });
 
     return () => {

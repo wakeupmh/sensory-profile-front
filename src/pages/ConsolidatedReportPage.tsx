@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Box } from '@radix-ui/themes';
 import { ArrowLeftIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { consolidatedReportApi } from '../services/api';
@@ -21,14 +22,10 @@ import SharePanel from '../components/consolidated-report/SharePanel';
 import AISummaryHistoryPanel from '../components/consolidated-report/AISummaryHistoryPanel';
 import AIQuestionChat from '../components/consolidated-report/AIQuestionChat';
 
-const PERIOD_OPTIONS = [
-  { label: '30 dias', value: 30 },
-  { label: '60 dias', value: 60 },
-  { label: '90 dias', value: 90 },
-  { label: '180 dias', value: 180 },
-];
+const PERIOD_OPTIONS = [30, 60, 90, 180];
 
 const ConsolidatedReportPage = () => {
+  const { t, i18n } = useTranslation();
   const { childId } = useParams<{ childId: string }>();
   const navigate = useNavigate();
   const { getToken } = useAuthContext();
@@ -51,12 +48,12 @@ const ConsolidatedReportPage = () => {
         if (!signal?.aborted) setSummary(data);
       } catch {
         if (signal?.aborted) return;
-        setError('Erro ao carregar o relatório consolidado. Tente novamente.');
+        setError(t('p1Consolidated.errLoad'));
       } finally {
         if (!signal?.aborted) setLoading(false);
       }
     })();
-  }, [childId]);
+  }, [childId, t]);
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -73,56 +70,61 @@ const ConsolidatedReportPage = () => {
       {/* Back button */}
       <div style={{ marginBottom: spacing.md }}>
         <GumroadButton variant="secondary" size="sm" onClick={() => navigate(childId ? `/children/${childId}` : '/dashboard')}>
-          <ArrowLeftIcon /> Voltar
+          <ArrowLeftIcon aria-hidden="true" /> {t('p1Consolidated.back')}
         </GumroadButton>
       </div>
 
       {/* Header */}
       <div style={{ marginBottom: spacing.lg }}>
         <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
-          Relatório Consolidado
+          {t('p1Consolidated.title')}
           {summary?.child?.name && ` — ${summary.child.name}`}
         </GumroadHeading>
         {summary && (
           <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-            Período: {new Date(summary.period.from).toLocaleDateString('pt-BR')} a{' '}
-            {new Date(summary.period.to).toLocaleDateString('pt-BR')} · Gerado em{' '}
-            {new Date(summary.generatedAt).toLocaleString('pt-BR')}
+            {t('p1Consolidated.period', {
+              from: new Date(summary.period.from).toLocaleDateString(i18n.language),
+              to: new Date(summary.period.to).toLocaleDateString(i18n.language),
+              generated: new Date(summary.generatedAt).toLocaleString(i18n.language),
+            })}
           </GumroadText>
         )}
       </div>
 
       {/* Period selector */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: spacing.lg }}>
-        <span style={{ fontSize: '0.85rem', fontWeight: 600, fontFamily: fonts.display }}>Período:</span>
-        {PERIOD_OPTIONS.map((opt) => (
+        <span style={{ fontSize: '0.85rem', fontWeight: 600, fontFamily: fonts.display }}>{t('p1Consolidated.periodLabel')}</span>
+        {PERIOD_OPTIONS.map((days) => (
           <button
-            key={opt.value}
-            onClick={() => handlePeriodChange(opt.value)}
+            key={days}
+            type="button"
+            aria-pressed={periodDays === days}
+            onClick={() => handlePeriodChange(days)}
             style={{
-              background: periodDays === opt.value ? colors.ink : colors.canvas,
-              color: periodDays === opt.value ? colors.canvas : colors.ink,
+              background: periodDays === days ? colors.ink : colors.canvas,
+              color: periodDays === days ? colors.canvas : colors.ink,
               border: `2px solid ${colors.ink}`,
               borderRadius: '9999px',
               padding: '4px 14px',
               fontSize: '0.82rem',
               fontWeight: 700,
               cursor: 'pointer',
-              boxShadow: periodDays === opt.value ? 'none' : shadows.input,
+              boxShadow: periodDays === days ? 'none' : shadows.input,
               fontFamily: fonts.display,
             }}
           >
-            {opt.label}
+            {t('p1Consolidated.days', { count: days })}
           </button>
         ))}
       </div>
 
       {loading ? (
         <div style={{ textAlign: 'center', padding: '60px 0' }}>
-          <LoadingSpinner size="large" text="Carregando relatório consolidado..." />
+          <LoadingSpinner size="large" text={t('p1Consolidated.loading')} />
         </div>
       ) : error ? (
         <div
+          role="alert"
           style={{
             background: colors.surface,
             border: `2px solid ${colors.ink}`,
@@ -131,36 +133,36 @@ const ConsolidatedReportPage = () => {
             textAlign: 'center',
           }}
         >
-          <ExclamationTriangleIcon width={32} height={32} style={{ marginBottom: '8px', color: colors['brand-salmon'] }} />
+          <ExclamationTriangleIcon aria-hidden="true" width={32} height={32} style={{ marginBottom: '8px', color: colors['brand-salmon'] }} />
           <p style={{ fontSize: '0.95rem', marginBottom: '12px' }}>{error}</p>
           <GumroadButton variant="primary" size="sm" onClick={() => fetchSummary(periodDays)}>
-            Tentar novamente
+            {t('p1Consolidated.retry')}
           </GumroadButton>
         </div>
       ) : summary ? (
         <>
           <div className="paper-surface">
-            <SectionCard title="Avaliações" icon="🧠" accentColor={colors['brand-cyan']}>
+            <SectionCard title={t('p1Common.sections.assessments')} icon="🧠" accentColor={colors['brand-cyan']}>
               <AssessmentsSection data={summary.assessments} />
             </SectionCard>
 
-            <SectionCard title="Registros Diários" icon="📋" accentColor={colors['brand-yellow']}>
+            <SectionCard title={t('p1Common.sections.dailyLogs')} icon="📋" accentColor={colors['brand-yellow']}>
               <LogsSummary data={summary.logs} />
             </SectionCard>
 
-            <SectionCard title="Terapia" icon="🏥" accentColor={colors['brand-mint']}>
+            <SectionCard title={t('p1Common.sections.therapy')} icon="🏥" accentColor={colors['brand-mint']}>
               <TherapySection data={summary.therapy} />
             </SectionCard>
 
-            <SectionCard title="Saúde" icon="💊" accentColor={colors['brand-salmon']}>
+            <SectionCard title={t('p1Common.sections.health')} icon="💊" accentColor={colors['brand-salmon']}>
               <MedicalSection data={summary.medical} />
             </SectionCard>
 
-            <SectionCard title="Desenvolvimento" icon="🌱" accentColor="#22c55e">
+            <SectionCard title={t('p1Common.sections.development')} icon="🌱" accentColor="#22c55e">
               <DevelopmentSection data={summary.development} />
             </SectionCard>
 
-            <SectionCard title="Educação" icon="🎒" accentColor={colors['brand-lavender']}>
+            <SectionCard title={t('p1Common.sections.education')} icon="🎒" accentColor={colors['brand-lavender']}>
               <EducationSection data={summary.education} />
             </SectionCard>
 

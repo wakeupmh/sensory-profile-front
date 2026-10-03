@@ -1,5 +1,6 @@
 import React from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { Pencil2Icon, TrashIcon } from '@radix-ui/react-icons';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import GumroadCard from '../design-system/GumroadCard';
@@ -13,8 +14,8 @@ interface CommunicationLogCardProps {
   onDelete: (id: string) => void;
 }
 
-function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString('pt-BR', {
+function formatDateTime(iso: string, lang: string): string {
+  return new Date(iso).toLocaleString(lang, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -38,6 +39,7 @@ const iconBtnStyle: React.CSSProperties = {
 };
 
 const CommunicationLogCard: React.FC<CommunicationLogCardProps> = ({ log, onEdit, onDelete }) => {
+  const { t, i18n } = useTranslation();
   const descriptionPreview = log.description
     ? log.description.length > 150
       ? log.description.slice(0, 150) + '...'
@@ -49,7 +51,7 @@ const CommunicationLogCard: React.FC<CommunicationLogCardProps> = ({ log, onEdit
       <Flex justify="between" align="start">
         <Flex direction="column" gap="1" style={{ flex: 1, minWidth: 0 }}>
           <GumroadText level="body-sm" style={{ fontWeight: 600, fontFamily: fonts.display, color: colors.ink }}>
-            {formatDateTime(log.occurredAt)}
+            {formatDateTime(log.occurredAt, i18n.language)}
           </GumroadText>
 
           <Flex gap="2" wrap="wrap" style={{ marginTop: '4px' }}>
@@ -67,7 +69,7 @@ const CommunicationLogCard: React.FC<CommunicationLogCardProps> = ({ log, onEdit
                 border: `1.5px solid ${colors.ink}`,
               }}
             >
-              {COMMUNICATION_ENTRY_TYPE_LABELS[log.entryType]}
+              {t(`cDevelopment.entryType.${log.entryType}`, { defaultValue: COMMUNICATION_ENTRY_TYPE_LABELS[log.entryType] })}
             </span>
 
             {/* Words count badge */}
@@ -85,7 +87,7 @@ const CommunicationLogCard: React.FC<CommunicationLogCardProps> = ({ log, onEdit
                   border: `1.5px solid ${colors.ink}`,
                 }}
               >
-                Palavras: {log.wordsCount}
+                {t('cDevelopment.wordsBadge', { count: log.wordsCount })}
               </span>
             )}
           </Flex>
@@ -99,18 +101,20 @@ const CommunicationLogCard: React.FC<CommunicationLogCardProps> = ({ log, onEdit
 
         <Flex gap="2" style={{ marginLeft: '12px', flexShrink: 0 }}>
           <button
+            type="button"
             style={iconBtnStyle}
             onClick={() => onEdit(log)}
-            aria-label="Editar registro"
+            aria-label={t('cDevelopment.editLogAria', { date: formatDateTime(log.occurredAt, i18n.language) })}
           >
-            <Pencil2Icon />
+            <Pencil2Icon aria-hidden="true" />
           </button>
           <button
+            type="button"
             style={iconBtnStyle}
             onClick={() => onDelete(log.id)}
-            aria-label="Remover registro"
+            aria-label={t('cDevelopment.removeLogAria', { date: formatDateTime(log.occurredAt, i18n.language) })}
           >
-            <TrashIcon />
+            <TrashIcon aria-hidden="true" />
           </button>
         </Flex>
       </Flex>

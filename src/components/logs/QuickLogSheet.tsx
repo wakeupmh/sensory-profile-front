@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, Flex } from '@radix-ui/themes';
 import { colors, shadows, radii, fonts, spacing } from '../../theme/tokens';
 import GumroadModal from '../design-system/GumroadModal';
@@ -10,7 +11,6 @@ import MoodLogForm from './MoodLogForm';
 import SleepLogForm from './SleepLogForm';
 import FoodLogForm from './FoodLogForm';
 import ToiletingLogForm from './ToiletingLogForm';
-import { LOG_TYPE_LABELS } from '../../types/logs';
 import type { LogType, LogData, CreateLogPayload } from '../../types/logs';
 
 interface QuickLogSheetProps {
@@ -40,6 +40,7 @@ export default function QuickLogSheet({
   // precisar dela nas dependências do efeito.
   const photoPreviewUrlRef = useRef<string | null>(null);
   const toast = useToast();
+  const { t } = useTranslation();
 
   /**
    * Toda troca da pré-visualização passa por aqui. Uma URL de blob não é
@@ -98,20 +99,25 @@ export default function QuickLogSheet({
 
   const handleDataSubmit = async (data: LogData) => {
     if (!selectedType) return;
+    const when = new Date(occurredAt);
+    if (Number.isNaN(when.getTime())) {
+      setError(t('p2Logs.quick.invalidDate'));
+      return;
+    }
     setIsLoading(true);
     setError(null);
     try {
       await onSubmit({
         childId,
         logType: selectedType,
-        occurredAt: new Date(occurredAt).toISOString(),
+        occurredAt: when.toISOString(),
         data,
         notes: notes.trim() || null,
       }, photoFile);
-      toast.success('Registro salvo');
+      toast.success(t('p2Logs.quick.saved'));
       onClose();
     } catch {
-      setError('Erro ao salvar registro. Tente novamente.');
+      setError(t('p2Logs.quick.saveError'));
     } finally {
       setIsLoading(false);
     }
@@ -121,7 +127,7 @@ export default function QuickLogSheet({
     <GumroadModal
       open={isOpen}
       onClose={onClose}
-      title={step === 'form' && selectedType ? LOG_TYPE_LABELS[selectedType] : 'Registrar'}
+      title={step === 'form' && selectedType ? t(`p2Logs.types.${selectedType}`) : t('p2Logs.quick.title')}
     >
         <Box mb="4">
           <label
@@ -135,7 +141,7 @@ export default function QuickLogSheet({
               marginBottom: '6px',
             }}
           >
-            Data e hora <span style={{ color: colors.error }} aria-hidden="true">*</span>
+            {t('p2Logs.quick.dateTime')} <span style={{ color: colors.error }} aria-hidden="true">*</span>
           </label>
           <input
             id="quicklog-data-hora"
@@ -181,9 +187,9 @@ export default function QuickLogSheet({
                     color: colors.ink,
                   }}
                 >
-                  Observações
+                  {t('p2Logs.quick.notes')}
                 </label>
-                <DictateButton onText={appendDictation} fieldLabel="observações" />
+                <DictateButton onText={appendDictation} fieldLabel={t('p2Logs.quick.notesField')} />
               </Flex>
               <textarea
                 id="quicklog-observacoes"
@@ -191,7 +197,7 @@ export default function QuickLogSheet({
                 onChange={(e) => setNotes(e.target.value.slice(0, 200))}
                 maxLength={200}
                 rows={2}
-                placeholder="Anotações adicionais (opcional)..."
+                placeholder={t('p2Logs.quick.notesPlaceholder')}
                 style={{
                   width: '100%',
                   padding: '10px 12px',
@@ -212,7 +218,7 @@ export default function QuickLogSheet({
             </Box>
 
             <Box mt="3">
-              <label
+              <div
                 style={{
                   display: 'block',
                   fontFamily: fonts.display,
@@ -222,13 +228,13 @@ export default function QuickLogSheet({
                   marginBottom: '6px',
                 }}
               >
-                Foto (opcional)
-              </label>
+                {t('p2Logs.quick.photo')}
+              </div>
               {photoPreviewUrl ? (
                 <Flex align="center" gap="3">
                   <img
                     src={photoPreviewUrl}
-                    alt="Prévia da foto selecionada"
+                    alt={t('p2Logs.quick.photoPreview')}
                     style={{
                       width: '64px',
                       height: '64px',
@@ -253,7 +259,7 @@ export default function QuickLogSheet({
                       cursor: 'pointer',
                     }}
                   >
-                    Remover foto
+                    {t('p2Logs.quick.removePhoto')}
                   </button>
                 </Flex>
               ) : (
@@ -275,7 +281,7 @@ export default function QuickLogSheet({
                   }}
                 >
                   <span aria-hidden="true">📷</span>
-                  Adicionar foto
+                  {t('p2Logs.quick.addPhoto')}
                   <input
                     type="file"
                     accept="image/*"
@@ -305,7 +311,7 @@ export default function QuickLogSheet({
                 padding: 0,
               }}
             >
-              ← Voltar
+              {t('p2Logs.quick.back')}
             </button>
           </Box>
         )}

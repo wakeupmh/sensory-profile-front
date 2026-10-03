@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { anamneseApi } from '../services/api';
 import { Box, Flex, AlertDialog, IconButton, Separator } from '@radix-ui/themes';
 import {
@@ -8,11 +9,12 @@ import {
   Pencil1Icon,
   TrashIcon,
   InfoCircledIcon,
-  ExclamationTriangleIcon,
   Share1Icon,
 } from '@radix-ui/react-icons';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useAuthContext } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
+import { ErrorState } from '../components/domain/ErrorState';
 import type { AnamneseSummary } from '../components/anamnese/types';
 import { colors, spacing } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
@@ -21,6 +23,8 @@ import GumroadBadge from '../components/design-system/GumroadBadge';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
 
 const AnamneseList = () => {
+  const { t, i18n } = useTranslation();
+  const toast = useToast();
   const [items, setItems] = useState<AnamneseSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
@@ -37,12 +41,12 @@ const AnamneseList = () => {
       setItems(response.data ?? response);
       setError(null);
     } catch (err) {
-      setError('Erro ao carregar anamneses. Por favor, tente novamente.');
+      setError(t('p1AnamneseList.errLoad'));
       console.error(err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchList();
@@ -54,8 +58,9 @@ const AnamneseList = () => {
       const token = await getToken();
       await anamneseApi.remove(id, token);
       setItems((prev) => prev.filter((a) => a.id !== id));
+      toast.success(t('p1AnamneseList.deleted'));
     } catch (err) {
-      setError('Erro ao excluir anamnese. Por favor, tente novamente.');
+      toast.error(t('p1AnamneseList.errDelete'));
       console.error(err);
     } finally {
       setDeleteLoading(null);
@@ -73,16 +78,16 @@ const AnamneseList = () => {
       >
         <Box>
           <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
-            Anamneses
+            {t('p1AnamneseList.title')}
           </GumroadHeading>
           <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-            Centralize a anamnese da criança e compartilhe com os profissionais
+            {t('p1AnamneseList.subtitle')}
           </GumroadText>
         </Box>
         <GumroadButton variant="primary" size="md" asChild>
           <Link to="/anamnese/new" style={{ textDecoration: 'none', display: 'inline-flex' }}>
-            <PlusIcon />
-            Nova Anamnese
+            <PlusIcon aria-hidden="true" />
+            {t('p1AnamneseList.new')}
           </Link>
         </GumroadButton>
       </Flex>
@@ -91,30 +96,25 @@ const AnamneseList = () => {
 
       {loading ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
-          <LoadingSpinner size="large" text="Carregando anamneses..." />
+          <LoadingSpinner size="large" text={t('p1AnamneseList.loading')} />
         </GumroadCard>
       ) : error ? (
-        <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
-          <Flex align="center" gap="2">
-            <ExclamationTriangleIcon />
-            <GumroadText level="body-md" as="p">{error}</GumroadText>
-          </Flex>
-        </GumroadCard>
+        <ErrorState message={error} onRetry={fetchList} retryLabel={t('p1Common.retry')} />
       ) : items.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">
-            <InfoCircledIcon width={40} height={40} />
+            <InfoCircledIcon width={40} height={40} aria-hidden="true" />
             <Box>
               <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
-                Nenhuma anamnese cadastrada
+                {t('p1AnamneseList.emptyTitle')}
               </GumroadHeading>
               <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-                Crie uma anamnese para reutilizar os dados em várias avaliações
+                {t('p1AnamneseList.emptyBody')}
               </GumroadText>
             </Box>
             <GumroadButton variant="primary" size="md" asChild>
               <Link to="/anamnese/new" style={{ textDecoration: 'none' }}>
-                Criar primeira anamnese
+                {t('p1AnamneseList.createFirst')}
               </Link>
             </GumroadButton>
           </Flex>
@@ -136,20 +136,20 @@ const AnamneseList = () => {
                   </GumroadHeading>
                   {a.isShared ? (
                     <GumroadBadge color="mint">
-                      <Share1Icon /> Compartilhada
+                      <Share1Icon aria-hidden="true" /> {t('p1AnamneseList.shared')}
                     </GumroadBadge>
                   ) : (
-                    <GumroadBadge color="cream">Privada</GumroadBadge>
+                    <GumroadBadge color="cream">{t('p1AnamneseList.private')}</GumroadBadge>
                   )}
                 </Flex>
 
                 <Flex direction="column" gap="1">
                   <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-                    <strong>Responsável:</strong> {a.caregiverName}
+                    <strong>{t('p1AnamneseList.caregiver')}</strong> {a.caregiverName}
                   </GumroadText>
                   <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-                    <strong>Criada em:</strong>{' '}
-                    {new Date(a.createdAt).toLocaleDateString('pt-BR')}
+                    <strong>{t('p1AnamneseList.createdAt')}</strong>{' '}
+                    {new Date(a.createdAt).toLocaleDateString(i18n.language)}
                   </GumroadText>
                 </Flex>
 
@@ -158,8 +158,8 @@ const AnamneseList = () => {
                     variant="soft"
                     size="2"
                     asChild
-                    title="Visualizar"
-                    aria-label="Visualizar anamnese"
+                    title={t('p1AnamneseList.view')}
+                    aria-label={t('p1AnamneseList.viewAria', { name: a.childName })}
                     style={{
                       background: colors.canvas,
                       border: `2px solid ${colors.ink}`,
@@ -169,15 +169,15 @@ const AnamneseList = () => {
                     }}
                   >
                     <Link to={`/anamnese/${a.id}`}>
-                      <EyeOpenIcon />
+                      <EyeOpenIcon aria-hidden="true" />
                     </Link>
                   </IconButton>
                   <IconButton
                     variant="soft"
                     size="2"
                     asChild
-                    title="Editar"
-                    aria-label="Editar anamnese"
+                    title={t('p1AnamneseList.edit')}
+                    aria-label={t('p1AnamneseList.editAria', { name: a.childName })}
                     style={{
                       background: colors['brand-cyan'],
                       border: `2px solid ${colors.ink}`,
@@ -187,7 +187,7 @@ const AnamneseList = () => {
                     }}
                   >
                     <Link to={`/anamnese/${a.id}/edit`}>
-                      <Pencil1Icon />
+                      <Pencil1Icon aria-hidden="true" />
                     </Link>
                   </IconButton>
                   <AlertDialog.Root>
@@ -195,8 +195,8 @@ const AnamneseList = () => {
                       <IconButton
                         variant="soft"
                         size="2"
-                        title="Excluir"
-                        aria-label="Excluir anamnese"
+                        title={t('p1AnamneseList.delete')}
+                        aria-label={t('p1AnamneseList.deleteAria', { name: a.childName })}
                         style={{
                           background: colors['brand-salmon'],
                           border: `2px solid ${colors.ink}`,
@@ -205,18 +205,18 @@ const AnamneseList = () => {
                           cursor: 'pointer',
                         }}
                       >
-                        <TrashIcon />
+                        <TrashIcon aria-hidden="true" />
                       </IconButton>
                     </AlertDialog.Trigger>
                     <AlertDialog.Content size="2">
-                      <AlertDialog.Title>Excluir Anamnese</AlertDialog.Title>
+                      <AlertDialog.Title>{t('p1AnamneseList.deleteTitle')}</AlertDialog.Title>
                       <AlertDialog.Description size="2">
-                        Tem certeza que deseja excluir esta anamnese? Esta ação não pode ser desfeita e links compartilhados deixarão de funcionar.
+                        {t('p1AnamneseList.deleteBody')}
                       </AlertDialog.Description>
                       <Flex gap="3" mt="4" justify="end">
                         <AlertDialog.Cancel>
                           <GumroadButton variant="secondary" size="sm">
-                            Cancelar
+                            {t('p1AnamneseList.cancel')}
                           </GumroadButton>
                         </AlertDialog.Cancel>
                         <AlertDialog.Action>
@@ -226,7 +226,7 @@ const AnamneseList = () => {
                             disabled={deleteLoading === a.id}
                             onClick={() => handleDelete(a.id)}
                           >
-                            {deleteLoading === a.id ? 'Excluindo...' : 'Excluir'}
+                            {deleteLoading === a.id ? t('p1AnamneseList.deleting') : t('p1AnamneseList.delete')}
                           </GumroadButton>
                         </AlertDialog.Action>
                       </Flex>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { DownloadIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { colors, radii, fonts, spacing } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
@@ -19,6 +20,7 @@ interface DocumentPreviewModalProps {
 }
 
 const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({ document, onClose, onUpdated }) => {
+  const { t } = useTranslation();
   const { getToken } = useAuthContext();
   const toast = useToast();
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
@@ -42,13 +44,13 @@ const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({ document, o
         const res = await documentApi.getDownloadUrl(token, document.id);
         if (!cancelled) setDownloadUrl(res.downloadUrl);
       } catch {
-        if (!cancelled) setError('Não foi possível carregar o arquivo.');
+        if (!cancelled) setError(t('cDocuments.loadError'));
       } finally {
         if (!cancelled) setLoading(false);
       }
     })();
     return () => { cancelled = true; };
-  }, [document, getToken]);
+  }, [document, getToken, t]);
 
   if (!document) return null;
 
@@ -56,9 +58,13 @@ const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({ document, o
   const expiryDirty = expiresAtDraft !== (document.expiresAt ?? '');
 
   const handleDownload = async () => {
-    const token = await getToken();
-    const res = await documentApi.getDownloadUrl(token, document.id);
-    window.open(res.downloadUrl, '_blank', 'noopener,noreferrer');
+    try {
+      const token = await getToken();
+      const res = await documentApi.getDownloadUrl(token, document.id);
+      window.open(res.downloadUrl, '_blank', 'noopener,noreferrer');
+    } catch {
+      toast.error(t('cDocuments.downloadError'));
+    }
   };
 
   const handleSaveExpiry = async () => {
@@ -67,9 +73,9 @@ const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({ document, o
       const token = await getToken();
       const updated = await documentApi.update(token, document.id, { expiresAt: expiresAtDraft || null });
       onUpdated?.(updated);
-      toast.success('Data de validade atualizada');
+      toast.success(t('cDocuments.expiryUpdated'));
     } catch {
-      toast.error('Não foi possível salvar a data de validade. Tente novamente.');
+      toast.error(t('cDocuments.expirySaveError'));
     } finally {
       setSavingExpiry(false);
     }
@@ -85,7 +91,7 @@ const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({ document, o
     >
         <Flex justify="end" mb="3">
           <GumroadButton variant="secondary" size="sm" onClick={handleDownload}>
-            <DownloadIcon /> Baixar
+            <DownloadIcon aria-hidden="true" /> {t('cDocuments.download')}
           </GumroadButton>
         </Flex>
 
@@ -113,7 +119,7 @@ const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({ document, o
                 marginBottom: '6px',
               }}
             >
-              Data de validade
+              {t('cDocuments.expiryDate')}
             </label>
             <input
               id="preview-data-validade"
@@ -138,17 +144,18 @@ const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({ document, o
             variant="primary"
             size="sm"
             onClick={handleSaveExpiry}
+            loading={savingExpiry}
             disabled={!expiryDirty || savingExpiry}
           >
-            {savingExpiry ? 'Salvando...' : 'Salvar'}
+            {savingExpiry ? t('cDocuments.saving') : t('cDocuments.save')}
           </GumroadButton>
         </Flex>
 
         {loading ? (
-          <Flex justify="center" py="6"><LoadingSpinner size="large" text="Carregando preview..." /></Flex>
+          <Flex justify="center" py="6"><LoadingSpinner size="large" text={t('cDocuments.loadingPreview')} /></Flex>
         ) : error ? (
-          <Flex align="center" gap="2" style={{ color: colors.error }}>
-            <ExclamationTriangleIcon />
+          <Flex align="center" gap="2" role="alert" style={{ color: colors.error }}>
+            <ExclamationTriangleIcon aria-hidden="true" />
             <GumroadText level="body-md" as="span">{error}</GumroadText>
           </Flex>
         ) : downloadUrl ? (
@@ -160,7 +167,7 @@ const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({ document, o
             <video src={downloadUrl} controls style={{ width: '100%', maxHeight: '70vh', borderRadius: radii.md, border: `2px solid ${colors.ink}` }} />
           ) : (
             <GumroadText level="body-md" as="p" style={{ opacity: 0.7 }}>
-              Pré-visualização não disponível para este tipo de arquivo. Use o botão "Baixar".
+              {t('cDocuments.noPreview', { action: t('cDocuments.download') })}
             </GumroadText>
           )
         ) : null}

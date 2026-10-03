@@ -23,6 +23,8 @@ interface GumroadTextProps {
   style?: React.CSSProperties;
   className?: string;
   color?: string;
+  /** Papel ARIA opcional (ex.: "status"/"alert" para mensagens dinâmicas) */
+  role?: React.AriaRole;
 }
 
 const GumroadHeading: React.FC<GumroadHeadingProps> = ({ children, level, as, style, className, color }) => {
@@ -46,11 +48,12 @@ const GumroadHeading: React.FC<GumroadHeadingProps> = ({ children, level, as, st
   );
 };
 
-export const GumroadText: React.FC<GumroadTextProps> = ({ children, level, as = 'span', style, className, color }) => {
+export const GumroadText: React.FC<GumroadTextProps> = ({ children, level, as = 'span', style, className, color, role }) => {
   const t = typography[level];
   return (
     <Text
       as={as}
+      role={role}
       className={className}
       style={{
         fontFamily: t.font,

@@ -2,6 +2,7 @@ import React from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Theme, Flex } from '@radix-ui/themes';
 import { Cross2Icon } from '@radix-ui/react-icons';
+import { useTranslation } from 'react-i18next';
 import { colors, shadows, radii, spacing, zIndex, applyTypography } from '../../theme/tokens';
 
 export interface GumroadModalProps {
@@ -49,6 +50,7 @@ const GumroadModal: React.FC<GumroadModalProps> = ({
   hideClose = false,
   style,
 }) => {
+  const { t } = useTranslation();
   const overlayStyle: React.CSSProperties = {
     position: 'fixed',
     inset: 0,
@@ -122,7 +124,7 @@ const GumroadModal: React.FC<GumroadModalProps> = ({
                   <Dialog.Close asChild>
                     <button
                       type="button"
-                      aria-label="Fechar"
+                      aria-label={t('cDesignSystem.close')}
                       disabled={closeDisabled}
                       style={closeButtonStyle}
                     >

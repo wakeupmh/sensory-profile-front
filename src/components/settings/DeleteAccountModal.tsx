@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation, Trans } from 'react-i18next';
 import { Flex, Box } from '@radix-ui/themes';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import GumroadModal from '../design-system/GumroadModal';
@@ -9,15 +10,15 @@ import { colors, spacing, radii } from '../../theme/tokens';
 import { accountApi } from '../../services/api';
 import { useAuthContext } from '../../context/AuthContext';
 
-const CONFIRMATION_PHRASE = 'excluir minha conta';
-
 interface DeleteAccountModalProps {
   open: boolean;
   onClose: () => void;
 }
 
 const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ open, onClose }) => {
+  const { t } = useTranslation();
   const { getToken, signOut } = useAuthContext();
+  const CONFIRMATION_PHRASE = t('p2Settings.delete.phrase');
   const [confirmText, setConfirmText] = useState('');
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +42,7 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ open, onClose }
       await signOut();
       window.location.href = '/';
     } catch {
-      setError('Não foi possível excluir a conta agora. Tente novamente.');
+      setError(t('p2Settings.delete.error'));
       setDeleting(false);
     }
   };
@@ -50,7 +51,7 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ open, onClose }
     <GumroadModal
       open={open}
       onClose={handleClose}
-      title="Excluir minha conta"
+      title={t('p2Settings.delete.title')}
       variant="center"
       maxWidth="480px"
       closeDisabled={deleting}
@@ -68,19 +69,17 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ open, onClose }
         >
           <ExclamationTriangleIcon width={20} height={20} style={{ flexShrink: 0, marginTop: '2px' }} />
           <GumroadText level="body-sm" as="p">
-            Isso apaga permanentemente todas as crianças cadastradas e tudo ligado a elas (avaliações,
-            registros, documentos, terapia, saúde, metas), além de anamneses, profissionais cadastrados e
-            rascunhos. <strong>Não pode ser desfeito.</strong>
+            {t('p2Settings.delete.warning')} <strong>{t('p2Settings.delete.irreversible')}</strong>
           </GumroadText>
         </Box>
 
         <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-          Digite <strong>{CONFIRMATION_PHRASE}</strong> abaixo para confirmar.
+          <Trans i18nKey="p2Settings.delete.typePrompt" values={{ phrase: CONFIRMATION_PHRASE }} components={{ strong: <strong /> }} />
         </GumroadText>
 
         <GumroadInput
           id="delete-account-confirm"
-          label="Confirmação"
+          label={t('p2Settings.delete.confirmLabel')}
           placeholder={CONFIRMATION_PHRASE}
           value={confirmText}
           onChange={(e) => setConfirmText(e.target.value)}
@@ -90,7 +89,7 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ open, onClose }
 
         <Flex gap="3" justify="end">
           <GumroadButton variant="secondary" size="md" onClick={handleClose} disabled={deleting}>
-            Cancelar
+            {t('p2Settings.delete.cancel')}
           </GumroadButton>
           <GumroadButton
             variant="primary"
@@ -99,7 +98,7 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ open, onClose }
             disabled={!isConfirmed || deleting}
             style={!isConfirmed ? undefined : { backgroundColor: colors['brand-salmon'] }}
           >
-            {deleting ? 'Excluindo...' : 'Excluir permanentemente'}
+            {deleting ? t('p2Settings.delete.deleting') : t('p2Settings.delete.confirm')}
           </GumroadButton>
         </Flex>
       </Flex>

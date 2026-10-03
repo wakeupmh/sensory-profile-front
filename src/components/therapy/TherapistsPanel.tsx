@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { PlusIcon } from '@radix-ui/react-icons';
 import GumroadButton from '../design-system/GumroadButton';
 import GumroadCard from '../design-system/GumroadCard';
@@ -31,6 +32,7 @@ const TherapistsPanel: React.FC<TherapistsPanelProps> = ({
   onDelete,
 }) => {
   const toast = useToast();
+  const { t } = useTranslation();
   const [view, setView] = useState<PanelView>('list');
   const [editingTherapist, setEditingTherapist] = useState<Therapist | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -49,7 +51,9 @@ const TherapistsPanel: React.FC<TherapistsPanelProps> = ({
     try {
       await onAdd(payload);
       setView('list');
-      toast.success('Terapeuta adicionado');
+      toast.success(t('p2Therapy.panel.added'));
+    } catch {
+      toast.error(t('p2Therapy.saveError'));
     } finally {
       setIsLoading(false);
     }
@@ -62,7 +66,9 @@ const TherapistsPanel: React.FC<TherapistsPanelProps> = ({
       await onUpdate(editingTherapist.id, payload);
       setEditingTherapist(null);
       setView('list');
-      toast.success('Alterações salvas');
+      toast.success(t('p2Therapy.changesSaved'));
+    } catch {
+      toast.error(t('p2Therapy.saveError'));
     } finally {
       setIsLoading(false);
     }
@@ -74,14 +80,16 @@ const TherapistsPanel: React.FC<TherapistsPanelProps> = ({
     try {
       await onDelete(deletingId);
       setDeletingId(null);
-      toast.success('Terapeuta removido');
+      toast.success(t('p2Therapy.panel.removed'));
+    } catch {
+      toast.error(t('p2Therapy.removeError'));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <GumroadModal open={isOpen} onClose={onClose} title="Terapeutas">
+    <GumroadModal open={isOpen} onClose={onClose} title={t('p2Therapy.panel.title')}>
       <>
 
         {/* List view */}
@@ -95,23 +103,23 @@ const TherapistsPanel: React.FC<TherapistsPanelProps> = ({
             >
               <Flex align="center" gap="1">
                 <PlusIcon />
-                Adicionar Terapeuta
+                {t('p2Therapy.panel.add')}
               </Flex>
             </GumroadButton>
 
             {therapists.length === 0 ? (
               <GumroadCard color="cream" padding="lg" style={{ textAlign: 'center' }}>
                 <GumroadText level="body-md" style={{ opacity: 0.7 }}>
-                  Nenhum terapeuta cadastrado
+                  {t('p2Therapy.panel.empty')}
                 </GumroadText>
               </GumroadCard>
             ) : (
               <Flex direction="column" gap="3">
-                {therapists.map((t) =>
-                  deletingId === t.id ? (
-                    <GumroadCard key={t.id} color="salmon" padding="md" shadow="md">
+                {therapists.map((th) =>
+                  deletingId === th.id ? (
+                    <GumroadCard key={th.id} color="salmon" padding="md" shadow="md">
                       <GumroadText level="body-md">
-                        Remover {t.name}?
+                        {t('p2Therapy.panel.confirm', { name: th.name })}
                       </GumroadText>
                       <Flex gap="2" mt="2">
                         <GumroadButton
@@ -120,21 +128,21 @@ const TherapistsPanel: React.FC<TherapistsPanelProps> = ({
                           onClick={handleConfirmDelete}
                           disabled={isLoading}
                         >
-                          Confirmar
+                          {t('p2Therapy.panel.confirmBtn')}
                         </GumroadButton>
                         <GumroadButton
                           variant="ghost"
                           size="sm"
                           onClick={() => setDeletingId(null)}
                         >
-                          Cancelar
+                          {t('p2Therapy.cancel')}
                         </GumroadButton>
                       </Flex>
                     </GumroadCard>
                   ) : (
                     <TherapistCard
-                      key={t.id}
-                      therapist={t}
+                      key={th.id}
+                      therapist={th}
                       onEdit={(therapist) => {
                         setEditingTherapist(therapist);
                         setView('edit');
@@ -152,7 +160,7 @@ const TherapistsPanel: React.FC<TherapistsPanelProps> = ({
         {view === 'add' && (
           <>
             <GumroadHeading level="title-md" style={{ marginBottom: '16px' }}>
-              Novo Terapeuta
+              {t('p2Therapy.panel.new')}
             </GumroadHeading>
             <TherapistForm
               initial={{}}
@@ -167,7 +175,7 @@ const TherapistsPanel: React.FC<TherapistsPanelProps> = ({
         {view === 'edit' && (
           <>
             <GumroadHeading level="title-md" style={{ marginBottom: '16px' }}>
-              Editar Terapeuta
+              {t('p2Therapy.panel.edit')}
             </GumroadHeading>
             <TherapistForm
               initial={editingTherapist ?? {}}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { colors, spacing, radii, applyTypography } from '../../theme/tokens';
 import { GumroadText } from '../design-system/GumroadHeading';
 import type { TimelineEvent } from '../../types/child';
@@ -10,9 +11,10 @@ interface TimelineEventCardProps {
 }
 
 const TimelineEventCard: React.FC<TimelineEventCardProps> = ({ event }) => {
+  const { t, i18n } = useTranslation();
   const colorConfig = TIMELINE_TYPE_COLORS[event.type];
-  const label = TIMELINE_TYPE_LABELS[event.type];
-  const dateStr = new Date(event.occurredAt).toLocaleString('pt-BR', {
+  const label = t(`cChildProfile.timelineType.${event.type}`, { defaultValue: TIMELINE_TYPE_LABELS[event.type] });
+  const dateStr = new Date(event.occurredAt).toLocaleString(i18n.language, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',

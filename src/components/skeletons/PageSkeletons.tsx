@@ -1,5 +1,6 @@
 import React from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import GumroadCard from '../design-system/GumroadCard';
 import GumroadSkeleton from '../design-system/GumroadSkeleton';
 
@@ -9,12 +10,15 @@ import GumroadSkeleton from '../design-system/GumroadSkeleton';
  * "Carregando…" via role="status" para leitores de tela.
  */
 
-const Status: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div role="status">
-    <span className="sr-only">Carregando…</span>
-    {children}
-  </div>
-);
+const Status: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { t } = useTranslation();
+  return (
+    <div role="status">
+      <span className="sr-only">{t('p2Common.loading')}</span>
+      {children}
+    </div>
+  );
+};
 
 const CardShell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <GumroadCard color="white" shadow="md" padding="lg">

@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Box, Flex, Separator } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeftIcon, ExclamationTriangleIcon, ClipboardIcon } from '@radix-ui/react-icons';
 import { useAuthContext } from '../context/AuthContext';
 import { sharedApi } from '../services/api';
@@ -24,6 +25,7 @@ const emptyFormData: AnamneseFormData = {
 };
 
 const SharedAnamneseView: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { getToken } = useAuthContext();
@@ -32,6 +34,7 @@ const SharedAnamneseView: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const fetchedRef = useRef(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     if (!id) return;
@@ -55,15 +58,16 @@ const SharedAnamneseView: React.FC = () => {
         const status = err?.response?.status;
         setError(
           status === 404
-            ? 'Você não tem acesso a esta anamnese ou ela não existe mais.'
-            : 'Não foi possível carregar a anamnese.',
+            ? t('p2Share.anamnese.noAccess')
+            : t('p2Share.anamnese.loadError'),
         );
       } finally {
         setLoading(false);
       }
     };
     run();
-  }, [id, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, getToken, reloadKey]);
 
   const noop = () => {};
 
@@ -71,19 +75,19 @@ const SharedAnamneseView: React.FC = () => {
     <Box style={{ maxWidth: 960, margin: '0 auto' }}>
       <Flex align="center" justify="between" mb="4" wrap="wrap" gap="3">
         <GumroadButton variant="secondary" size="sm" onClick={() => navigate('/shared')}>
-          <ChevronLeftIcon /> Voltar
+          <ChevronLeftIcon /> {t('p2Share.back')}
         </GumroadButton>
-        <GumroadBadge color="lavender">Compartilhado com você</GumroadBadge>
+        <GumroadBadge color="lavender">{t('p2Share.anamnese.sharedBadge')}</GumroadBadge>
       </Flex>
 
       <Flex align="center" gap="2" mb="2">
         <ClipboardIcon width={22} height={22} />
         <GumroadHeading level="display-sm" as="h1">
-          Anamnese
+          {t('p2Share.anamnese.title')}
         </GumroadHeading>
       </Flex>
       <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7, marginBottom: spacing.md }}>
-        Visualização somente-leitura. {createdAt && <>Criada em {new Date(createdAt).toLocaleDateString('pt-BR')}.</>}
+        {t('p2Share.anamnese.readOnly')} {createdAt && t('p2Share.anamnese.created', { date: new Date(createdAt).toLocaleDateString(i18n.language) })}
       </GumroadText>
 
       <Separator size="4" mb="4" />
@@ -91,16 +95,19 @@ const SharedAnamneseView: React.FC = () => {
       {loading ? (
         <GumroadCard color="cream" shadow="md" padding="xl">
           <Flex direction="column" align="center" gap="3" py="9">
-            <LoadingSpinner size="large" text="Carregando..." />
+            <LoadingSpinner size="large" text={t('p2Share.loading')} />
           </Flex>
         </GumroadCard>
       ) : error ? (
         <GumroadCard role="alert" color="salmon" shadow="md" padding="md">
-          <Flex align="center" gap="2">
+          <Flex align="center" gap="3" wrap="wrap">
             <ExclamationTriangleIcon />
             <GumroadText level="body-md" as="span">
               {error}
             </GumroadText>
+            <GumroadButton variant="secondary" size="sm" onClick={() => setReloadKey((k) => k + 1)}>
+              {t('p2Share.retry')}
+            </GumroadButton>
           </Flex>
         </GumroadCard>
       ) : (

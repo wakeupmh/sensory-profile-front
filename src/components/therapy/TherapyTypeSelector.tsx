@@ -1,5 +1,6 @@
 import React from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import type { TherapyType } from '../../types/therapy';
 
@@ -8,17 +9,18 @@ interface TherapyTypeSelectorProps {
   onSelect: (type: TherapyType) => void;
 }
 
-const TYPE_CONFIG: Record<TherapyType, { label: string; subtitle: string; color: string }> = {
-  aba: { label: 'ABA', subtitle: 'Análise do Comportamento Aplicada', color: colors['brand-salmon'] },
-  ot: { label: 'OT', subtitle: 'Terapia Ocupacional', color: colors['brand-cyan'] },
-  fonoaudiologia: { label: 'Fonoaudiologia', subtitle: 'Linguagem e Comunicação', color: colors['brand-lavender'] },
-  psicologia: { label: 'Psicologia', subtitle: 'Suporte Psicológico', color: colors['brand-yellow'] },
-  fisioterapia: { label: 'Fisioterapia', subtitle: 'Desenvolvimento Motor', color: '#A8E6CF' },
+const TYPE_CONFIG: Record<TherapyType, { color: string }> = {
+  aba: { color: colors['brand-salmon'] },
+  ot: { color: colors['brand-cyan'] },
+  fonoaudiologia: { color: colors['brand-lavender'] },
+  psicologia: { color: colors['brand-yellow'] },
+  fisioterapia: { color: '#A8E6CF' },
 };
 
 const THERAPY_TYPES = Object.keys(TYPE_CONFIG) as TherapyType[];
 
 const TherapyTypeSelector: React.FC<TherapyTypeSelectorProps> = ({ selected, onSelect }) => {
+  const { t } = useTranslation();
   const btnStyle = (type: TherapyType, isSelected: boolean): React.CSSProperties => ({
     minHeight: '52px',
     width: '100%',
@@ -40,19 +42,19 @@ const TherapyTypeSelector: React.FC<TherapyTypeSelectorProps> = ({ selected, onS
   return (
     <Flex direction="column" gap="2">
       {THERAPY_TYPES.map((type) => {
-        const config = TYPE_CONFIG[type];
         const isSelected = selected === type;
         return (
           <button
             key={type}
+            type="button"
             onClick={() => onSelect(type)}
             style={btnStyle(type, isSelected)}
           >
             <div style={{ fontFamily: fonts.display, fontWeight: 700, fontSize: '15px', color: colors.ink }}>
-              {config.label}
+              {t(`p2Therapy.types.${type}.label`)}
             </div>
             <div style={{ fontFamily: fonts.display, fontSize: '12px', color: colors.ink, opacity: 0.7 }}>
-              {config.subtitle}
+              {t(`p2Therapy.types.${type}.subtitle`)}
             </div>
           </button>
         );

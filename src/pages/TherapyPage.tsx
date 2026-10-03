@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, Flex } from '@radix-ui/themes';
 import {
   InfoCircledIcon,
@@ -35,27 +36,12 @@ const THERAPY_TYPE_COLORS: Record<TherapyType, BadgeColor> = {
   fisioterapia: 'mint',
 };
 
-const THERAPY_TYPE_LABELS: Record<TherapyType, string> = {
-  aba: 'ABA',
-  ot: 'OT',
-  fonoaudiologia: 'Fono',
-  psicologia: 'Psico',
-  fisioterapia: 'Fisio',
-};
-
 type FilterType = 'all' | TherapyType;
 
-const FILTER_OPTIONS: { value: FilterType; label: string }[] = [
-  { value: 'all', label: 'Todos' },
-  { value: 'aba', label: 'ABA' },
-  { value: 'ot', label: 'OT' },
-  { value: 'fonoaudiologia', label: 'Fonoaudiologia' },
-  { value: 'psicologia', label: 'Psicologia' },
-  { value: 'fisioterapia', label: 'Fisioterapia' },
-];
+const FILTER_VALUES: FilterType[] = ['all', 'aba', 'ot', 'fonoaudiologia', 'psicologia', 'fisioterapia'];
 
-function formatOccurredAt(iso: string): string {
-  return new Date(iso).toLocaleString('pt-BR', {
+function formatOccurredAt(iso: string, lang: string): string {
+  return new Date(iso).toLocaleString(lang, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -65,6 +51,7 @@ function formatOccurredAt(iso: string): string {
 }
 
 export default function TherapyPage() {
+  const { t, i18n } = useTranslation();
   const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
 
   const [filter, setFilter] = useState<FilterType>('all');
@@ -81,7 +68,7 @@ export default function TherapyPage() {
       return result.data;
     },
     [selectedChildId, filter],
-    { errorMessage: 'Erro ao carregar sessões. Por favor, tente novamente.' },
+    { errorMessage: t('p2Therapy.page.loadError') },
   );
 
   // A lista de terapeutas alimenta os seletores dos painéis. Falhar aqui nunca
@@ -122,7 +109,7 @@ export default function TherapyPage() {
 
   function findTherapistName(therapistId: string | null): string | null {
     if (!therapistId) return null;
-    return therapists.find((t) => t.id === therapistId)?.name ?? null;
+    return therapists.find((th) => th.id === therapistId)?.name ?? null;
   }
 
   return (
@@ -136,10 +123,10 @@ export default function TherapyPage() {
       >
         <Box>
           <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
-            Sessões de Terapia
+            {t('p2Therapy.page.title')}
           </GumroadHeading>
           <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7 }}>
-            Acompanhe as terapias da criança
+            {t('p2Therapy.page.subtitle')}
           </GumroadText>
         </Box>
         <GumroadButton
@@ -148,7 +135,7 @@ export default function TherapyPage() {
           onClick={() => setTherapistsPanelOpen(true)}
         >
           <HeartIcon />
-          Terapeutas
+          {t('p2Therapy.page.therapists')}
         </GumroadButton>
       </Flex>
 
@@ -156,14 +143,15 @@ export default function TherapyPage() {
         children={children}
         selectedChildId={selectedChildId}
         onChange={setSelectedChildId}
+        emptyLabel={t('p2Common.allChildren')}
       />
 
       <Flex align="center" gap="2" mb="5" wrap="wrap">
-        {FILTER_OPTIONS.map(({ value, label }) => (
+        {FILTER_VALUES.map((value) => (
           <FilterPill
             key={value}
             active={filter === value}
-            label={label}
+            label={value === 'all' ? t('p2Therapy.page.all') : t(`p2Therapy.types.${value}.label`)}
             onClick={() => setFilter(value)}
           />
         ))}
@@ -179,15 +167,15 @@ export default function TherapyPage() {
             <InfoCircledIcon width={40} height={40} />
             <Box>
               <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
-                Nenhuma sessão encontrada
+                {t('p2Therapy.page.empty')}
               </GumroadHeading>
               <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-                Registre as sessões de terapia da criança
+                {filter !== 'all' ? t('p2Therapy.page.emptyFiltered') : t('p2Therapy.page.emptyHint')}
               </GumroadText>
             </Box>
             <GumroadButton variant="primary" size="md" onClick={() => setSheetOpen(true)}>
               <PlusIcon />
-              Registrar sessão
+              {t('p2Therapy.page.register')}
             </GumroadButton>
           </Flex>
         </GumroadCard>
@@ -204,7 +192,7 @@ export default function TherapyPage() {
                       as="p"
                       style={{ opacity: 0.6, fontSize: '12px' }}
                     >
-                      {formatOccurredAt(session.occurredAt)}
+                      {formatOccurredAt(session.occurredAt, i18n.language)}
                     </GumroadText>
                     <GumroadText
                       level="body-md"
@@ -215,7 +203,7 @@ export default function TherapyPage() {
                           : { fontStyle: 'italic', opacity: 0.5 }
                       }
                     >
-                      {therapistName ?? 'Sem terapeuta'}
+                      {therapistName ?? t('p2Therapy.session.noTherapist')}
                     </GumroadText>
                     {session.durationMinutes != null && (
                       <GumroadText
@@ -223,7 +211,7 @@ export default function TherapyPage() {
                         as="p"
                         style={{ opacity: 0.55, fontSize: '12px' }}
                       >
-                        {session.durationMinutes} min
+                        {t('p2Therapy.page.minutes', { count: session.durationMinutes })}
                       </GumroadText>
                     )}
                     {session.notes && (
@@ -243,7 +231,7 @@ export default function TherapyPage() {
                     )}
                   </Flex>
                   <GumroadBadge color={THERAPY_TYPE_COLORS[session.therapyType]}>
-                    {THERAPY_TYPE_LABELS[session.therapyType]}
+                    {t(`p2Therapy.types.${session.therapyType}.short`)}
                   </GumroadBadge>
                 </Flex>
               </GumroadCard>
@@ -252,9 +240,11 @@ export default function TherapyPage() {
         </Flex>
       )}
 
+      {children.length > 0 && (
       <button
+        type="button"
         onClick={() => setSheetOpen(true)}
-        aria-label="Nova sessão"
+        aria-label={t('p2Therapy.page.newAria')}
         style={{
           position: 'fixed',
           bottom: '80px',
@@ -289,8 +279,9 @@ export default function TherapyPage() {
           (e.currentTarget as HTMLButtonElement).style.boxShadow = shadows.card;
         }}
       >
-        +
+        <span aria-hidden="true">+</span>
       </button>
+      )}
 
       <QuickSessionSheet
         isOpen={sheetOpen && !!effectiveChildId}

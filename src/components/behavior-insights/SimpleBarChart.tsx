@@ -11,13 +11,21 @@ interface SimpleBarChartProps {
   data: BarDatum[];
   accentColor: string;
   barHeight?: number;
+  /** Título acessível: o gráfico é lido como imagem com os valores listados */
+  label?: string;
 }
 
-const SimpleBarChart: React.FC<SimpleBarChartProps> = ({ data, accentColor, barHeight = 120 }) => {
+const SimpleBarChart: React.FC<SimpleBarChartProps> = ({ data, accentColor, barHeight = 120, label }) => {
   const max = Math.max(1, ...data.map((d) => d.value));
 
   return (
-    <Flex align="end" gap="2" style={{ height: barHeight, width: '100%' }}>
+    <Flex
+      align="end"
+      gap="2"
+      role="img"
+      aria-label={`${label ? `${label}: ` : ''}${data.map((d) => `${d.label} ${d.value}`).join(', ')}`}
+      style={{ height: barHeight, width: '100%' }}
+    >
       {data.map((d) => {
         const h = d.value === 0 ? 2 : Math.max(6, Math.round((d.value / max) * (barHeight - 24)));
         return (

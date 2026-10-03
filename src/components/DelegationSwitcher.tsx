@@ -1,7 +1,9 @@
+import { useTranslation } from 'react-i18next';
 import { useDelegation } from '../context/DelegationContext';
 import { colors, radii, shadows, fonts } from '../theme/tokens';
 
 const DelegationSwitcher: React.FC = () => {
+  const { t } = useTranslation();
   const { delegateChild, caregiverChildren, startDelegating, stopDelegating } = useDelegation();
 
   if (caregiverChildren.length === 0) return null;
@@ -18,7 +20,7 @@ const DelegationSwitcher: React.FC = () => {
         const child = caregiverChildren.find((c) => c.id === id);
         if (child) startDelegating(child);
       }}
-      aria-label="Visualizando"
+      aria-label={t('delegation.switcherLabel')}
       style={{
         height: '36px',
         padding: '0 10px',
@@ -34,10 +36,10 @@ const DelegationSwitcher: React.FC = () => {
         maxWidth: '220px',
       }}
     >
-      <option value="">Visualizando: Minhas crianças</option>
+      <option value="">{t('delegation.myChildren')}</option>
       {caregiverChildren.map((c) => (
         <option key={c.id} value={c.id}>
-          Visualizando: {c.name} (cuidador)
+          {t('delegation.caregiverOption', { name: c.name })}
         </option>
       ))}
     </select>

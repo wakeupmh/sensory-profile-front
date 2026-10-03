@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Box, Flex } from '@radix-ui/themes';
 import { CheckIcon, ExclamationTriangleIcon, EnvelopeOpenIcon } from '@radix-ui/react-icons';
 import { useAuthContext } from '../context/AuthContext';
@@ -11,6 +12,7 @@ import GumroadHeading, { GumroadText } from '../components/design-system/Gumroad
 import { colors, spacing } from '../theme/tokens';
 
 const InviteAcceptPage: React.FC = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { getToken } = useAuthContext();
@@ -24,7 +26,7 @@ const InviteAcceptPage: React.FC = () => {
   const submit = async (rawToken: string) => {
     const cleaned = rawToken.trim();
     if (!cleaned) {
-      setError('Cole o código de convite recebido do paciente.');
+      setError(t('p1Invite.pasteCode'));
       return;
     }
     try {
@@ -35,8 +37,8 @@ const InviteAcceptPage: React.FC = () => {
       setSuccess({ professionalName: professional.name });
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } }).response?.status;
-      if (status === 400) setError('Código inválido ou já utilizado.');
-      else setError('Não foi possível aceitar o convite. Tente novamente.');
+      if (status === 400) setError(t('p1Invite.invalidCode'));
+      else setError(t('p1Invite.errAccept'));
       console.error(err);
     } finally {
       setSubmitting(false);
@@ -63,11 +65,11 @@ const InviteAcceptPage: React.FC = () => {
       <Flex align="center" gap="2" mb="4">
         <EnvelopeOpenIcon width={22} height={22} />
         <GumroadHeading level="display-sm" as="h1">
-          Aceitar convite
+          {t('p1Invite.title')}
         </GumroadHeading>
       </Flex>
       <GumroadText level="body-md" as="p" color={colors.ink} style={{ opacity: 0.75, marginBottom: spacing.lg }}>
-        Cole abaixo o código de convite que você recebeu para acessar registros compartilhados.
+        {t('p1Invite.intro')}
       </GumroadText>
 
       {success ? (
@@ -76,15 +78,14 @@ const InviteAcceptPage: React.FC = () => {
             <Flex align="center" gap="2">
               <CheckIcon width={20} height={20} />
               <GumroadHeading level="title-md" as="h2">
-                Convite aceito
+                {t('p1Invite.accepted')}
               </GumroadHeading>
             </Flex>
             <GumroadText level="body-md" as="p">
-              Você agora pode acessar os registros compartilhados com você
-              {success.professionalName ? ` como ${success.professionalName}` : ''}.
+              {t('p1Invite.acceptedBody', { as: success.professionalName ? t('p1Invite.asName', { name: success.professionalName }) : '' })}
             </GumroadText>
             <GumroadButton variant="primary" size="md" onClick={() => navigate('/shared')}>
-              Ver registros compartilhados
+              {t('p1Invite.viewShared')}
             </GumroadButton>
           </Flex>
         </GumroadCard>
@@ -93,16 +94,16 @@ const InviteAcceptPage: React.FC = () => {
           <GumroadCard color="white" shadow="md" padding="md">
             <Flex direction="column" gap="3">
               {error && (
-                <Flex align="center" gap="2" style={{ color: colors['brand-salmon'] }}>
-                  <ExclamationTriangleIcon />
+                <Flex role="alert" align="center" gap="2" style={{ color: colors['brand-salmon'] }}>
+                  <ExclamationTriangleIcon aria-hidden="true" />
                   <GumroadText level="body-sm" as="span">
                     {error}
                   </GumroadText>
                 </Flex>
               )}
               <GumroadInput
-                label="Código de convite"
-                placeholder="Cole o código aqui"
+                label={t('p1Invite.codeLabel')}
+                placeholder={t('p1Invite.codePh')}
                 value={tokenInput}
                 onChange={(e) => setTokenInput(e.target.value)}
                 required
@@ -112,10 +113,10 @@ const InviteAcceptPage: React.FC = () => {
 
           <Flex gap="2" justify="end" mt="4">
             <GumroadButton variant="secondary" size="md" onClick={() => navigate('/dashboard')}>
-              Cancelar
+              {t('p1Invite.cancel')}
             </GumroadButton>
             <GumroadButton variant="primary" size="md" type="submit" disabled={submitting}>
-              {submitting ? 'Validando...' : 'Aceitar convite'}
+              {submitting ? t('p1Invite.validating') : t('p1Invite.accept')}
             </GumroadButton>
           </Flex>
         </form>

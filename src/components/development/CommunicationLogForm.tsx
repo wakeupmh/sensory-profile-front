@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Flex } from '@radix-ui/themes';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
@@ -64,6 +65,8 @@ const CommunicationLogForm: React.FC<CommunicationLogFormProps> = ({
   onCancel,
   loading = false,
 }) => {
+  const { t } = useTranslation();
+  const uid = useId();
   const [occurredAt, setOccurredAt] = useState(
     initialValues.occurredAt ? isoToDatetimeLocal(initialValues.occurredAt) : ''
   );
@@ -102,10 +105,11 @@ const CommunicationLogForm: React.FC<CommunicationLogFormProps> = ({
       <Flex direction="column" gap="3">
         <Flex gap="3">
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>
-              Data e hora <span style={{ color: colors.error }} aria-hidden="true">*</span>
+            <label style={labelStyle} htmlFor={`${uid}-date`}>
+              {t('cDevelopment.form.dateTime')} <span style={{ color: colors.error }} aria-hidden="true">*</span>
             </label>
             <input
+              id={`${uid}-date`}
               type="datetime-local"
               value={occurredAt}
               onChange={(e) => setOccurredAt(e.target.value)}
@@ -115,20 +119,21 @@ const CommunicationLogForm: React.FC<CommunicationLogFormProps> = ({
           </div>
 
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>
-              Tipo <span style={{ color: colors.error }} aria-hidden="true">*</span>
+            <label style={labelStyle} htmlFor={`${uid}-type`}>
+              {t('cDevelopment.form.type')} <span style={{ color: colors.error }} aria-hidden="true">*</span>
             </label>
             <select
+              id={`${uid}-type`}
               value={entryType}
               onChange={(e) => setEntryType(e.target.value as CommunicationEntryType)}
               style={{ ...inputStyle, cursor: 'pointer' }}
               required
             >
-              <option value="">Selecionar...</option>
+              <option value="">{t('cDevelopment.form.select')}</option>
               {(Object.entries(COMMUNICATION_ENTRY_TYPE_LABELS) as [CommunicationEntryType, string][]).map(
                 ([value, label]) => (
                   <option key={value} value={value}>
-                    {label}
+                    {t(`cDevelopment.entryType.${value}`, { defaultValue: label })}
                   </option>
                 )
               )}
@@ -137,59 +142,62 @@ const CommunicationLogForm: React.FC<CommunicationLogFormProps> = ({
         </Flex>
 
         <div>
-          <label style={labelStyle}>
-            Vocabulário estimado (palavras)
+          <label style={labelStyle} htmlFor={`${uid}-words`}>
+            {t('cDevelopment.form.words')}
           </label>
           <input
+            id={`${uid}-words`}
             type="number"
             min={0}
             value={wordsCount}
             onChange={(e) => setWordsCount(e.target.value)}
-            placeholder="Ex: 50"
+            placeholder={t('cDevelopment.form.wordsPh')}
             style={inputStyle}
           />
         </div>
 
         <div>
-          <label style={labelStyle}>
-            Descrição / Observações
+          <label style={labelStyle} htmlFor={`${uid}-desc`}>
+            {t('cDevelopment.form.description')}
             <span style={{ fontWeight: 400, color: colors['ink-muted'], marginLeft: '6px' }}>
               ({(description ?? '').length}/1000)
             </span>
           </label>
           <textarea
+            id={`${uid}-desc`}
             maxLength={1000}
             rows={3}
             value={description ?? ''}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Descreva a interação ou observação..."
+            placeholder={t('cDevelopment.form.descriptionPh')}
             style={textareaStyle}
           />
         </div>
 
         <div>
-          <label style={labelStyle}>
-            Notas adicionais
+          <label style={labelStyle} htmlFor={`${uid}-notes`}>
+            {t('cDevelopment.form.notes')}
             <span style={{ fontWeight: 400, color: colors['ink-muted'], marginLeft: '6px' }}>
               ({(notes ?? '').length}/2000)
             </span>
           </label>
           <textarea
+            id={`${uid}-notes`}
             maxLength={2000}
             rows={2}
             value={notes ?? ''}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Informações adicionais..."
+            placeholder={t('cDevelopment.form.notesPh')}
             style={textareaStyle}
           />
         </div>
 
         <Flex gap="2" mt="2">
-          <GumroadButton variant="primary" size="md" type="submit" disabled={isDisabled}>
-            {submitting || loading ? 'Salvando...' : 'Salvar Registro'}
+          <GumroadButton variant="primary" size="md" type="submit" disabled={isDisabled} loading={submitting || loading}>
+            {submitting || loading ? t('cDevelopment.saving') : t('cDevelopment.form.saveLog')}
           </GumroadButton>
           <GumroadButton variant="ghost" size="md" type="button" onClick={onCancel}>
-            Cancelar
+            {t('cDevelopment.cancel')}
           </GumroadButton>
         </Flex>
       </Flex>

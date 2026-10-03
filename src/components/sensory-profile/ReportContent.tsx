@@ -1,8 +1,9 @@
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { parseLocalDate } from '../../utils/date';
 import { FormData, SensoryItem } from "./types";
 import NormalCurveChart from "./NormalCurveChart";
-import { getInstrument } from "../../instruments";
+import { getInstrument, getSectionsForItemIds } from "../../instruments";
 import type { ClassificationBand, InstrumentSection } from "../../instruments/types";
 
 interface ReportContentProps {
@@ -36,7 +37,18 @@ const SP2_FALLBACK_SCALE_OPTIONS = [
 ];
 
 const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId }) => {
+  const { t, i18n } = useTranslation();
+  const dateFmt = useMemo(() => new Intl.DateTimeFormat(i18n.language || 'pt-BR'), [i18n.language]);
   const instrument = getInstrument(formData.instrumentId);
+
+  // Seções efetivas: instrumentos com seções dinâmicas (M-CHAT-R/F) derivam das respostas
+  const sections: InstrumentSection[] = useMemo(() => {
+    const itemIds = Object.values(formData.sections ?? {}).flatMap((s) => (s.items ?? []).map((i) => i.id));
+    return getSectionsForItemIds(instrument, itemIds);
+  }, [instrument, formData.sections]);
+
+  const hasBands =
+    instrument.defaultBands.length > 0 || sections.some((s) => (s.bands?.length ?? 0) > 0);
 
   const responseValueMap = useMemo(() => {
     if (!instrument?.scale?.options) {
@@ -67,7 +79,7 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
 
     const classifyScore = (score: number, section: InstrumentSection): { label: string; color: string } => {
       const bands: ClassificationBand[] = section.bands ?? instrument.defaultBands;
-      if (!bands || bands.length === 0) return { label: "Sem dados suficientes", color: "#888" };
+      if (!bands || bands.length === 0) return { label: t('assessmentReport.insufficientData'), color: "#888" };
 
       const maxPerItem = instrument.scale
         ? Math.max(...instrument.scale.options.map((o) => o.numeric))
@@ -84,7 +96,7 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
       return { label: last.label, color: last.color };
     };
 
-    return instrument.sections.map((section) => {
+    return sections.map((section) => {
       const sectionData = formData.sections?.[section.key] || { items: [] };
       const items = sectionData.items || [];
 
@@ -102,7 +114,7 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
         color,
       };
     });
-  }, [instrument, formData.sections, responseValueMap]);
+  }, [instrument, sections, formData.sections, responseValueMap, t]);
 
   const reportStyle = {
     fontFamily: "Arial, sans-serif",
@@ -178,10 +190,10 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
     <div className="paper-surface" style={reportStyle}>
       <div style={headerStyle}>
         <h1 style={{ fontSize: "24px", margin: "0 0 5px 0" }}>{instrument.name}</h1>
-        <h2 style={{ fontSize: "18px", fontWeight: "normal", margin: "0" }}>Relatório de Avaliação</h2>
+        <h2 style={{ fontSize: "18px", fontWeight: "normal", margin: "0" }}>{t('assessmentReport.title')}</h2>
         {instrument.citation && (
           <p style={{ fontSize: "12px", color: "#666", marginTop: "6px", fontStyle: "italic" }}>
-            Fonte: {instrument.citation}
+            {t('assessmentReport.source')} {instrument.citation}
           </p>
         )}
       </div>
@@ -203,112 +215,108 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
       )}
 
       <div style={sectionStyle} className="avoid-break first-section">
-        <h3 style={subHeaderStyle}>Dados da Criança</h3>
+        <h3 style={subHeaderStyle}>{t('assessmentForm.fields.childData')}</h3>
         <div style={sectionContentStyle}>
           <div style={{ display: "flex", flexDirection: "row", gap: "10px", marginBottom: "5px" }}>
             <div style={{ flex: 1 }}>
-              <span style={fieldLabelStyle}>Nome:</span> {formData.child.name || 'Não informado'}
+              <span style={fieldLabelStyle}>{t('assessmentReport.name')}</span> {formData.child.name || t('assessmentReport.notInformedM')}
             </div>
             <div style={{ flex: 1 }}>
-              <span style={fieldLabelStyle}>Idade:</span> {formData.child.age || 0} anos
+              <span style={fieldLabelStyle}>{t('assessmentForm.fields.age')}</span> {t('assessmentReport.years', { count: formData.child.age || 0 })}
             </div>
           </div>
           <div style={{ display: "flex", flexDirection: "row", gap: "10px", marginBottom: "5px" }}>
             <div style={{ flex: 1 }}>
-              <span style={fieldLabelStyle}>Data de Nascimento:</span> {
+              <span style={fieldLabelStyle}>{t('assessmentForm.fields.birthDate')}</span> {
                 formData.child.birthDate
-                  ? new Intl.DateTimeFormat('pt-BR').format(parseLocalDate(formData.child.birthDate))
-                  : 'Não informada'
+                  ? dateFmt.format(parseLocalDate(formData.child.birthDate))
+                  : t('assessmentReport.notInformedF')
               }
             </div>
             <div style={{ flex: 1 }}>
-              <span style={fieldLabelStyle}>Gênero:</span> {
-                formData.child.gender === 'male' ? 'Masculino'
-                  : formData.child.gender === 'female' ? 'Feminino'
-                    : formData.child.gender === 'other' ? 'Outro'
-                      : formData.child.gender || 'Não informado'
+              <span style={fieldLabelStyle}>{t('assessmentForm.fields.gender')}</span> {
+                formData.child.gender === 'male' ? t('assessmentForm.fields.male')
+                  : formData.child.gender === 'female' ? t('assessmentForm.fields.female')
+                    : formData.child.gender === 'other' ? t('assessmentForm.fields.other')
+                      : formData.child.gender || t('assessmentReport.notInformedM')
               }
             </div>
           </div>
           {formData.child.otherInfo && (
             <div style={{ marginTop: "5px" }}>
-              <span style={fieldLabelStyle}>Informações Adicionais:</span> {formData.child.otherInfo}
+              <span style={fieldLabelStyle}>{t('assessmentReport.additionalInfo')}</span> {formData.child.otherInfo}
             </div>
           )}
         </div>
       </div>
 
       <div style={sectionStyle} className="avoid-break">
-        <h3 style={subHeaderStyle}>Dados do Examinador</h3>
+        <h3 style={subHeaderStyle}>{t('assessmentForm.fields.examinerData')}</h3>
         <div style={sectionContentStyle}>
           <div style={{ display: "flex", flexDirection: "row", gap: "10px", marginBottom: "5px" }}>
             <div style={{ flex: 1 }}>
-              <span style={fieldLabelStyle}>Nome:</span> {formData.examiner.name || 'Não informado'}
+              <span style={fieldLabelStyle}>{t('assessmentReport.name')}</span> {formData.examiner.name || t('assessmentReport.notInformedM')}
             </div>
             <div style={{ flex: 1 }}>
-              <span style={fieldLabelStyle}>Profissão:</span> {formData.examiner.profession || 'Não informada'}
+              <span style={fieldLabelStyle}>{t('assessmentReport.profession')}</span> {formData.examiner.profession || t('assessmentReport.notInformedF')}
             </div>
           </div>
           <div>
-            <span style={fieldLabelStyle}>Contato:</span> {formData.examiner.contact || 'Não informado'}
+            <span style={fieldLabelStyle}>{t('assessmentForm.fields.contact')}</span> {formData.examiner.contact || t('assessmentReport.notInformedM')}
           </div>
         </div>
       </div>
 
       <div style={sectionStyle} className="avoid-break">
-        <h3 style={subHeaderStyle}>Dados do Cuidador</h3>
+        <h3 style={subHeaderStyle}>{t('assessmentForm.fields.caregiverData')}</h3>
         <div style={sectionContentStyle}>
           <div style={{ display: "flex", flexDirection: "row", gap: "10px", marginBottom: "5px" }}>
             <div style={{ flex: 1 }}>
-              <span style={fieldLabelStyle}>Nome:</span> {formData.caregiver.name || 'Não informado'}
+              <span style={fieldLabelStyle}>{t('assessmentReport.name')}</span> {formData.caregiver.name || t('assessmentReport.notInformedM')}
             </div>
             <div style={{ flex: 1 }}>
-              <span style={fieldLabelStyle}>Relação:</span> {
-                formData.caregiver.relationship === 'father' ? 'Pai'
-                  : formData.caregiver.relationship === 'mother' ? 'Mãe'
-                    : formData.caregiver.relationship === 'grandparent' ? 'Avô/Avó'
-                      : formData.caregiver.relationship === 'other_relative' ? 'Outro Familiar'
-                        : formData.caregiver.relationship === 'sibling' ? 'Irmão/Irmã'
-                          : formData.caregiver.relationship === 'other' ? 'Outro'
-                            : formData.caregiver.relationship || 'Não informada'
+              <span style={fieldLabelStyle}>{t('assessmentReport.relationship')}</span> {
+                ['father', 'mother', 'grandparent', 'other_relative', 'sibling', 'other'].includes(formData.caregiver.relationship)
+                  ? t(`assessmentReport.relations.${formData.caregiver.relationship}`)
+                  : formData.caregiver.relationship || t('assessmentReport.notInformedF')
               }
             </div>
           </div>
           <div>
-            <span style={fieldLabelStyle}>Contato:</span> {formData.caregiver.contact || 'Não informado'}
+            <span style={fieldLabelStyle}>{t('assessmentForm.fields.contact')}</span> {formData.caregiver.contact || t('assessmentReport.notInformedM')}
           </div>
         </div>
       </div>
 
       {instrument.hasQuadrants && (
         <div style={sectionStyle} className="avoid-break section-container">
-          <h3 style={subHeaderStyle}>Quadrantes de Processamento Sensorial</h3>
+          <h3 style={subHeaderStyle}>{t('assessmentReport.quadrants.title')}</h3>
           <p style={{ fontStyle: "italic", marginBottom: "15px" }}>
-            Os quatro quadrantes descrevem padrões de como a criança processa estímulos sensoriais no cotidiano.
+            {t('assessmentReport.quadrants.intro')}
           </p>
           <div style={{ marginTop: "15px" }}>
             <div style={colorBarStyle(quadrants.seeking.color)}>
-              <div style={{ fontWeight: "bold", color: quadrants.seeking.color }}>{quadrants.seeking.title} (EX)</div>
+              <div style={{ fontWeight: "bold", color: quadrants.seeking.color }}>{t('assessmentReport.quadrants.seeking.title')} (EX)</div>
               <div style={{ fontSize: "14px" }}>
-                Busca ativamente mais experiências sensoriais do que o típico para a idade.
+                {t('assessmentReport.quadrants.seeking.description')}
               </div>
             </div>
             <div style={colorBarStyle(quadrants.avoiding.color)}>
-              <div style={{ fontWeight: "bold", color: quadrants.avoiding.color }}>{quadrants.avoiding.title} (EV)</div>
+              <div style={{ fontWeight: "bold", color: quadrants.avoiding.color }}>{t('assessmentReport.quadrants.avoiding.title')} (EV)</div>
               <div style={{ fontSize: "14px" }}>
-                Procura reduzir o contato com estímulos sensoriais que considera desagradáveis.
+                {t('assessmentReport.quadrants.avoiding.description')}
               </div>
             </div>
             <div style={colorBarStyle(quadrants.sensitivity.color)}>
-              <div style={{ fontWeight: "bold", color: quadrants.sensitivity.color }}>{quadrants.sensitivity.title} (SN)</div>
+              <div style={{ fontWeight: "bold", color: quadrants.sensitivity.color }}>{t('assessmentReport.quadrants.sensitivity.title')} (SN)</div>
               <div style={{ fontSize: "14px" }}>
-                Nota e reage com maior intensidade a estímulos que outras crianças mal percebem.
+                {t('assessmentReport.quadrants.sensitivity.description')}
               </div>
             </div>
             <div style={colorBarStyle(quadrants.registration.color)}>
-              <div style={{ fontWeight: "bold", color: quadrants.registration.color }}>{quadrants.registration.title} (OB)</div>
+              <div style={{ fontWeight: "bold", color: quadrants.registration.color }}>{t('assessmentReport.quadrants.registration.title')} (OB)</div>
               <div style={{ fontSize: "14px" }}>
-                Tende a não perceber estímulos que outras crianças notam; registro sensorial reduzido.
+                {t('assessmentReport.quadrants.registration.description')}
               </div>
             </div>
           </div>
@@ -318,23 +326,30 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
       <div className="page-break"></div>
 
       {instrument.summaryComponent && (
-        <instrument.summaryComponent scores={scoreData} instrument={instrument} assessmentId={assessmentId} />
+        <instrument.summaryComponent
+          scores={formData.scoresJson ?? scoreData}
+          instrument={instrument}
+          assessmentId={assessmentId}
+          sections={formData.sections}
+        />
       )}
 
+      {/* Sem faixas de classificação (ex.: M-CHAT-R) a tabela de pontuação bruta não tem significado */}
+      {hasBands && (
       <div style={sectionStyle} className="avoid-break section-container">
-        <h3 style={subHeaderStyle}>Resumo das Pontuações</h3>
+        <h3 style={subHeaderStyle}>{t('assessmentReport.scores.title')}</h3>
         <p style={{ fontStyle: "italic", marginBottom: "15px" }}>
           {instrument.hasNormalCurve
-            ? "As pontuações são classificadas comparando o desempenho da criança com outras da mesma faixa etária."
-            : "As pontuações indicam a frequência observada por seção, conforme as faixas definidas por este instrumento."}
+            ? t('assessmentReport.scores.normed')
+            : t('assessmentReport.scores.banded')}
         </p>
 
         <table style={tableStyle}>
           <thead>
             <tr>
-              <th style={tableHeaderStyle}>Seção</th>
-              <th style={tableHeaderStyle}>Pontuação Bruta</th>
-              <th style={tableHeaderStyle}>Classificação</th>
+              <th style={tableHeaderStyle}>{t('assessmentReport.scores.section')}</th>
+              <th style={tableHeaderStyle}>{t('assessmentReport.scores.raw')}</th>
+              <th style={tableHeaderStyle}>{t('assessmentReport.scores.classification')}</th>
             </tr>
           </thead>
           <tbody>
@@ -348,12 +363,13 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
           </tbody>
         </table>
       </div>
+      )}
 
       {instrument.hasNormalCurve && (
         <>
           <div className="page-break"></div>
           <div style={sectionStyle} className="avoid-break section-container">
-            <h3 style={subHeaderStyle}>Curva Normal e Sistema de Classificação</h3>
+            <h3 style={subHeaderStyle}>{t('assessmentReport.normalCurve')}</h3>
             <NormalCurveChart scores={scoreData} />
           </div>
         </>
@@ -362,10 +378,10 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
       <div className="page-break"></div>
 
       <div style={sectionStyle} className="avoid-break section-container detailed-responses">
-        <h3 style={subHeaderStyle}>Detalhes das Respostas</h3>
+        <h3 style={subHeaderStyle}>{t('assessmentReport.details.title')}</h3>
 
         <div style={sectionContentStyle} className="detailed-responses">
-          {instrument.sections.map((section, sectionIndex) => {
+          {sections.map((section, sectionIndex) => {
             const sectionData = formData.sections?.[section.key] || { items: [] };
             const items = sectionData.items || [];
             if (items.length === 0) return null;
@@ -378,14 +394,14 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
                   <table style={tableStyle}>
                     <thead>
                       <tr>
-                        <th style={tableHeaderStyle}>Item</th>
-                        <th style={tableHeaderStyle}>Resposta</th>
-                        <th style={tableHeaderStyle}>Valor</th>
+                        <th style={tableHeaderStyle}>{t('assessmentForm.item')}</th>
+                        <th style={tableHeaderStyle}>{t('assessmentForm.answer')}</th>
+                        {hasBands && <th style={tableHeaderStyle}>{t('assessmentReport.details.value')}</th>}
                       </tr>
                     </thead>
                     <tbody>
                       {items.map((item, itemIndex) => {
-                        const responseText = scaleOptions.find(o => o.value === item.response)?.label || "Não respondido";
+                        const responseText = scaleOptions.find(o => o.value === item.response)?.label || t('assessmentReport.details.unanswered');
                         const responseValue = item.response ? Number(responseValueMap[item.response]) || 0 : 0;
                         const itemDescription = item.description || `Item ${item.id}`;
 
@@ -393,9 +409,11 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
                           <tr key={item.id} style={{ backgroundColor: itemIndex % 2 === 0 ? '#f9f9f9' : 'white' }}>
                             <td style={tableCellStyle}>{itemDescription}</td>
                             <td style={{ ...tableCellStyle, textAlign: 'center' as const }}>{responseText}</td>
-                            <td style={{ ...tableCellStyle, textAlign: 'center' as const }}>
-                              {typeof responseValue === 'number' && !isNaN(responseValue) ? responseValue : 0}
-                            </td>
+                            {hasBands && (
+                              <td style={{ ...tableCellStyle, textAlign: 'center' as const }}>
+                                {typeof responseValue === 'number' && !isNaN(responseValue) ? responseValue : 0}
+                              </td>
+                            )}
                           </tr>
                         );
                       })}
@@ -412,10 +430,10 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
 
       <div style={{ marginTop: "30px", pageBreakBefore: "always" as const }}>
         <div style={{ marginBottom: "10px" }}>
-          <span style={fieldLabelStyle}>Data da Avaliação:</span> {
+          <span style={fieldLabelStyle}>{t('assessmentReport.date')}</span> {
             formData.createdAt
-              ? new Intl.DateTimeFormat('pt-BR').format(new Date(formData.createdAt))
-              : new Intl.DateTimeFormat('pt-BR').format(new Date())
+              ? dateFmt.format(new Date(formData.createdAt))
+              : dateFmt.format(new Date())
           }
         </div>
         <div style={{ marginTop: "40px" }}>
@@ -427,7 +445,7 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
                 {formData.examiner.profession && (<span> - {formData.examiner.profession}</span>)}
               </>
             ) : (
-              "Assinatura do Examinador"
+              t('assessmentReport.signature')
             )}
           </div>
         </div>

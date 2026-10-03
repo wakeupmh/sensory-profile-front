@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
 import type {
@@ -61,6 +62,7 @@ const EducationPlanForm: React.FC<EducationPlanFormProps> = ({
   childId,
   isEdit = false,
 }) => {
+  const { t } = useTranslation();
   const [schoolName, setSchoolName] = useState(initial.schoolName ?? '');
   const [academicYear, setAcademicYear] = useState(initial.academicYear ?? '');
   const [planType, setPlanType] = useState<EducationPlanType | ''>(initial.planType ?? '');
@@ -101,13 +103,13 @@ const EducationPlanForm: React.FC<EducationPlanFormProps> = ({
       <Flex direction="column" gap="3">
         <div>
           <label style={labelStyle} htmlFor="eduplan-nome-da">
-            Nome da escola <span style={{ color: colors.error }} aria-hidden="true">*</span>
+            {t('cEducation.form.schoolName')} <span style={{ color: colors.error }} aria-hidden="true">*</span>
           </label>
           <input id="eduplan-nome-da"
             type="text"
             value={schoolName}
             onChange={(e) => setSchoolName(e.target.value)}
-            placeholder="Ex: EMEF João da Silva"
+            placeholder={t('cEducation.form.schoolNamePh')}
             style={inputStyle}
             required
           />
@@ -116,13 +118,13 @@ const EducationPlanForm: React.FC<EducationPlanFormProps> = ({
         <Flex gap="3">
           <div style={{ flex: 1 }}>
             <label style={labelStyle} htmlFor="eduplan-ano-letivo">
-              Ano letivo <span style={{ color: colors.error }} aria-hidden="true">*</span>
+              {t('cEducation.form.academicYear')} <span style={{ color: colors.error }} aria-hidden="true">*</span>
             </label>
             <input id="eduplan-ano-letivo"
               type="text"
               value={academicYear}
               onChange={(e) => setAcademicYear(e.target.value)}
-              placeholder="2024 ou 2024/2025"
+              placeholder={t('cEducation.form.academicYearPh')}
               style={inputStyle}
               required
             />
@@ -130,7 +132,7 @@ const EducationPlanForm: React.FC<EducationPlanFormProps> = ({
 
           <div style={{ flex: 1 }}>
             <label style={labelStyle} htmlFor="eduplan-tipo-de">
-              Tipo de plano <span style={{ color: colors.error }} aria-hidden="true">*</span>
+              {t('cEducation.form.planType')} <span style={{ color: colors.error }} aria-hidden="true">*</span>
             </label>
             <select id="eduplan-tipo-de"
               value={planType}
@@ -138,11 +140,11 @@ const EducationPlanForm: React.FC<EducationPlanFormProps> = ({
               style={{ ...inputStyle, cursor: 'pointer' }}
               required
             >
-              <option value="">Selecionar...</option>
+              <option value="">{t('cEducation.form.select')}</option>
               {(Object.entries(EDUCATION_PLAN_TYPE_LABELS) as [EducationPlanType, string][]).map(
                 ([value, label]) => (
                   <option key={value} value={value}>
-                    {label}
+                    {t(`cEducation.planType.${value}`, { defaultValue: label })}
                   </option>
                 )
               )}
@@ -153,7 +155,7 @@ const EducationPlanForm: React.FC<EducationPlanFormProps> = ({
         <Flex gap="3">
           <div style={{ flex: 1 }}>
             <label style={labelStyle} htmlFor="eduplan-data-de">
-              Data de início <span style={{ color: colors.error }} aria-hidden="true">*</span>
+              {t('cEducation.form.startDate')} <span style={{ color: colors.error }} aria-hidden="true">*</span>
             </label>
             <input id="eduplan-data-de"
               type="date"
@@ -164,7 +166,7 @@ const EducationPlanForm: React.FC<EducationPlanFormProps> = ({
             />
           </div>
           <div style={{ flex: 1 }}>
-            <label style={labelStyle} htmlFor="eduplan-data-de-2">Data de revisão</label>
+            <label style={labelStyle} htmlFor="eduplan-data-de-2">{t('cEducation.form.reviewDate')}</label>
             <input id="eduplan-data-de-2"
               type="date"
               value={reviewDate ?? ''}
@@ -173,7 +175,7 @@ const EducationPlanForm: React.FC<EducationPlanFormProps> = ({
             />
           </div>
           <div style={{ flex: 1 }}>
-            <label style={labelStyle} htmlFor="eduplan-data-de-3">Data de encerramento</label>
+            <label style={labelStyle} htmlFor="eduplan-data-de-3">{t('cEducation.form.endDate')}</label>
             <input id="eduplan-data-de-3"
               type="date"
               value={endDate ?? ''}
@@ -185,7 +187,7 @@ const EducationPlanForm: React.FC<EducationPlanFormProps> = ({
 
         <div>
           <label style={labelStyle} htmlFor="eduplan-objetivos-e">
-            Objetivos e metas
+            {t('cEducation.form.goals')}
             <span style={{ fontWeight: 400, color: colors['ink-muted'], marginLeft: '6px' }}>
               ({(goals ?? '').length}/5000)
             </span>
@@ -195,14 +197,14 @@ const EducationPlanForm: React.FC<EducationPlanFormProps> = ({
             rows={4}
             value={goals ?? ''}
             onChange={(e) => setGoals(e.target.value)}
-            placeholder="Descreva os objetivos e metas do plano..."
+            placeholder={t('cEducation.form.goalsPh')}
             style={textareaStyle}
           />
         </div>
 
         <div>
           <label style={labelStyle} htmlFor="eduplan-adaptacoes-e">
-            Adaptações e acomodações
+            {t('cEducation.form.accommodations')}
             <span style={{ fontWeight: 400, color: colors['ink-muted'], marginLeft: '6px' }}>
               ({(accommodations ?? '').length}/5000)
             </span>
@@ -212,14 +214,14 @@ const EducationPlanForm: React.FC<EducationPlanFormProps> = ({
             rows={4}
             value={accommodations ?? ''}
             onChange={(e) => setAccommodations(e.target.value)}
-            placeholder="Liste as adaptações e acomodações previstas..."
+            placeholder={t('cEducation.form.accommodationsPh')}
             style={textareaStyle}
           />
         </div>
 
         <div>
           <label style={labelStyle} htmlFor="eduplan-observacoes-2000">
-            Observações
+            {t('cEducation.form.notes')}
             <span style={{ fontWeight: 400, color: colors['ink-muted'], marginLeft: '6px' }}>
               ({(notes ?? '').length}/2000)
             </span>
@@ -229,17 +231,17 @@ const EducationPlanForm: React.FC<EducationPlanFormProps> = ({
             rows={3}
             value={notes ?? ''}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Observações adicionais..."
+            placeholder={t('cEducation.form.notesPh')}
             style={textareaStyle}
           />
         </div>
 
         <Flex gap="2" mt="2">
-          <GumroadButton variant="primary" size="md" type="submit" disabled={isDisabled}>
-            {submitting ? 'Salvando...' : isEdit ? 'Salvar plano' : 'Adicionar plano'}
+          <GumroadButton variant="primary" size="md" type="submit" disabled={isDisabled} loading={submitting}>
+            {submitting ? t('cEducation.saving') : isEdit ? t('cEducation.form.savePlan') : t('cEducation.form.addPlan')}
           </GumroadButton>
           <GumroadButton variant="ghost" size="md" type="button" onClick={onCancel}>
-            Cancelar
+            {t('cEducation.cancel')}
           </GumroadButton>
         </Flex>
       </Flex>

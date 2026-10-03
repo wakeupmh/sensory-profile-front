@@ -1,4 +1,6 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { EDUCATION_PLAN_TYPE_LABELS, SCHOOL_COMM_TYPE_LABELS } from '../../types/education';
 import type { ConsolidatedEducation } from '../../types/consolidatedReport';
 import { colors, itemCardStyle } from '../../theme/tokens';
 
@@ -14,29 +16,12 @@ const PLAN_TYPE_COLORS: Record<string, string> = {
   outro: '#F5F5F5',
 };
 
-const PLAN_TYPE_LABELS: Record<string, string> = {
-  pei: 'PEI',
-  pei_simplificado: 'PEI Simplificado',
-  adaptacao_curricular: 'Adaptação Curricular',
-  plano_aee: 'Plano AEE',
-  outro: 'Outro',
-};
-
-const COMM_TYPE_LABELS: Record<string, string> = {
-  reuniao: 'Reunião',
-  bilhete: 'Bilhete/Comunicado',
-  email: 'E-mail',
-  telefone: 'Ligação telefônica',
-  incidente: 'Incidente',
-  relatorio: 'Relatório escolar',
-  outro: 'Outro',
-};
-
 const EducationSection: React.FC<Props> = ({ data }) => {
+  const { t, i18n } = useTranslation();
   if (data.plans.length === 0 && data.recentComms.length === 0) {
     return (
       <p style={{ fontSize: '0.9rem', opacity: 0.6, margin: 0 }}>
-        Nenhum dado educacional registrado.
+        {t('cConsolidated.educationEmpty')}
       </p>
     );
   }
@@ -47,7 +32,7 @@ const EducationSection: React.FC<Props> = ({ data }) => {
       {data.plans.length > 0 && (
         <div>
           <p style={{ fontWeight: 700, fontSize: '0.85rem', margin: '0 0 6px', opacity: 0.8 }}>
-            Planos educacionais
+            {t('cConsolidated.educationPlans')}
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {data.plans.map((plan) => (
@@ -73,7 +58,7 @@ const EducationSection: React.FC<Props> = ({ data }) => {
                     textTransform: 'uppercase',
                   }}
                 >
-                  {PLAN_TYPE_LABELS[plan.planType] ?? plan.planType.toUpperCase()}
+                  {t(`cEducation.planType.${plan.planType}`, { defaultValue: (EDUCATION_PLAN_TYPE_LABELS as Record<string, string>)[plan.planType] ?? plan.planType.toUpperCase() })}
                 </span>
                 <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>{plan.academicYear}</span>
               </div>
@@ -86,7 +71,7 @@ const EducationSection: React.FC<Props> = ({ data }) => {
       {data.recentComms.length > 0 && (
         <div>
           <p style={{ fontWeight: 700, fontSize: '0.85rem', margin: '0 0 6px', opacity: 0.8 }}>
-            Comunicações recentes
+            {t('cConsolidated.recentComms')}
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {data.recentComms.map((c) => (
@@ -112,12 +97,12 @@ const EducationSection: React.FC<Props> = ({ data }) => {
                       fontWeight: 700,
                     }}
                   >
-                    {COMM_TYPE_LABELS[c.commType] ?? c.commType}
+                    {t(`cEducation.commType.${c.commType}`, { defaultValue: (SCHOOL_COMM_TYPE_LABELS as Record<string, string>)[c.commType] ?? c.commType })}
                   </span>
                   <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{c.subject}</span>
                 </div>
                 <span style={{ fontSize: '0.78rem', opacity: 0.6, whiteSpace: 'nowrap' }}>
-                  {new Date(c.occurredAt).toLocaleDateString('pt-BR')}
+                  {new Date(c.occurredAt).toLocaleDateString(i18n.language)}
                 </span>
               </div>
             ))}

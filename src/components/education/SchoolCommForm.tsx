@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
 import type {
@@ -66,6 +67,7 @@ const SchoolCommForm: React.FC<SchoolCommFormProps> = ({
   childId,
   isEdit = false,
 }) => {
+  const { t } = useTranslation();
   const [occurredAt, setOccurredAt] = useState(toDatetimeLocal(initial.occurredAt));
   const [commType, setCommType] = useState<SchoolCommType | ''>(initial.commType ?? '');
   const [subject, setSubject] = useState(initial.subject ?? '');
@@ -103,7 +105,7 @@ const SchoolCommForm: React.FC<SchoolCommFormProps> = ({
         <Flex gap="3">
           <div style={{ flex: 1 }}>
             <label style={labelStyle} htmlFor="schoolcomm-data-e">
-              Data e hora <span style={{ color: colors.error }} aria-hidden="true">*</span>
+              {t('cEducation.form.dateTime')} <span style={{ color: colors.error }} aria-hidden="true">*</span>
             </label>
             <input id="schoolcomm-data-e"
               type="datetime-local"
@@ -116,7 +118,7 @@ const SchoolCommForm: React.FC<SchoolCommFormProps> = ({
 
           <div style={{ flex: 1 }}>
             <label style={labelStyle} htmlFor="schoolcomm-tipo-de">
-              Tipo de comunicação <span style={{ color: colors.error }} aria-hidden="true">*</span>
+              {t('cEducation.form.commType')} <span style={{ color: colors.error }} aria-hidden="true">*</span>
             </label>
             <select id="schoolcomm-tipo-de"
               value={commType}
@@ -124,11 +126,11 @@ const SchoolCommForm: React.FC<SchoolCommFormProps> = ({
               style={{ ...inputStyle, cursor: 'pointer' }}
               required
             >
-              <option value="">Selecionar...</option>
+              <option value="">{t('cEducation.form.select')}</option>
               {(Object.entries(SCHOOL_COMM_TYPE_LABELS) as [SchoolCommType, string][]).map(
                 ([value, label]) => (
                   <option key={value} value={value}>
-                    {label}
+                    {t(`cEducation.commType.${value}`, { defaultValue: label })}
                   </option>
                 )
               )}
@@ -138,14 +140,14 @@ const SchoolCommForm: React.FC<SchoolCommFormProps> = ({
 
         <div>
           <label style={labelStyle} htmlFor="schoolcomm-assunto">
-            Assunto <span style={{ color: colors.error }} aria-hidden="true">*</span>
+            {t('cEducation.form.subject')} <span style={{ color: colors.error }} aria-hidden="true">*</span>
           </label>
           <input id="schoolcomm-assunto"
             type="text"
             maxLength={255}
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            placeholder="Resumo da comunicação"
+            placeholder={t('cEducation.form.subjectPh')}
             style={inputStyle}
             required
           />
@@ -153,7 +155,7 @@ const SchoolCommForm: React.FC<SchoolCommFormProps> = ({
 
         <div>
           <label style={labelStyle} htmlFor="schoolcomm-descricao-5000">
-            Descrição
+            {t('cEducation.form.description')}
             <span style={{ fontWeight: 400, color: colors['ink-muted'], marginLeft: '6px' }}>
               ({(description ?? '').length}/5000)
             </span>
@@ -163,25 +165,25 @@ const SchoolCommForm: React.FC<SchoolCommFormProps> = ({
             rows={4}
             value={description ?? ''}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Detalhes da comunicação..."
+            placeholder={t('cEducation.form.descriptionPh')}
             style={textareaStyle}
           />
         </div>
 
         <div>
-          <label style={labelStyle} htmlFor="schoolcomm-participantes">Participantes</label>
+          <label style={labelStyle} htmlFor="schoolcomm-participantes">{t('cEducation.form.attendees')}</label>
           <input id="schoolcomm-participantes"
             type="text"
             maxLength={500}
             value={attendees ?? ''}
             onChange={(e) => setAttendees(e.target.value)}
-            placeholder="Ex: Professora Ana, coordenadora, responsável"
+            placeholder={t('cEducation.form.attendeesPh')}
             style={inputStyle}
           />
         </div>
 
         <div>
-          <label style={labelStyle} htmlFor="schoolcomm-data-de">Data de retorno</label>
+          <label style={labelStyle} htmlFor="schoolcomm-data-de">{t('cEducation.form.followUpDate')}</label>
           <input id="schoolcomm-data-de"
             type="date"
             value={followUpDate ?? ''}
@@ -192,7 +194,7 @@ const SchoolCommForm: React.FC<SchoolCommFormProps> = ({
 
         <div>
           <label style={labelStyle} htmlFor="schoolcomm-observacoes-2000">
-            Observações
+            {t('cEducation.form.notes')}
             <span style={{ fontWeight: 400, color: colors['ink-muted'], marginLeft: '6px' }}>
               ({(notes ?? '').length}/2000)
             </span>
@@ -202,17 +204,17 @@ const SchoolCommForm: React.FC<SchoolCommFormProps> = ({
             rows={3}
             value={notes ?? ''}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Observações adicionais..."
+            placeholder={t('cEducation.form.notesPh')}
             style={textareaStyle}
           />
         </div>
 
         <Flex gap="2" mt="2">
-          <GumroadButton variant="primary" size="md" type="submit" disabled={isDisabled}>
-            {submitting ? 'Salvando...' : isEdit ? 'Salvar comunicação' : 'Adicionar comunicação'}
+          <GumroadButton variant="primary" size="md" type="submit" disabled={isDisabled} loading={submitting}>
+            {submitting ? t('cEducation.saving') : isEdit ? t('cEducation.form.saveComm') : t('cEducation.form.addComm')}
           </GumroadButton>
           <GumroadButton variant="ghost" size="md" type="button" onClick={onCancel}>
-            Cancelar
+            {t('cEducation.cancel')}
           </GumroadButton>
         </Flex>
       </Flex>

@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import DictateButton from '../design-system/DictateButton';
 import { Box, Flex } from '@radix-ui/themes';
 import { ChatBubbleIcon, InfoCircledIcon, PaperPlaneIcon } from '@radix-ui/react-icons';
@@ -32,6 +33,8 @@ function useCountdown(retryAt: number | null) {
 }
 
 const AIQuestionChat: React.FC<Props> = ({ childId, periodDays = 90 }) => {
+  const { t } = useTranslation();
+  const inputId = useId();
   const { getToken } = useAuthContext();
   const [question, setQuestion] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -63,11 +66,11 @@ const AIQuestionChat: React.FC<Props> = ({ childId, periodDays = 90 }) => {
           ...m,
           loading: false,
           error: err.info.retryAfterSeconds
-            ? `Limite de perguntas atingido. Tente novamente em ${err.info.retryAfterSeconds}s.`
-            : 'Limite de 5 perguntas por hora atingido. Tente novamente mais tarde.',
+            ? t('cConsolidated.chat.rateLimitSeconds', { seconds: err.info.retryAfterSeconds })
+            : t('cConsolidated.chat.rateLimitHour'),
         } : m)));
       } else {
-        setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, loading: false, error: 'Erro ao processar a pergunta. Tente novamente.' } : m)));
+        setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, loading: false, error: t('cConsolidated.chat.error') } : m)));
       }
     } finally {
       setSending(false);
@@ -77,15 +80,15 @@ const AIQuestionChat: React.FC<Props> = ({ childId, periodDays = 90 }) => {
   return (
     <Box>
       <Flex align="center" gap="2" mb="2">
-        <ChatBubbleIcon />
-        <GumroadHeading level="title-lg" as="h2">Perguntar à IA</GumroadHeading>
+        <ChatBubbleIcon aria-hidden="true" />
+        <GumroadHeading level="title-lg" as="h2">{t('cConsolidated.chat.title')}</GumroadHeading>
       </Flex>
       <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, marginBottom: spacing.md }}>
-        Pergunte sobre o histórico registrado. A resposta é baseada apenas nos dados do sistema.
+        {t('cConsolidated.chat.intro')}
       </GumroadText>
 
       {messages.length > 0 && (
-        <Flex direction="column" gap="3" mb="4">
+        <Flex direction="column" gap="3" mb="4" role="log" aria-live="polite" aria-label={t('cConsolidated.chat.logAria')}>
           {messages.map((m) => (
             <Flex key={m.id} direction="column" gap="2">
               <Box
@@ -116,7 +119,7 @@ const AIQuestionChat: React.FC<Props> = ({ childId, periodDays = 90 }) => {
                   whiteSpace: 'pre-wrap',
                 }}
               >
-                {m.loading ? 'Pensando...' : m.error ? <span style={{ color: colors['brand-salmon'] }}>{m.error}</span> : m.answer}
+                {m.loading ? t('cConsolidated.chat.thinking') : m.error ? <span style={{ color: colors['brand-salmon'] }}>{m.error}</span> : m.answer}
               </Box>
             </Flex>
           ))}
@@ -125,11 +128,13 @@ const AIQuestionChat: React.FC<Props> = ({ childId, periodDays = 90 }) => {
 
       <form onSubmit={handleAsk}>
         <Flex gap="2">
+          <label htmlFor={inputId} className="sr-only">{t('cConsolidated.chat.inputLabel')}</label>
           <input
+            id={inputId}
             type="text"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            placeholder={retrySeconds > 0 ? `Aguarde ${retrySeconds}s para perguntar novamente` : 'Ex: Como está o sono nas últimas semanas?'}
+            placeholder={retrySeconds > 0 ? t('cConsolidated.chat.wait', { seconds: retrySeconds }) : t('cConsolidated.chat.placeholder')}
             maxLength={500}
             disabled={sending || retrySeconds > 0}
             style={{
@@ -146,7 +151,7 @@ const AIQuestionChat: React.FC<Props> = ({ childId, periodDays = 90 }) => {
           <button
             type="submit"
             disabled={sending || retrySeconds > 0 || !question.trim()}
-            aria-label="Enviar pergunta"
+            aria-label={t('cConsolidated.chat.send')}
             style={{
               width: '44px',
               height: '44px',
@@ -161,7 +166,7 @@ const AIQuestionChat: React.FC<Props> = ({ childId, periodDays = 90 }) => {
               justifyContent: 'center',
             }}
           >
-            <PaperPlaneIcon />
+            <PaperPlaneIcon aria-hidden="true" />
           </button>
         </Flex>
         <Flex justify="end" mt="2">
@@ -170,15 +175,15 @@ const AIQuestionChat: React.FC<Props> = ({ childId, periodDays = 90 }) => {
               antes de enviar. */}
           <DictateButton
             onText={(text) => setQuestion((prev) => (prev ? `${prev} ${text}` : text).slice(0, 500))}
-            fieldLabel="pergunta"
+            fieldLabel={t('cConsolidated.chat.fieldLabel')}
           />
         </Flex>
       </form>
 
       <Flex align="center" gap="2" mt="3" style={{ opacity: 0.7 }}>
-        <InfoCircledIcon />
+        <InfoCircledIcon aria-hidden="true" />
         <GumroadText level="caption" as="span">
-          A IA pode errar e não substitui a avaliação de um profissional.
+          {t('cConsolidated.chat.disclaimer')}
         </GumroadText>
       </Flex>
     </Box>

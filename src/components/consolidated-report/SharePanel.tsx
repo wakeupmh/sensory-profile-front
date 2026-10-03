@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AlertDialog, Flex } from '@radix-ui/themes';
 import { consolidatedReportApi } from '../../services/api';
 import type { ReportShare } from '../../types/consolidatedReport';
@@ -13,6 +14,7 @@ interface Props {
 }
 
 const SharePanel: React.FC<Props> = ({ childId, periodDays = 90, isPublicView }) => {
+  const { t, i18n } = useTranslation();
   const { getToken } = useAuthContext();
   const [shares, setShares] = useState<ReportShare[]>([]);
   const [creating, setCreating] = useState(false);
@@ -35,14 +37,14 @@ const SharePanel: React.FC<Props> = ({ childId, periodDays = 90, isPublicView })
           setLoadError(null);
         }
       } catch {
-        if (!cancelled) setLoadError('Erro ao carregar links compartilhados.');
+        if (!cancelled) setLoadError(t('cConsolidated.share.loadError'));
       }
     };
     load();
     return () => {
       cancelled = true;
     };
-  }, [childId, getToken, isPublicView]);
+  }, [childId, getToken, isPublicView, t]);
 
   if (isPublicView) return null;
 
@@ -53,11 +55,16 @@ const SharePanel: React.FC<Props> = ({ childId, periodDays = 90, isPublicView })
       const token = await getToken();
       const res = await consolidatedReportApi.createShare(token, { childId, expiresInDays, periodDays });
       setShares((prev) => [res.share, ...prev]);
-      await navigator.clipboard.writeText(res.shareUrl);
-      setCopiedId(res.share.id);
-      setTimeout(() => setCopiedId(null), 2000);
+      try {
+        await navigator.clipboard.writeText(res.shareUrl);
+        setCopiedId(res.share.id);
+        setTimeout(() => setCopiedId(null), 2000);
+      } catch {
+        // O link foi criado; só a cópia automática falhou — "Copiar" na lista funciona
+        setActionError(t('cConsolidated.share.copyAfterCreateError'));
+      }
     } catch {
-      setActionError('Erro ao gerar link de compartilhamento.');
+      setActionError(t('cConsolidated.share.createError'));
     } finally {
       setCreating(false);
     }
@@ -70,7 +77,7 @@ const SharePanel: React.FC<Props> = ({ childId, periodDays = 90, isPublicView })
       await consolidatedReportApi.deleteShare(token, id);
       setShares((prev) => prev.filter((s) => s.id !== id));
     } catch {
-      setActionError('Erro ao excluir link.');
+      setActionError(t('cConsolidated.share.deleteError'));
     } finally {
       setDeletingId(null);
     }
@@ -93,7 +100,7 @@ const SharePanel: React.FC<Props> = ({ childId, periodDays = 90, isPublicView })
       setCopiedId(id);
       setTimeout(() => setCopiedId(null), 2000);
     } catch {
-      setActionError('Erro ao copiar o link.');
+      setActionError(t('cConsolidated.share.copyError'));
     } finally {
       setCopyingId(null);
     }
@@ -125,12 +132,12 @@ const SharePanel: React.FC<Props> = ({ childId, periodDays = 90, isPublicView })
           color: colors.ink,
         }}
       >
-        Compartilhar com Equipe
+        {t('cConsolidated.share.title')}
       </h2>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '12px' }}>
         <label style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-          Validade (dias):
+          {t('cConsolidated.share.validity')}
           <input
             type="number"
             min={1}
@@ -151,6 +158,7 @@ const SharePanel: React.FC<Props> = ({ childId, periodDays = 90, isPublicView })
           />
         </label>
         <button
+          type="button"
           onClick={handleCreate}
           disabled={creating}
           style={{
@@ -167,12 +175,12 @@ const SharePanel: React.FC<Props> = ({ childId, periodDays = 90, isPublicView })
             opacity: creating ? 0.7 : 1,
           }}
         >
-          {creating ? 'Gerando...' : 'Gerar Link de Compartilhamento'}
+          {creating ? t('cConsolidated.summary.generating') : t('cConsolidated.share.create')}
         </button>
       </div>
 
       {(loadError || actionError) && (
-        <p style={{ color: colors['brand-salmon'], fontSize: '0.85rem', marginBottom: '8px' }}>
+        <p role="alert" style={{ color: colors['brand-salmon'], fontSize: '0.85rem', marginBottom: '8px' }}>
           {loadError || actionError}
         </p>
       )}
@@ -201,7 +209,7 @@ const SharePanel: React.FC<Props> = ({ childId, periodDays = 90, isPublicView })
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '0.8rem', opacity: 0.65 }}>
-                      Link dos últimos {share.periodDays} dias
+                      {t('cConsolidated.share.lastDays', { count: share.periodDays })}
                     </span>
                     {expired && (
                       <span
@@ -214,17 +222,19 @@ const SharePanel: React.FC<Props> = ({ childId, periodDays = 90, isPublicView })
                           fontWeight: 700,
                         }}
                       >
-                        Expirado
+                        {t('cConsolidated.share.expired')}
                       </span>
                     )}
                   </div>
                   <span style={{ fontSize: '0.75rem', opacity: 0.55 }}>
-                    Válido até {new Date(share.expiresAt).toLocaleDateString('pt-BR')}
+                    {t('cConsolidated.share.validUntil', { date: new Date(share.expiresAt).toLocaleDateString(i18n.language) })}
                   </span>
                 </div>
                 <div style={{ display: 'flex', gap: '6px' }}>
                   {!expired && (
                     <button
+                      type="button"
+                      aria-live="polite"
                       onClick={() => handleCopyShare(share.id)}
                       disabled={copyingId === share.id}
                       style={{
@@ -238,12 +248,13 @@ const SharePanel: React.FC<Props> = ({ childId, periodDays = 90, isPublicView })
                         boxShadow: '1px 1px 0px #0A0A1A',
                       }}
                     >
-                      {copyingId === share.id ? 'Copiando…' : isCopied ? 'Copiado!' : 'Copiar'}
+                      {copyingId === share.id ? t('cConsolidated.share.copying') : isCopied ? t('cConsolidated.share.copied') : t('cConsolidated.share.copy')}
                     </button>
                   )}
                   <AlertDialog.Root>
                     <AlertDialog.Trigger>
                       <button
+                        type="button"
                         disabled={deletingId === share.id}
                         style={{
                           background: colors['brand-salmon'],
@@ -257,18 +268,18 @@ const SharePanel: React.FC<Props> = ({ childId, periodDays = 90, isPublicView })
                           opacity: deletingId === share.id ? 0.7 : 1,
                         }}
                       >
-                        {deletingId === share.id ? 'Excluindo...' : 'Excluir'}
+                        {deletingId === share.id ? t('cConsolidated.share.deleting') : t('cConsolidated.share.delete')}
                       </button>
                     </AlertDialog.Trigger>
                     <AlertDialog.Content size="2">
-                      <AlertDialog.Title>Excluir link de compartilhamento?</AlertDialog.Title>
+                      <AlertDialog.Title>{t('cConsolidated.share.deleteTitle')}</AlertDialog.Title>
                       <AlertDialog.Description size="2">
-                        Esta ação não pode ser desfeita.
+                        {t('cConsolidated.share.deleteDesc')}
                       </AlertDialog.Description>
                       <Flex gap="3" mt="4" justify="end">
                         <AlertDialog.Cancel>
                           <GumroadButton variant="secondary" size="sm">
-                            Cancelar
+                            {t('cConsolidated.share.cancel')}
                           </GumroadButton>
                         </AlertDialog.Cancel>
                         <AlertDialog.Action>
@@ -278,7 +289,7 @@ const SharePanel: React.FC<Props> = ({ childId, periodDays = 90, isPublicView })
                             disabled={deletingId === share.id}
                             onClick={() => handleDelete(share.id)}
                           >
-                            Excluir
+                            {t('cConsolidated.share.delete')}
                           </GumroadButton>
                         </AlertDialog.Action>
                       </Flex>

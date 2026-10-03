@@ -112,5 +112,5 @@ export function useDomainPage() {
 
   const effectiveChildId = selectedChildId || (children.length > 0 ? children[0].id : '');
 
-  return { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef };
+  return { children, childrenLoaded, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef };
 }

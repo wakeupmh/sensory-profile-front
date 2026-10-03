@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Box, Flex, TextField } from '@radix-ui/themes';
 import { CopyIcon, Link2Icon, Share1Icon } from '@radix-ui/react-icons';
+import { useTranslation } from 'react-i18next';
 import { useAuthContext } from '../../context/AuthContext';
 import { anamneseApi } from '../../services/api';
 import { colors, shadows, radii, typography } from '../../theme/tokens';
@@ -19,6 +20,7 @@ const buildShareUrl = (token: string): string => {
 };
 
 const ShareLinkBox: React.FC<ShareLinkBoxProps> = ({ anamneseId, shareToken, onTokenChange }) => {
+  const { t } = useTranslation();
   const { getToken } = useAuthContext();
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -33,7 +35,7 @@ const ShareLinkBox: React.FC<ShareLinkBoxProps> = ({ anamneseId, shareToken, onT
       onTokenChange(result.shareToken);
     } catch (err) {
       console.error(err);
-      setError('Erro ao gerar link de compartilhamento.');
+      setError(t('cAnamnese.share.generateError'));
     } finally {
       setLoading(false);
     }
@@ -49,7 +51,7 @@ const ShareLinkBox: React.FC<ShareLinkBoxProps> = ({ anamneseId, shareToken, onT
       setCopied(false);
     } catch (err) {
       console.error(err);
-      setError('Erro ao revogar link.');
+      setError(t('cAnamnese.share.revokeError'));
     } finally {
       setLoading(false);
     }
@@ -64,23 +66,23 @@ const ShareLinkBox: React.FC<ShareLinkBoxProps> = ({ anamneseId, shareToken, onT
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       } else {
-        setError('Copie o link manualmente (clipboard indisponível).');
+        setError(t('cAnamnese.share.clipboardUnavailable'));
       }
     } catch {
-      setError('Copie o link manualmente.');
+      setError(t('cAnamnese.share.copyManually'));
     }
   };
 
   return (
     <Box>
       <Flex align="center" gap="2" mb="2">
-        <Share1Icon />
+        <Share1Icon aria-hidden="true" />
         <GumroadHeading level="title-md" as="h3">
-          Compartilhar anamnese
+          {t('cAnamnese.share.title')}
         </GumroadHeading>
       </Flex>
       <GumroadText level="body-sm" as="p" style={{ opacity: 0.8, marginBottom: '12px' }}>
-        Gere um link somente-leitura para compartilhar com outros profissionais.
+        {t('cAnamnese.share.intro')}
       </GumroadText>
 
       {shareToken ? (
@@ -91,6 +93,7 @@ const ShareLinkBox: React.FC<ShareLinkBoxProps> = ({ anamneseId, shareToken, onT
                 size="2"
                 value={buildShareUrl(shareToken)}
                 readOnly
+                aria-label={t('cAnamnese.share.linkLabel')}
                 onFocus={(e) => e.currentTarget.select()}
                 style={{
                   backgroundColor: colors.canvas,
@@ -106,27 +109,27 @@ const ShareLinkBox: React.FC<ShareLinkBoxProps> = ({ anamneseId, shareToken, onT
                 }}
               >
                 <TextField.Slot>
-                  <Link2Icon />
+                  <Link2Icon aria-hidden="true" />
                 </TextField.Slot>
               </TextField.Root>
             </Box>
             <Flex gap="2">
               <GumroadButton variant="secondary" size="sm" onClick={handleCopy} disabled={loading}>
-                <CopyIcon /> {copied ? 'Copiado!' : 'Copiar'}
+                <CopyIcon aria-hidden="true" /> <span role="status">{copied ? t('cAnamnese.share.copied') : t('cAnamnese.share.copy')}</span>
               </GumroadButton>
               <GumroadButton variant="danger" size="sm" onClick={handleRevoke} disabled={loading}>
-                Revogar
+                {t('cAnamnese.share.revoke')}
               </GumroadButton>
             </Flex>
           </Flex>
-          {error && <GumroadText level="body-sm" as="p" style={{ color: colors['brand-salmon'] }}>{error}</GumroadText>}
+          {error && <GumroadText level="body-sm" as="p" role="alert" style={{ color: colors['brand-salmon'] }}>{error}</GumroadText>}
         </Flex>
       ) : (
         <Flex direction="column" gap="2">
-          <GumroadButton variant="primary" size="sm" onClick={handleGenerate} disabled={loading}>
-            <Share1Icon /> {loading ? 'Gerando...' : 'Gerar link de compartilhamento'}
+          <GumroadButton variant="primary" size="sm" onClick={handleGenerate} disabled={loading} loading={loading}>
+            <Share1Icon aria-hidden="true" /> {loading ? t('cAnamnese.share.generating') : t('cAnamnese.share.generate')}
           </GumroadButton>
-          {error && <GumroadText level="body-sm" as="p" style={{ color: colors['brand-salmon'] }}>{error}</GumroadText>}
+          {error && <GumroadText level="body-sm" as="p" role="alert" style={{ color: colors['brand-salmon'] }}>{error}</GumroadText>}
         </Flex>
       )}
     </Box>

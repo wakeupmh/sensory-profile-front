@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, Flex } from '@radix-ui/themes';
 import FastTextField from '../sensory-profile/FastTextField';
 import FastSelect from '../sensory-profile/FastSelect';
@@ -14,24 +15,6 @@ interface ClinicalHistorySectionProps {
   disabled?: boolean;
 }
 
-const yesNoOptions = [
-  { value: 'yes', label: 'Sim' },
-  { value: 'no', label: 'Não' },
-];
-
-const deliveryOptions = [
-  { value: 'vaginal', label: 'Vaginal' },
-  { value: 'cesarean', label: 'Cesárea' },
-  { value: 'forceps', label: 'Fórceps' },
-  { value: 'other', label: 'Outro' },
-];
-
-const shiftOptions = [
-  { value: 'morning', label: 'Manhã' },
-  { value: 'afternoon', label: 'Tarde' },
-  { value: 'full', label: 'Integral' },
-];
-
 const boolToSelect = (v: boolean | null): string => (v === true ? 'yes' : v === false ? 'no' : '');
 const selectToBool = (v: string): boolean | null => (v === 'yes' ? true : v === 'no' ? false : null);
 
@@ -45,7 +28,12 @@ const numAsString = (v: number | null | undefined): string =>
   v === null || v === undefined ? '' : String(v);
 
 const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ formData, updateFormData, disabled }) => {
+  const { t } = useTranslation();
   const ch = formData.clinicalHistory;
+  const opt = (values: string[]) => values.map((value) => ({ value, label: t(`cAnamnese.opt.${value}`) }));
+  const yesNoOptions = opt(['yes', 'no']);
+  const deliveryOptions = opt(['vaginal', 'cesarean', 'forceps', 'other']);
+  const shiftOptions = opt(['morning', 'afternoon', 'full']);
 
   const handleText = (path: string) => (_name: string, value: string) => {
     updateFormData(`clinicalHistory.${path}`, value);
@@ -78,17 +66,17 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
   return (
     <Box mb="6">
       <GumroadHeading level="display-sm" as="h2" style={{ marginBottom: '16px' }}>
-        Histórico Clínico
+        {t('cAnamnese.clinicalHistory')}
       </GumroadHeading>
 
       {/* Queixa */}
       <Box mb="5">
-        {sectionTitle('Queixa Principal')}
+        {sectionTitle(t('cAnamnese.sec.complaint'))}
         <Flex direction="column" gap="3" mt="2">
           <FastTextArea
             name="mainComplaint"
-            label="Queixa principal:"
-            placeholder="Motivo da procura, principais preocupações"
+            label={t('cAnamnese.f.mainComplaint.label')}
+            placeholder={t('cAnamnese.f.mainComplaint.placeholder')}
             initialValue={ch.queixa.mainComplaint}
             onValueChange={handleText('queixa.mainComplaint')}
             disabled={disabled}
@@ -98,8 +86,8 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1 }}>
               <FastTextField
                 name="complaintOnset"
-                label="Quando começou:"
-                placeholder="Ex: há 6 meses"
+                label={t('cAnamnese.f.complaintOnset.label')}
+                placeholder={t('cAnamnese.f.complaintOnset.placeholder')}
                 initialValue={ch.queixa.complaintOnset}
                 onValueChange={handleText('queixa.complaintOnset')}
                 disabled={disabled}
@@ -108,8 +96,8 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1 }}>
               <FastTextField
                 name="previousTreatments"
-                label="Tratamentos anteriores:"
-                placeholder="Descreva tratamentos já realizados"
+                label={t('cAnamnese.f.previousTreatments.label')}
+                placeholder={t('cAnamnese.f.previousTreatments.placeholder')}
                 initialValue={ch.queixa.previousTreatments}
                 onValueChange={handleText('queixa.previousTreatments')}
                 disabled={disabled}
@@ -123,13 +111,13 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
 
       {/* Gestação e parto */}
       <Box mb="5">
-        {sectionTitle('Gestação e Parto')}
+        {sectionTitle(t('cAnamnese.sec.gestation'))}
         <Flex direction="column" gap="3" mt="2">
           <Flex gap="4" direction={{ initial: 'column', sm: 'row' }}>
             <Box style={{ flex: 1 }}>
               <FastSelect
                 name="plannedPregnancy"
-                label="Gravidez planejada:"
+                label={t('cAnamnese.f.plannedPregnancy.label')}
                 options={yesNoOptions}
                 initialValue={boolToSelect(ch.gestation.plannedPregnancy)}
                 onValueChange={handleBool('gestation.plannedPregnancy')}
@@ -139,7 +127,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1 }}>
               <FastSelect
                 name="deliveryType"
-                label="Tipo de parto:"
+                label={t('cAnamnese.f.deliveryType.label')}
                 options={deliveryOptions}
                 initialValue={ch.gestation.deliveryType}
                 onValueChange={handleSelect('gestation.deliveryType')}
@@ -149,24 +137,24 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
           </Flex>
           <FastTextArea
             name="prenatalCareDetails"
-            label="Pré-natal:"
-            placeholder="Acompanhamento, número de consultas, exames"
+            label={t('cAnamnese.f.prenatalCareDetails.label')}
+            placeholder={t('cAnamnese.f.prenatalCareDetails.placeholder')}
             initialValue={ch.gestation.prenatalCareDetails}
             onValueChange={handleText('gestation.prenatalCareDetails')}
             disabled={disabled}
           />
           <FastTextArea
             name="complications"
-            label="Intercorrências na gestação:"
-            placeholder="Hipertensão, diabetes, sangramento, etc."
+            label={t('cAnamnese.f.complications.label')}
+            placeholder={t('cAnamnese.f.complications.placeholder')}
             initialValue={ch.gestation.complications}
             onValueChange={handleText('gestation.complications')}
             disabled={disabled}
           />
           <FastTextArea
             name="medicationsDuringPregnancy"
-            label="Medicações durante a gestação:"
-            placeholder="Liste medicações utilizadas"
+            label={t('cAnamnese.f.medicationsDuringPregnancy.label')}
+            placeholder={t('cAnamnese.f.medicationsDuringPregnancy.placeholder')}
             initialValue={ch.gestation.medicationsDuringPregnancy}
             onValueChange={handleText('gestation.medicationsDuringPregnancy')}
             disabled={disabled}
@@ -175,7 +163,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1 }}>
               <FastTextField
                 name="gestationalAgeWeeks"
-                label="Idade gestacional (semanas):"
+                label={t('cAnamnese.f.gestationalAgeWeeks.label')}
                 type="number"
                 initialValue={numAsString(ch.gestation.gestationalAgeWeeks)}
                 onValueChange={handleNumber('gestation.gestationalAgeWeeks')}
@@ -185,7 +173,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1 }}>
               <FastTextField
                 name="birthWeightGrams"
-                label="Peso ao nascer (g):"
+                label={t('cAnamnese.f.birthWeightGrams.label')}
                 type="number"
                 initialValue={numAsString(ch.gestation.birthWeightGrams)}
                 onValueChange={handleNumber('gestation.birthWeightGrams')}
@@ -195,7 +183,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1 }}>
               <FastTextField
                 name="birthLengthCm"
-                label="Comprimento ao nascer (cm):"
+                label={t('cAnamnese.f.birthLengthCm.label')}
                 type="number"
                 initialValue={numAsString(ch.gestation.birthLengthCm)}
                 onValueChange={handleNumber('gestation.birthLengthCm')}
@@ -207,7 +195,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1 }}>
               <FastTextField
                 name="apgar1min"
-                label="Apgar 1º minuto:"
+                label={t('cAnamnese.f.apgar1min.label')}
                 type="number"
                 initialValue={numAsString(ch.gestation.apgar1min)}
                 onValueChange={handleNumber('gestation.apgar1min')}
@@ -217,7 +205,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1 }}>
               <FastTextField
                 name="apgar5min"
-                label="Apgar 5º minuto:"
+                label={t('cAnamnese.f.apgar5min.label')}
                 type="number"
                 initialValue={numAsString(ch.gestation.apgar5min)}
                 onValueChange={handleNumber('gestation.apgar5min')}
@@ -227,8 +215,8 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
           </Flex>
           <FastTextArea
             name="neonatalIntercurrences"
-            label="Intercorrências neonatais:"
-            placeholder="UTI neonatal, icterícia, etc."
+            label={t('cAnamnese.f.neonatalIntercurrences.label')}
+            placeholder={t('cAnamnese.f.neonatalIntercurrences.placeholder')}
             initialValue={ch.gestation.neonatalIntercurrences}
             onValueChange={handleText('gestation.neonatalIntercurrences')}
             disabled={disabled}
@@ -240,13 +228,13 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
 
       {/* Desenvolvimento */}
       <Box mb="5">
-        {sectionTitle('Desenvolvimento')}
+        {sectionTitle(t('cAnamnese.sec.development'))}
         <Flex direction="column" gap="3" mt="2">
           <Flex gap="4" direction={{ initial: 'column', sm: 'row' }} wrap="wrap">
             <Box style={{ flex: 1, minWidth: 180 }}>
               <FastTextField
                 name="heldHeadMonths"
-                label="Sustentou a cabeça (meses):"
+                label={t('cAnamnese.f.heldHeadMonths.label')}
                 type="number"
                 initialValue={numAsString(ch.development.heldHeadMonths)}
                 onValueChange={handleNumber('development.heldHeadMonths')}
@@ -256,7 +244,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1, minWidth: 180 }}>
               <FastTextField
                 name="sattMonths"
-                label="Sentou sem apoio (meses):"
+                label={t('cAnamnese.f.sattMonths.label')}
                 type="number"
                 initialValue={numAsString(ch.development.sattMonths)}
                 onValueChange={handleNumber('development.sattMonths')}
@@ -266,7 +254,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1, minWidth: 180 }}>
               <FastTextField
                 name="crawledMonths"
-                label="Engatinhou (meses):"
+                label={t('cAnamnese.f.crawledMonths.label')}
                 type="number"
                 initialValue={numAsString(ch.development.crawledMonths)}
                 onValueChange={handleNumber('development.crawledMonths')}
@@ -276,7 +264,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1, minWidth: 180 }}>
               <FastTextField
                 name="walkedMonths"
-                label="Andou (meses):"
+                label={t('cAnamnese.f.walkedMonths.label')}
                 type="number"
                 initialValue={numAsString(ch.development.walkedMonths)}
                 onValueChange={handleNumber('development.walkedMonths')}
@@ -288,7 +276,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1, minWidth: 180 }}>
               <FastTextField
                 name="firstWordsMonths"
-                label="Primeiras palavras (meses):"
+                label={t('cAnamnese.f.firstWordsMonths.label')}
                 type="number"
                 initialValue={numAsString(ch.development.firstWordsMonths)}
                 onValueChange={handleNumber('development.firstWordsMonths')}
@@ -298,7 +286,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1, minWidth: 180 }}>
               <FastTextField
                 name="firstSentencesMonths"
-                label="Primeiras frases (meses):"
+                label={t('cAnamnese.f.firstSentencesMonths.label')}
                 type="number"
                 initialValue={numAsString(ch.development.firstSentencesMonths)}
                 onValueChange={handleNumber('development.firstSentencesMonths')}
@@ -308,7 +296,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1, minWidth: 180 }}>
               <FastTextField
                 name="sphincterControlMonths"
-                label="Controle de esfíncter (meses):"
+                label={t('cAnamnese.f.sphincterControlMonths.label')}
                 type="number"
                 initialValue={numAsString(ch.development.sphincterControlMonths)}
                 onValueChange={handleNumber('development.sphincterControlMonths')}
@@ -318,16 +306,16 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
           </Flex>
           <FastTextArea
             name="currentMotorObservations"
-            label="Observações motoras atuais:"
-            placeholder="Coordenação, equilíbrio, preferência manual, etc."
+            label={t('cAnamnese.f.currentMotorObservations.label')}
+            placeholder={t('cAnamnese.f.currentMotorObservations.placeholder')}
             initialValue={ch.development.currentMotorObservations}
             onValueChange={handleText('development.currentMotorObservations')}
             disabled={disabled}
           />
           <FastTextArea
             name="currentLanguageObservations"
-            label="Observações de linguagem atuais:"
-            placeholder="Compreensão, expressão, articulação"
+            label={t('cAnamnese.f.currentLanguageObservations.label')}
+            placeholder={t('cAnamnese.f.currentLanguageObservations.placeholder')}
             initialValue={ch.development.currentLanguageObservations}
             onValueChange={handleText('development.currentLanguageObservations')}
             disabled={disabled}
@@ -339,13 +327,13 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
 
       {/* Saúde */}
       <Box mb="5">
-        {sectionTitle('Saúde')}
+        {sectionTitle(t('cAnamnese.sec.health'))}
         <Flex direction="column" gap="3" mt="2">
           <Flex gap="4" direction={{ initial: 'column', sm: 'row' }}>
             <Box style={{ flex: 1 }}>
               <FastTextArea
                 name="allergies"
-                label="Alergias:"
+                label={t('cAnamnese.f.allergies.label')}
                 initialValue={ch.health.allergies}
                 onValueChange={handleText('health.allergies')}
                 disabled={disabled}
@@ -354,7 +342,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1 }}>
               <FastTextArea
                 name="chronicConditions"
-                label="Condições crônicas / diagnósticos:"
+                label={t('cAnamnese.f.chronicConditions.label')}
                 initialValue={ch.health.chronicConditions}
                 onValueChange={handleText('health.chronicConditions')}
                 disabled={disabled}
@@ -365,7 +353,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1 }}>
               <FastTextArea
                 name="currentMedications"
-                label="Medicações em uso:"
+                label={t('cAnamnese.f.currentMedications.label')}
                 initialValue={ch.health.currentMedications}
                 onValueChange={handleText('health.currentMedications')}
                 disabled={disabled}
@@ -374,7 +362,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1 }}>
               <FastTextArea
                 name="pastSurgeries"
-                label="Cirurgias prévias:"
+                label={t('cAnamnese.f.pastSurgeries.label')}
                 initialValue={ch.health.pastSurgeries}
                 onValueChange={handleText('health.pastSurgeries')}
                 disabled={disabled}
@@ -385,7 +373,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1 }}>
               <FastTextArea
                 name="hospitalizations"
-                label="Internações:"
+                label={t('cAnamnese.f.hospitalizations.label')}
                 initialValue={ch.health.hospitalizations}
                 onValueChange={handleText('health.hospitalizations')}
                 disabled={disabled}
@@ -394,8 +382,8 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1 }}>
               <FastTextArea
                 name="recurrentIllnesses"
-                label="Doenças recorrentes:"
-                placeholder="Otites, crises convulsivas, etc."
+                label={t('cAnamnese.f.recurrentIllnesses.label')}
+                placeholder={t('cAnamnese.f.recurrentIllnesses.placeholder')}
                 initialValue={ch.health.recurrentIllnesses}
                 onValueChange={handleText('health.recurrentIllnesses')}
                 disabled={disabled}
@@ -406,7 +394,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1 }}>
               <FastTextArea
                 name="sleepPattern"
-                label="Padrão de sono:"
+                label={t('cAnamnese.f.sleepPattern.label')}
                 initialValue={ch.health.sleepPattern}
                 onValueChange={handleText('health.sleepPattern')}
                 disabled={disabled}
@@ -415,7 +403,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1 }}>
               <FastTextArea
                 name="feedingPattern"
-                label="Padrão alimentar:"
+                label={t('cAnamnese.f.feedingPattern.label')}
                 initialValue={ch.health.feedingPattern}
                 onValueChange={handleText('health.feedingPattern')}
                 disabled={disabled}
@@ -429,13 +417,13 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
 
       {/* Escola */}
       <Box mb="5">
-        {sectionTitle('Escola')}
+        {sectionTitle(t('cAnamnese.sec.school'))}
         <Flex direction="column" gap="3" mt="2">
           <Flex gap="4" direction={{ initial: 'column', sm: 'row' }}>
             <Box style={{ flex: 1 }}>
               <FastSelect
                 name="attendsSchool"
-                label="Frequenta escola:"
+                label={t('cAnamnese.f.attendsSchool.label')}
                 options={yesNoOptions}
                 initialValue={boolToSelect(ch.school.attendsSchool)}
                 onValueChange={handleBool('school.attendsSchool')}
@@ -445,7 +433,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1 }}>
               <FastSelect
                 name="shift"
-                label="Turno:"
+                label={t('cAnamnese.f.shift.label')}
                 options={shiftOptions}
                 initialValue={ch.school.shift}
                 onValueChange={handleSelect('school.shift')}
@@ -457,7 +445,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1 }}>
               <FastTextField
                 name="schoolName"
-                label="Nome da escola:"
+                label={t('cAnamnese.f.schoolName.label')}
                 initialValue={ch.school.schoolName}
                 onValueChange={handleText('school.schoolName')}
                 disabled={disabled}
@@ -466,7 +454,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1 }}>
               <FastTextField
                 name="grade"
-                label="Série / nível:"
+                label={t('cAnamnese.f.grade.label')}
                 initialValue={ch.school.grade}
                 onValueChange={handleText('school.grade')}
                 disabled={disabled}
@@ -475,14 +463,14 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
           </Flex>
           <FastTextArea
             name="academicPerformance"
-            label="Desempenho acadêmico:"
+            label={t('cAnamnese.f.academicPerformance.label')}
             initialValue={ch.school.academicPerformance}
             onValueChange={handleText('school.academicPerformance')}
             disabled={disabled}
           />
           <FastTextArea
             name="socialBehaviorAtSchool"
-            label="Comportamento social na escola:"
+            label={t('cAnamnese.f.socialBehaviorAtSchool.label')}
             initialValue={ch.school.socialBehaviorAtSchool}
             onValueChange={handleText('school.socialBehaviorAtSchool')}
             disabled={disabled}
@@ -491,7 +479,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1 }}>
               <FastSelect
                 name="hasSupportTeacher"
-                label="Possui professor de apoio:"
+                label={t('cAnamnese.f.hasSupportTeacher.label')}
                 options={yesNoOptions}
                 initialValue={boolToSelect(ch.school.hasSupportTeacher)}
                 onValueChange={handleBool('school.hasSupportTeacher')}
@@ -501,7 +489,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 2 }}>
               <FastTextField
                 name="supportDetails"
-                label="Detalhes do apoio:"
+                label={t('cAnamnese.f.supportDetails.label')}
                 initialValue={ch.school.supportDetails}
                 onValueChange={handleText('school.supportDetails')}
                 disabled={disabled}
@@ -515,14 +503,14 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
 
       {/* Família */}
       <Box mb="2">
-        {sectionTitle('Família e Contexto')}
+        {sectionTitle(t('cAnamnese.sec.family'))}
         <Flex direction="column" gap="3" mt="2">
           <Flex gap="4" direction={{ initial: 'column', sm: 'row' }}>
             <Box style={{ flex: 1 }}>
               <FastTextField
                 name="livesWith"
-                label="Mora com:"
-                placeholder="Ex: pai, mãe e irmãos"
+                label={t('cAnamnese.f.livesWith.label')}
+                placeholder={t('cAnamnese.f.livesWith.placeholder')}
                 initialValue={ch.family.livesWith}
                 onValueChange={handleText('family.livesWith')}
                 disabled={disabled}
@@ -531,7 +519,7 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
             <Box style={{ flex: 1 }}>
               <FastTextField
                 name="parentsMaritalStatus"
-                label="Estado civil dos pais:"
+                label={t('cAnamnese.f.parentsMaritalStatus.label')}
                 initialValue={ch.family.parentsMaritalStatus}
                 onValueChange={handleText('family.parentsMaritalStatus')}
                 disabled={disabled}
@@ -540,28 +528,28 @@ const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = memo(({ fo
           </Flex>
           <FastTextField
             name="siblings"
-            label="Irmãos (quantidade / idades):"
+            label={t('cAnamnese.f.siblings.label')}
             initialValue={ch.family.siblings}
             onValueChange={handleText('family.siblings')}
             disabled={disabled}
           />
           <FastTextArea
             name="familyHistoryOfDisorders"
-            label="Histórico familiar de transtornos:"
+            label={t('cAnamnese.f.familyHistoryOfDisorders.label')}
             initialValue={ch.family.familyHistoryOfDisorders}
             onValueChange={handleText('family.familyHistoryOfDisorders')}
             disabled={disabled}
           />
           <FastTextArea
             name="socioeconomicNotes"
-            label="Contexto socioeconômico:"
+            label={t('cAnamnese.f.socioeconomicNotes.label')}
             initialValue={ch.family.socioeconomicNotes}
             onValueChange={handleText('family.socioeconomicNotes')}
             disabled={disabled}
           />
           <FastTextArea
             name="additionalNotes"
-            label="Observações adicionais:"
+            label={t('cAnamnese.f.additionalNotes.label')}
             initialValue={ch.family.additionalNotes}
             onValueChange={handleText('family.additionalNotes')}
             disabled={disabled}

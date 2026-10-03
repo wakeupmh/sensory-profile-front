@@ -1,9 +1,12 @@
 import { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Box, Flex, AlertDialog } from '@radix-ui/themes';
 import { ExclamationTriangleIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { documentApi } from '../services/api';
 import type { DocumentRecord } from '../types/documents';
 import { getExpiryStatus } from '../types/documents';
+import { useToast } from '../context/ToastContext';
 import { useDomainPage } from '../hooks/useDomainPage';
 import { useDomainResource } from '../hooks/useDomainResource';
 import { ChildSelector } from '../components/domain/ChildSelector';
@@ -22,7 +25,9 @@ const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
 const ACCEPTED_PREFIXES = ['application/pdf', 'image/', 'video/'];
 
 export default function DocumentsPage() {
-  const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
+  const { t } = useTranslation();
+  const toast = useToast();
+  const { children, childrenLoaded, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
 
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -32,7 +37,7 @@ export default function DocumentsPage() {
   const { data, loading, error, reload: fetchDocuments, setData } = useDomainResource(
     (token) => documentApi.list(token, { childId: effectiveChildId }),
     [effectiveChildId],
-    { errorMessage: 'Erro ao carregar documentos. Por favor, tente novamente.', enabled: Boolean(effectiveChildId) },
+    { errorMessage: t('p1Documents.errLoad'), enabled: Boolean(effectiveChildId) },
   );
 
   const documents = useMemo(() => data ?? [], [data]);
@@ -44,11 +49,11 @@ export default function DocumentsPage() {
   const handleFileSelected = (file: File) => {
     setUploadError(null);
     if (file.size > MAX_FILE_SIZE) {
-      setUploadError('Arquivo muito grande. O tamanho máximo é 25MB.');
+      setUploadError(t('p1Documents.tooLarge'));
       return;
     }
     if (!ACCEPTED_PREFIXES.some((prefix) => file.type.startsWith(prefix))) {
-      setUploadError('Tipo de arquivo não suportado. Envie PDF, imagem ou vídeo.');
+      setUploadError(t('p1Documents.badType'));
       return;
     }
     setPendingFile(file);
@@ -65,9 +70,14 @@ export default function DocumentsPage() {
 
   const handleDelete = async (id: string) => {
     setDeletingId(null);
-    const token = await getTokenRef.current();
-    await documentApi.delete(token, id);
-    setDocuments((prev) => prev.filter((d) => d.id !== id));
+    try {
+      const token = await getTokenRef.current();
+      await documentApi.delete(token, id);
+      setDocuments((prev) => prev.filter((d) => d.id !== id));
+      toast.success(t('p1Documents.deleted'));
+    } catch {
+      toast.error(t('p1Documents.deleteFail'));
+    }
   };
 
   const expiringCount = useMemo(
@@ -83,10 +93,10 @@ export default function DocumentsPage() {
       <Flex justify="between" align={{ initial: 'start', sm: 'center' }} mb="6" gap="4" direction={{ initial: 'column', sm: 'row' }}>
         <Box>
           <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
-            Documentos
+            {t('p1Documents.title')}
           </GumroadHeading>
           <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7 }}>
-            Exames, laudos, fotos e vídeos da criança
+            {t('p1Documents.subtitle')}
           </GumroadText>
         </Box>
       </Flex>
@@ -96,20 +106,34 @@ export default function DocumentsPage() {
       {expiringCount > 0 && (
         <GumroadCard role="alert" color="yellow" shadow="sm" padding="md" style={{ marginBottom: spacing.md }}>
           <Flex align="center" gap="2">
-            <ExclamationTriangleIcon />
+            <ExclamationTriangleIcon aria-hidden="true" />
             <GumroadText level="body-sm" as="p">
-              {expiringCount === 1
-                ? '1 documento vencido ou vencendo em breve'
-                : `${expiringCount} documentos vencidos ou vencendo em breve`}
+              {t('p1Documents.expiring', { count: expiringCount })}
             </GumroadText>
           </Flex>
         </GumroadCard>
       )}
 
-      {children.length === 0 ? null : !effectiveChildId ? (
+      {!childrenLoaded && children.length === 0 ? null : children.length === 0 ? (
+        <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
+          <Flex direction="column" align="center" gap="4">
+            <Box>
+              <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
+                {t('p1Common.noChildTitle')}
+              </GumroadHeading>
+              <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
+                {t('p1Documents.noChildBody')}
+              </GumroadText>
+            </Box>
+            <GumroadButton variant="primary" size="md" asChild>
+              <Link to="/children" style={{ textDecoration: 'none' }}>{t('p1Common.toChildren')}</Link>
+            </GumroadButton>
+          </Flex>
+        </GumroadCard>
+      ) : !effectiveChildId ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <GumroadText level="body-md" as="p" style={{ opacity: 0.7 }}>
-            Selecione uma criança para ver os documentos
+            {t('p1Documents.selectChild')}
           </GumroadText>
         </GumroadCard>
       ) : (
@@ -126,13 +150,13 @@ export default function DocumentsPage() {
           {loading ? (
             <DocumentsGridSkeleton />
           ) : error ? (
-            <ErrorState message={error} onRetry={fetchDocuments} />
+            <ErrorState message={error} onRetry={fetchDocuments} retryLabel={t('p1Common.retry')} />
           ) : documents.length === 0 ? (
             <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
               <Flex direction="column" align="center" gap="3">
-                <InfoCircledIcon width={36} height={36} />
+                <InfoCircledIcon width={36} height={36} aria-hidden="true" />
                 <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-                  Nenhum documento enviado ainda
+                  {t('p1Documents.empty')}
                 </GumroadText>
               </Flex>
             </GumroadCard>
@@ -158,17 +182,17 @@ export default function DocumentsPage() {
 
       <AlertDialog.Root open={!!deletingId} onOpenChange={(open) => !open && setDeletingId(null)}>
         <AlertDialog.Content size="2">
-          <AlertDialog.Title>Excluir documento</AlertDialog.Title>
+          <AlertDialog.Title>{t('p1Documents.deleteTitle')}</AlertDialog.Title>
           <AlertDialog.Description size="2">
-            Tem certeza que deseja excluir este documento? Esta ação não pode ser desfeita.
+            {t('p1Documents.deleteBody')}
           </AlertDialog.Description>
           <Flex gap="3" mt="4" justify="end">
             <AlertDialog.Cancel>
-              <GumroadButton variant="secondary" size="sm">Cancelar</GumroadButton>
+              <GumroadButton variant="secondary" size="sm">{t('p1Documents.cancel')}</GumroadButton>
             </AlertDialog.Cancel>
             <AlertDialog.Action>
               <GumroadButton variant="danger" size="sm" onClick={() => deletingId && handleDelete(deletingId)}>
-                Excluir
+                {t('p1Documents.delete')}
               </GumroadButton>
             </AlertDialog.Action>
           </Flex>

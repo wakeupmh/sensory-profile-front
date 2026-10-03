@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { PlusIcon } from '@radix-ui/react-icons';
 import GumroadButton from '../design-system/GumroadButton';
 import GumroadCard from '../design-system/GumroadCard';
@@ -28,8 +29,8 @@ interface CommunicationLogsPanelProps {
   getToken: () => Promise<string | null>;
 }
 
-function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString('pt-BR', {
+function formatDateTime(iso: string, lang: string): string {
+  return new Date(iso).toLocaleString(lang, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -45,6 +46,7 @@ const CommunicationLogsPanel: React.FC<CommunicationLogsPanelProps> = ({
   onMutate,
   getToken,
 }) => {
+  const { t, i18n } = useTranslation();
   const toast = useToast();
 
   const fetchFn = useCallback(async () => {
@@ -75,7 +77,9 @@ const CommunicationLogsPanel: React.FC<CommunicationLogsPanelProps> = ({
       await fetchLogs();
       onMutate?.();
       setView('list');
-      toast.success('Registro adicionado');
+      toast.success(t('cDevelopment.logAdded'));
+    } catch {
+      toast.error(t('cDevelopment.saveError'));
     } finally {
       setIsLoading(false);
     }
@@ -91,7 +95,9 @@ const CommunicationLogsPanel: React.FC<CommunicationLogsPanelProps> = ({
       onMutate?.();
       setView('list');
       setEditingLog(null);
-      toast.success('Alterações salvas');
+      toast.success(t('cDevelopment.changesSaved'));
+    } catch {
+      toast.error(t('cDevelopment.saveError'));
     } finally {
       setIsLoading(false);
     }
@@ -106,7 +112,9 @@ const CommunicationLogsPanel: React.FC<CommunicationLogsPanelProps> = ({
       await fetchLogs();
       onMutate?.();
       setDeletingId(null);
-      toast.success('Registro removido');
+      toast.success(t('cDevelopment.logRemoved'));
+    } catch {
+      toast.error(t('cDevelopment.removeError'));
     } finally {
       setIsLoading(false);
     }
@@ -115,7 +123,7 @@ const CommunicationLogsPanel: React.FC<CommunicationLogsPanelProps> = ({
   const deletingLog = logs.find((l) => l.id === deletingId);
 
   return (
-    <GumroadModal open={isOpen} onClose={onClose} title="Registros de Comunicação">
+    <GumroadModal open={isOpen} onClose={onClose} title={t('cDevelopment.logsTitle')}>
       <>
 
         {view === 'list' && (
@@ -127,8 +135,8 @@ const CommunicationLogsPanel: React.FC<CommunicationLogsPanelProps> = ({
               style={{ width: '100%', marginBottom: '16px' }}
             >
               <Flex align="center" gap="1">
-                <PlusIcon />
-                Adicionar Registro
+                <PlusIcon aria-hidden="true" />
+                {t('cDevelopment.addLog')}
               </Flex>
             </GumroadButton>
 
@@ -141,16 +149,16 @@ const CommunicationLogsPanel: React.FC<CommunicationLogsPanelProps> = ({
             {!error && logs.length === 0 ? (
               <GumroadCard color="cream" padding="lg" style={{ textAlign: 'center' }}>
                 <GumroadText level="body-md" style={{ opacity: 0.7 }}>
-                  Nenhum registro de comunicação
+                  {t('cDevelopment.noLogs')}
                 </GumroadText>
               </GumroadCard>
             ) : (
               <Flex direction="column" gap="3">
                 {logs.map((log) =>
                   deletingId === log.id ? (
-                    <GumroadCard key={log.id} color="salmon" padding="md" shadow="md">
+                    <GumroadCard key={log.id} color="salmon" padding="md" shadow="md" role="alert">
                       <GumroadText level="body-md">
-                        Remover registro de {deletingLog ? COMMUNICATION_ENTRY_TYPE_LABELS[deletingLog.entryType] : ''} em {deletingLog ? formatDateTime(deletingLog.occurredAt) : ''}?
+                        {deletingLog ? t('cDevelopment.removeLogConfirm', { type: t(`cDevelopment.entryType.${deletingLog.entryType}`, { defaultValue: COMMUNICATION_ENTRY_TYPE_LABELS[deletingLog.entryType] }), date: formatDateTime(deletingLog.occurredAt, i18n.language) }) : ''}
                       </GumroadText>
                       <Flex gap="2" mt="2">
                         <GumroadButton
@@ -159,14 +167,14 @@ const CommunicationLogsPanel: React.FC<CommunicationLogsPanelProps> = ({
                           onClick={handleConfirmDelete}
                           disabled={isLoading}
                         >
-                          {isLoading ? 'Removendo...' : 'Confirmar'}
+                          {isLoading ? t('cDevelopment.removing') : t('cDevelopment.confirm')}
                         </GumroadButton>
                         <GumroadButton
                           variant="ghost"
                           size="sm"
                           onClick={() => setDeletingId(null)}
                         >
-                          Cancelar
+                          {t('cDevelopment.cancel')}
                         </GumroadButton>
                       </Flex>
                     </GumroadCard>
@@ -197,7 +205,7 @@ const CommunicationLogsPanel: React.FC<CommunicationLogsPanelProps> = ({
         {view === 'add' && (
           <>
             <GumroadHeading level="title-md" style={{ marginBottom: '16px' }}>
-              Novo Registro de Comunicação
+              {t('cDevelopment.newLog')}
             </GumroadHeading>
             <CommunicationLogForm
               initialValues={{ childId }}
@@ -211,7 +219,7 @@ const CommunicationLogsPanel: React.FC<CommunicationLogsPanelProps> = ({
         {view === 'edit' && (
           <>
             <GumroadHeading level="title-md" style={{ marginBottom: '16px' }}>
-              Editar Registro de Comunicação
+              {t('cDevelopment.editLog')}
             </GumroadHeading>
             <CommunicationLogForm
               initialValues={editingLog ?? {}}

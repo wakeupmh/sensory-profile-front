@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
 import type { TherapyType, CreateTherapistPayload } from '../../types/therapy';
@@ -59,6 +60,7 @@ const TherapistForm: React.FC<TherapistFormProps> = ({
   onCancel,
   isLoading = false,
 }) => {
+  const { t } = useTranslation();
   const [name, setName] = useState(initial.name ?? '');
   const [specialty, setSpecialty] = useState<string>(initial.specialty ?? '');
   const [phone, setPhone] = useState(initial.phone ?? '');
@@ -91,14 +93,14 @@ const TherapistForm: React.FC<TherapistFormProps> = ({
         {/* Nome */}
         <div>
           <label style={labelStyle} htmlFor="therapist-nome">
-            Nome <span style={{ color: colors.error }} aria-hidden="true">*</span>
+            {t('p2Therapy.form.name')} <span style={{ color: colors.error }} aria-hidden="true">*</span>
           </label>
           <input id="therapist-nome"
             type="text"
             maxLength={255}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Nome do terapeuta"
+            placeholder={t('p2Therapy.form.namePh')}
             style={inputStyle}
             required
           />
@@ -107,7 +109,7 @@ const TherapistForm: React.FC<TherapistFormProps> = ({
         {/* Especialidade */}
         <div>
           <label style={labelStyle} htmlFor="therapist-especialidade">
-            Especialidade <span style={{ color: colors.error }} aria-hidden="true">*</span>
+            {t('p2Therapy.form.specialty')} <span style={{ color: colors.error }} aria-hidden="true">*</span>
           </label>
           <select id="therapist-especialidade"
             value={specialty}
@@ -115,50 +117,48 @@ const TherapistForm: React.FC<TherapistFormProps> = ({
             style={selectStyle}
             required
           >
-            <option value="">Selecionar...</option>
-            <option value="aba">ABA</option>
-            <option value="ot">OT</option>
-            <option value="fonoaudiologia">Fonoaudiologia</option>
-            <option value="psicologia">Psicologia</option>
-            <option value="fisioterapia">Fisioterapia</option>
+            <option value="">{t('p2Therapy.form.select')}</option>
+            {(['aba', 'ot', 'fonoaudiologia', 'psicologia', 'fisioterapia'] as const).map((v) => (
+              <option key={v} value={v}>{t(`p2Therapy.types.${v}.label`)}</option>
+            ))}
           </select>
         </div>
 
         {/* Telefone */}
         <div>
-          <label style={labelStyle} htmlFor="therapist-telefone">Telefone</label>
+          <label style={labelStyle} htmlFor="therapist-telefone">{t('p2Therapy.form.phone')}</label>
           <input id="therapist-telefone"
             type="tel"
             maxLength={50}
             value={phone ?? ''}
             onChange={(e) => setPhone(e.target.value)}
-            placeholder="(11) 99999-9999"
+            placeholder={t('p2Therapy.form.phonePh')}
             style={inputStyle}
           />
         </div>
 
         {/* Email */}
         <div>
-          <label style={labelStyle} htmlFor="therapist-e-mail">E-mail</label>
+          <label style={labelStyle} htmlFor="therapist-e-mail">{t('p2Therapy.form.email')}</label>
           <input id="therapist-e-mail"
             type="email"
             maxLength={255}
             value={email ?? ''}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="terapeuta@exemplo.com"
+            placeholder={t('p2Therapy.form.emailPh')}
             style={inputStyle}
           />
         </div>
 
         {/* Observações */}
         <div>
-          <label style={labelStyle} htmlFor="therapist-observacoes">Observações</label>
+          <label style={labelStyle} htmlFor="therapist-observacoes">{t('p2Therapy.form.notes')}</label>
           <textarea id="therapist-observacoes"
             maxLength={500}
             rows={2}
             value={notes ?? ''}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Informações adicionais..."
+            placeholder={t('p2Therapy.form.notesPh')}
             style={textareaStyle}
           />
         </div>
@@ -171,7 +171,7 @@ const TherapistForm: React.FC<TherapistFormProps> = ({
             type="submit"
             disabled={isDisabled}
           >
-            {submitting || isLoading ? 'Salvando...' : 'Salvar'}
+            {submitting || isLoading ? t('p2Therapy.saving') : t('p2Therapy.save')}
           </GumroadButton>
           <GumroadButton
             variant="ghost"
@@ -179,7 +179,7 @@ const TherapistForm: React.FC<TherapistFormProps> = ({
             type="button"
             onClick={onCancel}
           >
-            Cancelar
+            {t('p2Therapy.cancel')}
           </GumroadButton>
         </Flex>
       </Flex>

@@ -15,6 +15,8 @@ interface GumroadButtonProps {
   style?: React.CSSProperties;
   className?: string;
   asChild?: boolean;
+  /** Indica operação em andamento: desabilita o clique e anuncia aria-busy */
+  loading?: boolean;
   'aria-pressed'?: boolean;
   'aria-label'?: string;
 }
@@ -54,18 +56,19 @@ const variantMap: Record<ButtonVariant, React.CSSProperties> = {
 };
 
 const GumroadButton = React.forwardRef<HTMLButtonElement, GumroadButtonProps>(
-  ({ children, variant = 'primary', size = 'md', onClick, disabled, type = 'button', style, className, asChild, 'aria-pressed': ariaPressed, 'aria-label': ariaLabel }, ref) => {
+  ({ children, variant = 'primary', size = 'md', onClick, disabled, type = 'button', style, className, asChild, loading, 'aria-pressed': ariaPressed, 'aria-label': ariaLabel }, ref) => {
+    const isDisabled = disabled || loading;
     const baseStyle: React.CSSProperties = {
       ...variantMap[variant],
       ...sizeMap[size],
       borderRadius: radii.pill,
-      boxShadow: disabled || variant === 'ghost' ? shadows.none : shadows.button,
+      boxShadow: isDisabled || variant === 'ghost' ? shadows.none : shadows.button,
       fontFamily: typography.button.font,
       fontWeight: typography.button.weight,
       lineHeight: typography.button.lh,
       letterSpacing: typography.button.ls,
-      cursor: disabled ? 'not-allowed' : 'pointer',
-      opacity: disabled ? 0.5 : 1,
+      cursor: loading ? 'progress' : isDisabled ? 'not-allowed' : 'pointer',
+      opacity: isDisabled ? 0.5 : 1,
       display: 'inline-flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -79,7 +82,8 @@ const GumroadButton = React.forwardRef<HTMLButtonElement, GumroadButtonProps>(
         ref={ref}
         type={type}
         onClick={onClick}
-        disabled={disabled}
+        disabled={isDisabled}
+        aria-busy={loading || undefined}
         className={`gumroad-btn${className ? ' ' + className : ''}`}
         asChild={asChild}
         style={baseStyle}

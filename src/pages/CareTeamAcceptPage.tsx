@@ -122,7 +122,7 @@ const CareTeamAcceptPage: React.FC = () => {
             <Flex direction="column" gap="3">
               {error && (
                 <Flex align="center" gap="2" style={{ color: colors['brand-salmon'] }}>
-                  <ExclamationTriangleIcon />
+                  <ExclamationTriangleIcon aria-hidden="true" />
                   <GumroadText level="body-sm" as="span">
                     {error}
                   </GumroadText>

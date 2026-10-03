@@ -61,7 +61,7 @@ export default function ClinicsPage() {
   );
 
   if (loading) return <LoadingSpinner />;
-  if (error) return <ErrorState message={error} onRetry={reload} />;
+  if (error) return <ErrorState message={error} onRetry={reload} retryLabel={t('p1Common.retry')} />;
 
   const open = memberships.find((m) => m.clinicId === openClinicId);
   if (open) {
@@ -101,7 +101,7 @@ export default function ClinicsPage() {
               />
             </Box>
             <GumroadButton type="submit" variant="primary" disabled={!nameInput.trim() || creating}>
-              <PlusIcon /> {creating ? t('clinic.create.creating') : t('clinic.create.submit')}
+              <PlusIcon aria-hidden="true" /> {creating ? t('clinic.create.creating') : t('clinic.create.submit')}
             </GumroadButton>
           </Flex>
         </form>

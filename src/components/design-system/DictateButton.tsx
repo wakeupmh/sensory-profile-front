@@ -1,4 +1,5 @@
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { colors, fonts, radii } from '../../theme/tokens';
 import { formatDuration } from '../../hooks/useAudioRecorder';
 import { useVoiceDictation } from '../../hooks/useVoiceDictation';
@@ -10,13 +11,6 @@ interface DictateButtonProps {
   fieldLabel: string;
 }
 
-const LABELS: Record<string, string> = {
-  idle: 'Ditar',
-  recording: 'Parar',
-  sending: 'Enviando…',
-  transcribing: 'Transcrevendo…',
-};
-
 /**
  * Botão de ditado reutilizável: acompanha qualquer campo de texto do app.
  *
@@ -27,6 +21,7 @@ const LABELS: Record<string, string> = {
  * uma espera obrigatória.
  */
 export default function DictateButton({ onText, fieldLabel }: DictateButtonProps) {
+  const { t } = useTranslation();
   const dictation = useVoiceDictation(onText);
   if (!dictation.isSupported) return null;
 
@@ -40,7 +35,7 @@ export default function DictateButton({ onText, fieldLabel }: DictateButtonProps
         onClick={() => (recording ? dictation.stop() : dictation.start())}
         disabled={busy}
         aria-pressed={recording}
-        aria-label={recording ? `Parar o ditado de ${fieldLabel}` : `Ditar ${fieldLabel} por voz`}
+        aria-label={recording ? t('cDesignSystem.dictateStopAria', { field: fieldLabel }) : t('cDesignSystem.dictateStartAria', { field: fieldLabel })}
         className="press-in"
         style={{
           display: 'flex',
@@ -59,7 +54,7 @@ export default function DictateButton({ onText, fieldLabel }: DictateButtonProps
         }}
       >
         <span aria-hidden="true">{recording ? '⏹️' : '🎙️'}</span>
-        {recording ? `${LABELS.recording} ${formatDuration(dictation.seconds)}` : LABELS[dictation.state]}
+        {recording ? `${t('cDesignSystem.dictate.recording')} ${formatDuration(dictation.seconds)}` : t(`cDesignSystem.dictate.${dictation.state}`)}
       </button>
 
       {/* role=status: o texto chega segundos depois, então o progresso precisa
@@ -74,7 +69,7 @@ export default function DictateButton({ onText, fieldLabel }: DictateButtonProps
             fontStyle: 'italic',
           }}
         >
-          {dictation.error ?? 'O texto aparece aqui em instantes.'}
+          {dictation.error ?? t('cDesignSystem.dictateWait')}
         </span>
       )}
     </Flex>

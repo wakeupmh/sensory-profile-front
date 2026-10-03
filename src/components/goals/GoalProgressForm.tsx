@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
 import GumroadModal from '../design-system/GumroadModal';
@@ -8,7 +9,7 @@ import { useAuthContext } from '../../context/AuthContext';
 import type { TherapySessionSummary, TherapyType } from '../../types/therapy';
 import type { CreateGoalProgressPayload } from '../../types/goals';
 
-const THERAPY_TYPE_LABELS: Record<TherapyType, string> = {
+const THERAPY_TYPE_FALLBACK: Record<TherapyType, string> = {
   aba: 'ABA',
   ot: 'Terapia Ocupacional',
   fonoaudiologia: 'Fonoaudiologia',
@@ -50,6 +51,7 @@ const labelStyle: React.CSSProperties = {
 };
 
 const GoalProgressForm: React.FC<GoalProgressFormProps> = ({ isOpen, onClose, childId, unit, onSubmit }) => {
+  const { t, i18n } = useTranslation();
   const { getToken } = useAuthContext();
   const [value, setValue] = useState('');
   const [occurredAt, setOccurredAt] = useState(new Date().toISOString().slice(0, 10));
@@ -107,7 +109,7 @@ const GoalProgressForm: React.FC<GoalProgressFormProps> = ({ isOpen, onClose, ch
     <GumroadModal
       open={isOpen}
       onClose={handleClose}
-      title="Registrar progresso"
+      title={t('cGoals.progressForm.title')}
       variant="center"
       maxWidth="440px"
     >
@@ -115,22 +117,22 @@ const GoalProgressForm: React.FC<GoalProgressFormProps> = ({ isOpen, onClose, ch
           <Flex direction="column" gap="3">
             <div>
               <label style={labelStyle} htmlFor="goalprog-valor">
-                Valor {unit ? `(${unit})` : ''} <span style={{ color: colors.error }} aria-hidden="true">*</span>
+                {t('cGoals.progressForm.value')} {unit ? `(${unit})` : ''} <span style={{ color: colors.error }} aria-hidden="true">*</span>
               </label>
               <input id="goalprog-valor" type="number" step="any" value={value} onChange={(e) => setValue(e.target.value)} style={inputStyle} required />
             </div>
             <div>
-              <label style={labelStyle} htmlFor="goalprog-data">Data <span style={{ color: colors.error }} aria-hidden="true">*</span></label>
+              <label style={labelStyle} htmlFor="goalprog-data">{t('cGoals.progressForm.date')} <span style={{ color: colors.error }} aria-hidden="true">*</span></label>
               <input id="goalprog-data" type="date" value={occurredAt} onChange={(e) => setOccurredAt(e.target.value)} style={inputStyle} required />
             </div>
             {sessions.length > 0 && (
               <div>
-                <label style={labelStyle} htmlFor="goalprog-vincular-a">Vincular à sessão de terapia (opcional)</label>
+                <label style={labelStyle} htmlFor="goalprog-vincular-a">{t('cGoals.progressForm.linkSession')}</label>
                 <select id="goalprog-vincular-a" value={therapySessionId} onChange={(e) => setTherapySessionId(e.target.value)} style={inputStyle}>
-                  <option value="">Nenhuma</option>
+                  <option value="">{t('cGoals.progressForm.none')}</option>
                   {sessions.map((s) => (
                     <option key={s.id} value={s.id}>
-                      {new Date(s.occurredAt).toLocaleDateString('pt-BR')} — {THERAPY_TYPE_LABELS[s.therapyType]}
+                      {new Date(s.occurredAt).toLocaleDateString(i18n.language)} — {t(`cGoals.therapyType.${s.therapyType}`, { defaultValue: THERAPY_TYPE_FALLBACK[s.therapyType] })}
                     </option>
                   ))}
                 </select>
@@ -138,17 +140,17 @@ const GoalProgressForm: React.FC<GoalProgressFormProps> = ({ isOpen, onClose, ch
             )}
             <div>
               <label style={labelStyle} htmlFor="goalprog-observacao-500">
-                Observação
+                {t('cGoals.progressForm.notes')}
                 <span style={{ fontWeight: 400, color: colors['ink-muted'], marginLeft: '6px' }}>({notes.length}/500)</span>
               </label>
-              <textarea id="goalprog-observacao-500" maxLength={500} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Contexto do registro..." style={textareaStyle} />
+              <textarea id="goalprog-observacao-500" maxLength={500} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t('cGoals.progressForm.notesPh')} style={textareaStyle} />
             </div>
             <Flex gap="2" mt="2">
-              <GumroadButton variant="primary" size="md" type="submit" disabled={submitting || value === ''}>
-                {submitting ? 'Salvando...' : 'Salvar'}
+              <GumroadButton variant="primary" size="md" type="submit" disabled={submitting || value === ''} loading={submitting}>
+                {submitting ? t('cGoals.saving') : t('cGoals.save')}
               </GumroadButton>
               <GumroadButton variant="secondary" size="md" type="button" onClick={handleClose}>
-                Cancelar
+                {t('cGoals.cancel')}
               </GumroadButton>
             </Flex>
           </Flex>

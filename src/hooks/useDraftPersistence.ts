@@ -10,6 +10,17 @@ interface UseDraftPersistenceOptions {
   enabled: boolean;
 }
 
+// localStorage pode lançar (modo privado, armazenamento bloqueado, cota cheia).
+// O rascunho local é só um cache: falhar aqui nunca pode derrubar o fluxo — em
+// especial o clearDraft chamado depois de a anamnese já ter sido criada.
+function safeStorage<T>(action: () => T): T | null {
+  try {
+    return action();
+  } catch {
+    return null;
+  }
+}
+
 export function useDraftPersistence({
   formType,
   formData,
@@ -37,9 +48,11 @@ export function useDraftPersistence({
         await draftApi.saveDraft(formType, data, step, instId, token);
         lastSavedRef.current = snapshot;
         if (localKey) {
-          localStorage.setItem(
-            localKey,
-            JSON.stringify({ payload: data, currentStep: step, instrumentId: instId })
+          safeStorage(() =>
+            localStorage.setItem(
+              localKey,
+              JSON.stringify({ payload: data, currentStep: step, instrumentId: instId })
+            )
           );
         }
       } catch {
@@ -83,7 +96,7 @@ export function useDraftPersistence({
       // server unreachable — try cache
     }
     if (localKey) {
-      const cached = localStorage.getItem(localKey);
+      const cached = safeStorage(() => localStorage.getItem(localKey));
       if (cached) {
         try {
           const parsed = JSON.parse(cached) as {
@@ -115,7 +128,7 @@ export function useDraftPersistence({
     } catch {
       // ignore
     }
-    if (localKey) localStorage.removeItem(localKey);
+    if (localKey) safeStorage(() => localStorage.removeItem(localKey));
     lastSavedRef.current = '';
   }, [formType, getToken, localKey]);
 

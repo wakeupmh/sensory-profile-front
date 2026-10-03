@@ -1,4 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
+import i18n from '../../i18n';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ChildSelector } from './ChildSelector';
@@ -7,6 +8,11 @@ import type { ChildData } from '../../services/api';
 function childFixture(id: string, name: string): ChildData {
   return { id, userId: 'user-1', name, birthDate: '2018-01-01', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' };
 }
+
+// Os testes validam os textos em pt-BR; o detector de idioma do jsdom escolheria en-US
+beforeAll(async () => {
+  await i18n.changeLanguage('pt-BR');
+});
 
 describe('ChildSelector — nome acessível', () => {
   it('expõe um nome acessível em pt-BR para o campo de seleção', () => {

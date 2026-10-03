@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Flex, Box } from '@radix-ui/themes';
 import { colors, shadows, radii, fonts, spacing } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
@@ -13,11 +14,7 @@ const labelStyle: React.CSSProperties = {
   marginBottom: spacing.xxs,
 };
 
-const TYPE_OPTIONS: { value: ToiletingData['type']; label: string }[] = [
-  { value: 'urina', label: 'Urina' },
-  { value: 'fezes', label: 'Fezes' },
-  { value: 'ambos', label: 'Ambos' },
-];
+const TYPE_OPTIONS = ['urina', 'fezes', 'ambos'] as const;
 
 interface ToiletingLogFormProps {
   onSubmit: (data: ToiletingData) => void;
@@ -25,6 +22,8 @@ interface ToiletingLogFormProps {
 }
 
 export default function ToiletingLogForm({ onSubmit, isLoading }: ToiletingLogFormProps) {
+  const { t } = useTranslation();
+  const uid = useId();
   const [type, setType] = useState<ToiletingData['type'] | null>(null);
   const [independent, setIndependent] = useState(false);
 
@@ -41,12 +40,13 @@ export default function ToiletingLogForm({ onSubmit, isLoading }: ToiletingLogFo
     <form onSubmit={handleSubmit}>
       <Flex direction="column" gap="4">
         <Box>
-          <label style={labelStyle}>Tipo</label>
-          <Flex gap="2">
-            {TYPE_OPTIONS.map(({ value, label }) => (
+          <div id={`${uid}-t`} style={labelStyle}>{t('p2Logs.toilet.type')}</div>
+          <Flex gap="2" role="group" aria-labelledby={`${uid}-t`}>
+            {TYPE_OPTIONS.map((value) => (
               <button className="press-in"
                 key={value}
                 type="button"
+                aria-pressed={type === value}
                 onClick={() => setType(type === value ? null : value)}
                 style={{
                   flex: 1,
@@ -64,7 +64,7 @@ export default function ToiletingLogForm({ onSubmit, isLoading }: ToiletingLogFo
                   transition: 'transform 0.1s ease, background-color 0.1s ease',
                 }}
               >
-                {label}
+                {t(`p2Logs.toilet.${value}`)}
               </button>
             ))}
           </Flex>
@@ -73,6 +73,7 @@ export default function ToiletingLogForm({ onSubmit, isLoading }: ToiletingLogFo
         <Box>
           <button className="press-in"
             type="button"
+            aria-pressed={independent}
             onClick={() => setIndependent(prev => !prev)}
             style={{
               display: 'flex',
@@ -105,14 +106,14 @@ export default function ToiletingLogForm({ onSubmit, isLoading }: ToiletingLogFo
               justifyContent: 'center',
               flexShrink: 0,
             }}>
-              {independent && <span style={{ color: colors.surface, fontSize: '14px', lineHeight: 1 }}>✓</span>}
+              {independent && <span aria-hidden="true" style={{ color: colors.surface, fontSize: '14px', lineHeight: 1 }}>✓</span>}
             </span>
-            Independente
+            {t('p2Logs.toilet.independent')}
           </button>
         </Box>
 
         <GumroadButton type="submit" variant="primary" size="lg" disabled={isLoading}>
-          {isLoading ? 'Salvando...' : 'Salvar'}
+          {isLoading ? t('p2Logs.saving') : t('p2Logs.save')}
         </GumroadButton>
       </Flex>
     </form>

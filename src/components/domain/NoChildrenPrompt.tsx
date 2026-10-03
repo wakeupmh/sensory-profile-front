@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Flex, Box } from '@radix-ui/themes';
 import { PersonIcon } from '@radix-ui/react-icons';
 import GumroadCard from '../design-system/GumroadCard';
@@ -10,24 +11,23 @@ interface NoChildrenPromptProps {
   description?: string;
 }
 
-export function NoChildrenPrompt({
-  description = 'Cadastre uma criança para começar a usar esta área.',
-}: NoChildrenPromptProps) {
+export function NoChildrenPrompt({ description }: NoChildrenPromptProps) {
+  const { t } = useTranslation();
   return (
     <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center', marginBottom: spacing.lg }}>
       <Flex direction="column" align="center" gap="4">
-        <PersonIcon width={40} height={40} />
+        <PersonIcon width={40} height={40} aria-hidden="true" />
         <Box>
           <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
-            Nenhuma criança cadastrada
+            {t('cDomain.noChildrenTitle')}
           </GumroadHeading>
           <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-            {description}
+            {description ?? t('cDomain.noChildrenDesc')}
           </GumroadText>
         </Box>
         <GumroadButton variant="primary" size="md" asChild>
           <Link to="/children" style={{ textDecoration: 'none' }}>
-            Adicionar Criança
+            {t('cDomain.addChild')}
           </Link>
         </GumroadButton>
       </Flex>

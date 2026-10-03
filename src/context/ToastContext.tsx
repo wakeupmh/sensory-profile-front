@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import * as ToastPrimitive from '@radix-ui/react-toast';
 import { CheckCircledIcon, CrossCircledIcon, InfoCircledIcon, Cross2Icon } from '@radix-ui/react-icons';
 
@@ -39,6 +40,7 @@ const KIND_ICONS: Record<ToastKind, React.ReactNode> = {
  * usam "background".
  */
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { t } = useTranslation();
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const idRef = useRef(0);
 
@@ -58,7 +60,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   );
 
   const remove = useCallback((id: number) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+    setToasts((prev) => prev.filter((item) => item.id !== id));
   }, []);
 
   return (
@@ -84,12 +86,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 </ToastPrimitive.Description>
               )}
             </div>
-            <ToastPrimitive.Close className="toast-close" aria-label="Fechar notificação">
+            <ToastPrimitive.Close className="toast-close" aria-label={t('navExtra.toast.close')}>
               <Cross2Icon width={14} height={14} aria-hidden="true" />
             </ToastPrimitive.Close>
           </ToastPrimitive.Root>
         ))}
-        <ToastPrimitive.Viewport className="toast-viewport" label="Notificações" />
+        <ToastPrimitive.Viewport className="toast-viewport" label={t('navExtra.toast.region')} />
       </ToastPrimitive.Provider>
     </ToastContext.Provider>
   );

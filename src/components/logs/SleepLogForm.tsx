@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Flex, Box } from '@radix-ui/themes';
 import { colors, shadows, radii, fonts, spacing } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
@@ -26,11 +27,7 @@ const labelStyle: React.CSSProperties = {
   marginBottom: spacing.xxs,
 };
 
-const QUALITY_OPTIONS: { value: 1|2|3; label: string }[] = [
-  { value: 1, label: 'Ruim' },
-  { value: 2, label: 'Razoável' },
-  { value: 3, label: 'Boa' },
-];
+const QUALITY_OPTIONS: { value: 1|2|3 }[] = [{ value: 1 }, { value: 2 }, { value: 3 }];
 
 interface SleepLogFormProps {
   onSubmit: (data: SleepData) => void;
@@ -38,6 +35,8 @@ interface SleepLogFormProps {
 }
 
 export default function SleepLogForm({ onSubmit, isLoading }: SleepLogFormProps) {
+  const { t } = useTranslation();
+  const uid = useId();
   const [bedtime, setBedtime] = useState('');
   const [waketime, setWaketime] = useState('');
   const [wakings, setWakings] = useState('');
@@ -59,8 +58,9 @@ export default function SleepLogForm({ onSubmit, isLoading }: SleepLogFormProps)
       <Flex direction="column" gap="4">
         <Flex gap="3">
           <Box style={{ flex: 1 }}>
-            <label style={labelStyle}>Hora de dormir</label>
+            <label htmlFor={`${uid}-bed`} style={labelStyle}>{t('p2Logs.sleep.bedtime')}</label>
             <input
+              id={`${uid}-bed`}
               type="time"
               style={inputStyle}
               value={bedtime}
@@ -68,8 +68,9 @@ export default function SleepLogForm({ onSubmit, isLoading }: SleepLogFormProps)
             />
           </Box>
           <Box style={{ flex: 1 }}>
-            <label style={labelStyle}>Hora de acordar</label>
+            <label htmlFor={`${uid}-wake`} style={labelStyle}>{t('p2Logs.sleep.waketime')}</label>
             <input
+              id={`${uid}-wake`}
               type="time"
               style={inputStyle}
               value={waketime}
@@ -79,8 +80,10 @@ export default function SleepLogForm({ onSubmit, isLoading }: SleepLogFormProps)
         </Flex>
 
         <Box>
-          <label style={labelStyle}>Vezes que acordou</label>
+          <label htmlFor={`${uid}-n`} style={labelStyle}>{t('p2Logs.sleep.wakings')}</label>
           <input
+            id={`${uid}-n`}
+            inputMode="numeric"
             type="number"
             min={0}
             max={20}
@@ -92,12 +95,13 @@ export default function SleepLogForm({ onSubmit, isLoading }: SleepLogFormProps)
         </Box>
 
         <Box>
-          <label style={labelStyle}>Qualidade</label>
-          <Flex gap="2">
-            {QUALITY_OPTIONS.map(({ value, label }) => (
+          <div id={`${uid}-q`} style={labelStyle}>{t('p2Logs.sleep.quality')}</div>
+          <Flex gap="2" role="group" aria-labelledby={`${uid}-q`}>
+            {QUALITY_OPTIONS.map(({ value }) => (
               <button className="press-in"
                 key={value}
                 type="button"
+                aria-pressed={quality === value}
                 onClick={() => setQuality(quality === value ? null : value)}
                 style={{
                   flex: 1,
@@ -115,14 +119,14 @@ export default function SleepLogForm({ onSubmit, isLoading }: SleepLogFormProps)
                   transition: 'transform 0.1s ease, background-color 0.1s ease',
                 }}
               >
-                {label}
+                {t(`p2Logs.sleep.q${value}`)}
               </button>
             ))}
           </Flex>
         </Box>
 
         <GumroadButton type="submit" variant="primary" size="lg" disabled={isLoading}>
-          {isLoading ? 'Salvando...' : 'Salvar'}
+          {isLoading ? t('p2Logs.saving') : t('p2Logs.save')}
         </GumroadButton>
       </Flex>
     </form>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { Pencil2Icon, TrashIcon } from '@radix-ui/react-icons';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import GumroadCard from '../design-system/GumroadCard';
@@ -14,12 +15,12 @@ interface AppointmentCardProps {
   onDelete: (id: string) => void;
 }
 
-function formatDate(isoDate: string): string {
-  return new Date(isoDate + 'T00:00:00').toLocaleDateString('pt-BR');
+function formatDate(isoDate: string, lang: string): string {
+  return new Date(isoDate + 'T00:00:00').toLocaleDateString(lang);
 }
 
-function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString('pt-BR', {
+function formatDateTime(iso: string, lang: string): string {
+  return new Date(iso).toLocaleString(lang, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -43,6 +44,7 @@ const iconBtnStyle: React.CSSProperties = {
 };
 
 const AppointmentCard: React.FC<AppointmentCardProps> = ({ appointment, onEdit, onDelete }) => {
+  const { t, i18n } = useTranslation();
   const summaryPreview = appointment.summary
     ? appointment.summary.length > 80
       ? appointment.summary.slice(0, 80) + '…'
@@ -54,14 +56,14 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({ appointment, onEdit, 
       <Flex justify="between" align="start">
         <Flex direction="column" gap="1" style={{ flex: 1, minWidth: 0 }}>
           <GumroadHeading level="title-md" style={{ fontFamily: fonts.display }}>
-            {formatDateTime(appointment.occurredAt)}
+            {formatDateTime(appointment.occurredAt, i18n.language)}
           </GumroadHeading>
 
           {(appointment.doctorName || appointment.specialty) && (
             <Flex align="center" gap="2" style={{ flexWrap: 'wrap' }}>
               {appointment.doctorName && (
                 <GumroadText level="body-sm" style={{ fontWeight: 600 }}>
-                  Dr./Dra. {appointment.doctorName}
+                  {t('p2Medical.doctorPrefix', { name: appointment.doctorName })}
                 </GumroadText>
               )}
               {appointment.specialty && (
@@ -84,7 +86,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({ appointment, onEdit, 
 
           {appointment.followUpDate && (
             <GumroadText level="body-sm" style={{ color: colors['brand-cyan'], fontWeight: 600 }}>
-              Retorno: {formatDate(appointment.followUpDate)}
+              {t('p2Medical.appts.followUp', { date: formatDate(appointment.followUpDate, i18n.language) })}
             </GumroadText>
           )}
         </Flex>
@@ -93,14 +95,16 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({ appointment, onEdit, 
           <button
             style={iconBtnStyle}
             onClick={() => onEdit(appointment)}
-            aria-label="Editar consulta"
+            type="button"
+            aria-label={t('p2Medical.appts.editAria')}
           >
             <Pencil2Icon />
           </button>
           <button
             style={iconBtnStyle}
             onClick={() => onDelete(appointment.id)}
-            aria-label="Remover consulta"
+            type="button"
+            aria-label={t('p2Medical.appts.removeAria')}
           >
             <TrashIcon />
           </button>

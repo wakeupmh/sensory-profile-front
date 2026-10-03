@@ -1,4 +1,7 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { COMMUNICATION_ENTRY_TYPE_LABELS } from '../../types/development';
+import type { CommunicationEntryType } from '../../types/development';
 import type { ConsolidatedDevelopment } from '../../types/consolidatedReport';
 import { colors, itemCardStyle } from '../../theme/tokens';
 
@@ -7,13 +10,14 @@ interface Props {
 }
 
 const MILESTONE_PILLS = [
-  { key: 'achieved' as const, label: 'Alcançados', bg: '#b7f5b7', border: '#22c55e' },
-  { key: 'inProgress' as const, label: 'Em progresso', bg: colors['brand-yellow'], border: '#d97706' },
-  { key: 'notYet' as const, label: 'Não iniciados', bg: '#e5e7eb', border: '#6b7280' },
-  { key: 'regressed' as const, label: 'Em regressão', bg: colors['brand-salmon'], border: '#dc2626' },
+  { key: 'achieved' as const, label: 'achieved', bg: '#b7f5b7', border: '#22c55e' },
+  { key: 'inProgress' as const, label: 'inProgress', bg: colors['brand-yellow'], border: '#d97706' },
+  { key: 'notYet' as const, label: 'notYet', bg: '#e5e7eb', border: '#6b7280' },
+  { key: 'regressed' as const, label: 'regressed', bg: colors['brand-salmon'], border: '#dc2626' },
 ];
 
 const DevelopmentSection: React.FC<Props> = ({ data }) => {
+  const { t, i18n } = useTranslation();
   const totalMilestones = Object.values(data.milestoneStats).reduce((s, v) => s + v, 0);
 
   return (
@@ -21,7 +25,7 @@ const DevelopmentSection: React.FC<Props> = ({ data }) => {
       {/* Milestone stats */}
       <div>
         <p style={{ fontWeight: 700, fontSize: '0.85rem', margin: '0 0 8px', opacity: 0.8 }}>
-          Marcos de desenvolvimento{totalMilestones > 0 ? ` · ${totalMilestones} total` : ''}
+          {t('cConsolidated.milestones')}{totalMilestones > 0 ? ` · ${t('cConsolidated.milestonesTotal', { count: totalMilestones })}` : ''}
         </p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
           {MILESTONE_PILLS.map(({ key, label, bg, border }) => (
@@ -39,7 +43,7 @@ const DevelopmentSection: React.FC<Props> = ({ data }) => {
                 alignItems: 'center',
               }}
             >
-              <span>{label}</span>
+              <span>{t(`cConsolidated.milestoneStats.${label}`)}</span>
               <span style={{ opacity: 0.8 }}>· {data.milestoneStats[key]}</span>
             </div>
           ))}
@@ -50,7 +54,7 @@ const DevelopmentSection: React.FC<Props> = ({ data }) => {
       {data.recentCommunicationLogs.length > 0 && (
         <div>
           <p style={{ fontWeight: 700, fontSize: '0.85rem', margin: '0 0 6px', opacity: 0.8 }}>
-            Registros de comunicação recentes
+            {t('cConsolidated.recentCommLogs')}
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {data.recentCommunicationLogs.map((log) => (
@@ -61,13 +65,13 @@ const DevelopmentSection: React.FC<Props> = ({ data }) => {
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                  <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{log.entryType}</span>
+                  <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{t(`cDevelopment.entryType.${log.entryType}`, { defaultValue: COMMUNICATION_ENTRY_TYPE_LABELS[log.entryType as CommunicationEntryType] ?? log.entryType })}</span>
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     {log.wordsCount !== null && (
-                      <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>{log.wordsCount} palavras</span>
+                      <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>{t('cConsolidated.wordsCount', { count: log.wordsCount })}</span>
                     )}
                     <span style={{ fontSize: '0.78rem', opacity: 0.6 }}>
-                      {new Date(log.occurredAt).toLocaleDateString('pt-BR')}
+                      {new Date(log.occurredAt).toLocaleDateString(i18n.language)}
                     </span>
                   </div>
                 </div>
@@ -84,7 +88,7 @@ const DevelopmentSection: React.FC<Props> = ({ data }) => {
 
       {totalMilestones === 0 && data.recentCommunicationLogs.length === 0 && (
         <p style={{ fontSize: '0.9rem', opacity: 0.6, margin: 0 }}>
-          Nenhum dado de desenvolvimento registrado.
+          {t('cConsolidated.developmentEmpty')}
         </p>
       )}
     </div>

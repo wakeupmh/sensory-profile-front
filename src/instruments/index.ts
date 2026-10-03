@@ -1,4 +1,4 @@
-import type { Instrument } from './types';
+import type { Instrument, InstrumentSection } from './types';
 import { crianca3a14 } from './crianca-3-14';
 import { criancaPequena } from './crianca-pequena';
 import { atec } from './atec';
@@ -28,10 +28,20 @@ export const findSectionByItemId = (
   instrument: Instrument,
   itemId: number,
 ): string | null => {
-  for (const section of instrument.sections) {
+  for (const section of getSectionsForItemIds(instrument, [itemId])) {
     if (section.items.some((i) => i.id === itemId)) return section.key;
   }
   return null;
 };
+
+/**
+ * Seções efetivas de um instrumento. Para instrumentos com seções dinâmicas
+ * (ex.: M-CHAT-R/F) elas são derivadas dos itens respondidos.
+ */
+export const getSectionsForItemIds = (
+  instrument: Instrument,
+  itemIds: number[],
+): InstrumentSection[] =>
+  instrument.sectionsForItemIds ? instrument.sectionsForItemIds(itemIds) : instrument.sections;
 
 export * from './types';

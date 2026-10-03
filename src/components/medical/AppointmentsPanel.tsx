@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { PlusIcon } from '@radix-ui/react-icons';
 import GumroadButton from '../design-system/GumroadButton';
 import GumroadCard from '../design-system/GumroadCard';
@@ -37,6 +38,7 @@ const AppointmentsPanel: React.FC<AppointmentsPanelProps> = ({
   onDelete,
 }) => {
   const toast = useToast();
+  const { t } = useTranslation();
   const [view, setView] = useState<PanelView>('list');
   const [editingAppointment, setEditingAppointment] = useState<MedicalAppointmentSummary | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -55,7 +57,9 @@ const AppointmentsPanel: React.FC<AppointmentsPanelProps> = ({
     try {
       await onAdd(payload as CreateAppointmentPayload);
       setView('list');
-      toast.success('Consulta adicionada');
+      toast.success(t('p2Medical.appts.added'));
+    } catch {
+      toast.error(t('p2Medical.saveError'));
     } finally {
       setIsLoading(false);
     }
@@ -68,7 +72,9 @@ const AppointmentsPanel: React.FC<AppointmentsPanelProps> = ({
       await onEdit(editingAppointment.id, payload as Omit<CreateAppointmentPayload, 'childId'>);
       setView('list');
       setEditingAppointment(null);
-      toast.success('Alterações salvas');
+      toast.success(t('p2Medical.changesSaved'));
+    } catch {
+      toast.error(t('p2Medical.saveError'));
     } finally {
       setIsLoading(false);
     }
@@ -80,7 +86,9 @@ const AppointmentsPanel: React.FC<AppointmentsPanelProps> = ({
     try {
       await onDelete(deletingId);
       setDeletingId(null);
-      toast.success('Consulta removida');
+      toast.success(t('p2Medical.appts.removed'));
+    } catch {
+      toast.error(t('p2Medical.removeError'));
     } finally {
       setIsLoading(false);
     }
@@ -89,7 +97,7 @@ const AppointmentsPanel: React.FC<AppointmentsPanelProps> = ({
   const deletingAppointment = appointments.find((a) => a.id === deletingId);
 
   return (
-    <GumroadModal open={isOpen} onClose={onClose} title="Consultas">
+    <GumroadModal open={isOpen} onClose={onClose} title={t('p2Medical.appts.title')}>
       <>
 
         {view === 'list' && (
@@ -102,14 +110,14 @@ const AppointmentsPanel: React.FC<AppointmentsPanelProps> = ({
             >
               <Flex align="center" gap="1">
                 <PlusIcon />
-                Adicionar Consulta
+                {t('p2Medical.appts.add')}
               </Flex>
             </GumroadButton>
 
             {appointments.length === 0 ? (
               <GumroadCard color="cream" padding="lg" style={{ textAlign: 'center' }}>
                 <GumroadText level="body-md" style={{ opacity: 0.7 }}>
-                  Nenhuma consulta registrada
+                  {t('p2Medical.appts.empty')}
                 </GumroadText>
               </GumroadCard>
             ) : (
@@ -118,9 +126,9 @@ const AppointmentsPanel: React.FC<AppointmentsPanelProps> = ({
                   deletingId === appt.id ? (
                     <GumroadCard key={appt.id} color="salmon" padding="md" shadow="md">
                       <GumroadText level="body-md">
-                        Remover consulta
+                        {t('p2Medical.appts.confirm')}
                         {deletingAppointment?.doctorName
-                          ? ` com Dr./Dra. ${deletingAppointment.doctorName}`
+                          ? t('p2Medical.appts.confirmWith', { name: deletingAppointment.doctorName })
                           : ''}?
                       </GumroadText>
                       <Flex gap="2" mt="2">
@@ -130,14 +138,14 @@ const AppointmentsPanel: React.FC<AppointmentsPanelProps> = ({
                           onClick={handleConfirmDelete}
                           disabled={isLoading}
                         >
-                          Remover
+                          {t('p2Medical.remove')}
                         </GumroadButton>
                         <GumroadButton
                           variant="ghost"
                           size="sm"
                           onClick={() => setDeletingId(null)}
                         >
-                          Cancelar
+                          {t('p2Medical.cancel')}
                         </GumroadButton>
                       </Flex>
                     </GumroadCard>
@@ -161,7 +169,7 @@ const AppointmentsPanel: React.FC<AppointmentsPanelProps> = ({
         {view === 'add' && (
           <>
             <GumroadHeading level="title-md" style={{ marginBottom: '16px' }}>
-              Nova Consulta
+              {t('p2Medical.appts.new')}
             </GumroadHeading>
             <AppointmentForm
               childId={childId}
@@ -175,7 +183,7 @@ const AppointmentsPanel: React.FC<AppointmentsPanelProps> = ({
         {view === 'edit' && (
           <>
             <GumroadHeading level="title-md" style={{ marginBottom: '16px' }}>
-              Editar Consulta
+              {t('p2Medical.appts.edit')}
             </GumroadHeading>
             <AppointmentForm
               childId={childId}

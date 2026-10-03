@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ConsolidatedTherapy } from '../../types/consolidatedReport';
 import { THERAPY_TYPE_LABELS } from '../../types/consolidatedReport';
 import { colors, fonts, itemCardStyle } from '../../theme/tokens';
@@ -8,6 +9,7 @@ interface Props {
 }
 
 const TherapySection: React.FC<Props> = ({ data }) => {
+  const { t, i18n } = useTranslation();
   const typeEntries = Object.entries(data.byType).filter(([, count]) => count > 0);
   const recentSessions = data.recentSessions.slice(0, 5);
 
@@ -26,7 +28,7 @@ const TherapySection: React.FC<Props> = ({ data }) => {
         >
           {data.sessionCount}{' '}
           <span style={{ fontSize: '0.9rem', fontWeight: 600, opacity: 0.7 }}>
-            {data.sessionCount === 1 ? 'sessão' : 'sessões'} no período
+            {t('cConsolidated.sessionsInPeriod', { count: data.sessionCount })}
           </span>
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
@@ -42,11 +44,11 @@ const TherapySection: React.FC<Props> = ({ data }) => {
                 fontWeight: 700,
               }}
             >
-              {THERAPY_TYPE_LABELS[type] ?? type} · {count}
+              {t(`cGoals.therapyType.${type}`, { defaultValue: THERAPY_TYPE_LABELS[type] ?? type })} · {count}
             </span>
           ))}
           {typeEntries.length === 0 && (
-            <span style={{ fontSize: '0.85rem', opacity: 0.6 }}>Sem sessões registradas.</span>
+            <span style={{ fontSize: '0.85rem', opacity: 0.6 }}>{t('cConsolidated.noSessions')}</span>
           )}
         </div>
       </div>
@@ -55,12 +57,12 @@ const TherapySection: React.FC<Props> = ({ data }) => {
       {data.activeTherapists.length > 0 && (
         <div>
           <p style={{ fontWeight: 700, fontSize: '0.85rem', margin: '0 0 6px', opacity: 0.8 }}>
-            Terapeutas ativos
+            {t('cConsolidated.activeTherapists')}
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-            {data.activeTherapists.map((t) => (
+            {data.activeTherapists.map((th) => (
               <div
-                key={t.id}
+                key={th.id}
                 style={{
                   background: colors.canvas,
                   border: `2px solid ${colors.ink}`,
@@ -72,7 +74,7 @@ const TherapySection: React.FC<Props> = ({ data }) => {
                   alignItems: 'center',
                 }}
               >
-                <span style={{ fontWeight: 600 }}>{t.name}</span>
+                <span style={{ fontWeight: 600 }}>{th.name}</span>
                 <span
                   style={{
                     background: colors['brand-lavender'],
@@ -81,7 +83,7 @@ const TherapySection: React.FC<Props> = ({ data }) => {
                     fontSize: '0.75rem',
                   }}
                 >
-                  {t.specialty}
+                  {th.specialty}
                 </span>
               </div>
             ))}
@@ -93,7 +95,7 @@ const TherapySection: React.FC<Props> = ({ data }) => {
       {recentSessions.length > 0 && (
         <div>
           <p style={{ fontWeight: 700, fontSize: '0.85rem', margin: '0 0 6px', opacity: 0.8 }}>
-            Sessões recentes
+            {t('cConsolidated.recentSessions')}
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {recentSessions.map((s) => (
@@ -110,17 +112,17 @@ const TherapySection: React.FC<Props> = ({ data }) => {
               >
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                   <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>
-                    {THERAPY_TYPE_LABELS[s.therapyType] ?? s.therapyType}
+                    {t(`cGoals.therapyType.${s.therapyType}`, { defaultValue: THERAPY_TYPE_LABELS[s.therapyType] ?? s.therapyType })}
                   </span>
                   {s.therapistName && (
                     <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>· {s.therapistName}</span>
                   )}
                   {s.durationMinutes && (
-                    <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>· {s.durationMinutes} min</span>
+                    <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>· {t('cConsolidated.minutes', { count: s.durationMinutes })}</span>
                   )}
                 </div>
                 <span style={{ fontSize: '0.78rem', opacity: 0.6, whiteSpace: 'nowrap' }}>
-                  {new Date(s.occurredAt).toLocaleDateString('pt-BR')}
+                  {new Date(s.occurredAt).toLocaleDateString(i18n.language)}
                 </span>
               </div>
             ))}

@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { PlusIcon } from '@radix-ui/react-icons';
 import GumroadButton from '../design-system/GumroadButton';
 import GumroadCard from '../design-system/GumroadCard';
@@ -36,6 +37,7 @@ const SchoolCommsPanel: React.FC<SchoolCommsPanelProps> = ({
   onMutate,
 }) => {
   const { getToken } = useAuthContext();
+  const { t } = useTranslation();
   const toast = useToast();
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -95,7 +97,9 @@ const SchoolCommsPanel: React.FC<SchoolCommsPanelProps> = ({
       await fetchComms();
       onMutate?.();
       setView('list');
-      toast.success('Comunicação adicionada');
+      toast.success(t('cEducation.commAdded'));
+    } catch {
+      toast.error(t('cEducation.saveError'));
     } finally {
       setIsLoading(false);
     }
@@ -111,7 +115,9 @@ const SchoolCommsPanel: React.FC<SchoolCommsPanelProps> = ({
       onMutate?.();
       setView('list');
       setEditingComm(null);
-      toast.success('Alterações salvas');
+      toast.success(t('cEducation.changesSaved'));
+    } catch {
+      toast.error(t('cEducation.saveError'));
     } finally {
       setIsLoading(false);
     }
@@ -124,7 +130,9 @@ const SchoolCommsPanel: React.FC<SchoolCommsPanelProps> = ({
       await schoolCommApi.delete(token, id);
       await fetchComms();
       onMutate?.();
-      toast.success('Comunicação removida');
+      toast.success(t('cEducation.commRemoved'));
+    } catch {
+      toast.error(t('cEducation.removeError'));
     } finally {
       setIsLoading(false);
     }
@@ -133,7 +141,7 @@ const SchoolCommsPanel: React.FC<SchoolCommsPanelProps> = ({
   const hasMore = comms.length < total;
 
   return (
-    <GumroadModal open={isOpen} onClose={onClose} title="Comunicações com a Escola">
+    <GumroadModal open={isOpen} onClose={onClose} title={t('cEducation.commsTitle')}>
       <>
 
         {view === 'list' && (
@@ -145,8 +153,8 @@ const SchoolCommsPanel: React.FC<SchoolCommsPanelProps> = ({
               style={{ width: '100%', marginBottom: '16px' }}
             >
               <Flex align="center" gap="1">
-                <PlusIcon />
-                Adicionar Comunicação
+                <PlusIcon aria-hidden="true" />
+                {t('cEducation.addComm')}
               </Flex>
             </GumroadButton>
 
@@ -159,7 +167,7 @@ const SchoolCommsPanel: React.FC<SchoolCommsPanelProps> = ({
             {!error && comms.length === 0 ? (
               <GumroadCard color="cream" padding="lg" style={{ textAlign: 'center' }}>
                 <GumroadText level="body-md" style={{ opacity: 0.7 }}>
-                  Nenhuma comunicação registrada
+                  {t('cEducation.noComms')}
                 </GumroadText>
               </GumroadCard>
             ) : (
@@ -191,7 +199,7 @@ const SchoolCommsPanel: React.FC<SchoolCommsPanelProps> = ({
                     disabled={isLoading}
                     style={{ width: '100%', marginTop: '8px' }}
                   >
-                    {isLoading ? 'Carregando...' : 'Carregar mais'}
+                    {isLoading ? t('cEducation.loading') : t('cEducation.loadMore')}
                   </GumroadButton>
                 )}
               </Flex>
@@ -202,7 +210,7 @@ const SchoolCommsPanel: React.FC<SchoolCommsPanelProps> = ({
         {view === 'add' && (
           <>
             <GumroadHeading level="title-md" style={{ marginBottom: '16px' }}>
-              Nova Comunicação
+              {t('cEducation.newComm')}
             </GumroadHeading>
             <SchoolCommForm
               initial={{ childId }}
@@ -217,7 +225,7 @@ const SchoolCommsPanel: React.FC<SchoolCommsPanelProps> = ({
         {view === 'edit' && (
           <>
             <GumroadHeading level="title-md" style={{ marginBottom: '16px' }}>
-              Editar Comunicação
+              {t('cEducation.editComm')}
             </GumroadHeading>
             <SchoolCommForm
               initial={editingComm ?? {}}

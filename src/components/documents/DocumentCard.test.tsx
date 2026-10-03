@@ -1,4 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
+import i18n from '../../i18n';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import DocumentCard from './DocumentCard';
@@ -19,6 +20,11 @@ function makeDocument(overrides: Partial<DocumentRecord> = {}): DocumentRecord {
     ...overrides,
   };
 }
+
+// Os testes validam os textos em pt-BR; o detector de idioma do jsdom escolheria en-US
+beforeAll(async () => {
+  await i18n.changeLanguage('pt-BR');
+});
 
 describe('DocumentCard — expiry badge', () => {
   it('shows no expiry badge when the document has no expiresAt', () => {

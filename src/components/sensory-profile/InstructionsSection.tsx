@@ -1,69 +1,66 @@
 import React from "react";
 import { Box } from "@radix-ui/themes";
 import { colors, radii } from "../../theme/tokens";
+import { useTranslation } from "react-i18next";
+import type { Instrument } from "../../instruments/types";
 import GumroadHeading, { GumroadText } from "../design-system/GumroadHeading";
 
+// Chaves em assessmentForm.instructions.options.<key>.{label,description}
 const responseOptions = [
-  {
-    label: "Quase sempre",
-    color: "#6D28D9",
-    fontColor: "#fff",
-    description: "responde desta maneira Quase sempre (90% ou mais do tempo).",
-  },
-  {
-    label: "Frequentemente",
-    color: "#8B5CF6",
-    fontColor: "#fff",
-    description: "responde desta maneira Frequentemente (75% do tempo).",
-  },
-  {
-    label: "Metade do tempo",
-    color: "#A78BFA",
-    fontColor: "#fff",
-    description: "responde desta maneira Metade do tempo (50% do tempo).",
-  },
-  {
-    label: "Ocasionalmente",
-    color: "#C4B5FD",
-    fontColor: "#222",
-    description: "responde desta maneira Ocasionalmente (25% do tempo).",
-  },
-  {
-    label: "Quase nunca",
-    color: "#E9D5FF",
-    fontColor: "#222",
-    description: "responde desta maneira Quase nunca (10% ou menos do tempo).",
-  },
-  {
-    label: "Não se aplica",
-    color: "#F3E8FF",
-    fontColor: "#222",
-    description: "Se você não puder responder porque você não observou o comportamento ou acha que tal item não se aplica ao/à seu/sua filho(a), marque Não se aplica.",
-  },
+  { key: 'almostAlways', color: "#6D28D9", fontColor: "#fff" },
+  { key: 'frequently', color: "#8B5CF6", fontColor: "#fff" },
+  { key: 'halfTheTime', color: "#A78BFA", fontColor: "#fff" },
+  { key: 'occasionally', color: "#C4B5FD", fontColor: "#222" },
+  { key: 'almostNever', color: "#E9D5FF", fontColor: "#222" },
+  { key: 'notApplicable', color: "#F3E8FF", fontColor: "#222" },
 ];
 
-const InstructionsSection: React.FC = () => (
+interface InstructionsSectionProps {
+  instrument?: Instrument;
+}
+
+const InstructionsSection: React.FC<InstructionsSectionProps> = ({ instrument }) => {
+  const { t } = useTranslation();
+
+  // Escalas de frequência são específicas do Perfil Sensorial; M-CHAT-R usa sim/não
+  // e o M-CHAT-R/F usa passou/falhou, então as instruções precisam ser outras.
+  const binaryScale = (instrument?.scale?.options.length ?? 0) === 2;
+  if (binaryScale) {
+    const isFollowup = !!instrument?.parentInstrumentId;
+    return (
+      <Box mb="6">
+        <GumroadHeading level="title-lg" as="h2" style={{ marginBottom: '12px' }}>
+          {t('assessmentForm.instructions.title')}
+        </GumroadHeading>
+        <GumroadText level="body-md" as="p">
+          {t(isFollowup ? 'assessmentForm.instructions.followup' : 'assessmentForm.instructions.yesNo')}
+        </GumroadText>
+      </Box>
+    );
+  }
+
+  return (
   <Box mb="6">
     <GumroadHeading level="title-lg" as="h2" style={{ marginBottom: '12px' }}>
-      INSTRUÇÕES
+      {t('assessmentForm.instructions.title')}
     </GumroadHeading>
     <Box mt="2" mb="2">
       <GumroadText level="body-md" as="p">
-        As páginas a seguir contêm afirmações que descrevem como as crianças podem agir. Leia cada frase e selecione a opção que melhor descreve a frequência na qual seu/sua filho(a) demonstra esses comportamentos. <b>Marque uma opção para cada afirmação.</b>
+        {t('assessmentForm.instructions.intro')} <b>{t('assessmentForm.instructions.introBold')}</b>
       </GumroadText>
     </Box>
     <GumroadText level="body-md" as="p" style={{ fontWeight: 600 }}>
-      Use estas orientações para marcar suas respostas:
+      {t('assessmentForm.instructions.guidelines')}
     </GumroadText>
     <Box mt="2" mb="2">
       <GumroadText level="body-md" as="p" style={{ fontWeight: 600 }}>
-        Quando tem a oportunidade, meu filho(a)...
+        {t('assessmentForm.instructions.whenOpportunity')}
       </GumroadText>
     </Box>
     <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 8 }}>
       <tbody>
         {responseOptions.map((option) => (
-          <tr key={option.label}>
+          <tr key={option.key}>
             <td style={{
               padding: 8,
               width: 160,
@@ -83,17 +80,20 @@ const InstructionsSection: React.FC = () => (
                   border: `2px solid ${colors.ink}`,
                 }}
               >
-                {option.label}
+                {t(`assessmentForm.instructions.options.${option.key}.label`)}
               </span>
             </td>
             <td style={{ padding: 8, verticalAlign: 'middle' }}>
-              <GumroadText level="body-md" as="span">{option.description}</GumroadText>
+              <GumroadText level="body-md" as="span">
+                {t(`assessmentForm.instructions.options.${option.key}.description`)}
+              </GumroadText>
             </td>
           </tr>
         ))}
       </tbody>
     </table>
   </Box>
-);
+  );
+};
 
 export default InstructionsSection;

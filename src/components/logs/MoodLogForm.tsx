@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Flex, Box } from '@radix-ui/themes';
 import { colors, shadows, radii, fonts, spacing } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
 import type { MoodData } from '../../types/logs';
 
-const MOOD_LEVELS: { value: 1|2|3|4|5; emoji: string; label: string }[] = [
-  { value: 1, emoji: '😣', label: 'Muito Agitado' },
-  { value: 2, emoji: '😟', label: 'Agitado' },
-  { value: 3, emoji: '😐', label: 'Neutro' },
-  { value: 4, emoji: '🙂', label: 'Calmo' },
-  { value: 5, emoji: '😊', label: 'Muito Calmo' },
+const MOOD_LEVELS: { value: 1|2|3|4|5; emoji: string }[] = [
+  { value: 1, emoji: '😣' },
+  { value: 2, emoji: '😟' },
+  { value: 3, emoji: '😐' },
+  { value: 4, emoji: '🙂' },
+  { value: 5, emoji: '😊' },
 ];
 
 const MOOD_TAGS = ['calmo', 'agitado', 'feliz', 'triste', 'ansioso', 'frustrado'];
@@ -29,6 +30,8 @@ interface MoodLogFormProps {
 }
 
 export default function MoodLogForm({ onSubmit, isLoading }: MoodLogFormProps) {
+  const { t } = useTranslation();
+  const uid = useId();
   const [level, setLevel] = useState<1|2|3|4|5|null>(null);
   const [tags, setTags] = useState<string[]>([]);
 
@@ -47,14 +50,17 @@ export default function MoodLogForm({ onSubmit, isLoading }: MoodLogFormProps) {
     <form onSubmit={handleSubmit}>
       <Flex direction="column" gap="4">
         <Box>
-          <label style={labelStyle}>Como estava? <span style={{ color: colors.error }} aria-hidden="true">*</span></label>
-          <Flex gap="2">
-            {MOOD_LEVELS.map(({ value, emoji, label }) => (
+          <div id={`${uid}-l`} style={labelStyle}>{t('p2Logs.mood.how')} <span style={{ color: colors.error }} aria-hidden="true">*</span></div>
+          <Flex gap="2" role="group" aria-labelledby={`${uid}-l`}>
+            {MOOD_LEVELS.map(({ value, emoji }) => {
+              const label = t(`p2Logs.mood.l${value}`);
+              return (
               <button className="press-in"
                 key={value}
                 type="button"
                 onClick={() => setLevel(value)}
                 title={label}
+                aria-pressed={level === value}
                 style={{
                   flex: 1,
                   display: 'flex',
@@ -71,18 +77,19 @@ export default function MoodLogForm({ onSubmit, isLoading }: MoodLogFormProps) {
                   transition: 'transform 0.1s ease, background-color 0.1s ease',
                 }}
               >
-                <span style={{ fontSize: '24px', lineHeight: 1 }}>{emoji}</span>
+                <span style={{ fontSize: '24px', lineHeight: 1 }} aria-hidden="true">{emoji}</span>
                 <span style={{ fontFamily: fonts.display, fontSize: '10px', fontWeight: 600, color: colors.ink, textAlign: 'center', lineHeight: 1.2 }}>
                   {label}
                 </span>
               </button>
-            ))}
+              );
+            })}
           </Flex>
         </Box>
 
         <Box>
-          <label style={labelStyle}>Marcadores</label>
-          <Flex gap="2" wrap="wrap">
+          <div id={`${uid}-t`} style={labelStyle}>{t('p2Logs.mood.tags')}</div>
+          <Flex gap="2" wrap="wrap" role="group" aria-labelledby={`${uid}-t`}>
             {MOOD_TAGS.map(tag => {
               const isSelected = tags.includes(tag);
               return (
@@ -90,6 +97,7 @@ export default function MoodLogForm({ onSubmit, isLoading }: MoodLogFormProps) {
                   key={tag}
                   type="button"
                   onClick={() => toggleTag(tag)}
+                  aria-pressed={isSelected}
                   style={{
                     padding: '6px 14px',
                     backgroundColor: isSelected ? colors['brand-lavender'] : colors.surface,
@@ -105,7 +113,7 @@ export default function MoodLogForm({ onSubmit, isLoading }: MoodLogFormProps) {
                     transition: 'transform 0.1s ease, background-color 0.1s ease',
                   }}
                 >
-                  {tag}
+                  {t(`p2Logs.mood.tag.${tag}`)}
                 </button>
               );
             })}
@@ -113,8 +121,13 @@ export default function MoodLogForm({ onSubmit, isLoading }: MoodLogFormProps) {
         </Box>
 
         <GumroadButton type="submit" variant="primary" size="lg" disabled={isLoading || level === null}>
-          {isLoading ? 'Salvando...' : 'Salvar'}
+          {isLoading ? t('p2Logs.saving') : t('p2Logs.save')}
         </GumroadButton>
+        {level === null && (
+          <p style={{ margin: 0, fontFamily: fonts.display, fontSize: '12px', color: colors['ink-muted'] }}>
+            {t('p2Logs.mood.pickLevel')}
+          </p>
+        )}
       </Flex>
     </form>
   );

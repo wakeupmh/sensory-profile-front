@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
@@ -31,7 +31,7 @@ export default function SignIn() {
           background: colors.canvas,
           border: `2px solid ${colors.ink}`,
           borderRadius: radii.xl,
-          padding: '48px',
+          padding: 'clamp(24px, 6vw, 48px)',
           width: '420px',
           maxWidth: '90vw',
           boxShadow: '8px 8px 0px #FFFFFF',
@@ -43,7 +43,7 @@ export default function SignIn() {
             as="h1"
             style={{ marginBottom: '4px' }}
           >
-            Perfil Sensorial
+            {t('p2SignIn.appName')}
           </GumroadHeading>
           <div style={{ fontSize: '14px', color: colors.ink, opacity: 0.6, fontFamily: typography['body-sm'].font }}>
             {t('auth.tagline')}
@@ -110,6 +110,7 @@ export default function SignIn() {
                 password_label: t('auth.signIn.passwordLabel'),
                 password_input_placeholder: t('auth.signIn.passwordPlaceholder'),
                 button_label: t('auth.signIn.button'),
+                loading_button_label: t('p2SignIn.signInLoading'),
                 link_text: t('auth.signIn.linkText'),
               },
               sign_up: {
@@ -118,20 +119,36 @@ export default function SignIn() {
                 password_label: t('auth.signUp.passwordLabel'),
                 password_input_placeholder: t('auth.signUp.passwordPlaceholder'),
                 button_label: t('auth.signUp.button'),
+                loading_button_label: t('p2SignIn.signUpLoading'),
+                confirmation_text: t('p2SignIn.signUpConfirmation'),
                 link_text: t('auth.signUp.linkText'),
               },
               forgotten_password: {
                 email_label: t('auth.forgottenPassword.emailLabel'),
                 email_input_placeholder: t('auth.forgottenPassword.emailPlaceholder'),
                 button_label: t('auth.forgottenPassword.button'),
+                loading_button_label: t('p2SignIn.forgotLoading'),
+                confirmation_text: t('p2SignIn.forgotConfirmation'),
                 // Exibido na tela de login como o link "esqueci minha senha"
                 // (é assim que a lib nomeia essa variável, não é sobre a
                 // própria tela de recuperação)
                 link_text: t('auth.forgottenPassword.linkText'),
               },
+              update_password: {
+                password_label: t('p2SignIn.updatePassword.password'),
+                password_input_placeholder: t('p2SignIn.updatePassword.placeholder'),
+                button_label: t('p2SignIn.updatePassword.button'),
+                loading_button_label: t('p2SignIn.updatePassword.loading'),
+                confirmation_text: t('p2SignIn.updatePassword.confirmation'),
+              },
             },
           }}
         />
+        <Flex justify="center" gap="4" wrap="wrap" mt="4" style={{ fontSize: '13px', fontFamily: typography['body-sm'].font }}>
+          <Link to="/" style={{ color: colors.ink }}>{t('p2SignIn.backHome')}</Link>
+          <Link to="/privacidade" style={{ color: colors.ink }}>{t('p2SignIn.privacy')}</Link>
+          <Link to="/termos" style={{ color: colors.ink }}>{t('p2SignIn.terms')}</Link>
+        </Flex>
       </Box>
     </Flex>
   );

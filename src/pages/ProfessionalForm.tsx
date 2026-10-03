@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Box, Flex } from '@radix-ui/themes';
+import { Trans, useTranslation } from 'react-i18next';
 import { ChevronLeftIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { useAuthContext } from '../context/AuthContext';
 import { professionalApi } from '../services/api';
@@ -17,11 +18,13 @@ import { colors, spacing } from '../theme/tokens';
 const emptyForm = { name: '', email: '', profession: '' };
 
 const ProfessionalForm: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const { getToken } = useAuthContext();
   const fetchedRef = useRef(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   const isNewMode = !id;
   const isEditMode = !!id && location.pathname.endsWith('/edit');
@@ -43,6 +46,7 @@ const ProfessionalForm: React.FC = () => {
       try {
         setLoading(true);
         setNotFound(false);
+        setError(null);
         const token = await getToken();
         const p = await professionalApi.get(id, token);
         setProfessional(p);
@@ -51,20 +55,22 @@ const ProfessionalForm: React.FC = () => {
       } catch (err: unknown) {
         const status = (err as { response?: { status?: number } }).response?.status;
         if (status === 404) setNotFound(true);
-        else setError('Não foi possível carregar o profissional.');
+        else setError(t('p2ProForm.loadError'));
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
     run();
-  }, [id, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, getToken, reloadKey]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setValidationError(null);
+    setError(null);
     if (!form.name.trim()) {
-      setValidationError('Informe o nome do profissional.');
+      setValidationError(t('p2ProForm.nameRequired'));
       return;
     }
 
@@ -90,7 +96,7 @@ const ProfessionalForm: React.FC = () => {
       }
     } catch (err) {
       console.error(err);
-      setError('Não foi possível salvar o profissional. Tente novamente.');
+      setError(t('p2ProForm.saveError'));
     } finally {
       setSaving(false);
     }
@@ -104,23 +110,23 @@ const ProfessionalForm: React.FC = () => {
       setProfessional(updated);
     } catch (err) {
       console.error(err);
-      setError('Não foi possível gerar um novo código de convite.');
+      setError(t('p2ProForm.rotateError'));
     }
   };
 
   const handleBack = () => navigate('/professionals');
 
   const getTitle = () => {
-    if (isNewMode) return justCreated ? 'Profissional cadastrado' : 'Novo profissional';
-    if (isEditMode) return 'Editar profissional';
-    return professional?.name ?? 'Profissional';
+    if (isNewMode) return justCreated ? t('p2ProForm.titleCreated') : t('p2ProForm.titleNew');
+    if (isEditMode) return t('p2ProForm.titleEdit');
+    return professional?.name ?? t('p2ProForm.titleDefault');
   };
 
   if (loading) {
     return (
       <GumroadCard color="cream" shadow="md" padding="xl">
         <Flex direction="column" align="center" gap="3" py="9">
-          <LoadingSpinner size="large" text="Carregando..." />
+          <LoadingSpinner size="large" text={t('p2ProForm.loading')} />
         </Flex>
       </GumroadCard>
     );
@@ -128,7 +134,12 @@ const ProfessionalForm: React.FC = () => {
 
   if (notFound) {
     return (
-      <NotFound title="Profissional não encontrado" message="Este profissional não existe ou foi removido." />
+      <NotFound
+        title={t('p2ProForm.notFoundTitle')}
+        message={t('p2ProForm.notFoundMessage')}
+        buttonText={t('p2ProForm.notFoundButton')}
+        redirectTo="/professionals"
+      />
     );
   }
 
@@ -136,7 +147,7 @@ const ProfessionalForm: React.FC = () => {
     <Box style={{ maxWidth: 720, margin: '0 auto' }}>
       <Flex align="center" gap="2" mb="4">
         <GumroadButton variant="secondary" size="sm" onClick={handleBack}>
-          <ChevronLeftIcon /> Voltar
+          <ChevronLeftIcon /> {t('p2ProForm.back')}
         </GumroadButton>
       </Flex>
 
@@ -155,26 +166,38 @@ const ProfessionalForm: React.FC = () => {
         </GumroadCard>
       )}
 
-      {/* Just-created flow: show the invitation token, then "Concluir" */}
-      {justCreated ? (
+      {/* Falha ao carregar (não 404): sem os dados, o formulário vazio levaria a sobrescrever o cadastro */}
+      {!isNewMode && !professional ? (
+        <Flex gap="2">
+          <GumroadButton variant="primary" size="md" onClick={() => setReloadKey((k) => k + 1)}>
+            {t('p2ProForm.retry')}
+          </GumroadButton>
+          <GumroadButton variant="secondary" size="md" onClick={handleBack}>
+            {t('p2ProForm.back')}
+          </GumroadButton>
+        </Flex>
+      ) : justCreated ? (
         <Flex direction="column" gap="4">
           <GumroadText level="body-md" as="p" color={colors.ink} style={{ opacity: 0.8 }}>
-            Pronto! O profissional <strong>{justCreated.name}</strong> está cadastrado como <em>pendente</em>. Envie o código
-            abaixo para que ele(a) possa vincular a conta dele(a).
+            <Trans
+              i18nKey="p2ProForm.created"
+              values={{ name: justCreated.name }}
+              components={{ strong: <strong />, em: <em /> }}
+            />
           </GumroadText>
           {justCreated.invitationToken && (
             <InvitationTokenCard token={justCreated.invitationToken} professionalName={justCreated.name} />
           )}
           <Flex gap="2" justify="end">
             <GumroadButton variant="secondary" size="md" onClick={handleBack}>
-              Voltar para a lista
+              {t('p2ProForm.backToList')}
             </GumroadButton>
             <GumroadButton
               variant="primary"
               size="md"
               onClick={() => navigate(`/professionals/${justCreated.id}`)}
             >
-              Ver detalhes
+              {t('p2ProForm.viewDetails')}
             </GumroadButton>
           </Flex>
         </Flex>
@@ -182,15 +205,15 @@ const ProfessionalForm: React.FC = () => {
         <Flex direction="column" gap="4">
           <GumroadCard color="white" shadow="md" padding="md">
             <Flex direction="column" gap="3">
-              <Field label="Nome" value={professional.name} />
-              <Field label="E-mail" value={professional.email ?? '—'} />
-              <Field label="Profissão / Especialidade" value={professional.profession ?? '—'} />
+              <Field label={t('p2ProForm.fieldName')} value={professional.name} />
+              <Field label={t('p2ProForm.fieldEmail')} value={professional.email ?? '—'} />
+              <Field label={t('p2ProForm.fieldProfession')} value={professional.profession ?? '—'} />
               <Field
-                label="Status"
-                value={professional.status === 'accepted' ? 'Aceito' : 'Convite pendente'}
+                label={t('p2ProForm.fieldStatus')}
+                value={professional.status === 'accepted' ? t('p2ProForm.accepted') : t('p2ProForm.pending')}
               />
               {professional.acceptedAt && (
-                <Field label="Aceito em" value={new Date(professional.acceptedAt).toLocaleString('pt-BR')} />
+                <Field label={t('p2ProForm.fieldAcceptedAt')} value={new Date(professional.acceptedAt).toLocaleString(i18n.language)} />
               )}
             </Flex>
           </GumroadCard>
@@ -205,14 +228,14 @@ const ProfessionalForm: React.FC = () => {
 
           <Flex gap="2" justify="end">
             <GumroadButton variant="secondary" size="md" onClick={handleBack}>
-              Voltar
+              {t('p2ProForm.back')}
             </GumroadButton>
             <GumroadButton
               variant="primary"
               size="md"
               onClick={() => navigate(`/professionals/${professional.id}/edit`)}
             >
-              Editar
+              {t('p2ProForm.edit')}
             </GumroadButton>
           </Flex>
         </Flex>
@@ -236,21 +259,21 @@ const ProfessionalForm: React.FC = () => {
                 </Box>
               )}
               <GumroadInput
-                label="Nome"
-                placeholder="Nome do profissional"
+                label={t('p2ProForm.fieldName')}
+                placeholder={t('p2ProForm.namePh')}
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 required
               />
               <GumroadInput
-                label="E-mail (opcional)"
-                placeholder="email@exemplo.com"
+                label={t('p2ProForm.emailOpt')}
+                placeholder={t('p2ProForm.emailPh')}
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
               <GumroadInput
-                label="Profissão / Especialidade (opcional)"
-                placeholder="Ex: Terapeuta Ocupacional"
+                label={t('p2ProForm.professionOpt')}
+                placeholder={t('p2ProForm.professionPh')}
                 value={form.profession}
                 onChange={(e) => setForm({ ...form, profession: e.target.value })}
               />
@@ -259,10 +282,10 @@ const ProfessionalForm: React.FC = () => {
 
           <Flex gap="2" justify="end" mt="4">
             <GumroadButton variant="secondary" size="md" onClick={handleBack}>
-              Cancelar
+              {t('p2ProForm.cancel')}
             </GumroadButton>
             <GumroadButton variant="primary" size="md" type="submit" disabled={saving}>
-              {saving ? 'Salvando...' : isNewMode ? 'Cadastrar e gerar convite' : 'Salvar alterações'}
+              {saving ? t('p2ProForm.saving') : isNewMode ? t('p2ProForm.createInvite') : t('p2ProForm.saveChanges')}
             </GumroadButton>
           </Flex>
         </form>

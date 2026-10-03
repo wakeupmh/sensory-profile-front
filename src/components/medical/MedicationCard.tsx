@@ -1,5 +1,6 @@
 import React from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { Pencil2Icon, TrashIcon } from '@radix-ui/react-icons';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import GumroadCard from '../design-system/GumroadCard';
@@ -14,8 +15,8 @@ interface MedicationCardProps {
   onDelete: (id: string) => void;
 }
 
-function formatDate(isoDate: string): string {
-  return new Date(isoDate + 'T00:00:00').toLocaleDateString('pt-BR');
+function formatDate(isoDate: string, lang: string): string {
+  return new Date(isoDate + 'T00:00:00').toLocaleDateString(lang);
 }
 
 const iconBtnStyle: React.CSSProperties = {
@@ -33,6 +34,7 @@ const iconBtnStyle: React.CSSProperties = {
 };
 
 const MedicationCard: React.FC<MedicationCardProps> = ({ medication, onEdit, onDelete }) => {
+  const { t, i18n } = useTranslation();
   const notesPreview = medication.notes
     ? medication.notes.length > 60
       ? medication.notes.slice(0, 60) + '…'
@@ -48,7 +50,7 @@ const MedicationCard: React.FC<MedicationCardProps> = ({ medication, onEdit, onD
               {medication.name}
             </GumroadHeading>
             <GumroadBadge color={medication.active ? 'mint' : 'cream'}>
-              {medication.active ? 'Ativo' : 'Inativo'}
+              {medication.active ? t('p2Medical.meds.active') : t('p2Medical.meds.inactive')}
             </GumroadBadge>
           </Flex>
 
@@ -60,15 +62,15 @@ const MedicationCard: React.FC<MedicationCardProps> = ({ medication, onEdit, onD
 
           {(medication.startDate || medication.endDate) && (
             <GumroadText level="body-sm" style={{ opacity: 0.7 }}>
-              {medication.startDate ? formatDate(medication.startDate) : '—'}
+              {medication.startDate ? formatDate(medication.startDate, i18n.language) : '—'}
               {' → '}
-              {medication.endDate ? formatDate(medication.endDate) : 'em curso'}
+              {medication.endDate ? formatDate(medication.endDate, i18n.language) : t('p2Medical.meds.ongoing')}
             </GumroadText>
           )}
 
           {medication.prescribingDoctor && (
             <GumroadText level="body-sm" style={{ opacity: 0.7 }}>
-              Dr./Dra. {medication.prescribingDoctor}
+              {t('p2Medical.doctorPrefix', { name: medication.prescribingDoctor })}
             </GumroadText>
           )}
 
@@ -83,14 +85,16 @@ const MedicationCard: React.FC<MedicationCardProps> = ({ medication, onEdit, onD
           <button
             style={iconBtnStyle}
             onClick={() => onEdit(medication)}
-            aria-label="Editar medicamento"
+            type="button"
+            aria-label={t('p2Medical.meds.editAria')}
           >
             <Pencil2Icon />
           </button>
           <button
             style={iconBtnStyle}
             onClick={() => onDelete(medication.id)}
-            aria-label="Remover medicamento"
+            type="button"
+            aria-label={t('p2Medical.meds.removeAria')}
           >
             <TrashIcon />
           </button>

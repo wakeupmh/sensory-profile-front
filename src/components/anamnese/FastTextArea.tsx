@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, useId, memo } from 'react';
 import { TextArea } from '@radix-ui/themes';
 import { colors, shadows, radii, typography } from '../../theme/tokens';
 
@@ -24,6 +24,7 @@ const FastTextArea = memo(({
   onValueChange,
 }: FastTextAreaProps) => {
   const [value, setValue] = useState(initialValue);
+  const id = useId();
 
   useEffect(() => {
     setValue(initialValue);
@@ -43,6 +44,7 @@ const FastTextArea = memo(({
     <div style={{ width: '100%' }}>
       {label && (
         <label
+          htmlFor={id}
           style={{
             display: 'block',
             fontFamily: typography['title-sm'].font,
@@ -55,6 +57,7 @@ const FastTextArea = memo(({
         </label>
       )}
       <TextArea
+        id={id}
         size="2"
         placeholder={placeholder}
         value={value}

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, Flex } from '@radix-ui/themes';
 import { Cross2Icon, ExclamationTriangleIcon, StopIcon } from '@radix-ui/react-icons';
 import { colors, shadows, radii, spacing, zIndex } from '../../theme/tokens';
@@ -36,6 +37,7 @@ export default function DailyReportRecorder({
   reportDate,
   replaces = null,
 }: DailyReportRecorderProps) {
+  const { t, i18n } = useTranslation();
   const { isRecording, seconds, error, start, stop, cancel } = useAudioRecorder();
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -71,11 +73,11 @@ export default function DailyReportRecorder({
   const handleStop = async () => {
     const recording = await stop();
     if (!recording) {
-      setSubmitError('Nada foi gravado. Tente novamente.');
+      setSubmitError(t('p2Logs.report.nothing'));
       return;
     }
     if (recording.durationSeconds < MIN_USEFUL_SECONDS) {
-      setSubmitError('A gravação ficou curta demais. Conte um pouco mais sobre o dia.');
+      setSubmitError(t('p2Logs.report.tooShort'));
       return;
     }
     setSubmitting(true);
@@ -84,7 +86,7 @@ export default function DailyReportRecorder({
       await onFinish(recording);
       onClose();
     } catch {
-      setSubmitError('Não foi possível enviar a gravação. Verifique a conexão e tente novamente.');
+      setSubmitError(t('p2Logs.report.sendError'));
     } finally {
       setSubmitting(false);
     }
@@ -96,7 +98,7 @@ export default function DailyReportRecorder({
     <Box
       role="dialog"
       aria-modal="true"
-      aria-label="Gravar relato do dia"
+      aria-label={t('p2Logs.report.dialog')}
       style={{
         position: 'fixed',
         inset: 0,
@@ -124,13 +126,13 @@ export default function DailyReportRecorder({
       >
         <Flex justify="between" align="center" mb="4">
           <GumroadHeading level="title-md" as="h2">
-            Relato do dia
+            {t('p2Logs.report.title')}
           </GumroadHeading>
           <button
             type="button"
             onClick={onClose}
             disabled={submitting}
-            aria-label="Fechar"
+            aria-label={t('p2Logs.report.close')}
             style={{ background: 'none', border: 'none', cursor: submitting ? 'default' : 'pointer' }}
           >
             <Cross2Icon width={20} height={20} />
@@ -138,13 +140,13 @@ export default function DailyReportRecorder({
         </Flex>
 
         <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, marginBottom: spacing.md }}>
-          {new Date(`${reportDate}T12:00:00`).toLocaleDateString('pt-BR', {
+          {new Date(`${reportDate}T12:00:00`).toLocaleDateString(i18n.language, {
             weekday: 'long',
             day: '2-digit',
             month: 'long',
           })}
           {' — '}
-          conte como foi o dia. A gravação vira um relatório com registros sugeridos que você confirma depois.
+          {t('p2Logs.report.intro')}
         </GumroadText>
 
         {replaces && (
@@ -160,8 +162,8 @@ export default function DailyReportRecorder({
           >
             <GumroadText level="body-sm" as="p">
               {replaces.status === 'ready'
-                ? 'Já existe um relato para hoje. Gravar de novo substitui a transcrição e o relatório atuais.'
-                : 'Já existe uma gravação para hoje. Gravar de novo substitui a anterior.'}
+                ? t('p2Logs.report.replacesReady')
+                : t('p2Logs.report.replacesOther')}
             </GumroadText>
           </Box>
         )}
@@ -170,7 +172,7 @@ export default function DailyReportRecorder({
           <Flex align="center" gap="2" style={{ color: colors.ink }}>
             <ExclamationTriangleIcon />
             <GumroadText level="body-sm" as="p">
-              Este navegador não permite gravar áudio. Tente pelo Chrome, Firefox ou Safari atualizados.
+              {t('p2Logs.report.unsupported')}
             </GumroadText>
           </Flex>
         ) : (
@@ -189,25 +191,25 @@ export default function DailyReportRecorder({
 
             {isRecording && remaining <= 60 && (
               <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-                A gravação para automaticamente em {formatDuration(remaining)}.
+                {t('p2Logs.report.autoStop', { time: formatDuration(remaining) })}
               </GumroadText>
             )}
 
             {submitting ? (
-              <GumroadText level="body-md" as="p">Enviando a gravação…</GumroadText>
+              <GumroadText level="body-md" as="p">{t('p2Logs.report.sending')}</GumroadText>
             ) : isRecording ? (
               <GumroadButton variant="primary" size="lg" onClick={handleStop}>
                 <StopIcon />
-                Parar e enviar
+                {t('p2Logs.report.stop')}
               </GumroadButton>
             ) : (
               <GumroadButton variant="primary" size="lg" onClick={start}>
-                Começar a gravar
+                {t('p2Logs.report.start')}
               </GumroadButton>
             )}
 
             {(error || submitError) && (
-              <Flex align="center" gap="2">
+              <Flex align="center" gap="2" role="alert">
                 <ExclamationTriangleIcon />
                 <GumroadText level="body-sm" as="p">{error ?? submitError}</GumroadText>
               </Flex>
