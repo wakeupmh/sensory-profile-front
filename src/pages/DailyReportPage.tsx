@@ -361,7 +361,7 @@ export default function DailyReportPage() {
           <LoadingSpinner size="large" text={t('p1Daily.loadingReports')} />
         </GumroadCard>
       ) : error ? (
-        <ErrorState message={error} onRetry={fetchReports} />
+        <ErrorState message={error} onRetry={fetchReports} retryLabel={t('p1Common.retry')} />
       ) : children.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">

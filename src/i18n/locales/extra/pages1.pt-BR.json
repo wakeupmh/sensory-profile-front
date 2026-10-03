@@ -105,7 +105,8 @@
       "achieved": "Alcançada",
       "paused": "Pausada",
       "discontinued": "Descontinuada"
-    }
+    },
+    "retry": "Tentar novamente"
   },
   "p1Logs": {
     "all": "Todos",
@@ -250,5 +251,40 @@
     "entries": "Registros",
     "noEntries": "Nenhum registro de progresso ainda",
     "linkedSession": "Sessão vinculada"
+  },
+  "p1AnamneseList": {
+    "errLoad": "Erro ao carregar anamneses. Por favor, tente novamente.",
+    "errDelete": "Erro ao excluir anamnese. Por favor, tente novamente.",
+    "deleted": "Anamnese excluída",
+    "title": "Anamneses",
+    "subtitle": "Centralize a anamnese da criança e compartilhe com os profissionais",
+    "new": "Nova Anamnese",
+    "loading": "Carregando anamneses...",
+    "emptyTitle": "Nenhuma anamnese cadastrada",
+    "emptyBody": "Crie uma anamnese para reutilizar os dados em várias avaliações",
+    "createFirst": "Criar primeira anamnese",
+    "shared": "Compartilhada",
+    "private": "Privada",
+    "caregiver": "Responsável:",
+    "createdAt": "Criada em:",
+    "view": "Visualizar",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "viewAria": "Visualizar anamnese de {{name}}",
+    "editAria": "Editar anamnese de {{name}}",
+    "deleteAria": "Excluir anamnese de {{name}}",
+    "deleteTitle": "Excluir Anamnese",
+    "deleteBody": "Tem certeza que deseja excluir esta anamnese? Esta ação não pode ser desfeita e links compartilhados deixarão de funcionar.",
+    "cancel": "Cancelar",
+    "deleting": "Excluindo..."
+  },
+  "p1AnamneseShared": {
+    "loading": "Carregando anamnese compartilhada...",
+    "invalidTitle": "Link inválido ou expirado",
+    "invalidBody": "Este link de compartilhamento não é mais válido. Solicite um novo link ao profissional responsável.",
+    "goHome": "Ir para o início",
+    "title": "Anamnese compartilhada",
+    "readOnly": "Visualização somente-leitura.",
+    "createdAt": "Criada em {{date}}."
   }
 }

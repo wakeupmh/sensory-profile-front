@@ -189,7 +189,7 @@ export default function LogsPage() {
       {loading ? (
         <LogsListSkeleton />
       ) : error ? (
-        <ErrorState message={error} onRetry={fetchLogs} />
+        <ErrorState message={error} onRetry={fetchLogs} retryLabel={t('p1Common.retry')} />
       ) : children.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">

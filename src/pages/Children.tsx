@@ -245,7 +245,7 @@ const Children = () => {
       {/* Error banner */}
       {error && (
         <Box mb="5">
-          <ErrorState message={error} onRetry={fetchChildren} />
+          <ErrorState message={error} onRetry={fetchChildren} retryLabel={t('p1Common.retry')} />
         </Box>
       )}
 

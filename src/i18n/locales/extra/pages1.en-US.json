@@ -105,7 +105,8 @@
       "achieved": "Achieved",
       "paused": "Paused",
       "discontinued": "Discontinued"
-    }
+    },
+    "retry": "Try again"
   },
   "p1Logs": {
     "all": "All",
@@ -250,5 +251,40 @@
     "entries": "Entries",
     "noEntries": "No progress entries yet",
     "linkedSession": "Linked session"
+  },
+  "p1AnamneseList": {
+    "errLoad": "Error loading anamneses. Please try again.",
+    "errDelete": "Error deleting anamnese. Please try again.",
+    "deleted": "Anamnese deleted",
+    "title": "Anamneses",
+    "subtitle": "Centralize the child's anamnese and share it with professionals",
+    "new": "New Anamnese",
+    "loading": "Loading anamneses...",
+    "emptyTitle": "No anamneses yet",
+    "emptyBody": "Create an anamnese to reuse the data across assessments",
+    "createFirst": "Create first anamnese",
+    "shared": "Shared",
+    "private": "Private",
+    "caregiver": "Caregiver:",
+    "createdAt": "Created on:",
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete",
+    "viewAria": "View anamnese of {{name}}",
+    "editAria": "Edit anamnese of {{name}}",
+    "deleteAria": "Delete anamnese of {{name}}",
+    "deleteTitle": "Delete Anamnese",
+    "deleteBody": "Are you sure you want to delete this anamnese? This action cannot be undone and shared links will stop working.",
+    "cancel": "Cancel",
+    "deleting": "Deleting..."
+  },
+  "p1AnamneseShared": {
+    "loading": "Loading shared anamnese...",
+    "invalidTitle": "Invalid or expired link",
+    "invalidBody": "This sharing link is no longer valid. Ask the responsible professional for a new link.",
+    "goHome": "Go to home page",
+    "title": "Shared anamnese",
+    "readOnly": "Read-only view.",
+    "createdAt": "Created on {{date}}."
   }
 }

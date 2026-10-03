@@ -104,7 +104,7 @@ export default function GoalsPage() {
       {loading ? (
         <GoalsListSkeleton />
       ) : error ? (
-        <ErrorState message={error} onRetry={fetchGoals} />
+        <ErrorState message={error} onRetry={fetchGoals} retryLabel={t('p1Common.retry')} />
       ) : children.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">

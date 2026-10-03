@@ -106,7 +106,7 @@ export default function GoalDetailPage() {
           <LoadingSpinner size="large" text={t('p1GoalDetail.loading')} />
         </GumroadCard>
       ) : error ? (
-        <ErrorState message={error} onRetry={fetchAll} />
+        <ErrorState message={error} onRetry={fetchAll} retryLabel={t('p1Common.retry')} />
       ) : goal ? (
         <>
           {isAchieved && (

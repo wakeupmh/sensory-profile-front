@@ -164,7 +164,7 @@ const ChildProfilePage = () => {
       {/* Error */}
       {error && (
         <Box mb="5">
-          <ErrorState message={error} onRetry={() => fetchProfile(periodDays)} />
+          <ErrorState message={error} onRetry={() => fetchProfile(periodDays)} retryLabel={t('p1Common.retry')} />
         </Box>
       )}
 

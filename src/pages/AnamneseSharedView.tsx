@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Box, Card, Container, Flex, Heading, Separator, Text } from '@radix-ui/themes';
 import { ExclamationTriangleIcon, FileTextIcon } from '@radix-ui/react-icons';
 
@@ -19,6 +20,7 @@ const emptyFormData: AnamneseFormData = {
 };
 
 const AnamneseSharedView: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const { token } = useParams();
   const [loading, setLoading] = useState(true);
   const [invalid, setInvalid] = useState(false);
@@ -64,7 +66,7 @@ const AnamneseSharedView: React.FC = () => {
       <Container size="3" p="6">
         <Card>
           <Flex align="center" justify="center" direction="column" gap="3" py="9">
-            <LoadingSpinner size="large" text="Carregando anamnese compartilhada..." />
+            <LoadingSpinner size="large" text={t('p1AnamneseShared.loading')} />
           </Flex>
         </Card>
       </Container>
@@ -77,10 +79,11 @@ const AnamneseSharedView: React.FC = () => {
         <Card>
           <Flex direction="column" align="center" gap="3" py="9">
             <ExclamationTriangleIcon width={32} height={32} color="var(--crimson-9)" />
-            <Heading size="5">Link inválido ou expirado</Heading>
+            <Heading size="5">{t('p1AnamneseShared.invalidTitle')}</Heading>
             <Text color="gray" align="center">
-              Este link de compartilhamento não é mais válido. Solicite um novo link ao profissional responsável.
+              {t('p1AnamneseShared.invalidBody')}
             </Text>
+            <Link to="/">{t('p1AnamneseShared.goHome')}</Link>
           </Flex>
         </Card>
       </Container>
@@ -94,12 +97,10 @@ const AnamneseSharedView: React.FC = () => {
     <Container size="3" p={{ initial: '4', sm: '6' }}>
       <Flex align="center" gap="2" mb="2">
         <FileTextIcon width={24} height={24} color="var(--violet-9)" />
-        <Heading size="6" color="violet">Anamnese compartilhada</Heading>
+        <Heading size="6" color="violet">{t('p1AnamneseShared.title')}</Heading>
       </Flex>
       <Text size="2" color="gray" as="p" mb="4">
-        Visualização somente-leitura. {createdAt && (
-          <>Criada em {new Date(createdAt).toLocaleDateString('pt-BR')}.</>
-        )}
+        {t('p1AnamneseShared.readOnly')} {createdAt && t('p1AnamneseShared.createdAt', { date: new Date(createdAt).toLocaleDateString(i18n.language) })}
       </Text>
       <Separator size="4" mb="4" />
 
