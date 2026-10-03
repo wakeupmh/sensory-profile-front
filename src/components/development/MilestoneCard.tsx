@@ -1,5 +1,6 @@
 import React from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { Pencil2Icon, TrashIcon } from '@radix-ui/react-icons';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import GumroadCard from '../design-system/GumroadCard';
@@ -19,8 +20,8 @@ interface MilestoneCardProps {
   onDelete: (id: string) => void;
 }
 
-function formatDate(isoDate: string): string {
-  return new Date(isoDate + 'T00:00:00').toLocaleDateString('pt-BR', {
+function formatDate(isoDate: string, lang: string): string {
+  return new Date(isoDate + 'T00:00:00').toLocaleDateString(lang, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -42,6 +43,7 @@ const iconBtnStyle: React.CSSProperties = {
 };
 
 const MilestoneCard: React.FC<MilestoneCardProps> = ({ milestone, onEdit, onDelete }) => {
+  const { t, i18n } = useTranslation();
   const statusColors = MILESTONE_STATUS_COLORS[milestone.status];
   const categoryColor = MILESTONE_CATEGORY_COLORS[milestone.category];
 
@@ -74,7 +76,7 @@ const MilestoneCard: React.FC<MilestoneCardProps> = ({ milestone, onEdit, onDele
                 border: `1.5px solid ${colors.ink}`,
               }}
             >
-              {MILESTONE_STATUS_LABELS[milestone.status]}
+              {t(`cDevelopment.milestoneStatus.${milestone.status}`, { defaultValue: MILESTONE_STATUS_LABELS[milestone.status] })}
             </span>
 
             {/* Category badge */}
@@ -91,19 +93,19 @@ const MilestoneCard: React.FC<MilestoneCardProps> = ({ milestone, onEdit, onDele
                 border: `1.5px solid ${colors.ink}`,
               }}
             >
-              {MILESTONE_CATEGORY_LABELS[milestone.category]}
+              {t(`cDevelopment.milestoneCategory.${milestone.category}`, { defaultValue: MILESTONE_CATEGORY_LABELS[milestone.category] })}
             </span>
           </Flex>
 
           {milestone.achievedDate && (
             <GumroadText level="body-sm" style={{ color: '#1A7A4A', marginTop: '4px' }}>
-              ✓ Conquistado em: {formatDate(milestone.achievedDate)}
+              {t('cDevelopment.achievedOn', { date: formatDate(milestone.achievedDate, i18n.language) })}
             </GumroadText>
           )}
 
           {milestone.targetDate && (
             <GumroadText level="body-sm" style={{ opacity: 0.6, marginTop: '2px' }}>
-              Meta: {formatDate(milestone.targetDate)}
+              {t('cDevelopment.targetOn', { date: formatDate(milestone.targetDate, i18n.language) })}
             </GumroadText>
           )}
 
@@ -116,18 +118,20 @@ const MilestoneCard: React.FC<MilestoneCardProps> = ({ milestone, onEdit, onDele
 
         <Flex gap="2" style={{ marginLeft: '12px', flexShrink: 0 }}>
           <button
+            type="button"
             style={iconBtnStyle}
             onClick={() => onEdit(milestone)}
-            aria-label="Editar marco"
+            aria-label={t('cDevelopment.editMilestoneAria', { title: milestone.title })}
           >
-            <Pencil2Icon />
+            <Pencil2Icon aria-hidden="true" />
           </button>
           <button
+            type="button"
             style={iconBtnStyle}
             onClick={() => onDelete(milestone.id)}
-            aria-label="Remover marco"
+            aria-label={t('cDevelopment.removeMilestoneAria', { title: milestone.title })}
           >
-            <TrashIcon />
+            <TrashIcon aria-hidden="true" />
           </button>
         </Flex>
       </Flex>
