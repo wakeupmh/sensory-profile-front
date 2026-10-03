@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { assessmentApi, draftApi, childApi, DraftData } from '../services/api';
 import type { ChildData } from '../services/api';
@@ -44,6 +44,8 @@ const INSTRUMENT_BADGE_COLOR: Record<string, BadgeColor> = {
 const getInstrumentBadgeColor = (instrumentId?: string): BadgeColor =>
   (instrumentId && INSTRUMENT_BADGE_COLOR[instrumentId]) || 'cream';
 
+const RECENT_LIMIT = 6;
+
 const Home = () => {
   const { t, i18n } = useTranslation();
   const [assessments, setAssessments] = useState<Assessment[]>([]);
@@ -58,6 +60,9 @@ const Home = () => {
   const getTokenRef = useRef(getToken);
   getTokenRef.current = getToken;
   const navigate = useNavigate();
+  // /assessments é a lista completa; /dashboard é o resumo com as mais recentes
+  const isList = useLocation().pathname.startsWith('/assessments');
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const fetchAssessments = useCallback(async () => {
     try {
@@ -100,18 +105,19 @@ const Home = () => {
       else setAnamneseDraft(null);
     } catch (err) {
       console.error('Erro ao descartar rascunho:', err);
-      setError(t('dashboard.errors.discardDraft'));
+      setActionError(t('dashboard.errors.discardDraft'));
     }
   };
 
   const handleDeleteAssessment = async (id: string) => {
     try {
       setDeleteLoading(id);
+      setActionError(null);
       const token = await getToken();
       await assessmentApi.deleteAssessment(id, token);
       setAssessments((prev) => prev.filter((a) => a.id !== id));
     } catch (err) {
-      setError(t('dashboard.errors.deleteAssessment'));
+      setActionError(t('dashboard.errors.deleteAssessment'));
       console.error(err);
     } finally {
       setDeleteLoading(null);
@@ -131,6 +137,8 @@ const Home = () => {
     return assessments.filter((a) => (a.instrumentId ?? 'crianca-3-14') === instrumentFilter);
   }, [assessments, instrumentFilter]);
 
+  const visibleAssessments = isList ? filteredAssessments : filteredAssessments.slice(0, RECENT_LIMIT);
+
   return (
     <Box>
       {/* Header */}
@@ -143,10 +151,10 @@ const Home = () => {
       >
         <Box>
           <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
-            {t('dashboard.title')}
+            {isList ? t('dashboard.title') : t('nav.dashboard')}
           </GumroadHeading>
           <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7 }}>
-            {t('dashboard.subtitle')}
+            {isList ? t('dashboard.subtitle') : t('home.subtitle')}
           </GumroadText>
         </Box>
         <GumroadButton variant="primary" size="md" asChild>
@@ -161,7 +169,7 @@ const Home = () => {
       </Flex>
 
       {/* Consolidated Report Quick Access */}
-      {!loading && children.length > 0 && (
+      {!isList && !loading && children.length > 0 && (
         <GumroadCard color="cream" shadow="md" padding="md" style={{ marginBottom: spacing.lg }}>
           <Flex align="center" justify="between" gap="3" wrap="wrap">
             <Flex align="center" gap="2">
@@ -201,6 +209,22 @@ const Home = () => {
                 </Flex>
               ))}
             </Flex>
+          </Flex>
+        </GumroadCard>
+      )}
+
+      {actionError && (
+        <GumroadCard role="alert" color="salmon" shadow="md" padding="md" style={{ marginBottom: spacing.lg }}>
+          <Flex align="center" justify="between" gap="3">
+            <Flex align="center" gap="2">
+              <ExclamationTriangleIcon aria-hidden="true" />
+              <GumroadText level="body-md" as="p">
+                {actionError}
+              </GumroadText>
+            </Flex>
+            <GumroadButton variant="secondary" size="sm" onClick={() => setActionError(null)}>
+              {t('home.dismiss')}
+            </GumroadButton>
           </Flex>
         </GumroadCard>
       )}
@@ -272,12 +296,14 @@ const Home = () => {
       )}
 
       {/* Instrument Filter */}
-      {!loading && !error && assessments.length > 0 && distinctInstrumentIds.length > 1 && (
+      {isList && !loading && !error && assessments.length > 0 && distinctInstrumentIds.length > 1 && (
         <Flex align="center" gap="2" mb="4" wrap="wrap">
           <GumroadText level="body-sm" as="span" style={{ opacity: 0.7, whiteSpace: 'nowrap' }}>
             {t('dashboard.filter.byInstrument')}
           </GumroadText>
           <button
+            type="button"
+            aria-pressed={instrumentFilter === 'all'}
             onClick={() => setInstrumentFilter('all')}
             style={{
               padding: '4px 14px',
@@ -299,6 +325,8 @@ const Home = () => {
             return (
               <button
                 key={id}
+                type="button"
+                aria-pressed={active}
                 onClick={() => setInstrumentFilter(id)}
                 style={{
                   padding: '4px 14px',
@@ -324,20 +352,23 @@ const Home = () => {
       ) : error ? (
         <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
           <Flex align="center" gap="2">
-            <ExclamationTriangleIcon />
-            <GumroadText level="body-md" as="p">
+            <ExclamationTriangleIcon aria-hidden="true" />
+            <GumroadText level="body-md" as="p" style={{ flex: 1 }}>
               {error}
             </GumroadText>
+            <GumroadButton variant="secondary" size="sm" onClick={fetchAssessments}>
+              {t('home.retry')}
+            </GumroadButton>
           </Flex>
         </GumroadCard>
       ) : children.length === 0 ? (
-        <NoChildrenPrompt description="Cadastre a primeira criança para começar — depois disso você poderá fazer avaliações, registrar o dia a dia e acompanhar o progresso." />
+        <NoChildrenPrompt description={t('home.noChildrenDescription')} />
       ) : assessments.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">
             <InfoCircledIcon width={40} height={40} />
             <Box>
-              <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
+              <GumroadHeading level="title-md" as="h2" style={{ marginBottom: spacing.xs }}>
                 {t('dashboard.empty.noAssessments.title')}
               </GumroadHeading>
               <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
@@ -356,7 +387,7 @@ const Home = () => {
           <Flex direction="column" align="center" gap="4">
             <InfoCircledIcon width={40} height={40} />
             <Box>
-              <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
+              <GumroadHeading level="title-md" as="h2" style={{ marginBottom: spacing.xs }}>
                 {t('dashboard.empty.noneForInstrument.title')}
               </GumroadHeading>
               <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
@@ -366,6 +397,12 @@ const Home = () => {
           </Flex>
         </GumroadCard>
       ) : (
+        <>
+        {!isList && (
+          <GumroadHeading level="title-md" as="h2" style={{ marginBottom: spacing.md }}>
+            {t('home.recent')}
+          </GumroadHeading>
+        )}
         <div
           style={{
             display: 'grid',
@@ -373,7 +410,7 @@ const Home = () => {
             gap: '20px',
           }}
         >
-          {filteredAssessments.map((assessment, i) => {
+          {visibleAssessments.map((assessment, i) => {
             const instrument = getInstrument(assessment.instrumentId);
             return (
               <GumroadCard
@@ -389,7 +426,7 @@ const Home = () => {
                   <Flex justify="between" align="start" gap="2">
                     <GumroadHeading
                       level="title-md"
-                      as="h3"
+                      as={isList ? 'h2' : 'h3'}
                       style={{ wordBreak: 'break-word', flex: 1 }}
                     >
                       {assessment.childName}
@@ -514,6 +551,16 @@ const Home = () => {
             );
           })}
         </div>
+        {!isList && filteredAssessments.length > RECENT_LIMIT && (
+          <Flex justify="center" mt="5">
+            <GumroadButton variant="secondary" size="md" asChild>
+              <Link to="/assessments" style={{ textDecoration: 'none' }}>
+                {t('home.viewAll', { count: filteredAssessments.length })}
+              </Link>
+            </GumroadButton>
+          </Flex>
+        )}
+        </>
       )}
     </Box>
   );

@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Box, Container } from '@radix-ui/themes';
 import Menu from './Menu';
 import BottomNav from './BottomNav';
@@ -6,10 +7,11 @@ import DelegationBanner from './DelegationBanner';
 import { colors } from '../theme/tokens';
 
 const Layout = () => {
+  const { t } = useTranslation();
   return (
     <Box style={{ minHeight: '100vh', backgroundColor: colors.canvas }}>
       <a href="#main-content" className="skip-link">
-        Pular para o conteúdo
+        {t('navExtra.skipToContent')}
       </a>
       <DelegationBanner />
       <Menu />

@@ -1,1 +1,49 @@
-{}
+{
+  "navExtra": {
+    "search": "Buscar",
+    "skipToContent": "Pular para o conteúdo",
+    "groups": {
+      "daily": "Registro diário",
+      "health": "Saúde e terapias",
+      "sharing": "Compartilhamento",
+      "account": "Conta"
+    },
+    "toast": {
+      "close": "Fechar notificação",
+      "region": "Notificações"
+    }
+  },
+  "home": {
+    "subtitle": "Resumo das suas avaliações recentes e atalhos",
+    "recent": "Avaliações recentes",
+    "viewAll": "Ver todas as avaliações ({{count}})",
+    "retry": "Tentar novamente",
+    "dismiss": "Dispensar",
+    "noChildrenDescription": "Cadastre a primeira criança para começar — depois disso você poderá fazer avaliações, registrar o dia a dia e acompanhar o progresso."
+  },
+  "search": {
+    "placeholder": "Buscar crianças, registros, documentos…",
+    "inputLabel": "Buscar crianças, registros, documentos",
+    "minChars": "Digite pelo menos {{count}} caracteres para buscar.",
+    "loading": "Buscando…",
+    "error": "Não foi possível buscar agora. Tente novamente.",
+    "noResults": "Nenhum resultado para \"{{query}}\".",
+    "sections": {
+      "children": "Crianças",
+      "logs": "Registros",
+      "documents": "Documentos"
+    }
+  },
+  "notFound": {
+    "title": "Não Encontrado",
+    "message": "O recurso que você está procurando não foi encontrado.",
+    "back": "Voltar para a página inicial"
+  },
+  "delegation": {
+    "banner": "Modo cuidador — gerenciando dados de {{name}}",
+    "exit": "Sair do modo cuidador",
+    "switcherLabel": "Visualizando",
+    "myChildren": "Visualizando: Minhas crianças",
+    "caregiverOption": "Visualizando: {{name}} (cuidador)"
+  }
+}

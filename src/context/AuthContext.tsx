@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
@@ -37,15 +37,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const getToken = async (): Promise<string | null> => {
+  // Referências estáveis: consumidores usam getToken em deps de efeitos (ex.: busca global)
+  const getToken = useCallback(async (): Promise<string | null> => {
     const { data } = await supabase.auth.getSession();
     return data.session?.access_token ?? null;
-  };
+  }, []);
 
-  const signOut = () => supabase.auth.signOut().then(() => undefined);
+  const signOut = useCallback(() => supabase.auth.signOut().then(() => undefined), []);
+
+  const value = useMemo(() => ({ session, isLoaded, getToken, signOut }), [session, isLoaded, getToken, signOut]);
 
   return (
-    <AuthContext.Provider value={{ session, isLoaded, getToken, signOut }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
