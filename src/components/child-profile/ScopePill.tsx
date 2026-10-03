@@ -10,6 +10,8 @@ interface ScopePillProps {
 
 const ScopePill: React.FC<ScopePillProps> = ({ label, active, onClick, disabled }) => (
   <button
+    type="button"
+    aria-pressed={active}
     onClick={onClick}
     disabled={disabled}
     style={{

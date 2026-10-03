@@ -1,1 +1,139 @@
-{}
+{
+  "cDesignSystem": {
+    "close": "Close",
+    "stepOfLabel": "Step {{current}} of {{total}}: {{label}}",
+    "stepOf": "Step {{current}} of {{total}}",
+    "goToStep": "Go to step {{number}}: {{label}}",
+    "dictateStopAria": "Stop dictating {{field}}",
+    "dictateStartAria": "Dictate {{field}} by voice",
+    "dictateWait": "The text will appear here shortly.",
+    "dictate": {
+      "idle": "Dictate",
+      "recording": "Stop",
+      "sending": "Sending…",
+      "transcribing": "Transcribing…"
+    }
+  },
+  "cDomain": {
+    "retry": "Try again",
+    "noChildrenTitle": "No children registered",
+    "noChildrenDesc": "Register a child to start using this area.",
+    "addChild": "Add Child",
+    "selectChild": "Select child",
+    "allChildren": "All children"
+  },
+  "cGoals": {
+    "status": {
+      "active": "Active",
+      "achieved": "Achieved",
+      "paused": "Paused",
+      "discontinued": "Discontinued"
+    },
+    "domain": {
+      "comunicacao": "Communication",
+      "social": "Social",
+      "motor": "Motor",
+      "autocuidado": "Self-care",
+      "academico": "Academic",
+      "comportamental": "Behavioral",
+      "outro": "Other"
+    },
+    "therapyType": {
+      "aba": "ABA",
+      "ot": "Occupational Therapy",
+      "fonoaudiologia": "Speech Therapy",
+      "psicologia": "Psychology",
+      "fisioterapia": "Physical Therapy"
+    },
+    "sinceStart_one": "{{delta}} since the start ({{count}} entry)",
+    "sinceStart_other": "{{delta}} since the start ({{count}} entries)",
+    "saving": "Saving...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "editGoal": "Edit Goal",
+    "newGoal": "New Goal",
+    "progressAria": "Goal progress",
+    "baselineLabel": "Baseline",
+    "targetLabel": "Target",
+    "noProgress": "No progress entries yet",
+    "chartAria_one": "Progress chart with {{count}} entry; baseline {{baseline}}, target {{target}}",
+    "chartAria_other": "Progress chart with {{count}} entries; baseline {{baseline}}, target {{target}}",
+    "chartBaseline": "baseline",
+    "chartTarget": "target",
+    "chartRange": "Range: {{min}} to {{max}}",
+    "form": {
+      "title": "Goal title",
+      "titlePh": "E.g. Expand functional vocabulary",
+      "domain": "Domain",
+      "status": "Status",
+      "criteria": "Mastery criteria",
+      "criteriaPh": "E.g. Success criteria, context of application...",
+      "description": "Description",
+      "descriptionPh": "Additional details about the goal...",
+      "baseline": "Baseline",
+      "target": "Target",
+      "unit": "Unit",
+      "unitPh": "E.g. words",
+      "startDate": "Start date",
+      "targetDate": "Target date"
+    },
+    "progressForm": {
+      "title": "Log progress",
+      "value": "Value",
+      "date": "Date",
+      "linkSession": "Link to therapy session (optional)",
+      "none": "None",
+      "notes": "Notes",
+      "notesPh": "Context for this entry..."
+    }
+  },
+  "cChildProfile": {
+    "timelineType": {
+      "assessment": "Assessment",
+      "log": "Log",
+      "therapy": "Therapy",
+      "medical_appointment": "Appointment",
+      "communication": "Communication",
+      "school_comm": "School",
+      "milestone": "Milestone"
+    },
+    "loadError": "Error loading the timeline. Please try again.",
+    "loading": "Loading timeline...",
+    "empty": "No events recorded yet.",
+    "loadingMore": "Loading...",
+    "loadMore": "Load more",
+    "countOf": "{{shown}} of {{total}} events"
+  },
+  "cInsights": {
+    "weekday": [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ],
+    "hourShort": "{{hour}}h",
+    "notEnoughData": "Not enough data",
+    "loadError": "Error loading behavior insights. Please try again.",
+    "title": "Behavior Insights",
+    "days": "{{count}} days",
+    "loading": "Loading insights...",
+    "emptyTitle": "No ABC records in this period",
+    "emptyDesc": "Record the antecedent, behavior and consequence to see insights here.",
+    "createFirst": "Create first record",
+    "occurrences": "Occurrences in the period",
+    "vsPrevious": "{{percent}}% vs. previous period",
+    "avgIntensity": "Average intensity",
+    "byWeekday": "By day of the week",
+    "byHour": "By hour of the day",
+    "topAntecedents": "Top antecedents",
+    "topBehaviors": "Top behaviors",
+    "recent": "Recent occurrences",
+    "antecedent": "Antecedent",
+    "behavior": "Behavior",
+    "consequence": "Consequence",
+    "intensity": "Intensity {{value}}"
+  }
+}

@@ -1,5 +1,6 @@
 import { Flex } from '@radix-ui/themes';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import { useTranslation } from 'react-i18next';
 import GumroadCard from '../design-system/GumroadCard';
 import GumroadButton from '../design-system/GumroadButton';
 import { GumroadText } from '../design-system/GumroadHeading';
@@ -20,18 +21,19 @@ interface ErrorStateProps {
  * páginas de domínio, que exibiam a mensagem de erro sem nenhuma forma de o
  * usuário tentar de novo sem recarregar a página (e perder o estado do PWA).
  */
-export function ErrorState({ message, onRetry, retryLabel = 'Tentar novamente' }: ErrorStateProps) {
+export function ErrorState({ message, onRetry, retryLabel }: ErrorStateProps) {
+  const { t } = useTranslation();
   return (
     <GumroadCard role="alert" color="salmon" shadow="md" padding="lg">
       <Flex align="center" gap="2" justify="between" wrap="wrap">
         <Flex align="center" gap="2">
-          <ExclamationTriangleIcon />
+          <ExclamationTriangleIcon aria-hidden="true" />
           <GumroadText level="body-md" as="p">
             {message}
           </GumroadText>
         </Flex>
         <GumroadButton variant="primary" size="sm" onClick={onRetry}>
-          {retryLabel}
+          {retryLabel ?? t('cDomain.retry')}
         </GumroadButton>
       </Flex>
     </GumroadCard>

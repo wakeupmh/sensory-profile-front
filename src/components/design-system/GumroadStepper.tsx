@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { colors, fonts, borders, shadows } from '../../theme/tokens';
 
 export interface StepItem {
@@ -21,6 +22,7 @@ const GumroadStepper: React.FC<GumroadStepperProps> = ({
   completed,
   onStepClick,
 }) => {
+  const { t } = useTranslation();
   const isCondensed = steps.length > CONDENSED_THRESHOLD;
 
   return (
@@ -41,8 +43,9 @@ const GumroadStepper: React.FC<GumroadStepperProps> = ({
           marginBottom: '20px',
         }}
         className="stepper-mobile"
+        role="status"
       >
-        Etapa {current + 1} de {steps.length}: {steps[current]?.label}
+        {t('cDesignSystem.stepOfLabel', { current: current + 1, total: steps.length, label: steps[current]?.label })}
       </div>
 
       {/* Desktop: full stepper (≤7 steps) */}
@@ -79,6 +82,7 @@ const GumroadStepper: React.FC<GumroadStepperProps> = ({
             const isCompleted = completed.has(i);
             const isCurrent = i === current;
             const isClickable = onStepClick && (isCompleted || isCurrent);
+            const Tag = isClickable ? 'button' : 'div';
 
             let circleStyle: React.CSSProperties = {
               width: '32px',
@@ -130,9 +134,12 @@ const GumroadStepper: React.FC<GumroadStepperProps> = ({
                   flex: 1,
                 }}
               >
-                <div
-                  style={circleStyle}
-                  onClick={isClickable ? () => onStepClick!(i) : undefined}
+                <Tag
+                  {...(isClickable
+                    ? { type: 'button' as const, onClick: () => onStepClick!(i), 'aria-label': t('cDesignSystem.goToStep', { number: i + 1, label: step.label }) }
+                    : {})}
+                  aria-current={isCurrent ? 'step' : undefined}
+                  style={{ ...circleStyle, padding: 0, ...(isClickable ? { background: circleStyle.background } : {}) }}
                   title={step.label}
                 >
                   {isCompleted && !isCurrent ? (
@@ -148,7 +155,7 @@ const GumroadStepper: React.FC<GumroadStepperProps> = ({
                   ) : (
                     <span>{i + 1}</span>
                   )}
-                </div>
+                </Tag>
                 <span
                   style={{
                     fontFamily: fonts.display,
@@ -256,12 +263,25 @@ const GumroadStepper: React.FC<GumroadStepperProps> = ({
                 }
 
                 return (
-                  <div
-                    key={step.key}
-                    style={dotStyle}
-                    onClick={isClickable ? () => onStepClick!(i) : undefined}
-                    title={`${i + 1}. ${step.label}`}
-                  />
+                  isClickable ? (
+                    <button
+                      key={step.key}
+                      type="button"
+                      style={{ ...dotStyle, padding: 0 }}
+                      onClick={() => onStepClick!(i)}
+                      aria-current={isCurrent ? 'step' : undefined}
+                      aria-label={t('cDesignSystem.goToStep', { number: i + 1, label: step.label })}
+                      title={`${i + 1}. ${step.label}`}
+                    />
+                  ) : (
+                    <div
+                      key={step.key}
+                      style={dotStyle}
+                      role="img"
+                      aria-label={`${i + 1}. ${step.label}`}
+                      title={`${i + 1}. ${step.label}`}
+                    />
+                  )
                 );
               })}
             </div>
@@ -270,7 +290,7 @@ const GumroadStepper: React.FC<GumroadStepperProps> = ({
           {/* Current step label */}
           <div style={{ textAlign: 'center', fontFamily: fonts.display }}>
             <div style={{ fontSize: '11px', fontWeight: 500, color: '#888', marginBottom: '2px' }}>
-              Etapa {current + 1} de {steps.length}
+              {t('cDesignSystem.stepOf', { current: current + 1, total: steps.length })}
             </div>
             <div style={{ fontSize: '14px', fontWeight: 700, color: colors['brand-cyan'] }}>
               {steps[current]?.label}

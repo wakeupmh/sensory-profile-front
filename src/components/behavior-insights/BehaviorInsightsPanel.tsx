@@ -1,6 +1,8 @@
+import type { TFunction } from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowUpIcon,
   ArrowDownIcon,
@@ -10,7 +12,6 @@ import {
 import { behaviorInsightsApi } from '../../services/api';
 import { useAuthContext } from '../../context/AuthContext';
 import type { BehaviorInsights, BehaviorTopItem } from '../../types/behaviorInsights';
-import { WEEKDAY_LABELS } from '../../types/behaviorInsights';
 import { colors, spacing, radii } from '../../theme/tokens';
 import GumroadCard from '../design-system/GumroadCard';
 import GumroadButton from '../design-system/GumroadButton';
@@ -24,11 +25,7 @@ interface BehaviorInsightsPanelProps {
   childId: string;
 }
 
-const PERIOD_OPTIONS = [
-  { label: '7 dias', value: 7 },
-  { label: '30 dias', value: 30 },
-  { label: '90 dias', value: 90 },
-];
+const PERIOD_OPTIONS = [7, 30, 90];
 
 const INTENSITY_COLORS: Record<number, 'mint' | 'cyan' | 'yellow' | 'peach' | 'salmon'> = {
   1: 'mint',
@@ -38,22 +35,22 @@ const INTENSITY_COLORS: Record<number, 'mint' | 'cyan' | 'yellow' | 'peach' | 's
   5: 'salmon',
 };
 
-function buildWeekdayData(byWeekday: Record<string, number>): BarDatum[] {
-  return WEEKDAY_LABELS.map((label, idx) => ({
-    label,
+function buildWeekdayData(byWeekday: Record<string, number>, t: TFunction): BarDatum[] {
+  return [0, 1, 2, 3, 4, 5, 6].map((idx) => ({
+    label: t(`cInsights.weekday.${idx}`),
     value: byWeekday[String(idx)] ?? 0,
   }));
 }
 
-function buildHourData(byHour: Record<string, number>): BarDatum[] {
+function buildHourData(byHour: Record<string, number>, t: TFunction): BarDatum[] {
   return Array.from({ length: 24 }, (_, h) => ({
-    label: `${h}h`,
+    label: t('cInsights.hourShort', { hour: h }),
     value: byHour[String(h)] ?? 0,
   }));
 }
 
-function formatOccurredAt(iso: string): string {
-  return new Date(iso).toLocaleString('pt-BR', {
+function formatOccurredAt(iso: string, lang: string): string {
+  return new Date(iso).toLocaleString(lang, {
     day: '2-digit',
     month: '2-digit',
     hour: '2-digit',
@@ -62,10 +59,11 @@ function formatOccurredAt(iso: string): string {
 }
 
 const TopChips: React.FC<{ items: BehaviorTopItem[] }> = ({ items }) => {
+  const { t } = useTranslation();
   if (items.length === 0) {
     return (
       <GumroadText level="body-sm" as="p" style={{ opacity: 0.5, fontStyle: 'italic' }}>
-        Sem dados suficientes
+        {t('cInsights.notEnoughData')}
       </GumroadText>
     );
   }
@@ -81,6 +79,7 @@ const TopChips: React.FC<{ items: BehaviorTopItem[] }> = ({ items }) => {
 };
 
 const BehaviorInsightsPanel: React.FC<BehaviorInsightsPanelProps> = ({ childId }) => {
+  const { t, i18n } = useTranslation();
   const { getToken } = useAuthContext();
   const [days, setDays] = useState(30);
   const [insights, setInsights] = useState<BehaviorInsights | null>(null);
@@ -96,11 +95,11 @@ const BehaviorInsightsPanel: React.FC<BehaviorInsightsPanelProps> = ({ childId }
       const data = await behaviorInsightsApi.get(token, childId, days);
       setInsights(data);
     } catch {
-      setError('Erro ao carregar insights de comportamento. Tente novamente.');
+      setError(t('cInsights.loadError'));
     } finally {
       setLoading(false);
     }
-  }, [childId, days, getToken]);
+  }, [childId, days, getToken, t]);
 
   useEffect(() => {
     fetchInsights();
@@ -112,13 +111,15 @@ const BehaviorInsightsPanel: React.FC<BehaviorInsightsPanelProps> = ({ childId }
     <Box>
       <Flex justify="between" align="center" mb="3" wrap="wrap" gap="3">
         <GumroadHeading level="title-lg" as="h2">
-          Insights de Comportamento
+          {t('cInsights.title')}
         </GumroadHeading>
         <Flex gap="2" wrap="wrap">
           {PERIOD_OPTIONS.map((opt) => (
             <button
-              key={opt.value}
-              onClick={() => setDays(opt.value)}
+              key={opt}
+              type="button"
+              aria-pressed={days === opt}
+              onClick={() => setDays(opt)}
               style={{
                 padding: '6px 16px',
                 border: `2px solid ${colors.ink}`,
@@ -127,11 +128,11 @@ const BehaviorInsightsPanel: React.FC<BehaviorInsightsPanelProps> = ({ childId }
                 fontFamily: 'Inter, sans-serif',
                 fontSize: '13px',
                 fontWeight: 600,
-                backgroundColor: days === opt.value ? colors.ink : 'transparent',
-                color: days === opt.value ? colors.canvas : colors.ink,
+                backgroundColor: days === opt ? colors.ink : 'transparent',
+                color: days === opt ? colors.canvas : colors.ink,
               }}
             >
-              {opt.label}
+              {t('cInsights.days', { count: opt })}
             </button>
           ))}
         </Flex>
@@ -139,26 +140,26 @@ const BehaviorInsightsPanel: React.FC<BehaviorInsightsPanelProps> = ({ childId }
 
       {loading ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
-          <LoadingSpinner size="large" text="Carregando insights..." />
+          <LoadingSpinner size="large" text={t('cInsights.loading')} />
         </GumroadCard>
       ) : error ? (
         <ErrorState message={error} onRetry={fetchInsights} />
       ) : !insights || insights.totalCount === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">
-            <InfoCircledIcon width={36} height={36} />
+            <InfoCircledIcon width={36} height={36} aria-hidden="true" />
             <Box>
               <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
-                Nenhum registro ABC no período
+                {t('cInsights.emptyTitle')}
               </GumroadHeading>
               <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-                Registre antecedente, comportamento e consequência para ver os insights aqui.
+                {t('cInsights.emptyDesc')}
               </GumroadText>
             </Box>
             <GumroadButton variant="primary" size="md" asChild>
               <Link to={`/logs?childId=${childId}`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <PlusIcon />
-                Criar primeiro registro
+                <PlusIcon aria-hidden="true" />
+                {t('cInsights.createFirst')}
               </Link>
             </GumroadButton>
           </Flex>
@@ -170,7 +171,7 @@ const BehaviorInsightsPanel: React.FC<BehaviorInsightsPanelProps> = ({ childId }
             <Flex justify="between" align="center" wrap="wrap" gap="4">
               <Box>
                 <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, marginBottom: '4px' }}>
-                  Ocorrências no período
+                  {t('cInsights.occurrences')}
                 </GumroadText>
                 <GumroadHeading level="display-sm" as="h3">
                   {insights.totalCount}
@@ -186,14 +187,14 @@ const BehaviorInsightsPanel: React.FC<BehaviorInsightsPanelProps> = ({ childId }
                     fontSize: '15px',
                   }}
                 >
-                  {insights.percentChange > 0 ? <ArrowUpIcon /> : <ArrowDownIcon />}
-                  {Math.abs(insights.percentChange).toFixed(0)}% vs. período anterior
+                  {insights.percentChange > 0 ? <ArrowUpIcon aria-hidden="true" /> : <ArrowDownIcon aria-hidden="true" />}
+                  {t('cInsights.vsPrevious', { percent: Math.abs(insights.percentChange).toFixed(0) })}
                 </Flex>
               )}
               {insights.averageIntensity !== null && (
                 <Box>
                   <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, marginBottom: '4px' }}>
-                    Intensidade média
+                    {t('cInsights.avgIntensity')}
                   </GumroadText>
                   <GumroadHeading level="title-lg" as="h3">
                     {insights.averageIntensity.toFixed(1)}/5
@@ -207,17 +208,17 @@ const BehaviorInsightsPanel: React.FC<BehaviorInsightsPanelProps> = ({ childId }
           <Flex gap="4" wrap="wrap">
             <GumroadCard color="cream" shadow="md" padding="lg" style={{ flex: '1 1 280px' }}>
               <GumroadHeading level="title-sm" as="h3" style={{ marginBottom: spacing.md }}>
-                Por dia da semana
+                {t('cInsights.byWeekday')}
               </GumroadHeading>
-              <SimpleBarChart data={buildWeekdayData(insights.byWeekday)} accentColor={colors['brand-cyan']} />
+              <SimpleBarChart label={t('cInsights.byWeekday')} data={buildWeekdayData(insights.byWeekday, t)} accentColor={colors['brand-cyan']} />
             </GumroadCard>
 
             <GumroadCard color="cream" shadow="md" padding="lg" style={{ flex: '1 1 280px', overflowX: 'auto' }}>
               <GumroadHeading level="title-sm" as="h3" style={{ marginBottom: spacing.md }}>
-                Por hora do dia
+                {t('cInsights.byHour')}
               </GumroadHeading>
               <Box style={{ minWidth: '480px' }}>
-                <SimpleBarChart data={buildHourData(insights.byHour)} accentColor={colors['brand-yellow']} />
+                <SimpleBarChart label={t('cInsights.byHour')} data={buildHourData(insights.byHour, t)} accentColor={colors['brand-yellow']} />
               </Box>
             </GumroadCard>
           </Flex>
@@ -226,13 +227,13 @@ const BehaviorInsightsPanel: React.FC<BehaviorInsightsPanelProps> = ({ childId }
           <Flex gap="4" wrap="wrap">
             <GumroadCard color="white" shadow="md" padding="lg" style={{ flex: '1 1 280px' }}>
               <GumroadHeading level="title-sm" as="h3" style={{ marginBottom: spacing.sm }}>
-                Top antecedentes
+                {t('cInsights.topAntecedents')}
               </GumroadHeading>
               <TopChips items={insights.topAntecedents} />
             </GumroadCard>
             <GumroadCard color="white" shadow="md" padding="lg" style={{ flex: '1 1 280px' }}>
               <GumroadHeading level="title-sm" as="h3" style={{ marginBottom: spacing.sm }}>
-                Top comportamentos
+                {t('cInsights.topBehaviors')}
               </GumroadHeading>
               <TopChips items={insights.topBehaviors} />
             </GumroadCard>
@@ -241,7 +242,7 @@ const BehaviorInsightsPanel: React.FC<BehaviorInsightsPanelProps> = ({ childId }
           {/* Recent timeline */}
           <Box>
             <GumroadHeading level="title-sm" as="h3" style={{ marginBottom: spacing.sm }}>
-              Ocorrências recentes
+              {t('cInsights.recent')}
             </GumroadHeading>
             <Flex direction="column" gap="2">
               {insights.recent.slice(0, 10).map((occ) => (
@@ -249,21 +250,21 @@ const BehaviorInsightsPanel: React.FC<BehaviorInsightsPanelProps> = ({ childId }
                   <Flex justify="between" align="start" gap="3" wrap="wrap">
                     <Box style={{ flex: 1, minWidth: 0 }}>
                       <GumroadText level="body-sm" as="p" style={{ opacity: 0.6, marginBottom: '4px' }}>
-                        {formatOccurredAt(occ.occurredAt)}
+                        {formatOccurredAt(occ.occurredAt, i18n.language)}
                       </GumroadText>
                       <GumroadText level="body-sm" as="p">
-                        <strong>Antecedente:</strong> {occ.antecedent}
+                        <strong>{t('cInsights.antecedent')}:</strong> {occ.antecedent}
                       </GumroadText>
                       <GumroadText level="body-sm" as="p">
-                        <strong>Comportamento:</strong> {occ.behavior}
+                        <strong>{t('cInsights.behavior')}:</strong> {occ.behavior}
                       </GumroadText>
                       <GumroadText level="body-sm" as="p">
-                        <strong>Consequência:</strong> {occ.consequence}
+                        <strong>{t('cInsights.consequence')}:</strong> {occ.consequence}
                       </GumroadText>
                     </Box>
                     {occ.intensity !== null && (
                       <GumroadBadge color={INTENSITY_COLORS[occ.intensity] ?? 'cream'}>
-                        Intensidade {occ.intensity}
+                        {t('cInsights.intensity', { value: occ.intensity })}
                       </GumroadBadge>
                     )}
                   </Flex>

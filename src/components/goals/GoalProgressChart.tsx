@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { colors, fonts } from '../../theme/tokens';
 import type { GoalProgressEntry } from '../../types/goals';
 
@@ -14,6 +15,7 @@ const PAD_X = 40;
 const PAD_Y = 30;
 
 const GoalProgressChart: React.FC<GoalProgressChartProps> = ({ entries, baseline, target }) => {
+  const { t, i18n } = useTranslation();
   const sorted = useMemo(
     () => [...entries].sort((a, b) => new Date(a.occurredAt).getTime() - new Date(b.occurredAt).getTime()),
     [entries],
@@ -45,7 +47,7 @@ const GoalProgressChart: React.FC<GoalProgressChartProps> = ({ entries, baseline
   if (sorted.length === 0) {
     return (
       <p style={{ fontFamily: fonts.body, fontSize: '13px', opacity: 0.6, fontStyle: 'italic' }}>
-        Sem registros de progresso ainda
+        {t('cGoals.noProgress')}
       </p>
     );
   }
@@ -53,14 +55,14 @@ const GoalProgressChart: React.FC<GoalProgressChartProps> = ({ entries, baseline
   const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
 
   return (
-    <svg width="100%" height={HEIGHT} viewBox={`0 0 ${WIDTH} ${HEIGHT}`} style={{ display: 'block', overflow: 'visible' }}>
+    <svg role="img" aria-label={t('cGoals.chartAria', { count: points.length, baseline, target })} width="100%" height={HEIGHT} viewBox={`0 0 ${WIDTH} ${HEIGHT}`} style={{ display: 'block', overflow: 'visible' }}>
       {/* Baseline reference */}
       <line x1={PAD_X} y1={baselineY} x2={WIDTH - PAD_X} y2={baselineY} stroke={colors.ink} strokeOpacity={0.25} strokeDasharray="4 4" strokeWidth={1.5} />
-      <text x={WIDTH - PAD_X} y={baselineY - 4} textAnchor="end" fontSize="10" fill={colors.ink} opacity={0.5}>baseline</text>
+      <text x={WIDTH - PAD_X} y={baselineY - 4} textAnchor="end" fontSize="10" fill={colors.ink} opacity={0.5}>{t('cGoals.chartBaseline')}</text>
 
       {/* Target reference */}
       <line x1={PAD_X} y1={targetY} x2={WIDTH - PAD_X} y2={targetY} stroke={colors.success} strokeOpacity={0.4} strokeDasharray="4 4" strokeWidth={1.5} />
-      <text x={WIDTH - PAD_X} y={targetY - 4} textAnchor="end" fontSize="10" fill={colors.success}>meta</text>
+      <text x={WIDTH - PAD_X} y={targetY - 4} textAnchor="end" fontSize="10" fill={colors.success}>{t('cGoals.chartTarget')}</text>
 
       {/* Progress line */}
       <path d={pathD} fill="none" stroke={colors['brand-cyan']} strokeWidth={3} />
@@ -69,11 +71,11 @@ const GoalProgressChart: React.FC<GoalProgressChartProps> = ({ entries, baseline
       {points.map((p, idx) => (
         <g key={idx}>
           <circle cx={p.x} cy={p.y} r={7} fill={colors['brand-cyan']} stroke={colors.ink} strokeWidth={2}>
-            <title>{`${new Date(p.date).toLocaleDateString('pt-BR')}: ${p.value}`}</title>
+            <title>{`${new Date(p.date).toLocaleDateString(i18n.language)}: ${p.value}`}</title>
           </circle>
         </g>
       ))}
-      <title>{`Faixa: ${minVal.toFixed(1)} a ${maxVal.toFixed(1)}`}</title>
+      <title>{t('cGoals.chartRange', { min: minVal.toFixed(1), max: maxVal.toFixed(1) })}</title>
     </svg>
   );
 };

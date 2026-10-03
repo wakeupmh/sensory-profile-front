@@ -1,4 +1,5 @@
 import { useId } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box } from '@radix-ui/themes';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import type { ChildData } from '../../services/api';
@@ -11,7 +12,8 @@ interface ChildSelectorProps {
   emptyLabel?: string;
 }
 
-export function ChildSelector({ children, selectedChildId, onChange, emptyLabel = 'Todas as crianças' }: ChildSelectorProps) {
+export function ChildSelector({ children, selectedChildId, onChange, emptyLabel }: ChildSelectorProps) {
+  const { t } = useTranslation();
   const selectId = useId();
   if (children.length === 0) return <NoChildrenPrompt />;
   return (
@@ -20,7 +22,7 @@ export function ChildSelector({ children, selectedChildId, onChange, emptyLabel 
           controle mais importante destas páginas, mas seu visual (borda +
           opções) já comunica o propósito para quem enxerga a tela. */}
       <label htmlFor={selectId} className="sr-only">
-        Selecionar criança
+        {t('cDomain.selectChild')}
       </label>
       <select
         id={selectId}
@@ -41,7 +43,7 @@ export function ChildSelector({ children, selectedChildId, onChange, emptyLabel 
           minWidth: '200px',
         }}
       >
-        <option value="">{emptyLabel}</option>
+        <option value="">{emptyLabel ?? t('cDomain.allChildren')}</option>
         {children.map((c) => (
           <option key={c.id} value={c.id}>
             {c.name}

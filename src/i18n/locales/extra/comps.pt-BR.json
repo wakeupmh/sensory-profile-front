@@ -1,1 +1,139 @@
-{}
+{
+  "cDesignSystem": {
+    "close": "Fechar",
+    "stepOfLabel": "Etapa {{current}} de {{total}}: {{label}}",
+    "stepOf": "Etapa {{current}} de {{total}}",
+    "goToStep": "Ir para a etapa {{number}}: {{label}}",
+    "dictateStopAria": "Parar o ditado de {{field}}",
+    "dictateStartAria": "Ditar {{field}} por voz",
+    "dictateWait": "O texto aparece aqui em instantes.",
+    "dictate": {
+      "idle": "Ditar",
+      "recording": "Parar",
+      "sending": "Enviando…",
+      "transcribing": "Transcrevendo…"
+    }
+  },
+  "cDomain": {
+    "retry": "Tentar novamente",
+    "noChildrenTitle": "Nenhuma criança cadastrada",
+    "noChildrenDesc": "Cadastre uma criança para começar a usar esta área.",
+    "addChild": "Adicionar Criança",
+    "selectChild": "Selecionar criança",
+    "allChildren": "Todas as crianças"
+  },
+  "cGoals": {
+    "status": {
+      "active": "Ativa",
+      "achieved": "Alcançada",
+      "paused": "Pausada",
+      "discontinued": "Descontinuada"
+    },
+    "domain": {
+      "comunicacao": "Comunicação",
+      "social": "Social",
+      "motor": "Motor",
+      "autocuidado": "Autocuidado",
+      "academico": "Acadêmico",
+      "comportamental": "Comportamental",
+      "outro": "Outro"
+    },
+    "therapyType": {
+      "aba": "ABA",
+      "ot": "Terapia Ocupacional",
+      "fonoaudiologia": "Fonoaudiologia",
+      "psicologia": "Psicologia",
+      "fisioterapia": "Fisioterapia"
+    },
+    "sinceStart_one": "{{delta}} desde o início ({{count}} registro)",
+    "sinceStart_other": "{{delta}} desde o início ({{count}} registros)",
+    "saving": "Salvando...",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "editGoal": "Editar Meta",
+    "newGoal": "Nova Meta",
+    "progressAria": "Progresso da meta",
+    "baselineLabel": "Baseline",
+    "targetLabel": "Meta",
+    "noProgress": "Sem registros de progresso ainda",
+    "chartAria_one": "Gráfico de progresso com {{count}} registro; baseline {{baseline}}, meta {{target}}",
+    "chartAria_other": "Gráfico de progresso com {{count}} registros; baseline {{baseline}}, meta {{target}}",
+    "chartBaseline": "baseline",
+    "chartTarget": "meta",
+    "chartRange": "Faixa: {{min}} a {{max}}",
+    "form": {
+      "title": "Título da meta",
+      "titlePh": "Ex: Ampliar vocabulário funcional",
+      "domain": "Domínio",
+      "status": "Status",
+      "criteria": "Critério de domínio",
+      "criteriaPh": "Ex: Critério de sucesso, contexto de aplicação...",
+      "description": "Descrição",
+      "descriptionPh": "Detalhes adicionais sobre a meta...",
+      "baseline": "Baseline",
+      "target": "Meta",
+      "unit": "Unidade",
+      "unitPh": "Ex: palavras",
+      "startDate": "Data de início",
+      "targetDate": "Data alvo"
+    },
+    "progressForm": {
+      "title": "Registrar progresso",
+      "value": "Valor",
+      "date": "Data",
+      "linkSession": "Vincular à sessão de terapia (opcional)",
+      "none": "Nenhuma",
+      "notes": "Observação",
+      "notesPh": "Contexto do registro..."
+    }
+  },
+  "cChildProfile": {
+    "timelineType": {
+      "assessment": "Avaliação",
+      "log": "Registro",
+      "therapy": "Terapia",
+      "medical_appointment": "Consulta",
+      "communication": "Comunicação",
+      "school_comm": "Escola",
+      "milestone": "Marco"
+    },
+    "loadError": "Erro ao carregar linha do tempo. Por favor, tente novamente.",
+    "loading": "Carregando linha do tempo...",
+    "empty": "Nenhum evento registrado ainda.",
+    "loadingMore": "Carregando...",
+    "loadMore": "Carregar mais",
+    "countOf": "{{shown}} de {{total}} eventos"
+  },
+  "cInsights": {
+    "weekday": [
+      "Dom",
+      "Seg",
+      "Ter",
+      "Qua",
+      "Qui",
+      "Sex",
+      "Sáb"
+    ],
+    "hourShort": "{{hour}}h",
+    "notEnoughData": "Sem dados suficientes",
+    "loadError": "Erro ao carregar insights de comportamento. Tente novamente.",
+    "title": "Insights de Comportamento",
+    "days": "{{count}} dias",
+    "loading": "Carregando insights...",
+    "emptyTitle": "Nenhum registro ABC no período",
+    "emptyDesc": "Registre antecedente, comportamento e consequência para ver os insights aqui.",
+    "createFirst": "Criar primeiro registro",
+    "occurrences": "Ocorrências no período",
+    "vsPrevious": "{{percent}}% vs. período anterior",
+    "avgIntensity": "Intensidade média",
+    "byWeekday": "Por dia da semana",
+    "byHour": "Por hora do dia",
+    "topAntecedents": "Top antecedentes",
+    "topBehaviors": "Top comportamentos",
+    "recent": "Ocorrências recentes",
+    "antecedent": "Antecedente",
+    "behavior": "Comportamento",
+    "consequence": "Consequência",
+    "intensity": "Intensidade {{value}}"
+  }
+}

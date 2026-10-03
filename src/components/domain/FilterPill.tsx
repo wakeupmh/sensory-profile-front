@@ -9,6 +9,8 @@ interface FilterPillProps {
 
 export const FilterPill = memo(({ active, label, onClick }: FilterPillProps) => (
   <button
+    type="button"
+    aria-pressed={active}
     onClick={onClick}
     style={{
       padding: '4px 14px',
