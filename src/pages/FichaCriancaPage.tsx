@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { parseLocalDate } from '../utils/date';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { Box, Flex } from '@radix-ui/themes';
 import { ArrowLeftIcon, ExclamationTriangleIcon, Share2Icon } from '@radix-ui/react-icons';
 import { childApi, comorbidityApi, medicationApi } from '../services/api';
@@ -24,19 +26,21 @@ const SAVE_DEBOUNCE_MS = 600;
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
-function calculateAge(birthDate: string): string {
+function calculateAge(birthDate: string, t: TFunction): string {
   const birth = parseLocalDate(birthDate);
   const now = new Date();
   let years = now.getFullYear() - birth.getFullYear();
   let months = now.getMonth() - birth.getMonth();
   if (now.getDate() < birth.getDate()) months -= 1;
   if (months < 0) { years -= 1; months += 12; }
-  if (years <= 0) return `${months} ${months === 1 ? 'mês' : 'meses'}`;
-  return `${years} ${years === 1 ? 'ano' : 'anos'}${months > 0 ? ` e ${months} ${months === 1 ? 'mês' : 'meses'}` : ''}`;
+  const monthsText = t('p1Ficha.months', { count: months });
+  if (years <= 0) return monthsText;
+  const yearsText = t('p1Ficha.years', { count: years });
+  return months > 0 ? t('p1Ficha.ageJoin', { years: yearsText, months: monthsText }) : yearsText;
 }
 
-function formatBirthDate(birthDate: string): string {
-  return parseLocalDate(birthDate).toLocaleDateString('pt-BR');
+function formatBirthDate(birthDate: string, locale: string): string {
+  return parseLocalDate(birthDate).toLocaleDateString(locale);
 }
 
 const textareaStyle: React.CSSProperties = {
@@ -62,14 +66,15 @@ const printLabelStyle: React.CSSProperties = {
   display: 'block',
 };
 
-const SAVE_STATUS_LABELS: Record<SaveStatus, string> = {
+const SAVE_STATUS_KEYS: Record<SaveStatus, string> = {
   idle: '',
-  saving: 'Salvando...',
-  saved: 'Sincronizado entre dispositivos',
-  error: 'Não foi possível salvar. Tente novamente.',
+  saving: 'p1Ficha.saving',
+  saved: 'p1Ficha.saved',
+  error: 'p1Ficha.saveError',
 };
 
 export default function FichaCriancaPage() {
+  const { t, i18n } = useTranslation();
   const { childId } = useParams<{ childId: string }>();
   const navigate = useNavigate();
   const { getToken } = useAuthContext();
@@ -105,21 +110,15 @@ export default function FichaCriancaPage() {
         emergencyContact: childData.emergencyContact ?? '',
       });
     } catch {
-      setError('Erro ao carregar a ficha. Por favor, tente novamente.');
+      setError(t('p1Ficha.errLoad'));
     } finally {
       setLoading(false);
     }
-  }, [childId]);
+  }, [childId, t]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  useEffect(() => {
-    return () => {
-      if (saveTimeoutRef.current) window.clearTimeout(saveTimeoutRef.current);
-    };
-  }, []);
 
   const saveNotes = useCallback(async (snapshot: CareNotes) => {
     if (!childId) return;
@@ -133,13 +132,32 @@ export default function FichaCriancaPage() {
     }
   }, [childId]);
 
-  const updateNotes = (patch: Partial<CareNotes>) => {
-    setNotes((prev) => {
-      const next = { ...prev, ...patch };
+  // Edição ainda não enviada: se o usuário sair da página dentro da janela do
+  // debounce, grava na saída em vez de descartar o que acabou de digitar.
+  const pendingNotesRef = useRef<CareNotes | null>(null);
+  const saveNotesRef = useRef(saveNotes);
+  saveNotesRef.current = saveNotes;
+
+  useEffect(() => {
+    return () => {
       if (saveTimeoutRef.current) window.clearTimeout(saveTimeoutRef.current);
-      saveTimeoutRef.current = window.setTimeout(() => saveNotes(next), SAVE_DEBOUNCE_MS);
-      return next;
-    });
+      if (pendingNotesRef.current) {
+        const snapshot = pendingNotesRef.current;
+        pendingNotesRef.current = null;
+        void saveNotesRef.current(snapshot);
+      }
+    };
+  }, []);
+
+  const updateNotes = (patch: Partial<CareNotes>) => {
+    const next = { ...notes, ...patch };
+    setNotes(next);
+    pendingNotesRef.current = next;
+    if (saveTimeoutRef.current) window.clearTimeout(saveTimeoutRef.current);
+    saveTimeoutRef.current = window.setTimeout(() => {
+      pendingNotesRef.current = null;
+      void saveNotes(next);
+    }, SAVE_DEBOUNCE_MS);
   };
 
   const handlePrint = () => {
@@ -175,13 +193,13 @@ export default function FichaCriancaPage() {
     <Box style={{ maxWidth: '720px', margin: '0 auto' }}>
       <Flex justify="between" align="center" mb="5" gap="3" wrap="wrap">
         <GumroadButton variant="secondary" size="sm" onClick={() => navigate(childId ? `/children/${childId}` : '/children')}>
-          <ArrowLeftIcon />
-          Voltar
+          <ArrowLeftIcon aria-hidden="true" />
+          {t('p1Ficha.back')}
         </GumroadButton>
         {child && (
           <GumroadButton variant="primary" size="sm" onClick={handlePrint}>
-            <Share2Icon />
-            Imprimir / Exportar
+            <Share2Icon aria-hidden="true" />
+            {t('p1Ficha.print')}
           </GumroadButton>
         )}
       </Flex>
@@ -189,45 +207,46 @@ export default function FichaCriancaPage() {
       {error && (
         <GumroadCard role="alert" color="salmon" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
           <Flex align="center" gap="2">
-            <ExclamationTriangleIcon />
+            <ExclamationTriangleIcon aria-hidden="true" />
             <GumroadText level="body-md" as="p">{error}</GumroadText>
+            <GumroadButton variant="primary" size="sm" onClick={fetchData}>{t('p1Common.retry')}</GumroadButton>
           </Flex>
         </GumroadCard>
       )}
 
       {loading ? (
-        <Flex justify="center" py="6"><LoadingSpinner size="medium" text="Carregando ficha..." /></Flex>
+        <Flex justify="center" py="6"><LoadingSpinner size="medium" text={t('p1Ficha.loading')} /></Flex>
       ) : child ? (
         <div id="ficha-crianca-print">
           <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
-            Ficha da Criança — {child.name}
+            {t('p1Ficha.title', { name: child.name })}
           </GumroadHeading>
           <GumroadText level="body-sm" as="p" style={{ opacity: 0.7, marginBottom: spacing.lg }}>
-            Documento de referência rápida para escola, cuidadores e emergências
+            {t('p1Ficha.subtitle')}
           </GumroadText>
 
           <GumroadCard color="cream" shadow="md" padding="lg" style={{ marginBottom: spacing.md }}>
             <Flex gap="4" wrap="wrap">
               <Box>
-                <span style={printLabelStyle}>Nascimento</span>
+                <span style={printLabelStyle}>{t('p1Ficha.birth')}</span>
                 <GumroadText level="body-md" as="p">
-                  {formatBirthDate(child.birthDate)} ({calculateAge(child.birthDate)})
+                  {formatBirthDate(child.birthDate, i18n.language)} ({calculateAge(child.birthDate, t)})
                 </GumroadText>
               </Box>
               {child.gender && (
                 <Box>
-                  <span style={printLabelStyle}>Gênero</span>
-                  <GumroadText level="body-md" as="p">{child.gender}</GumroadText>
+                  <span style={printLabelStyle}>{t('p1Ficha.gender')}</span>
+                  <GumroadText level="body-md" as="p">{['male', 'female', 'other'].includes(child.gender) ? t(`p1Children.${child.gender}`) : child.gender}</GumroadText>
                 </Box>
               )}
             </Flex>
           </GumroadCard>
 
           <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.md }}>
-            <span style={printLabelStyle}>Diagnósticos</span>
+            <span style={printLabelStyle}>{t('p1Ficha.diagnoses')}</span>
             {comorbidities.length === 0 ? (
               <GumroadText level="body-sm" as="p" style={{ opacity: 0.6, fontStyle: 'italic' }}>
-                Nenhum diagnóstico registrado
+                {t('p1Ficha.noDiagnoses')}
               </GumroadText>
             ) : (
               <Flex direction="column" gap="1">
@@ -241,10 +260,10 @@ export default function FichaCriancaPage() {
           </GumroadCard>
 
           <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.md }}>
-            <span style={printLabelStyle}>Medicações em uso</span>
+            <span style={printLabelStyle}>{t('p1Ficha.meds')}</span>
             {medications.length === 0 ? (
               <GumroadText level="body-sm" as="p" style={{ opacity: 0.6, fontStyle: 'italic' }}>
-                Nenhuma medicação ativa registrada
+                {t('p1Ficha.noMeds')}
               </GumroadText>
             ) : (
               <Flex direction="column" gap="1">
@@ -258,35 +277,35 @@ export default function FichaCriancaPage() {
           </GumroadCard>
 
           <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.md }}>
-            <span style={printLabelStyle}>Gatilhos sensoriais conhecidos</span>
+            <span style={printLabelStyle}>{t('p1Ficha.triggers')}</span>
             <textarea
               value={notes.sensoryTriggers}
               onChange={(e) => updateNotes({ sensoryTriggers: e.target.value })}
-              placeholder="Ex.: barulhos altos e inesperados, luzes fluorescentes, aglomerações..."
+              placeholder={t('p1Ficha.triggersPh')}
               style={textareaStyle}
-              aria-label="Gatilhos sensoriais conhecidos"
+              aria-label={t('p1Ficha.triggers')}
             />
           </GumroadCard>
 
           <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.md }}>
-            <span style={printLabelStyle}>O que ajuda a acalmar</span>
+            <span style={printLabelStyle}>{t('p1Ficha.calming')}</span>
             <textarea
               value={notes.calmingStrategies}
               onChange={(e) => updateNotes({ calmingStrategies: e.target.value })}
-              placeholder="Ex.: fone abafador, objeto de apego, contar até 10 em voz baixa..."
+              placeholder={t('p1Ficha.calmingPh')}
               style={textareaStyle}
-              aria-label="O que ajuda a acalmar"
+              aria-label={t('p1Ficha.calming')}
             />
           </GumroadCard>
 
           <GumroadCard color="yellow" shadow="md" padding="lg" style={{ marginBottom: spacing.md }}>
-            <span style={printLabelStyle}>Contato de emergência</span>
+            <span style={printLabelStyle}>{t('p1Ficha.emergency')}</span>
             <textarea
               value={notes.emergencyContact}
               onChange={(e) => updateNotes({ emergencyContact: e.target.value })}
-              placeholder="Nome, parentesco e telefone"
+              placeholder={t('p1Ficha.emergencyPh')}
               style={{ ...textareaStyle, minHeight: '40px', backgroundColor: colors.canvas }}
-              aria-label="Contato de emergência"
+              aria-label={t('p1Ficha.emergency')}
             />
           </GumroadCard>
 
@@ -302,19 +321,19 @@ export default function FichaCriancaPage() {
                 color: saveStatus === 'error' ? colors.error : colors.ink,
               }}
             >
-              {SAVE_STATUS_LABELS[saveStatus]}
+              {t(SAVE_STATUS_KEYS[saveStatus])}
             </p>
           )}
 
           <GumroadText level="caption" as="p" style={{ opacity: 0.5, marginTop: spacing.md }}>
-            Gerado em {new Date().toLocaleString('pt-BR')}
+            {t('p1Ficha.generated', { date: new Date().toLocaleString(i18n.language) })}
           </GumroadText>
         </div>
       ) : null}
 
       {!loading && !child && !error && (
         <Link to="/children" style={{ textDecoration: 'none' }}>
-          <GumroadText level="body-sm" as="span">Voltar para crianças</GumroadText>
+          <GumroadText level="body-sm" as="span">{t('p1Ficha.backToChildren')}</GumroadText>
         </Link>
       )}
     </Box>
