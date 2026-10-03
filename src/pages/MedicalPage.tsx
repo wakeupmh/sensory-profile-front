@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, Flex } from '@radix-ui/themes';
 import { medicationApi, comorbidityApi, appointmentApi } from '../services/api';
 import type {
@@ -24,8 +25,8 @@ import ComorbiditiesPanel from '../components/medical/ComorbiditiesPanel';
 import AppointmentsPanel from '../components/medical/AppointmentsPanel';
 import { DomainListSkeleton } from '../components/skeletons/PageSkeletons';
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('pt-BR', {
+function formatDate(iso: string, lang: string): string {
+  return new Date(iso).toLocaleDateString(lang, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -33,6 +34,7 @@ function formatDate(iso: string): string {
 }
 
 export default function MedicalPage() {
+  const { t, i18n } = useTranslation();
   const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
 
   const [medsPanelOpen, setMedsPanelOpen] = useState(false);
@@ -88,7 +90,7 @@ export default function MedicalPage() {
           {resource.error}
         </GumroadText>
         <GumroadButton variant="secondary" size="sm" onClick={retry}>
-          Tentar novamente
+          {t('p2Medical.page.retry')}
         </GumroadButton>
       </Flex>
     ) : null;
@@ -173,10 +175,10 @@ export default function MedicalPage() {
       >
         <Box>
           <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
-            Histórico Médico
+            {t('p2Medical.page.title')}
           </GumroadHeading>
           <GumroadText level="body-sm" as="p" color={colors.ink} style={{ opacity: 0.7 }}>
-            Medicamentos, diagnósticos e consultas
+            {t('p2Medical.page.subtitle')}
           </GumroadText>
         </Box>
       </Flex>
@@ -186,6 +188,7 @@ export default function MedicalPage() {
         children={children}
         selectedChildId={selectedChildId}
         onChange={setSelectedChildId}
+        emptyLabel={t('p2Common.allChildren')}
       />
 
       {/* Loading state */}
@@ -200,7 +203,7 @@ export default function MedicalPage() {
             <Flex justify="between" align="center" mb="3" gap="2">
               <Flex align="center" gap="2">
                 <GumroadHeading level="title-md" as="h2">
-                  Medicamentos Ativos
+                  {t('p2Medical.page.activeMeds')}
                 </GumroadHeading>
                 <GumroadBadge color="cyan">{activeMeds.length}</GumroadBadge>
               </Flex>
@@ -210,12 +213,12 @@ export default function MedicalPage() {
                 onClick={() => effectiveChildId && setMedsPanelOpen(true)}
                 disabled={!effectiveChildId}
               >
-                Gerenciar
+                {t('p2Medical.page.manage')}
               </GumroadButton>
             </Flex>
             {sectionError(meds, fetchMedications) ??
              (children.length > 0 && medications.slice(0, 3).length === 0 ? (
-              <p style={emptyStyle}>Nenhum registro</p>
+              <p style={emptyStyle}>{t('p2Medical.page.noRecords')}</p>
             ) : (
               medications.slice(0, 3).map((med) => (
                 <div key={med.id} style={previewItemStyle}>
@@ -230,7 +233,7 @@ export default function MedicalPage() {
             <Flex justify="between" align="center" mb="3" gap="2">
               <Flex align="center" gap="2">
                 <GumroadHeading level="title-md" as="h2">
-                  Diagnósticos
+                  {t('p2Medical.comorb.title')}
                 </GumroadHeading>
                 <GumroadBadge color="lavender">{comorbidities.length}</GumroadBadge>
               </Flex>
@@ -240,12 +243,12 @@ export default function MedicalPage() {
                 onClick={() => effectiveChildId && setComorbidityPanelOpen(true)}
                 disabled={!effectiveChildId}
               >
-                Gerenciar
+                {t('p2Medical.page.manage')}
               </GumroadButton>
             </Flex>
             {sectionError(comorbs, fetchComorbidities) ??
              (children.length > 0 && comorbidities.slice(0, 3).length === 0 ? (
-              <p style={emptyStyle}>Nenhum registro</p>
+              <p style={emptyStyle}>{t('p2Medical.page.noRecords')}</p>
             ) : (
               comorbidities.slice(0, 3).map((c) => (
                 <div key={c.id} style={previewItemStyle}>
@@ -260,7 +263,7 @@ export default function MedicalPage() {
             <Flex justify="between" align="center" mb="3" gap="2">
               <Flex align="center" gap="2">
                 <GumroadHeading level="title-md" as="h2">
-                  Consultas
+                  {t('p2Medical.appts.title')}
                 </GumroadHeading>
                 <GumroadBadge color="yellow">{appointments.length}</GumroadBadge>
               </Flex>
@@ -270,16 +273,16 @@ export default function MedicalPage() {
                 onClick={() => effectiveChildId && setAppointmentPanelOpen(true)}
                 disabled={!effectiveChildId}
               >
-                Gerenciar
+                {t('p2Medical.page.manage')}
               </GumroadButton>
             </Flex>
             {sectionError(appts, fetchAppointments) ??
              (children.length > 0 && appointments.slice(0, 3).length === 0 ? (
-              <p style={emptyStyle}>Nenhum registro</p>
+              <p style={emptyStyle}>{t('p2Medical.page.noRecords')}</p>
             ) : (
               appointments.slice(0, 3).map((appt) => (
                 <div key={appt.id} style={previewItemStyle}>
-                  {appt.occurredAt ? formatDate(appt.occurredAt) : '—'}
+                  {appt.occurredAt ? formatDate(appt.occurredAt, i18n.language) : '—'}
                   {appt.doctorName ? ` — ${appt.doctorName}` : ''}
                 </div>
               ))

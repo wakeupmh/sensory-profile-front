@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useId } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Flex, Box } from '@radix-ui/themes';
 import {colors, shadows, radii, fonts } from '../../theme/tokens';
 import type { LogType } from '../../types/logs';
@@ -79,19 +80,22 @@ function ChipRow<T extends string | number>({
   options,
   value,
   onSelect,
+  labelledBy,
 }: {
   options: { value: T; label: string }[];
   value: T | undefined;
   onSelect: (value: T) => void;
+  labelledBy?: string;
 }) {
   return (
-    <Flex gap="2" wrap="wrap">
+    <Flex gap="2" wrap="wrap" role="group" aria-labelledby={labelledBy}>
       {options.map((opt) => (
         <button
           key={String(opt.value)}
           type="button"
           className="press-in"
           style={chipStyle(value === opt.value)}
+          aria-pressed={value === opt.value}
           onClick={() => onSelect(opt.value)}
         >
           {opt.label}
@@ -102,45 +106,47 @@ function ChipRow<T extends string | number>({
 }
 
 function MoodEditor({ data, onChange }: { data: Record<string, unknown>; onChange: (d: Record<string, unknown>) => void }) {
+  const { t } = useTranslation();
+  const uid = useId();
   const level = numberField(data.level);
   return (
     <Flex direction="column" gap="3">
       <Box>
-        <label style={labelStyle}>Como estava</label>
+        <div id={`${uid}-l`} style={labelStyle}>{t('p2Logs.sug.mood')}</div>
         <ChipRow
+          labelledBy={`${uid}-l`}
           options={[1, 2, 3, 4, 5].map((v) => ({ value: v, label: String(v) }))}
           value={level}
           onSelect={(v) => onChange({ ...data, level: v })}
         />
       </Box>
       <Box>
-        <label style={labelStyle}>Marcadores (separados por vírgula)</label>
+        <label htmlFor={`${uid}-t`} style={labelStyle}>{t('p2Logs.sug.tagsList')}</label>
         <input
+          id={`${uid}-t`}
           type="text"
           style={inputStyle}
           defaultValue={joinList(data.tags)}
           onBlur={(e) => onChange({ ...data, tags: parseList(e.target.value) })}
-          placeholder="Ex: calmo, feliz"
+          placeholder={t('p2Logs.sug.tagsPh')}
         />
       </Box>
     </Flex>
   );
 }
 
-const SLEEP_QUALITY: { value: 1 | 2 | 3; label: string }[] = [
-  { value: 1, label: 'Ruim' },
-  { value: 2, label: 'Razoável' },
-  { value: 3, label: 'Boa' },
-];
-
 function SleepEditor({ data, onChange }: { data: Record<string, unknown>; onChange: (d: Record<string, unknown>) => void }) {
+  const { t } = useTranslation();
+  const uid = useId();
+  const SLEEP_QUALITY = ([1, 2, 3] as const).map((value) => ({ value, label: t(`p2Logs.sleep.q${value}`) }));
   const quality = numberField(data.quality) as 1 | 2 | 3 | undefined;
   return (
     <Flex direction="column" gap="3">
       <Flex gap="3">
         <Box style={{ flex: 1 }}>
-          <label style={labelStyle}>Dormiu</label>
+          <label htmlFor={`${uid}-bed`} style={labelStyle}>{t('p2Logs.sug.slept')}</label>
           <input
+            id={`${uid}-bed`}
             type="time"
             style={inputStyle}
             defaultValue={stringField(data.bedtime)}
@@ -148,8 +154,9 @@ function SleepEditor({ data, onChange }: { data: Record<string, unknown>; onChan
           />
         </Box>
         <Box style={{ flex: 1 }}>
-          <label style={labelStyle}>Acordou</label>
+          <label htmlFor={`${uid}-wake`} style={labelStyle}>{t('p2Logs.sug.woke')}</label>
           <input
+            id={`${uid}-wake`}
             type="time"
             style={inputStyle}
             defaultValue={stringField(data.waketime)}
@@ -157,8 +164,9 @@ function SleepEditor({ data, onChange }: { data: Record<string, unknown>; onChan
           />
         </Box>
         <Box style={{ width: '90px' }}>
-          <label style={labelStyle}>Vezes acordou</label>
+          <label htmlFor={`${uid}-n`} style={labelStyle}>{t('p2Logs.sug.wakings')}</label>
           <input
+            id={`${uid}-n`}
             type="number"
             min={0}
             max={20}
@@ -169,110 +177,112 @@ function SleepEditor({ data, onChange }: { data: Record<string, unknown>; onChan
         </Box>
       </Flex>
       <Box>
-        <label style={labelStyle}>Qualidade</label>
-        <ChipRow options={SLEEP_QUALITY} value={quality} onSelect={(v) => onChange({ ...data, quality: v })} />
+        <div id={`${uid}-q`} style={labelStyle}>{t('p2Logs.sleep.quality')}</div>
+        <ChipRow labelledBy={`${uid}-q`} options={SLEEP_QUALITY} value={quality} onSelect={(v) => onChange({ ...data, quality: v })} />
       </Box>
     </Flex>
   );
 }
 
-const MEAL_OPTIONS: { value: string; label: string }[] = [
-  { value: 'cafe', label: 'Café da manhã' },
-  { value: 'almoco', label: 'Almoço' },
-  { value: 'jantar', label: 'Jantar' },
-  { value: 'lanche', label: 'Lanche' },
-];
-
 function FoodEditor({ data, onChange }: { data: Record<string, unknown>; onChange: (d: Record<string, unknown>) => void }) {
+  const { t } = useTranslation();
+  const uid = useId();
+  const MEAL_OPTIONS = (['cafe', 'almoco', 'jantar', 'lanche'] as const).map((value) => ({ value: value as string, label: t(`p2Logs.food.${value}`) }));
   const meal = typeof data.meal === 'string' ? data.meal : undefined;
   return (
     <Flex direction="column" gap="3">
       <Box>
-        <label style={labelStyle}>Refeição</label>
-        <ChipRow options={MEAL_OPTIONS} value={meal} onSelect={(v) => onChange({ ...data, meal: v })} />
+        <div id={`${uid}-m`} style={labelStyle}>{t('p2Logs.food.meal')}</div>
+        <ChipRow labelledBy={`${uid}-m`} options={MEAL_OPTIONS} value={meal} onSelect={(v) => onChange({ ...data, meal: v })} />
       </Box>
       <Box>
-        <label style={labelStyle}>Aceitou (separados por vírgula)</label>
+        <label htmlFor={`${uid}-a`} style={labelStyle}>{t('p2Logs.sug.acceptedList')}</label>
         <input
+          id={`${uid}-a`}
           type="text"
           style={inputStyle}
           defaultValue={joinList(data.accepted)}
           onBlur={(e) => onChange({ ...data, accepted: parseList(e.target.value) })}
-          placeholder="Ex: arroz, frango"
+          placeholder={t('p2Logs.sug.acceptedPh')}
         />
       </Box>
       <Box>
-        <label style={labelStyle}>Recusou (separados por vírgula)</label>
+        <label htmlFor={`${uid}-r`} style={labelStyle}>{t('p2Logs.sug.refusedList')}</label>
         <input
+          id={`${uid}-r`}
           type="text"
           style={inputStyle}
           defaultValue={joinList(data.refused)}
           onBlur={(e) => onChange({ ...data, refused: parseList(e.target.value) })}
-          placeholder="Ex: brócolis"
+          placeholder={t('p2Logs.sug.refusedPh')}
         />
       </Box>
     </Flex>
   );
 }
 
-const TOILETING_TYPE: { value: string; label: string }[] = [
-  { value: 'urina', label: 'Urina' },
-  { value: 'fezes', label: 'Fezes' },
-  { value: 'ambos', label: 'Ambos' },
-];
-
 function ToiletingEditor({ data, onChange }: { data: Record<string, unknown>; onChange: (d: Record<string, unknown>) => void }) {
+  const { t } = useTranslation();
+  const uid = useId();
+  const TOILETING_TYPE = (['urina', 'fezes', 'ambos'] as const).map((value) => ({ value: value as string, label: t(`p2Logs.toilet.${value}`) }));
   const type = typeof data.type === 'string' ? data.type : undefined;
   const independent = data.independent === true;
   return (
     <Flex direction="column" gap="3">
       <Box>
-        <label style={labelStyle}>Tipo</label>
-        <ChipRow options={TOILETING_TYPE} value={type} onSelect={(v) => onChange({ ...data, type: v })} />
+        <div id={`${uid}-t`} style={labelStyle}>{t('p2Logs.toilet.type')}</div>
+        <ChipRow labelledBy={`${uid}-t`} options={TOILETING_TYPE} value={type} onSelect={(v) => onChange({ ...data, type: v })} />
       </Box>
       <button
         type="button"
         className="press-in"
         style={{ ...chipStyle(independent), width: 'fit-content' }}
+        aria-pressed={independent}
         onClick={() => onChange({ ...data, independent: !independent })}
       >
-        {independent ? '✓ Independente' : 'Independente?'}
+        {independent ? t('p2Logs.sug.independentYes') : t('p2Logs.sug.independentAsk')}
       </button>
     </Flex>
   );
 }
 
 function AbcEditor({ data, onChange }: { data: Record<string, unknown>; onChange: (d: Record<string, unknown>) => void }) {
+  const { t } = useTranslation();
+  const uid = useId();
   const intensity = numberField(data.intensity);
   return (
     <Flex direction="column" gap="3">
       <Box>
-        <label style={labelStyle}>Antes</label>
+        <label htmlFor={`${uid}-a`} style={labelStyle}>{t('p2Logs.sug.before')}</label>
         <textarea
+          id={`${uid}-a`}
           style={{ ...inputStyle, minHeight: '52px', resize: 'vertical' }}
           defaultValue={stringField(data.antecedent)}
           onBlur={(e) => onChange({ ...data, antecedent: e.target.value })}
         />
       </Box>
       <Box>
-        <label style={labelStyle}>Comportamento</label>
+        <label htmlFor={`${uid}-b`} style={labelStyle}>{t('p2Logs.sug.behavior')}</label>
         <textarea
+          id={`${uid}-b`}
           style={{ ...inputStyle, minHeight: '52px', resize: 'vertical' }}
           defaultValue={stringField(data.behavior)}
           onBlur={(e) => onChange({ ...data, behavior: e.target.value })}
         />
       </Box>
       <Box>
-        <label style={labelStyle}>Depois</label>
+        <label htmlFor={`${uid}-c`} style={labelStyle}>{t('p2Logs.sug.after')}</label>
         <textarea
+          id={`${uid}-c`}
           style={{ ...inputStyle, minHeight: '52px', resize: 'vertical' }}
           defaultValue={stringField(data.consequence)}
           onBlur={(e) => onChange({ ...data, consequence: e.target.value })}
         />
       </Box>
       <Box>
-        <label style={labelStyle}>Intensidade</label>
+        <div id={`${uid}-i`} style={labelStyle}>{t('p2Logs.abc.intensity')}</div>
         <ChipRow
+          labelledBy={`${uid}-i`}
           options={[1, 2, 3, 4, 5].map((v) => ({ value: v, label: String(v) }))}
           value={intensity}
           onSelect={(v) => onChange({ ...data, intensity: v })}

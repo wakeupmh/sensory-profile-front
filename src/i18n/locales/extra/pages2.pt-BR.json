@@ -1,1 +1,223 @@
-{}
+{
+  "p2Logs": {
+    "save": "Salvar",
+    "saving": "Salvando...",
+    "types": {
+      "abc": "ABC (Comportamento)",
+      "mood": "Humor",
+      "sleep": "Sono",
+      "food": "Alimentação",
+      "toileting": "Banheiro"
+    },
+    "quick": {
+      "title": "Registrar",
+      "dateTime": "Data e hora",
+      "notes": "Observações",
+      "notesField": "observações",
+      "notesPlaceholder": "Anotações adicionais (opcional)...",
+      "photo": "Foto (opcional)",
+      "photoPreview": "Prévia da foto selecionada",
+      "removePhoto": "Remover foto",
+      "addPhoto": "Adicionar foto",
+      "back": "← Voltar",
+      "saved": "Registro salvo",
+      "saveError": "Erro ao salvar registro. Tente novamente.",
+      "invalidDate": "Informe uma data e hora válidas."
+    },
+    "abc": {
+      "antecedent": "O que aconteceu antes?",
+      "antecedentPh": "Descreva o antecedente...",
+      "behavior": "Qual foi o comportamento?",
+      "behaviorPh": "Descreva o comportamento...",
+      "consequence": "O que aconteceu depois?",
+      "consequencePh": "Descreva a consequência...",
+      "intensity": "Intensidade",
+      "i1": "1 — Muito leve",
+      "i2": "2 — Leve",
+      "i3": "3 — Moderado",
+      "i4": "4 — Intenso",
+      "i5": "5 — Muito intenso"
+    },
+    "mood": {
+      "how": "Como estava?",
+      "l1": "Muito Agitado",
+      "l2": "Agitado",
+      "l3": "Neutro",
+      "l4": "Calmo",
+      "l5": "Muito Calmo",
+      "tags": "Marcadores",
+      "tag": {
+        "calmo": "calmo",
+        "agitado": "agitado",
+        "feliz": "feliz",
+        "triste": "triste",
+        "ansioso": "ansioso",
+        "frustrado": "frustrado"
+      },
+      "pickLevel": "Escolha como estava para salvar."
+    },
+    "sleep": {
+      "bedtime": "Hora de dormir",
+      "waketime": "Hora de acordar",
+      "wakings": "Vezes que acordou",
+      "quality": "Qualidade",
+      "q1": "Ruim",
+      "q2": "Razoável",
+      "q3": "Boa"
+    },
+    "food": {
+      "meal": "Refeição",
+      "cafe": "Café da manhã",
+      "almoco": "Almoço",
+      "jantar": "Jantar",
+      "lanche": "Lanche",
+      "accepted": "Alimentos aceitos",
+      "acceptedPh": "Ex: arroz, frango, cenoura",
+      "refused": "Alimentos recusados",
+      "refusedPh": "Ex: brócolis, feijão",
+      "hint": "Separe os alimentos por vírgula."
+    },
+    "toilet": {
+      "type": "Tipo",
+      "urina": "Urina",
+      "fezes": "Fezes",
+      "ambos": "Ambos",
+      "independent": "Independente"
+    },
+    "report": {
+      "dialog": "Gravar relato do dia",
+      "title": "Relato do dia",
+      "close": "Fechar",
+      "intro": "conte como foi o dia. A gravação vira um relatório com registros sugeridos que você confirma depois.",
+      "nothing": "Nada foi gravado. Tente novamente.",
+      "tooShort": "A gravação ficou curta demais. Conte um pouco mais sobre o dia.",
+      "sendError": "Não foi possível enviar a gravação. Verifique a conexão e tente novamente.",
+      "replacesReady": "Já existe um relato para hoje. Gravar de novo substitui a transcrição e o relatório atuais.",
+      "replacesOther": "Já existe uma gravação para hoje. Gravar de novo substitui a anterior.",
+      "unsupported": "Este navegador não permite gravar áudio. Tente pelo Chrome, Firefox ou Safari atualizados.",
+      "autoStop": "A gravação para automaticamente em {{time}}.",
+      "sending": "Enviando a gravação…",
+      "stop": "Parar e enviar",
+      "start": "Começar a gravar"
+    },
+    "sug": {
+      "mood": "Como estava",
+      "tagsList": "Marcadores (separados por vírgula)",
+      "tagsPh": "Ex: calmo, feliz",
+      "slept": "Dormiu",
+      "woke": "Acordou",
+      "wakings": "Vezes acordou",
+      "acceptedList": "Aceitou (separados por vírgula)",
+      "acceptedPh": "Ex: arroz, frango",
+      "refusedList": "Recusou (separados por vírgula)",
+      "refusedPh": "Ex: brócolis",
+      "independentYes": "✓ Independente",
+      "independentAsk": "Independente?",
+      "before": "Antes",
+      "behavior": "Comportamento",
+      "after": "Depois"
+    }
+  },
+  "p2Medical": {
+    "save": "Salvar",
+    "saving": "Salvando...",
+    "cancel": "Cancelar",
+    "remove": "Remover",
+    "changesSaved": "Alterações salvas",
+    "saveError": "Não foi possível salvar. Tente novamente.",
+    "removeError": "Não foi possível remover. Tente novamente.",
+    "doctorPrefix": "Dr./Dra. {{name}}",
+    "meds": {
+      "title": "Medicamentos",
+      "add": "Adicionar Medicamento",
+      "empty": "Nenhum medicamento cadastrado",
+      "confirm": "Remover {{name}}?",
+      "new": "Novo Medicamento",
+      "edit": "Editar Medicamento",
+      "added": "Medicamento adicionado",
+      "removed": "Medicamento removido",
+      "active": "Ativo",
+      "inactive": "Inativo",
+      "ongoing": "em curso",
+      "editAria": "Editar medicamento",
+      "removeAria": "Remover medicamento",
+      "form": {
+        "name": "Nome",
+        "namePh": "Nome do medicamento",
+        "dosage": "Dosagem",
+        "dosagePh": "Ex: 10mg",
+        "frequency": "Frequência",
+        "frequencyPh": "Ex: 2x ao dia",
+        "start": "Data de início",
+        "end": "Data de término",
+        "doctor": "Médico prescritor",
+        "doctorPh": "Nome do médico",
+        "active": "Medicamento ativo",
+        "notes": "Observações",
+        "notesPh": "Informações adicionais...",
+        "endBeforeStart": "A data de término não pode ser anterior à de início."
+      }
+    },
+    "appts": {
+      "title": "Consultas",
+      "add": "Adicionar Consulta",
+      "empty": "Nenhuma consulta registrada",
+      "confirm": "Remover consulta",
+      "confirmWith": " com Dr./Dra. {{name}}",
+      "new": "Nova Consulta",
+      "edit": "Editar Consulta",
+      "added": "Consulta adicionada",
+      "removed": "Consulta removida",
+      "followUp": "Retorno: {{date}}",
+      "editAria": "Editar consulta",
+      "removeAria": "Remover consulta",
+      "form": {
+        "when": "Data e hora da consulta",
+        "doctor": "Médico",
+        "doctorPh": "Nome do médico",
+        "specialty": "Especialidade",
+        "specialtyPh": "Ex: Neuropediatra",
+        "clinic": "Clínica / Hospital",
+        "clinicPh": "Nome da clínica ou hospital",
+        "summary": "Resumo da consulta",
+        "summaryPh": "O que foi discutido ou decidido na consulta...",
+        "followUp": "Data de retorno",
+        "notes": "Observações internas",
+        "notesPh": "Notas adicionais..."
+      }
+    },
+    "comorb": {
+      "title": "Diagnósticos",
+      "add": "Adicionar Diagnóstico",
+      "empty": "Nenhum diagnóstico cadastrado",
+      "new": "Novo Diagnóstico",
+      "edit": "Editar Diagnóstico",
+      "added": "Diagnóstico adicionado",
+      "removed": "Diagnóstico removido",
+      "editAria": "Editar diagnóstico",
+      "removeAria": "Remover diagnóstico",
+      "form": {
+        "condition": "Condição / Diagnóstico",
+        "conditionPh": "Ex: Transtorno do Espectro Autista",
+        "icd": "Código CID",
+        "icdPh": "Ex: F84.0",
+        "date": "Data do diagnóstico",
+        "doctor": "Médico diagnosticador",
+        "doctorPh": "Nome do médico",
+        "notes": "Observações",
+        "notesPh": "Informações adicionais..."
+      }
+    },
+    "page": {
+      "title": "Histórico Médico",
+      "subtitle": "Medicamentos, diagnósticos e consultas",
+      "activeMeds": "Medicamentos Ativos",
+      "manage": "Gerenciar",
+      "retry": "Tentar novamente",
+      "noRecords": "Nenhum registro"
+    }
+  },
+  "p2Common": {
+    "allChildren": "Todas as crianças"
+  }
+}

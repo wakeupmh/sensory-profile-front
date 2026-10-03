@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
 import type { Medication, CreateMedicationPayload, UpdateMedicationPayload } from '../../types/medical';
@@ -56,6 +57,7 @@ const MedicationForm: React.FC<MedicationFormProps> = ({
   onCancel,
   loading = false,
 }) => {
+  const { t } = useTranslation();
   const [name, setName] = useState(initialValues.name ?? '');
   const [dosage, setDosage] = useState(initialValues.dosage ?? '');
   const [frequency, setFrequency] = useState(initialValues.frequency ?? '');
@@ -66,7 +68,8 @@ const MedicationForm: React.FC<MedicationFormProps> = ({
   const [notes, setNotes] = useState(initialValues.notes ?? '');
   const [submitting, setSubmitting] = useState(false);
 
-  const isDisabled = submitting || loading || !name.trim();
+  const dateOrderInvalid = Boolean(startDate && endDate && endDate < startDate);
+  const isDisabled = submitting || loading || !name.trim() || dateOrderInvalid;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,14 +97,14 @@ const MedicationForm: React.FC<MedicationFormProps> = ({
       <Flex direction="column" gap="3">
         <div>
           <label style={labelStyle} htmlFor="med-nome">
-            Nome <span style={{ color: colors.error }} aria-hidden="true">*</span>
+            {t('p2Medical.meds.form.name')} <span style={{ color: colors.error }} aria-hidden="true">*</span>
           </label>
           <input id="med-nome"
             type="text"
             maxLength={255}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Nome do medicamento"
+            placeholder={t('p2Medical.meds.form.namePh')}
             style={inputStyle}
             required
           />
@@ -109,24 +112,24 @@ const MedicationForm: React.FC<MedicationFormProps> = ({
 
         <Flex gap="3">
           <div style={{ flex: 1 }}>
-            <label style={labelStyle} htmlFor="med-dosagem">Dosagem</label>
+            <label style={labelStyle} htmlFor="med-dosagem">{t('p2Medical.meds.form.dosage')}</label>
             <input id="med-dosagem"
               type="text"
               maxLength={100}
               value={dosage}
               onChange={(e) => setDosage(e.target.value)}
-              placeholder="Ex: 10mg"
+              placeholder={t('p2Medical.meds.form.dosagePh')}
               style={inputStyle}
             />
           </div>
           <div style={{ flex: 1 }}>
-            <label style={labelStyle} htmlFor="med-frequencia">Frequência</label>
+            <label style={labelStyle} htmlFor="med-frequencia">{t('p2Medical.meds.form.frequency')}</label>
             <input id="med-frequencia"
               type="text"
               maxLength={100}
               value={frequency}
               onChange={(e) => setFrequency(e.target.value)}
-              placeholder="Ex: 2x ao dia"
+              placeholder={t('p2Medical.meds.form.frequencyPh')}
               style={inputStyle}
             />
           </div>
@@ -134,7 +137,7 @@ const MedicationForm: React.FC<MedicationFormProps> = ({
 
         <Flex gap="3">
           <div style={{ flex: 1 }}>
-            <label style={labelStyle} htmlFor="med-data-de">Data de início</label>
+            <label style={labelStyle} htmlFor="med-data-de">{t('p2Medical.meds.form.start')}</label>
             <input id="med-data-de"
               type="date"
               value={startDate}
@@ -143,24 +146,31 @@ const MedicationForm: React.FC<MedicationFormProps> = ({
             />
           </div>
           <div style={{ flex: 1 }}>
-            <label style={labelStyle} htmlFor="med-data-de-2">Data de término</label>
+            <label style={labelStyle} htmlFor="med-data-de-2">{t('p2Medical.meds.form.end')}</label>
             <input id="med-data-de-2"
               type="date"
               value={endDate}
+              min={startDate || undefined}
               onChange={(e) => setEndDate(e.target.value)}
               style={inputStyle}
             />
           </div>
         </Flex>
 
+        {dateOrderInvalid && (
+          <p role="alert" style={{ margin: 0, fontFamily: fonts.display, fontSize: '13px', color: colors.error }}>
+            {t('p2Medical.meds.form.endBeforeStart')}
+          </p>
+        )}
+
         <div>
-          <label style={labelStyle} htmlFor="med-medico-prescritor">Médico prescritor</label>
+          <label style={labelStyle} htmlFor="med-medico-prescritor">{t('p2Medical.meds.form.doctor')}</label>
           <input id="med-medico-prescritor"
             type="text"
             maxLength={255}
             value={prescribingDoctor}
             onChange={(e) => setPrescribingDoctor(e.target.value)}
-            placeholder="Nome do médico"
+            placeholder={t('p2Medical.meds.form.doctorPh')}
             style={inputStyle}
           />
         </div>
@@ -173,13 +183,13 @@ const MedicationForm: React.FC<MedicationFormProps> = ({
               onChange={(e) => setActive(e.target.checked)}
               style={{ width: '18px', height: '18px', accentColor: colors['brand-cyan'], cursor: 'pointer' }}
             />
-            Medicamento ativo
+            {t('p2Medical.meds.form.active')}
           </label>
         </div>
 
         <div>
           <label style={labelStyle} htmlFor="med-observacoes-2000">
-            Observações
+            {t('p2Medical.meds.form.notes')}
             <span style={{ fontWeight: 400, color: colors['ink-muted'], marginLeft: '6px' }}>
               ({notes.length}/2000)
             </span>
@@ -189,17 +199,17 @@ const MedicationForm: React.FC<MedicationFormProps> = ({
             rows={3}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Informações adicionais..."
+            placeholder={t('p2Medical.meds.form.notesPh')}
             style={textareaStyle}
           />
         </div>
 
         <Flex gap="2" mt="2">
           <GumroadButton variant="primary" size="md" type="submit" disabled={isDisabled}>
-            {submitting || loading ? 'Salvando...' : 'Salvar'}
+            {submitting || loading ? t('p2Medical.saving') : t('p2Medical.save')}
           </GumroadButton>
           <GumroadButton variant="ghost" size="md" type="button" onClick={onCancel}>
-            Cancelar
+            {t('p2Medical.cancel')}
           </GumroadButton>
         </Flex>
       </Flex>

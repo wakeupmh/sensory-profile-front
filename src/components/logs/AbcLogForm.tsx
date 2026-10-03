@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Flex, Box } from '@radix-ui/themes';
 import { colors, shadows, radii, fonts, spacing } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
@@ -28,20 +29,14 @@ const labelStyle: React.CSSProperties = {
   marginBottom: spacing.xxs,
 };
 
-const INTENSITY_LABELS: Record<number, string> = {
-  1: '1 — Muito leve',
-  2: '2 — Leve',
-  3: '3 — Moderado',
-  4: '4 — Intenso',
-  5: '5 — Muito intenso',
-};
-
 interface AbcLogFormProps {
   onSubmit: (data: AbcData) => void;
   isLoading?: boolean;
 }
 
 export default function AbcLogForm({ onSubmit, isLoading }: AbcLogFormProps) {
+  const { t } = useTranslation();
+  const uid = useId();
   const [antecedent, setAntecedent] = useState('');
   const [behavior, setBehavior] = useState('');
   const [consequence, setConsequence] = useState('');
@@ -63,47 +58,52 @@ export default function AbcLogForm({ onSubmit, isLoading }: AbcLogFormProps) {
     <form onSubmit={handleSubmit}>
       <Flex direction="column" gap="4">
         <Box>
-          <label style={labelStyle}>O que aconteceu antes? <span style={{ color: colors.error }} aria-hidden="true">*</span></label>
+          <label htmlFor={`${uid}-a`} style={labelStyle}>{t('p2Logs.abc.antecedent')} <span style={{ color: colors.error }} aria-hidden="true">*</span></label>
           <textarea
+            id={`${uid}-a`}
             style={inputStyle}
             value={antecedent}
             onChange={e => setAntecedent(e.target.value)}
-            placeholder="Descreva o antecedente..."
+            placeholder={t('p2Logs.abc.antecedentPh')}
             required
           />
         </Box>
 
         <Box>
-          <label style={labelStyle}>Qual foi o comportamento? <span style={{ color: colors.error }} aria-hidden="true">*</span></label>
+          <label htmlFor={`${uid}-b`} style={labelStyle}>{t('p2Logs.abc.behavior')} <span style={{ color: colors.error }} aria-hidden="true">*</span></label>
           <textarea
+            id={`${uid}-b`}
             style={inputStyle}
             value={behavior}
             onChange={e => setBehavior(e.target.value)}
-            placeholder="Descreva o comportamento..."
+            placeholder={t('p2Logs.abc.behaviorPh')}
             required
           />
         </Box>
 
         <Box>
-          <label style={labelStyle}>O que aconteceu depois? <span style={{ color: colors.error }} aria-hidden="true">*</span></label>
+          <label htmlFor={`${uid}-c`} style={labelStyle}>{t('p2Logs.abc.consequence')} <span style={{ color: colors.error }} aria-hidden="true">*</span></label>
           <textarea
+            id={`${uid}-c`}
             style={inputStyle}
             value={consequence}
             onChange={e => setConsequence(e.target.value)}
-            placeholder="Descreva a consequência..."
+            placeholder={t('p2Logs.abc.consequencePh')}
             required
           />
         </Box>
 
         <Box>
-          <label style={labelStyle}>Intensidade</label>
-          <Flex gap="2">
+          <div id={`${uid}-i`} style={labelStyle}>{t('p2Logs.abc.intensity')}</div>
+          <Flex gap="2" role="group" aria-labelledby={`${uid}-i`}>
             {([1, 2, 3, 4, 5] as const).map(n => (
               <button className="press-in"
                 key={n}
                 type="button"
                 onClick={() => setIntensity(intensity === n ? null : n)}
-                title={INTENSITY_LABELS[n]}
+                title={t(`p2Logs.abc.i${n}`)}
+                aria-label={t(`p2Logs.abc.i${n}`)}
+                aria-pressed={intensity === n}
                 style={{
                   flex: 1,
                   height: '44px',
@@ -127,7 +127,7 @@ export default function AbcLogForm({ onSubmit, isLoading }: AbcLogFormProps) {
         </Box>
 
         <GumroadButton type="submit" variant="primary" size="lg" disabled={isLoading}>
-          {isLoading ? 'Salvando...' : 'Salvar'}
+          {isLoading ? t('p2Logs.saving') : t('p2Logs.save')}
         </GumroadButton>
       </Flex>
     </form>

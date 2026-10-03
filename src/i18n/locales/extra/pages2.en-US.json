@@ -1,1 +1,223 @@
-{}
+{
+  "p2Logs": {
+    "save": "Save",
+    "saving": "Saving...",
+    "types": {
+      "abc": "ABC (Behavior)",
+      "mood": "Mood",
+      "sleep": "Sleep",
+      "food": "Food",
+      "toileting": "Toileting"
+    },
+    "quick": {
+      "title": "Log",
+      "dateTime": "Date and time",
+      "notes": "Notes",
+      "notesField": "notes",
+      "notesPlaceholder": "Additional notes (optional)...",
+      "photo": "Photo (optional)",
+      "photoPreview": "Preview of the selected photo",
+      "removePhoto": "Remove photo",
+      "addPhoto": "Add photo",
+      "back": "← Back",
+      "saved": "Log saved",
+      "saveError": "Could not save the log. Please try again.",
+      "invalidDate": "Enter a valid date and time."
+    },
+    "abc": {
+      "antecedent": "What happened before?",
+      "antecedentPh": "Describe the antecedent...",
+      "behavior": "What was the behavior?",
+      "behaviorPh": "Describe the behavior...",
+      "consequence": "What happened after?",
+      "consequencePh": "Describe the consequence...",
+      "intensity": "Intensity",
+      "i1": "1 — Very mild",
+      "i2": "2 — Mild",
+      "i3": "3 — Moderate",
+      "i4": "4 — Intense",
+      "i5": "5 — Very intense"
+    },
+    "mood": {
+      "how": "How were they?",
+      "l1": "Very Agitated",
+      "l2": "Agitated",
+      "l3": "Neutral",
+      "l4": "Calm",
+      "l5": "Very Calm",
+      "tags": "Tags",
+      "tag": {
+        "calmo": "calm",
+        "agitado": "agitated",
+        "feliz": "happy",
+        "triste": "sad",
+        "ansioso": "anxious",
+        "frustrado": "frustrated"
+      },
+      "pickLevel": "Pick how they were to save."
+    },
+    "sleep": {
+      "bedtime": "Bedtime",
+      "waketime": "Wake-up time",
+      "wakings": "Times woke up",
+      "quality": "Quality",
+      "q1": "Poor",
+      "q2": "Fair",
+      "q3": "Good"
+    },
+    "food": {
+      "meal": "Meal",
+      "cafe": "Breakfast",
+      "almoco": "Lunch",
+      "jantar": "Dinner",
+      "lanche": "Snack",
+      "accepted": "Foods accepted",
+      "acceptedPh": "E.g. rice, chicken, carrot",
+      "refused": "Foods refused",
+      "refusedPh": "E.g. broccoli, beans",
+      "hint": "Separate foods with commas."
+    },
+    "toilet": {
+      "type": "Type",
+      "urina": "Urine",
+      "fezes": "Stool",
+      "ambos": "Both",
+      "independent": "Independent"
+    },
+    "report": {
+      "dialog": "Record the day report",
+      "title": "Day report",
+      "close": "Close",
+      "intro": "tell us how the day went. The recording becomes a report with suggested logs that you confirm later.",
+      "nothing": "Nothing was recorded. Please try again.",
+      "tooShort": "The recording was too short. Tell us a little more about the day.",
+      "sendError": "Could not send the recording. Check your connection and try again.",
+      "replacesReady": "A report already exists for today. Recording again replaces the current transcript and report.",
+      "replacesOther": "A recording already exists for today. Recording again replaces the previous one.",
+      "unsupported": "This browser cannot record audio. Try an up-to-date Chrome, Firefox or Safari.",
+      "autoStop": "Recording stops automatically in {{time}}.",
+      "sending": "Sending the recording…",
+      "stop": "Stop and send",
+      "start": "Start recording"
+    },
+    "sug": {
+      "mood": "How they were",
+      "tagsList": "Tags (comma-separated)",
+      "tagsPh": "E.g. calm, happy",
+      "slept": "Went to bed",
+      "woke": "Woke up",
+      "wakings": "Times woke up",
+      "acceptedList": "Accepted (comma-separated)",
+      "acceptedPh": "E.g. rice, chicken",
+      "refusedList": "Refused (comma-separated)",
+      "refusedPh": "E.g. broccoli",
+      "independentYes": "✓ Independent",
+      "independentAsk": "Independent?",
+      "before": "Before",
+      "behavior": "Behavior",
+      "after": "After"
+    }
+  },
+  "p2Medical": {
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "remove": "Remove",
+    "changesSaved": "Changes saved",
+    "saveError": "Could not save. Please try again.",
+    "removeError": "Could not remove. Please try again.",
+    "doctorPrefix": "Dr. {{name}}",
+    "meds": {
+      "title": "Medications",
+      "add": "Add Medication",
+      "empty": "No medications registered",
+      "confirm": "Remove {{name}}?",
+      "new": "New Medication",
+      "edit": "Edit Medication",
+      "added": "Medication added",
+      "removed": "Medication removed",
+      "active": "Active",
+      "inactive": "Inactive",
+      "ongoing": "ongoing",
+      "editAria": "Edit medication",
+      "removeAria": "Remove medication",
+      "form": {
+        "name": "Name",
+        "namePh": "Medication name",
+        "dosage": "Dosage",
+        "dosagePh": "E.g. 10mg",
+        "frequency": "Frequency",
+        "frequencyPh": "E.g. twice a day",
+        "start": "Start date",
+        "end": "End date",
+        "doctor": "Prescribing doctor",
+        "doctorPh": "Doctor name",
+        "active": "Active medication",
+        "notes": "Notes",
+        "notesPh": "Additional information...",
+        "endBeforeStart": "The end date cannot be before the start date."
+      }
+    },
+    "appts": {
+      "title": "Appointments",
+      "add": "Add Appointment",
+      "empty": "No appointments recorded",
+      "confirm": "Remove appointment",
+      "confirmWith": " with Dr. {{name}}",
+      "new": "New Appointment",
+      "edit": "Edit Appointment",
+      "added": "Appointment added",
+      "removed": "Appointment removed",
+      "followUp": "Follow-up: {{date}}",
+      "editAria": "Edit appointment",
+      "removeAria": "Remove appointment",
+      "form": {
+        "when": "Appointment date and time",
+        "doctor": "Doctor",
+        "doctorPh": "Doctor name",
+        "specialty": "Specialty",
+        "specialtyPh": "E.g. Pediatric neurologist",
+        "clinic": "Clinic / Hospital",
+        "clinicPh": "Clinic or hospital name",
+        "summary": "Appointment summary",
+        "summaryPh": "What was discussed or decided at the appointment...",
+        "followUp": "Follow-up date",
+        "notes": "Private notes",
+        "notesPh": "Additional notes..."
+      }
+    },
+    "comorb": {
+      "title": "Diagnoses",
+      "add": "Add Diagnosis",
+      "empty": "No diagnoses registered",
+      "new": "New Diagnosis",
+      "edit": "Edit Diagnosis",
+      "added": "Diagnosis added",
+      "removed": "Diagnosis removed",
+      "editAria": "Edit diagnosis",
+      "removeAria": "Remove diagnosis",
+      "form": {
+        "condition": "Condition / Diagnosis",
+        "conditionPh": "E.g. Autism Spectrum Disorder",
+        "icd": "ICD code",
+        "icdPh": "E.g. F84.0",
+        "date": "Diagnosis date",
+        "doctor": "Diagnosing doctor",
+        "doctorPh": "Doctor name",
+        "notes": "Notes",
+        "notesPh": "Additional information..."
+      }
+    },
+    "page": {
+      "title": "Medical History",
+      "subtitle": "Medications, diagnoses and appointments",
+      "activeMeds": "Active Medications",
+      "manage": "Manage",
+      "retry": "Try again",
+      "noRecords": "No records"
+    }
+  },
+  "p2Common": {
+    "allChildren": "All children"
+  }
+}

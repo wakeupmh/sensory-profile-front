@@ -1,5 +1,6 @@
 import React from 'react';
 import { Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { Pencil2Icon, TrashIcon } from '@radix-ui/react-icons';
 import { colors, shadows, radii, fonts } from '../../theme/tokens';
 import GumroadCard from '../design-system/GumroadCard';
@@ -14,8 +15,8 @@ interface ComorbidityCardProps {
   onDelete: (id: string) => void;
 }
 
-function formatDate(isoDate: string): string {
-  return new Date(isoDate + 'T00:00:00').toLocaleDateString('pt-BR');
+function formatDate(isoDate: string, lang: string): string {
+  return new Date(isoDate + 'T00:00:00').toLocaleDateString(lang);
 }
 
 const iconBtnStyle: React.CSSProperties = {
@@ -33,6 +34,7 @@ const iconBtnStyle: React.CSSProperties = {
 };
 
 const ComorbidityCard: React.FC<ComorbidityCardProps> = ({ comorbidity, onEdit, onDelete }) => {
+  const { t, i18n } = useTranslation();
   const notesPreview = comorbidity.notes
     ? comorbidity.notes.length > 60
       ? comorbidity.notes.slice(0, 60) + '…'
@@ -54,9 +56,9 @@ const ComorbidityCard: React.FC<ComorbidityCardProps> = ({ comorbidity, onEdit, 
 
           {(comorbidity.diagnosisDate || comorbidity.diagnosingDoctor) && (
             <GumroadText level="body-sm" style={{ opacity: 0.7 }}>
-              {comorbidity.diagnosisDate && formatDate(comorbidity.diagnosisDate)}
+              {comorbidity.diagnosisDate && formatDate(comorbidity.diagnosisDate, i18n.language)}
               {comorbidity.diagnosisDate && comorbidity.diagnosingDoctor && ' · '}
-              {comorbidity.diagnosingDoctor && `Dr./Dra. ${comorbidity.diagnosingDoctor}`}
+              {comorbidity.diagnosingDoctor && t('p2Medical.doctorPrefix', { name: comorbidity.diagnosingDoctor })}
             </GumroadText>
           )}
 
@@ -71,14 +73,16 @@ const ComorbidityCard: React.FC<ComorbidityCardProps> = ({ comorbidity, onEdit, 
           <button
             style={iconBtnStyle}
             onClick={() => onEdit(comorbidity)}
-            aria-label="Editar diagnóstico"
+            type="button"
+            aria-label={t('p2Medical.comorb.editAria')}
           >
             <Pencil2Icon />
           </button>
           <button
             style={iconBtnStyle}
             onClick={() => onDelete(comorbidity.id)}
-            aria-label="Remover diagnóstico"
+            type="button"
+            aria-label={t('p2Medical.comorb.removeAria')}
           >
             <TrashIcon />
           </button>
