@@ -4,6 +4,7 @@ import { useState, FormEvent, useEffect, useMemo, useRef } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { assessmentApi, ChildData } from '../services/api';
 import { Box, Flex, Badge } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 
 import ChildDataSection from '../components/sensory-profile/ChildDataSection';
 import ChildPicker from '../components/sensory-profile/ChildPicker';
@@ -21,10 +22,11 @@ import NotFound from '../components/NotFound';
 import { useAuthContext } from '../context/AuthContext';
 import {
   DEFAULT_INSTRUMENT_ID,
-  findSectionByItemId,
   getInstrument,
+  getSectionsForItemIds,
 } from '../instruments';
 import { toSensoryItems } from '../instruments/types';
+import { buildSectionsFromResponses } from '../components/sensory-profile/buildSections';
 import { colors, spacing, typography } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
@@ -33,15 +35,19 @@ import GumroadStepper from '../components/design-system/GumroadStepper';
 import { useDraftPersistence } from '../hooks/useDraftPersistence';
 
 const PRELUDE_STEP_KEYS = [
-  { key: 'child', label: 'Criança' },
-  { key: 'examiner', label: 'Examinador' },
-  { key: 'caregiver', label: 'Responsável' },
-  { key: 'instructions', label: 'Instruções' },
+  { key: 'child', labelKey: 'assessmentForm.steps.child' },
+  { key: 'examiner', labelKey: 'assessmentForm.steps.examiner' },
+  { key: 'caregiver', labelKey: 'assessmentForm.steps.caregiver' },
+  { key: 'instructions', labelKey: 'assessmentForm.steps.instructions' },
 ] as const;
 
 const PRELUDE_COUNT = PRELUDE_STEP_KEYS.length; // 4
 
 const SensoryProfileForm: React.FC = () => {
+  const { t } = useTranslation();
+  // Efeitos de carga usam a tradução mais recente sem depender da identidade de t
+  const tRef = useRef(t);
+  tRef.current = t;
   const [searchParams] = useSearchParams();
   const initialInstrumentId = searchParams.get('instrument') || DEFAULT_INSTRUMENT_ID;
   const isFresh = searchParams.get('fresh') === '1';
@@ -58,14 +64,15 @@ const SensoryProfileForm: React.FC = () => {
     if (hasAnyResponse) {
       const confirmed = typeof window === 'undefined'
         ? true
-        : window.confirm('Trocar de instrumento irá reiniciar as respostas já preenchidas. Deseja continuar?');
+        : window.confirm(t('assessmentForm.confirmSwitchInstrument'));
       if (!confirmed) return;
     }
     switchInstrument(newId);
   };
 
   const [parentData, setParentData] = useState<{ scores_json: Record<string, unknown> } | null>(null);
-  const [parentLoading, setParentLoading] = useState(false);
+  const [parentLoading, setParentLoading] = useState(!!searchParams.get('parent'));
+  const [parentError, setParentError] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -87,18 +94,26 @@ const SensoryProfileForm: React.FC = () => {
   const instrument = useMemo(() => getInstrument(formData.instrumentId), [formData.instrumentId]);
 
   const effectiveSections = useMemo(() => {
-    if (instrument.dynamicSections && parentData) {
-      return instrument.dynamicSections(parentData);
+    if (instrument.dynamicSections) {
+      // Novo: seções vêm da avaliação-mãe. Visualização/edição: das respostas já carregadas.
+      if (parentData) return instrument.dynamicSections(parentData);
+      const ids = Object.values(formData.sections ?? {}).flatMap((sec) => sec.items.map((i) => i.id));
+      return getSectionsForItemIds(instrument, ids);
     }
     return instrument.sections;
-  }, [instrument, parentData]);
+  }, [instrument, parentData, formData.sections]);
+
+  // Sem avaliação-mãe válida, instrumentos de acompanhamento não têm itens para responder
+  const needsParent = isNewMode && !!instrument.parentInstrumentId;
+  const parentUnavailable =
+    needsParent && !parentLoading && (!parentId || parentError || effectiveSections.length === 0);
 
   const steps = useMemo(
     () => [
-      ...PRELUDE_STEP_KEYS,
+      ...PRELUDE_STEP_KEYS.map((st) => ({ key: st.key, label: t(st.labelKey) })),
       ...effectiveSections.map((s) => ({ key: s.key, label: s.title ?? s.key })),
     ],
-    [effectiveSections],
+    [effectiveSections, t],
   );
 
   // Stepper state (new-mode only)
@@ -148,14 +163,16 @@ const SensoryProfileForm: React.FC = () => {
   useEffect(() => {
     if (!parentId) return;
     setParentLoading(true);
+    setParentError(false);
     const fetchParent = async () => {
       try {
         const token = await getToken();
         const response = await assessmentApi.getAssessmentById(parentId, token);
-        const assessment = response.data?.assessment ?? response;
-        setParentData({ scores_json: assessment.scores_json ?? {} });
+        const assessment = response.data?.assessment ?? response.assessment ?? response;
+        setParentData({ scores_json: assessment.scores_json ?? assessment.scoresJson ?? {} });
       } catch (err) {
         console.error('Error fetching parent assessment:', err);
+        setParentError(true);
       } finally {
         setParentLoading(false);
       }
@@ -163,6 +180,38 @@ const SensoryProfileForm: React.FC = () => {
     fetchParent();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [parentId]);
+
+  // Seções dinâmicas (ex.: itens reprovados da triagem) entram no formulário quando a avaliação-mãe carrega
+  useEffect(() => {
+    if (!isNewMode || !instrument.dynamicSections || !parentData) return;
+    setFormData((prev) => {
+      let changed = false;
+      const sections = { ...prev.sections };
+      for (const def of effectiveSections) {
+        const current = sections[def.key];
+        if (!current) {
+          sections[def.key] = { items: toSensoryItems(def.items), rawScore: 0, comments: '' };
+          changed = true;
+        } else {
+          // Rascunhos antigos: atualiza descrição e roteiro a partir da definição do instrumento
+          const items = current.items.map((it) => {
+            const d = def.items.find((x) => x.id === it.id);
+            if (!d || (it.description === d.description && it.guidance === d.guidance)) return it;
+            changed = true;
+            return { ...it, description: d.description, guidance: d.guidance };
+          });
+          sections[def.key] = { ...current, items };
+        }
+      }
+      return changed ? { ...prev, sections } : prev;
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isNewMode, instrument, parentData, effectiveSections]);
+
+  // Ao trocar de etapa, volta ao topo para o usuário ver o início do conteúdo
+  useEffect(() => {
+    if (isNewMode) window.scrollTo?.({ top: 0 });
+  }, [currentStep, isNewMode]);
 
   // Per-step validation
   const validateStep = (step: number): boolean => {
@@ -174,19 +223,25 @@ const SensoryProfileForm: React.FC = () => {
     };
 
     if (step === 0) {
-      if (!formData.child?.selectedChildId) return fail('Selecione ou cadastre uma criança para continuar.');
+      if (!formData.child?.selectedChildId) return fail(t('assessmentForm.validation.child'));
     } else if (step === 1) {
-      if (!formData.examiner?.name) return fail('Nome do examinador é obrigatório');
-      if (!formData.examiner?.profession) return fail('Cargo/Função do examinador é obrigatório');
-      if (!formData.examiner?.contact) return fail('Contato do examinador é obrigatório');
+      if (!formData.examiner?.name) return fail(t('assessmentForm.validation.examinerName'));
+      if (!formData.examiner?.profession) return fail(t('assessmentForm.validation.examinerProfession'));
+      if (!formData.examiner?.contact) return fail(t('assessmentForm.validation.examinerContact'));
     } else if (step === 2) {
-      if (!formData.caregiver?.name) return fail('Nome do cuidador é obrigatório');
-      if (!formData.caregiver?.relationship) return fail('Relação do cuidador com a criança é obrigatória');
-      if (!formData.caregiver?.contact) return fail('Contato do cuidador é obrigatório');
+      if (!formData.caregiver?.name) return fail(t('assessmentForm.validation.caregiverName'));
+      if (!formData.caregiver?.relationship) return fail(t('assessmentForm.validation.caregiverRelationship'));
+      if (!formData.caregiver?.contact) return fail(t('assessmentForm.validation.caregiverContact'));
     } else if (step === 3) {
       // No validation for instructions
+    } else {
+      // Etapas de itens: todos precisam de resposta antes de avançar
+      const section = effectiveSections[step - PRELUDE_COUNT];
+      const missing = section
+        ? (formData.sections?.[section.key]?.items ?? []).filter((i) => !i.response).length
+        : 0;
+      if (missing > 0) return fail(t('assessmentForm.validation.sectionItems', { count: missing }));
     }
-    // Steps 4-12 are individual sensory sections — no required-field validation
 
     return true;
   };
@@ -234,31 +289,12 @@ const SensoryProfileForm: React.FC = () => {
           const loadedInstrumentId: string = assessment.instrumentId || DEFAULT_INSTRUMENT_ID;
           const loadedInstrument = getInstrument(loadedInstrumentId);
 
-          const builtSections: Record<string, { items: any[]; rawScore: number; comments: string }> =
-            Object.fromEntries(
-              loadedInstrument.sections.map((s) => [
-                s.key,
-                { items: toSensoryItems(s.items), rawScore: 0, comments: '' },
-              ]),
-            );
+          const { sections: builtSections, sectionKeys } = buildSectionsFromResponses(loadedInstrument, responses);
 
-          if (Array.isArray(responses)) {
-            responses.forEach((r: { itemId: number; response: string; id?: string }) => {
-              const sectionKey = findSectionByItemId(loadedInstrument, r.itemId);
-              if (!sectionKey) return;
-              const section = builtSections[sectionKey];
-              const target = section.items.find((it) => it.id === r.itemId);
-              if (target) {
-                target.response = r.response;
-                if (r.id) target.responseId = r.id;
-              }
-            });
-          }
-
-          loadedInstrument.sections.forEach((s) => {
-            const scoreField = `${s.key}RawScore`;
+          sectionKeys.forEach((key) => {
+            const scoreField = `${key}RawScore`;
             if (assessment[scoreField] !== undefined && assessment[scoreField] !== null) {
-              builtSections[s.key].rawScore = assessment[scoreField];
+              builtSections[key].rawScore = assessment[scoreField];
             }
           });
 
@@ -293,6 +329,7 @@ const SensoryProfileForm: React.FC = () => {
               contact: assessment.caregiverContact,
             },
             sections: builtSections,
+            scoresJson: assessment.scores_json ?? assessment.scoresJson ?? undefined,
             createdAt: assessment.createdAt,
           });
         } else {
@@ -305,7 +342,7 @@ const SensoryProfileForm: React.FC = () => {
         if (err.response && err.response.status === 404) {
           setNotFound(true);
         } else {
-          setError('Erro ao carregar avaliação. Por favor, tente novamente.');
+          setError(tRef.current('assessmentForm.errors.load'));
         }
         console.error(err);
       } finally {
@@ -331,7 +368,7 @@ const SensoryProfileForm: React.FC = () => {
           if (err.response && err.response.status === 404) {
             setNotFound(true);
           } else {
-            setError('Erro ao gerar relatório. Por favor, tente novamente.');
+            setError(tRef.current('assessmentForm.errors.report'));
           }
           console.error(err);
         } finally {
@@ -346,27 +383,33 @@ const SensoryProfileForm: React.FC = () => {
   const validateForm = () => {
     setValidationError(null);
 
-    if (!formData.child?.name) return fail('Nome da criança é obrigatório');
-    if (!formData.child?.birthDate) return fail('Data de nascimento da criança é obrigatória');
-    if (!formData.child?.gender) return fail('Gênero da criança é obrigatório');
-    if (!formData.child?.age) return fail('Idade da criança é obrigatória');
+    if (!formData.child?.name) return fail(t('assessmentForm.validation.childName'));
+    if (!formData.child?.birthDate) return fail(t('assessmentForm.validation.childBirthDate'));
+    if (!formData.child?.gender) return fail(t('assessmentForm.validation.childGender'));
+    if (!formData.child?.age) return fail(t('assessmentForm.validation.childAge'));
 
-    if (!formData.examiner?.name) return fail('Nome do examinador é obrigatório');
-    if (!formData.examiner?.profession) return fail('Cargo/Função do examinador é obrigatório');
-    if (!formData.examiner?.contact) return fail('Contato do examinador é obrigatório');
+    if (!formData.examiner?.name) return fail(t('assessmentForm.validation.examinerName'));
+    if (!formData.examiner?.profession) return fail(t('assessmentForm.validation.examinerProfession'));
+    if (!formData.examiner?.contact) return fail(t('assessmentForm.validation.examinerContact'));
 
-    if (!formData.caregiver?.name) return fail('Nome do cuidador é obrigatório');
-    if (!formData.caregiver?.relationship) return fail('Relação do cuidador com a criança é obrigatória');
-    if (!formData.caregiver?.contact) return fail('Contato do cuidador é obrigatório');
+    if (!formData.caregiver?.name) return fail(t('assessmentForm.validation.caregiverName'));
+    if (!formData.caregiver?.relationship) return fail(t('assessmentForm.validation.caregiverRelationship'));
+    if (!formData.caregiver?.contact) return fail(t('assessmentForm.validation.caregiverContact'));
 
+    // Todos os itens de todas as seções são obrigatórios (a API rejeita respostas incompletas)
+    const unanswered: string[] = [];
     for (const section of effectiveSections) {
-      const sectionData = formData.sections?.[section.key];
-      if (!sectionData) continue;
-      for (const item of sectionData.items) {
+      const items = formData.sections?.[section.key]?.items ?? section.items.map((i) => ({ ...i, response: null }));
+      items.forEach((item, idx) => {
         if (!item.response) {
-          return fail('Todos os itens de processamento sensorial são obrigatórios');
+          unanswered.push(
+            section.items.length === 1 ? section.title : effectiveSections.length > 1 ? `${section.title} (${idx + 1})` : String(idx + 1),
+          );
         }
-      }
+      });
+    }
+    if (unanswered.length > 0) {
+      return fail(t('assessmentForm.validation.unansweredItems', { count: unanswered.length, items: unanswered.join(', ') }));
     }
 
     return true;
@@ -396,7 +439,7 @@ const SensoryProfileForm: React.FC = () => {
       caregiver: formData.caregiver,
       responses,
       sectionComments,
-      ...(parentId ? { parentAssessmentId: parentId } : {}),
+      ...(parentId && instrument.parentInstrumentId ? { parentAssessmentId: parentId } : {}),
     };
   };
 
@@ -419,7 +462,7 @@ const SensoryProfileForm: React.FC = () => {
 
       navigate('/dashboard');
     } catch (err) {
-      setError('Erro ao salvar avaliação. Por favor, tente novamente.');
+      setError(t('assessmentForm.errors.save'));
       console.error(err);
     } finally {
       setSubmitting(false);
@@ -440,10 +483,10 @@ const SensoryProfileForm: React.FC = () => {
   };
 
   const getTitle = () => {
-    if (isNewMode) return 'Nova Avaliação';
-    if (isEditMode) return 'Editar Avaliação';
-    if (isReportMode) return 'Relatório de Avaliação';
-    return 'Visualizar Avaliação';
+    if (isNewMode) return t('assessmentForm.title.new');
+    if (isEditMode) return t('assessmentForm.title.edit');
+    if (isReportMode) return t('assessmentForm.title.report');
+    return t('assessmentForm.title.view');
   };
 
   const renderStepContent = () => {
@@ -505,7 +548,7 @@ const SensoryProfileForm: React.FC = () => {
       case 3:
         return (
           <GumroadCard color="cream" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
-            <InstructionsSection />
+            <InstructionsSection instrument={instrument} />
           </GumroadCard>
         );
       default: {
@@ -540,20 +583,35 @@ const SensoryProfileForm: React.FC = () => {
       {loading || parentLoading ? (
         <GumroadCard color="cream" shadow="md" padding="xl">
           <Flex align="center" justify="center" direction="column" gap="3" py="9">
-            <LoadingSpinner size="large" text="Carregando dados..." />
+            <LoadingSpinner size="large" text={t('assessmentForm.loading')} />
           </Flex>
         </GumroadCard>
       ) : notFound ? (
         <NotFound
-          title="Avaliação não encontrada"
-          message="A avaliação que você está procurando não existe ou foi removida."
+          title={t('assessmentForm.notFound.title')}
+          message={t('assessmentForm.notFound.message')}
         />
+      ) : parentUnavailable ? (
+        <GumroadCard role="alert" color="salmon" shadow="md" padding="xl">
+          <Flex align="center" justify="center" direction="column" gap="3" py="9">
+            <GumroadText level="body-md" as="p">
+              {parentError
+                ? t('assessmentForm.parent.loadError')
+                : !parentId
+                  ? t('assessmentForm.parent.missing')
+                  : t('assessmentForm.parent.noFailedItems')}
+            </GumroadText>
+            <GumroadButton variant="secondary" size="md" onClick={() => navigate('/dashboard')}>
+              {t('assessmentForm.buttons.back')}
+            </GumroadButton>
+          </Flex>
+        </GumroadCard>
       ) : error ? (
         <GumroadCard role="alert" color="salmon" shadow="md" padding="xl">
           <Flex align="center" justify="center" direction="column" gap="3" py="9">
             <GumroadText level="body-md" as="p">{error}</GumroadText>
             <GumroadButton variant="secondary" size="md" onClick={() => navigate('/dashboard')}>
-              Voltar
+              {t('assessmentForm.buttons.back')}
             </GumroadButton>
           </Flex>
         </GumroadCard>
@@ -587,24 +645,24 @@ const SensoryProfileForm: React.FC = () => {
             <Flex gap="3" wrap="wrap">
               {!isNewMode && !isEditMode && !isReportMode && (
                 <GumroadButton variant="secondary" size="sm" onClick={() => navigate(`/assessment/${id}/edit`)}>
-                  Editar
+                  {t('assessmentForm.buttons.edit')}
                 </GumroadButton>
               )}
               {!isNewMode && !isReportMode && (
                 <GumroadButton variant="secondary" size="sm" onClick={() => navigate(`/assessment/${id}/report`)}>
-                  Ver Relatório
+                  {t('assessmentForm.buttons.viewReport')}
                 </GumroadButton>
               )}
               <GumroadButton variant="secondary" size="sm" onClick={handleClose}>
-                Voltar
+                {t('assessmentForm.buttons.back')}
               </GumroadButton>
             </Flex>
           </Flex>
 
           {validationError && (
-            <GumroadCard color="salmon" shadow="sm" padding="md" style={{ marginBottom: spacing.lg }}>
+            <GumroadCard role="alert" color="salmon" shadow="sm" padding="md" style={{ marginBottom: spacing.lg }}>
               <GumroadText level="body-md" as="p" style={{ fontWeight: 600 }}>
-                Erros de validação: {validationError}
+                {t('assessmentForm.validationPrefix')} {validationError}
               </GumroadText>
             </GumroadCard>
           )}
@@ -627,16 +685,16 @@ const SensoryProfileForm: React.FC = () => {
 
               <Flex gap="3" mt="4" justify="end" wrap="wrap">
                 <GumroadButton variant="secondary" size="md" onClick={handleClose}>
-                  Cancelar
+                  {t('assessmentForm.buttons.cancel')}
                 </GumroadButton>
                 {currentStep > 0 && (
                   <GumroadButton variant="secondary" size="md" onClick={handleStepBack}>
-                    Voltar
+                    {t('assessmentForm.buttons.back')}
                   </GumroadButton>
                 )}
                 {currentStep < steps.length - 1 ? (
                   <GumroadButton variant="primary" size="md" onClick={handleStepNext}>
-                    Próximo
+                    {t('assessmentForm.buttons.next')}
                   </GumroadButton>
                 ) : (
                   <GumroadButton
@@ -645,7 +703,7 @@ const SensoryProfileForm: React.FC = () => {
                     onClick={() => handleSubmit()}
                     disabled={submitting}
                   >
-                    {submitting ? 'Criando...' : 'Criar Avaliação'}
+                    {submitting ? t('assessmentForm.creating') : t('assessmentForm.create')}
                   </GumroadButton>
                 )}
               </Flex>
@@ -689,12 +747,13 @@ const SensoryProfileForm: React.FC = () => {
               </GumroadCard>
 
               <GumroadCard color="cream" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
-                <InstructionsSection />
+                <InstructionsSection instrument={instrument} />
               </GumroadCard>
 
               <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
                 <SensoryProcessingSection
                   formData={formData}
+                  sections={effectiveSections}
                   updateItemResponse={updateItemResponse}
                   updateFormData={updateFormData}
                   disabled={isViewMode || isReportMode}
@@ -705,21 +764,21 @@ const SensoryProfileForm: React.FC = () => {
                 {!isViewMode && !isReportMode && (
                   <>
                     <GumroadButton variant="secondary" size="md" onClick={handleClose}>
-                      Cancelar
+                      {t('assessmentForm.buttons.cancel')}
                     </GumroadButton>
                     <GumroadButton variant="primary" size="md" type="submit" disabled={submitting}>
-                      {submitting ? 'Salvando...' : 'Salvar Alterações'}
+                      {submitting ? t('assessmentForm.saving') : t('assessmentForm.saveChanges')}
                     </GumroadButton>
                   </>
                 )}
                 {(isViewMode || isReportMode) && (
                   <>
                     <GumroadButton variant="secondary" size="md" onClick={handleClose}>
-                      Voltar
+                      {t('assessmentForm.buttons.back')}
                     </GumroadButton>
                     {isViewMode && (
                       <GumroadButton variant="primary" size="md" onClick={() => navigate(`/assessment/${id}/edit`)}>
-                        Editar
+                        {t('assessmentForm.buttons.edit')}
                       </GumroadButton>
                     )}
                   </>

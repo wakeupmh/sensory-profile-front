@@ -1,20 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Flex } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import PDFGenerator from '../components/sensory-profile/PDFGenerator';
 import ReportContent from '../components/sensory-profile/ReportContent';
-import { FormData, SensoryItem, SensorySection } from '../components/sensory-profile/types';
+import { FormData } from '../components/sensory-profile/types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import NotFound from '../components/NotFound';
 import { useAuthContext } from '../context/AuthContext';
 import { assessmentApi } from '../services/api';
-import {
-  DEFAULT_INSTRUMENT_ID,
-  findSectionByItemId,
-  getInstrument,
-} from '../instruments';
-import { toSensoryItems } from '../instruments/types';
+import { DEFAULT_INSTRUMENT_ID, getInstrument } from '../instruments';
+import { buildSectionsFromResponses } from '../components/sensory-profile/buildSections';
 
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
@@ -24,6 +21,9 @@ const ReportPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { getToken } = useAuthContext();
+  const { t } = useTranslation();
+  const tRef = useRef(t);
+  tRef.current = t;
 
   const [formData, setFormData] = useState<FormData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,27 +46,12 @@ const ReportPage: React.FC = () => {
           const instrumentId: string = response.assessment.instrumentId || DEFAULT_INSTRUMENT_ID;
           const instrument = getInstrument(instrumentId);
 
-          const sections: Record<string, SensorySection> = Object.fromEntries(
-            instrument.sections.map((s) => [
-              s.key,
-              { items: toSensoryItems(s.items) as SensoryItem[], rawScore: 0, comments: '' },
-            ]),
-          );
+          const { sections, sectionKeys } = buildSectionsFromResponses(instrument, response.responses);
 
-          response.responses.forEach((r: { itemId: number; response: string; id?: string }) => {
-            const sectionKey = findSectionByItemId(instrument, r.itemId);
-            if (!sectionKey) return;
-            const target = sections[sectionKey].items.find((it) => it.id === r.itemId);
-            if (target) {
-              target.response = r.response as SensoryItem['response'];
-              if (r.id) target.responseId = r.id;
-            }
-          });
-
-          instrument.sections.forEach((s) => {
-            const scoreField = `${s.key}RawScore`;
+          sectionKeys.forEach((key) => {
+            const scoreField = `${key}RawScore`;
             if (response.assessment[scoreField] !== undefined && response.assessment[scoreField] !== null) {
-              sections[s.key].rawScore = response.assessment[scoreField];
+              sections[key].rawScore = response.assessment[scoreField];
             }
           });
 
@@ -97,6 +82,7 @@ const ReportPage: React.FC = () => {
               contact: response.assessment.caregiverContact || '',
             },
             sections,
+            scoresJson: response.assessment.scores_json ?? response.assessment.scoresJson ?? undefined,
             createdAt: response.assessment.createdAt,
           });
         } else {
@@ -111,7 +97,7 @@ const ReportPage: React.FC = () => {
         if (err.response && err.response.status === 404) {
           setNotFound(true);
         } else {
-          setError('Erro ao carregar a avaliação. Por favor, tente novamente.');
+          setError(tRef.current('assessmentReport.page.loadError'));
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -127,20 +113,20 @@ const ReportPage: React.FC = () => {
       {loading ? (
         <GumroadCard color="cream" shadow="md" padding="xl">
           <Flex align="center" justify="center" direction="column" gap="3" py="9">
-            <LoadingSpinner size="large" text="Carregando dados..." />
+            <LoadingSpinner size="large" text={t('assessmentForm.loading')} />
           </Flex>
         </GumroadCard>
       ) : notFound ? (
         <NotFound
-          title="Avaliação não encontrada"
-          message="A avaliação que você está procurando não existe ou foi removida."
+          title={t('assessmentForm.notFound.title')}
+          message={t('assessmentForm.notFound.message')}
         />
       ) : error ? (
         <GumroadCard role="alert" color="salmon" shadow="md" padding="xl">
           <Flex align="center" justify="center" direction="column" gap="3" py="9">
             <GumroadText level="body-md" as="p">{error}</GumroadText>
             <GumroadButton variant="secondary" size="md" onClick={() => navigate('/dashboard')}>
-              Voltar
+              {t('assessmentForm.buttons.back')}
             </GumroadButton>
           </Flex>
         </GumroadCard>
@@ -154,15 +140,15 @@ const ReportPage: React.FC = () => {
             direction={{ initial: 'column', sm: 'row' }}
           >
             <GumroadHeading level="display-sm" as="h1">
-              Relatório de Avaliação
+              {t('assessmentReport.title')}
             </GumroadHeading>
             <Flex gap="3" wrap="wrap">
               <PDFGenerator formData={formData} assessmentId={id || ''} />
               <GumroadButton variant="secondary" size="sm" onClick={() => navigate(`/assessment/${id}`)}>
-                Voltar para Avaliação
+                {t('assessmentReport.page.backToAssessment')}
               </GumroadButton>
               <GumroadButton variant="secondary" size="sm" onClick={() => navigate('/dashboard')}>
-                Voltar para Início
+                {t('assessmentReport.page.backToHome')}
               </GumroadButton>
             </Flex>
           </Flex>

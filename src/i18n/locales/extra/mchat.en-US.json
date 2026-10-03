@@ -1,1 +1,277 @@
-{}
+{
+  "mchatR": {
+    "risk": {
+      "baixo": "Low Risk",
+      "medio": "Medium Risk",
+      "alto": "High Risk"
+    },
+    "failedCount": "Items not passed: {{count}}/20",
+    "explanation": {
+      "baixo": "Low-risk result: few or no signs of autism. Keep monitoring the child's development and keep up routine pediatric visits.",
+      "medio": "Medium-risk result: the Follow-Up Interview (M-CHAT-R/F) is recommended to look more closely at the items not passed. If the risk is confirmed, seek a specialized evaluation.",
+      "alto": "High-risk result: a specialized diagnostic evaluation is needed as soon as possible. Book an appointment with a professional trained in child development (neuropediatrician, child psychiatrist or multidisciplinary team)."
+    },
+    "highRisk": {
+      "title": "Next step: specialized evaluation",
+      "body": "By protocol, the Follow-Up Interview is not indicated at this risk level. Refer the child now for a diagnostic evaluation and early intervention, without waiting for further screening. Bring this report to the appointment."
+    },
+    "startFollowup": "Start Follow-Up Interview →",
+    "failedItemsTitle": "Items not passed (position in the screening)",
+    "noFailedItems": "No items not passed."
+  },
+  "mchatFollowup": {
+    "risk": {
+      "baixo": "Low Risk",
+      "alto": "High Risk"
+    },
+    "failedCountOne": "{{count}} item still not passed after follow-up",
+    "failedCountOther": "{{count}} items still not passed after follow-up",
+    "explanation": {
+      "baixo": "After the interview, fewer than 2 items remained not passed: the screening is considered negative. Keep monitoring development and rescreen if new concerns come up.",
+      "alto": "After the interview, 2 or more items remained not passed: the screening is considered positive. Refer the child for a specialized diagnostic evaluation and early intervention."
+    },
+    "resultPerItem": "Result per item",
+    "itemLabel": "Item {{n}}",
+    "result": {
+      "passou": "Passed",
+      "falhou": "Failed"
+    }
+  },
+  "assessmentForm": {
+    "item": "Item",
+    "description": "Description",
+    "answer": "Answer",
+    "guidanceTitle": "Interview script",
+    "frequency": {
+      "label": "Frequency",
+      "notApplicable": "Not applicable",
+      "almostNever": "Almost Never",
+      "occasionally": "Occasionally",
+      "halfTheTime": "Half the Time",
+      "frequently": "Frequently",
+      "almostAlways": "Almost Always"
+    },
+    "steps": {
+      "child": "Child",
+      "examiner": "Examiner",
+      "caregiver": "Caregiver",
+      "instructions": "Instructions"
+    },
+    "confirmSwitchInstrument": "Switching instrument will reset the answers already filled in. Do you want to continue?",
+    "validation": {
+      "child": "Select or add a child to continue.",
+      "examinerName": "Examiner name is required",
+      "examinerProfession": "Examiner role/profession is required",
+      "examinerContact": "Examiner contact is required",
+      "caregiverName": "Caregiver name is required",
+      "caregiverRelationship": "The caregiver's relationship to the child is required",
+      "caregiverContact": "Caregiver contact is required",
+      "childName": "Child name is required",
+      "childBirthDate": "Child date of birth is required",
+      "childGender": "Child gender is required",
+      "childAge": "Child age is required",
+      "allItems": "All items are required. Go back and answer the missing items.",
+      "sectionItems_one": "{{count}} item in this step is still unanswered.",
+      "sectionItems_other": "{{count}} items in this step are still unanswered.",
+      "unansweredItems_one": "1 item is still unanswered: {{items}}.",
+      "unansweredItems_other": "{{count}} items are still unanswered: {{items}}."
+    },
+    "errors": {
+      "load": "Error loading the assessment. Please try again.",
+      "report": "Error generating the report. Please try again.",
+      "save": "Error saving the assessment. Please try again."
+    },
+    "title": {
+      "new": "New Assessment",
+      "edit": "Edit Assessment",
+      "report": "Assessment Report",
+      "view": "View Assessment"
+    },
+    "loading": "Loading data...",
+    "notFound": {
+      "title": "Assessment not found",
+      "message": "The assessment you are looking for does not exist or was removed."
+    },
+    "validationPrefix": "Validation errors:",
+    "creating": "Creating...",
+    "create": "Create Assessment",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
+    "buttons": {
+      "cancel": "Cancel",
+      "back": "Back",
+      "next": "Next",
+      "edit": "Edit",
+      "viewReport": "View Report"
+    },
+    "parent": {
+      "loadError": "Could not load the source M-CHAT-R screening. Go back and try starting the follow-up interview again from the screening report.",
+      "missing": "The follow-up interview must be started from the report of a medium-risk M-CHAT-R screening.",
+      "noFailedItems": "The source screening has no failed items to investigate in the follow-up interview."
+    },
+    "picker": {
+      "title": "Instrument",
+      "help": "Choose the questionnaire suited to the child's age range. Switching resets the answers already filled in for this assessment.",
+      "ageRange": "Age range",
+      "allAges": "All ages",
+      "sections": "{{count}} sections"
+    },
+    "comments": {
+      "label": "Comments:",
+      "placeholder": "Add comments about this section"
+    },
+    "instructions": {
+      "title": "INSTRUCTIONS",
+      "intro": "The following pages contain statements describing how children may act. Read each statement and select the option that best describes how often your child shows these behaviors.",
+      "introBold": "Select one option for each statement.",
+      "guidelines": "Use these guidelines to mark your answers:",
+      "whenOpportunity": "When given the opportunity, my child...",
+      "yesNo": "Answer each question with Yes or No, thinking about the child's usual behavior. If the behavior happened only once or twice and is not usual, answer as if it did not happen. Select one option for each question.",
+      "followup": "For each item not passed in the screening, read the original question and probe the caregiver following the script. Then mark Passed or Failed according to the rule given in the script.",
+      "options": {
+        "almostAlways": {
+          "label": "Almost always",
+          "description": "responds this way Almost always (90% of the time or more)."
+        },
+        "frequently": {
+          "label": "Frequently",
+          "description": "responds this way Frequently (75% of the time)."
+        },
+        "halfTheTime": {
+          "label": "Half the time",
+          "description": "responds this way Half the time (50% of the time)."
+        },
+        "occasionally": {
+          "label": "Occasionally",
+          "description": "responds this way Occasionally (25% of the time)."
+        },
+        "almostNever": {
+          "label": "Almost never",
+          "description": "responds this way Almost never (10% of the time or less)."
+        },
+        "notApplicable": {
+          "label": "Not applicable",
+          "description": "If you cannot answer because you have not observed the behavior or think the item does not apply to your child, select Not applicable."
+        }
+      }
+    },
+    "fields": {
+      "male": "Male",
+      "female": "Female",
+      "other": "Other",
+      "childName": "Child's Name:",
+      "fullName": "Full name",
+      "birthDate": "Date of Birth:",
+      "gender": "Gender:",
+      "nationalId": "National ID (RG/CPF):",
+      "nationalIdPlaceholder": "RG or CPF",
+      "otherInfo": "Other Information:",
+      "otherInfoPlaceholder": "Relevant additional information",
+      "childData": "Child Information",
+      "age": "Age:",
+      "examinerData": "Examiner Information",
+      "examinerName": "Examiner Name:",
+      "examinerNamePlaceholder": "Examiner name",
+      "profession": "Role/Profession:",
+      "professionPlaceholder": "Role or profession",
+      "contact": "Contact:",
+      "contactPlaceholder": "Phone or email",
+      "contactPlaceholderCaregiver": "Phone or email",
+      "mother": "Mother",
+      "father": "Father",
+      "grandparent": "Grandparent",
+      "sibling": "Sibling",
+      "caregiverData": "Caregiver Information",
+      "caregiverName": "Caregiver Name:",
+      "caregiverNamePlaceholder": "Caregiver name",
+      "relationship": "Relationship to the Child:"
+    },
+    "childPicker": {
+      "requiredFields": "Name, date of birth and gender are required.",
+      "saveError": "Error saving the child. Please try again.",
+      "loading": "Loading...",
+      "title": "Select Child",
+      "removed": "The previously selected child was removed. Please select another.",
+      "loadError": "Could not load the registered children.",
+      "retry": "Try again",
+      "empty": "No children registered. Click “New Child” to get started.",
+      "year": "year",
+      "years": "years",
+      "newChild": "New Child",
+      "save": "Save"
+    }
+  },
+  "assessmentReport": {
+    "title": "Assessment Report",
+    "source": "Source:",
+    "insufficientData": "Insufficient data",
+    "name": "Name:",
+    "notInformedM": "Not provided",
+    "notInformedF": "Not provided",
+    "years": "{{count}} years",
+    "additionalInfo": "Additional Information:",
+    "profession": "Profession:",
+    "relationship": "Relationship:",
+    "relations": {
+      "father": "Father",
+      "mother": "Mother",
+      "grandparent": "Grandparent",
+      "other_relative": "Other Relative",
+      "sibling": "Sibling",
+      "other": "Other"
+    },
+    "quadrants": {
+      "title": "Sensory Processing Quadrants",
+      "intro": "The four quadrants describe patterns in how the child processes sensory stimuli in daily life.",
+      "seeking": {
+        "title": "Sensory Seeking",
+        "description": "Actively seeks more sensory experiences than is typical for the age."
+      },
+      "avoiding": {
+        "title": "Sensory Avoiding",
+        "description": "Tries to reduce contact with sensory stimuli they find unpleasant."
+      },
+      "sensitivity": {
+        "title": "Sensory Sensitivity",
+        "description": "Notices and reacts more strongly to stimuli that other children barely perceive."
+      },
+      "registration": {
+        "title": "Sensory Registration",
+        "description": "Tends not to notice stimuli that other children notice; reduced sensory registration."
+      }
+    },
+    "scores": {
+      "title": "Score Summary",
+      "normed": "Scores are classified by comparing the child's performance with other children of the same age range.",
+      "banded": "Scores show the frequency observed per section, according to the bands defined by this instrument.",
+      "section": "Section",
+      "raw": "Raw Score",
+      "classification": "Classification"
+    },
+    "normalCurve": "Normal Curve and Classification System",
+    "details": {
+      "title": "Response Details",
+      "value": "Value",
+      "unanswered": "Not answered"
+    },
+    "date": "Assessment Date:",
+    "signature": "Examiner Signature",
+    "page": {
+      "loadError": "Error loading the assessment. Please try again.",
+      "backToAssessment": "Back to Assessment",
+      "backToHome": "Back to Home"
+    },
+    "shared": {
+      "noAccess": "You do not have access to this assessment or it no longer exists.",
+      "loadError": "Could not load the assessment.",
+      "badge": "Shared with you",
+      "title": "Sensory Assessment",
+      "readOnly": "Read-only view of the report."
+    },
+    "pdf": {
+      "error": "Error generating the PDF. Please try again.",
+      "generating": "Generating PDF...",
+      "generate": "Generate PDF"
+    }
+  }
+}

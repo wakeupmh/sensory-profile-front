@@ -11,7 +11,8 @@ const FOLLOWUP_SCALE = {
 };
 
 function dynamicSections(parent: { scores_json: Record<string, unknown> }): InstrumentSection[] {
-  const failedItemIds = (parent.scores_json.failedItemIds as number[]) ?? [];
+  const raw = parent.scores_json?.failedItemIds;
+  const failedItemIds = Array.isArray(raw) ? (raw as number[]) : [];
   return failedItemIds.map((screenItemId) => {
     // Offset: screen items are 3001-3020, probe items are 4001-4020
     const probeItemId = screenItemId - 3000 + 4000;
@@ -23,6 +24,15 @@ function dynamicSections(parent: { scores_json: Record<string, unknown> }): Inst
       items: probeItem ? [probeItem] : [],
     };
   });
+}
+
+// Itens respondidos (4001-4020) -> seções, na ordem dos itens da triagem
+function sectionsForItemIds(itemIds: number[]): InstrumentSection[] {
+  const screenIds = [...new Set(itemIds)]
+    .filter((id) => id > 4000 && id <= 4020)
+    .sort((a, b) => a - b)
+    .map((id) => id - 4000 + 3000);
+  return dynamicSections({ scores_json: { failedItemIds: screenIds } });
 }
 
 export const mchatRFFollowup: Instrument = {
@@ -42,5 +52,6 @@ export const mchatRFFollowup: Instrument = {
   defaultBands: [],
   sections: [], // static sections empty; always use dynamicSections at runtime
   dynamicSections,
+  sectionsForItemIds,
   summaryComponent: FollowupSummary,
 };

@@ -1,1 +1,277 @@
-{}
+{
+  "mchatR": {
+    "risk": {
+      "baixo": "Baixo Risco",
+      "medio": "Risco Médio",
+      "alto": "Alto Risco"
+    },
+    "failedCount": "Itens não aprovados: {{count}}/20",
+    "explanation": {
+      "baixo": "Resultado de baixo risco: poucas ou nenhuma sinalização de autismo. Continue acompanhando o desenvolvimento da criança e mantenha as consultas pediátricas de rotina.",
+      "medio": "Resultado de risco médio: recomenda-se a realização da Entrevista de Acompanhamento (M-CHAT-R/F) para investigar mais detalhadamente os itens reprovados. Se o risco for confirmado, procure uma avaliação especializada.",
+      "alto": "Resultado de alto risco: indica necessidade de avaliação diagnóstica especializada o mais breve possível. Agende uma consulta com um profissional capacitado em desenvolvimento infantil (neuropediatra, psiquiatra infantil ou equipe multidisciplinar)."
+    },
+    "highRisk": {
+      "title": "Próximo passo: avaliação especializada",
+      "body": "Pelo protocolo, a Entrevista de Acompanhamento não é indicada neste nível de risco. Encaminhe a criança agora para avaliação diagnóstica e para intervenção precoce, sem aguardar novas triagens. Leve este relatório à consulta."
+    },
+    "startFollowup": "Iniciar Entrevista de Acompanhamento →",
+    "failedItemsTitle": "Itens reprovados (posição na triagem)",
+    "noFailedItems": "Nenhum item reprovado."
+  },
+  "mchatFollowup": {
+    "risk": {
+      "baixo": "Baixo Risco",
+      "alto": "Alto Risco"
+    },
+    "failedCountOne": "{{count}} item ainda reprovado após acompanhamento",
+    "failedCountOther": "{{count}} itens ainda reprovados após acompanhamento",
+    "explanation": {
+      "baixo": "Após a entrevista, menos de 2 itens permaneceram reprovados: a triagem é considerada negativa. Continue acompanhando o desenvolvimento e refaça a triagem se surgirem novas preocupações.",
+      "alto": "Após a entrevista, 2 ou mais itens permaneceram reprovados: a triagem é considerada positiva. Encaminhe a criança para avaliação diagnóstica especializada e intervenção precoce."
+    },
+    "resultPerItem": "Resultado por item",
+    "itemLabel": "Item {{n}}",
+    "result": {
+      "passou": "Passou",
+      "falhou": "Falhou"
+    }
+  },
+  "assessmentForm": {
+    "item": "Item",
+    "description": "Descrição",
+    "answer": "Resposta",
+    "guidanceTitle": "Roteiro da entrevista",
+    "frequency": {
+      "label": "Frequência",
+      "notApplicable": "Não se aplica",
+      "almostNever": "Quase Nunca",
+      "occasionally": "Ocasionalmente",
+      "halfTheTime": "Metade do Tempo",
+      "frequently": "Frequentemente",
+      "almostAlways": "Quase Sempre"
+    },
+    "steps": {
+      "child": "Criança",
+      "examiner": "Examinador",
+      "caregiver": "Responsável",
+      "instructions": "Instruções"
+    },
+    "confirmSwitchInstrument": "Trocar de instrumento irá reiniciar as respostas já preenchidas. Deseja continuar?",
+    "validation": {
+      "child": "Selecione ou cadastre uma criança para continuar.",
+      "examinerName": "Nome do examinador é obrigatório",
+      "examinerProfession": "Cargo/Função do examinador é obrigatório",
+      "examinerContact": "Contato do examinador é obrigatório",
+      "caregiverName": "Nome do cuidador é obrigatório",
+      "caregiverRelationship": "Relação do cuidador com a criança é obrigatória",
+      "caregiverContact": "Contato do cuidador é obrigatório",
+      "childName": "Nome da criança é obrigatório",
+      "childBirthDate": "Data de nascimento da criança é obrigatória",
+      "childGender": "Gênero da criança é obrigatório",
+      "childAge": "Idade da criança é obrigatória",
+      "allItems": "Todos os itens são obrigatórios. Volte e responda os itens que faltam.",
+      "sectionItems_one": "Falta responder {{count}} item desta etapa.",
+      "sectionItems_other": "Faltam responder {{count}} itens desta etapa.",
+      "unansweredItems_one": "Falta responder 1 item: {{items}}.",
+      "unansweredItems_other": "Faltam responder {{count}} itens: {{items}}."
+    },
+    "errors": {
+      "load": "Erro ao carregar avaliação. Por favor, tente novamente.",
+      "report": "Erro ao gerar relatório. Por favor, tente novamente.",
+      "save": "Erro ao salvar avaliação. Por favor, tente novamente."
+    },
+    "title": {
+      "new": "Nova Avaliação",
+      "edit": "Editar Avaliação",
+      "report": "Relatório de Avaliação",
+      "view": "Visualizar Avaliação"
+    },
+    "loading": "Carregando dados...",
+    "notFound": {
+      "title": "Avaliação não encontrada",
+      "message": "A avaliação que você está procurando não existe ou foi removida."
+    },
+    "validationPrefix": "Erros de validação:",
+    "creating": "Criando...",
+    "create": "Criar Avaliação",
+    "saving": "Salvando...",
+    "saveChanges": "Salvar Alterações",
+    "buttons": {
+      "cancel": "Cancelar",
+      "back": "Voltar",
+      "next": "Próximo",
+      "edit": "Editar",
+      "viewReport": "Ver Relatório"
+    },
+    "parent": {
+      "loadError": "Não foi possível carregar a triagem M-CHAT-R de origem. Volte e tente iniciar a entrevista de acompanhamento novamente pelo relatório da triagem.",
+      "missing": "A entrevista de acompanhamento deve ser iniciada a partir do relatório de uma triagem M-CHAT-R com risco médio.",
+      "noFailedItems": "A triagem de origem não tem itens reprovados para investigar na entrevista de acompanhamento."
+    },
+    "picker": {
+      "title": "Instrumento",
+      "help": "Escolha o questionário adequado à faixa etária. Ao trocar, as respostas já preenchidas desta avaliação serão reiniciadas.",
+      "ageRange": "Faixa etária",
+      "allAges": "Todas as idades",
+      "sections": "{{count}} seções"
+    },
+    "comments": {
+      "label": "Comentários:",
+      "placeholder": "Adicione comentários sobre esta seção"
+    },
+    "instructions": {
+      "title": "INSTRUÇÕES",
+      "intro": "As páginas a seguir contêm afirmações que descrevem como as crianças podem agir. Leia cada frase e selecione a opção que melhor descreve a frequência na qual seu/sua filho(a) demonstra esses comportamentos.",
+      "introBold": "Marque uma opção para cada afirmação.",
+      "guidelines": "Use estas orientações para marcar suas respostas:",
+      "whenOpportunity": "Quando tem a oportunidade, meu filho(a)...",
+      "yesNo": "Responda cada pergunta com Sim ou Não, pensando no comportamento habitual da criança. Se o comportamento aconteceu só uma ou duas vezes e não é habitual, responda como se ele não acontecesse. Marque uma opção para cada pergunta.",
+      "followup": "Para cada item reprovado na triagem, leia a pergunta original e faça a sondagem ao cuidador seguindo o roteiro. Em seguida, marque Passou ou Falhou conforme a regra indicada no roteiro.",
+      "options": {
+        "almostAlways": {
+          "label": "Quase sempre",
+          "description": "responde desta maneira Quase sempre (90% ou mais do tempo)."
+        },
+        "frequently": {
+          "label": "Frequentemente",
+          "description": "responde desta maneira Frequentemente (75% do tempo)."
+        },
+        "halfTheTime": {
+          "label": "Metade do tempo",
+          "description": "responde desta maneira Metade do tempo (50% do tempo)."
+        },
+        "occasionally": {
+          "label": "Ocasionalmente",
+          "description": "responde desta maneira Ocasionalmente (25% do tempo)."
+        },
+        "almostNever": {
+          "label": "Quase nunca",
+          "description": "responde desta maneira Quase nunca (10% ou menos do tempo)."
+        },
+        "notApplicable": {
+          "label": "Não se aplica",
+          "description": "Se você não puder responder porque você não observou o comportamento ou acha que tal item não se aplica ao/à seu/sua filho(a), marque Não se aplica."
+        }
+      }
+    },
+    "fields": {
+      "male": "Masculino",
+      "female": "Feminino",
+      "other": "Outro",
+      "childName": "Nome da Criança:",
+      "fullName": "Nome completo",
+      "birthDate": "Data de Nascimento:",
+      "gender": "Gênero:",
+      "nationalId": "Identidade Nacional (RG/CPF):",
+      "nationalIdPlaceholder": "RG ou CPF",
+      "otherInfo": "Outras Informações:",
+      "otherInfoPlaceholder": "Informações adicionais relevantes",
+      "childData": "Dados da Criança",
+      "age": "Idade:",
+      "examinerData": "Dados do Examinador",
+      "examinerName": "Nome do Examinador:",
+      "examinerNamePlaceholder": "Nome do examinador",
+      "profession": "Cargo/Função:",
+      "professionPlaceholder": "Cargo ou função",
+      "contact": "Contato:",
+      "contactPlaceholder": "Telefone ou email",
+      "contactPlaceholderCaregiver": "Telefone ou e-mail",
+      "mother": "Mãe",
+      "father": "Pai",
+      "grandparent": "Avó/Avô",
+      "sibling": "Irmã/Irmão",
+      "caregiverData": "Dados do Cuidador",
+      "caregiverName": "Nome do Cuidador:",
+      "caregiverNamePlaceholder": "Nome do cuidador",
+      "relationship": "Relação com a Criança:"
+    },
+    "childPicker": {
+      "requiredFields": "Nome, data de nascimento e gênero são obrigatórios.",
+      "saveError": "Erro ao salvar criança. Tente novamente.",
+      "loading": "Carregando...",
+      "title": "Selecionar Criança",
+      "removed": "A criança selecionada anteriormente foi removida. Por favor, selecione outra.",
+      "loadError": "Não foi possível carregar as crianças cadastradas.",
+      "retry": "Tentar novamente",
+      "empty": "Nenhuma criança cadastrada. Clique em “Nova Criança” para começar.",
+      "year": "ano",
+      "years": "anos",
+      "newChild": "Nova Criança",
+      "save": "Salvar"
+    }
+  },
+  "assessmentReport": {
+    "title": "Relatório de Avaliação",
+    "source": "Fonte:",
+    "insufficientData": "Sem dados suficientes",
+    "name": "Nome:",
+    "notInformedM": "Não informado",
+    "notInformedF": "Não informada",
+    "years": "{{count}} anos",
+    "additionalInfo": "Informações Adicionais:",
+    "profession": "Profissão:",
+    "relationship": "Relação:",
+    "relations": {
+      "father": "Pai",
+      "mother": "Mãe",
+      "grandparent": "Avô/Avó",
+      "other_relative": "Outro Familiar",
+      "sibling": "Irmão/Irmã",
+      "other": "Outro"
+    },
+    "quadrants": {
+      "title": "Quadrantes de Processamento Sensorial",
+      "intro": "Os quatro quadrantes descrevem padrões de como a criança processa estímulos sensoriais no cotidiano.",
+      "seeking": {
+        "title": "Busca Sensorial",
+        "description": "Busca ativamente mais experiências sensoriais do que o típico para a idade."
+      },
+      "avoiding": {
+        "title": "Evitação Sensorial",
+        "description": "Procura reduzir o contato com estímulos sensoriais que considera desagradáveis."
+      },
+      "sensitivity": {
+        "title": "Sensibilidade Sensorial",
+        "description": "Nota e reage com maior intensidade a estímulos que outras crianças mal percebem."
+      },
+      "registration": {
+        "title": "Registro Sensorial",
+        "description": "Tende a não perceber estímulos que outras crianças notam; registro sensorial reduzido."
+      }
+    },
+    "scores": {
+      "title": "Resumo das Pontuações",
+      "normed": "As pontuações são classificadas comparando o desempenho da criança com outras da mesma faixa etária.",
+      "banded": "As pontuações indicam a frequência observada por seção, conforme as faixas definidas por este instrumento.",
+      "section": "Seção",
+      "raw": "Pontuação Bruta",
+      "classification": "Classificação"
+    },
+    "normalCurve": "Curva Normal e Sistema de Classificação",
+    "details": {
+      "title": "Detalhes das Respostas",
+      "value": "Valor",
+      "unanswered": "Não respondido"
+    },
+    "date": "Data da Avaliação:",
+    "signature": "Assinatura do Examinador",
+    "page": {
+      "loadError": "Erro ao carregar a avaliação. Por favor, tente novamente.",
+      "backToAssessment": "Voltar para Avaliação",
+      "backToHome": "Voltar para Início"
+    },
+    "shared": {
+      "noAccess": "Você não tem acesso a esta avaliação ou ela não existe mais.",
+      "loadError": "Não foi possível carregar a avaliação.",
+      "badge": "Compartilhado com você",
+      "title": "Avaliação Sensorial",
+      "readOnly": "Visualização somente-leitura do relatório."
+    },
+    "pdf": {
+      "error": "Erro ao gerar PDF. Por favor, tente novamente.",
+      "generating": "Gerando PDF...",
+      "generate": "Gerar PDF"
+    }
+  }
+}

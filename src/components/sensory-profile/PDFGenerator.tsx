@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { Button } from "@radix-ui/themes";
+import { useTranslation } from "react-i18next";
 import ReportContent from "./ReportContent";
 import { FormData } from "./types";
 
@@ -9,6 +10,7 @@ interface PDFGeneratorProps {
 }
 
 const PDFGenerator: React.FC<PDFGeneratorProps> = ({ formData }) => {
+  const { t } = useTranslation();
   const contentRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -154,7 +156,7 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({ formData }) => {
 
     } catch (error) {
       console.error('Error generating PDF:', error);
-      alert('Erro ao gerar PDF. Por favor, tente novamente.');
+      alert(t('assessmentReport.pdf.error'));
       setIsGenerating(false);
     }
   };
@@ -166,7 +168,7 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({ formData }) => {
         color="violet"
         disabled={isGenerating}
       >
-        {isGenerating ? 'Gerando PDF...' : 'Gerar PDF'}
+        {isGenerating ? t('assessmentReport.pdf.generating') : t('assessmentReport.pdf.generate')}
       </Button>
       <div 
         id="print-content"

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Flex, Box } from '@radix-ui/themes';
 import { colors, shadows, radii, typography } from '../../theme/tokens';
 
@@ -51,11 +52,12 @@ const textareaStyle: React.CSSProperties = {
 };
 
 const ChildForm: React.FC<ChildFormProps> = ({ value, onChange, disabled }) => {
+  const { t } = useTranslation();
   const genderOptions = [
-    { value: '', label: 'Selecionar...' },
-    { value: 'male', label: 'Masculino' },
-    { value: 'female', label: 'Feminino' },
-    { value: 'other', label: 'Outro' },
+    { value: '', label: t('common.select') },
+    { value: 'male', label: t('assessmentForm.fields.male') },
+    { value: 'female', label: t('assessmentForm.fields.female') },
+    { value: 'other', label: t('assessmentForm.fields.other') },
   ];
 
   return (
@@ -63,13 +65,13 @@ const ChildForm: React.FC<ChildFormProps> = ({ value, onChange, disabled }) => {
       <Flex gap="4" direction={{ initial: 'column', sm: 'row' }}>
         <Box style={{ flex: 1 }}>
           <label style={labelStyle} htmlFor="child-nome-da">
-            Nome da Criança: <span style={{ color: colors.error }} aria-hidden="true">*</span>
+            {t('assessmentForm.fields.childName')} <span style={{ color: colors.error }} aria-hidden="true">*</span>
           </label>
           <input id="child-nome-da"
             type="text"
             value={value.name}
             onChange={(e) => onChange('name', e.target.value)}
-            placeholder="Nome completo"
+            placeholder={t('assessmentForm.fields.fullName')}
             disabled={disabled}
             required
             style={{ ...inputStyle, opacity: disabled ? 0.6 : 1 }}
@@ -77,7 +79,7 @@ const ChildForm: React.FC<ChildFormProps> = ({ value, onChange, disabled }) => {
         </Box>
         <Box style={{ flex: 1 }}>
           <label style={labelStyle} htmlFor="child-data-de">
-            Data de Nascimento: <span style={{ color: colors.error }} aria-hidden="true">*</span>
+            {t('assessmentForm.fields.birthDate')} <span style={{ color: colors.error }} aria-hidden="true">*</span>
           </label>
           <input id="child-data-de"
             type="date"
@@ -92,7 +94,7 @@ const ChildForm: React.FC<ChildFormProps> = ({ value, onChange, disabled }) => {
 
       <Flex gap="4" direction={{ initial: 'column', sm: 'row' }}>
         <Box style={{ flex: 1 }}>
-          <label style={labelStyle} htmlFor="child-genero">Gênero:</label>
+          <label style={labelStyle} htmlFor="child-genero">{t('assessmentForm.fields.gender')}</label>
           <select id="child-genero"
             value={value.gender ?? ''}
             onChange={(e) => onChange('gender', e.target.value)}
@@ -107,12 +109,12 @@ const ChildForm: React.FC<ChildFormProps> = ({ value, onChange, disabled }) => {
           </select>
         </Box>
         <Box style={{ flex: 1 }}>
-          <label style={labelStyle} htmlFor="child-identidade-nacional">Identidade Nacional (RG/CPF):</label>
+          <label style={labelStyle} htmlFor="child-identidade-nacional">{t('assessmentForm.fields.nationalId')}</label>
           <input id="child-identidade-nacional"
             type="text"
             value={value.nationalIdentity ?? ''}
             onChange={(e) => onChange('nationalIdentity', e.target.value)}
-            placeholder="RG ou CPF"
+            placeholder={t('assessmentForm.fields.nationalIdPlaceholder')}
             disabled={disabled}
             style={{ ...inputStyle, opacity: disabled ? 0.6 : 1 }}
           />
@@ -120,11 +122,11 @@ const ChildForm: React.FC<ChildFormProps> = ({ value, onChange, disabled }) => {
       </Flex>
 
       <Box>
-        <label style={labelStyle} htmlFor="child-outras-informacoes">Outras Informações:</label>
+        <label style={labelStyle} htmlFor="child-outras-informacoes">{t('assessmentForm.fields.otherInfo')}</label>
         <textarea id="child-outras-informacoes"
           value={value.otherInfo ?? ''}
           onChange={(e) => onChange('otherInfo', e.target.value)}
-          placeholder="Informações adicionais relevantes"
+          placeholder={t('assessmentForm.fields.otherInfoPlaceholder')}
           disabled={disabled}
           style={{ ...textareaStyle, opacity: disabled ? 0.6 : 1 }}
         />

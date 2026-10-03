@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, useId, memo } from 'react';
 import { TextField as RadixTextField, Text } from '@radix-ui/themes';
 import { colors, shadows, radii, typography } from '../../theme/tokens';
 
@@ -31,6 +31,7 @@ const FastTextField = memo(({
   onValueChange
 }: FastTextFieldProps) => {
   // Estado local para o valor do campo
+  const inputId = useId();
   const [value, setValue] = useState(initialValue);
 
   // Atualizar o valor inicial se ele mudar
@@ -56,6 +57,7 @@ const FastTextField = memo(({
       {label && (
         <Text
           as="label"
+          htmlFor={inputId}
           size="2"
           weight="bold"
           mb="1"
@@ -71,6 +73,7 @@ const FastTextField = memo(({
         </Text>
       )}
       <RadixTextField.Root
+        id={inputId}
         size="2"
         type={type}
         placeholder={placeholder}

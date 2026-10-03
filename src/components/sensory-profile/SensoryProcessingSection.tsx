@@ -4,12 +4,15 @@ import SensoryItemsTable from './SensoryItemsTable';
 import { FormData, FrequencyResponse, SensoryItem } from './types';
 import { getInstrument } from '../../instruments';
 import { Box, TextArea } from '@radix-ui/themes';
+import { useTranslation } from 'react-i18next';
 import { colors, shadows, radii, typography } from '../../theme/tokens';
 import GumroadHeading from '../design-system/GumroadHeading';
-import type { ResponseScale } from '../../instruments/types';
+import type { InstrumentSection, ResponseScale } from '../../instruments/types';
 
 interface SensoryProcessingSectionProps {
   formData: FormData;
+  /** Seções efetivas (instrumentos com seções dinâmicas); padrão: as do instrumento. */
+  sections?: InstrumentSection[];
   updateItemResponse: (section: string, itemId: number, response: FrequencyResponse) => void;
   updateFormData: (path: string, value: any) => void;
   disabled?: boolean;
@@ -36,6 +39,7 @@ const SensorySection = memo(({
   updateComments: (section: string, comments: string) => void;
   disabled?: boolean;
 }) => {
+  const { t } = useTranslation();
   const textareaId = `comments-${sectionKey}`;
   return (
     <Box mb="6">
@@ -52,12 +56,12 @@ const SensorySection = memo(({
         disabled={disabled}
       />
       <Box mt="3">
-        <label htmlFor={textareaId} style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '16px', display: 'block', marginBottom: '6px' }}>
-          Comentários:
+        <label htmlFor={textareaId} style={{ fontFamily: typography['title-sm'].font, fontWeight: 600, fontSize: '16px', display: 'block', marginBottom: '6px' }}>
+          {t('assessmentForm.comments.label')}
         </label>
         <TextArea
           id={textareaId}
-          placeholder="Adicione comentários sobre esta seção"
+          placeholder={t('assessmentForm.comments.placeholder')}
           value={comments || ''}
           onChange={(e) => updateComments(sectionKey, e.target.value)}
           disabled={disabled}
@@ -83,6 +87,7 @@ export { SensorySection };
 
 const SensoryProcessingSection: React.FC<SensoryProcessingSectionProps> = memo(({
   formData,
+  sections,
   updateItemResponse,
   updateFormData,
   disabled,
@@ -95,7 +100,7 @@ const SensoryProcessingSection: React.FC<SensoryProcessingSectionProps> = memo((
 
   return (
     <>
-      {instrument.sections.map((section) => {
+      {(sections ?? instrument.sections).map((section) => {
         const sectionData = formData.sections?.[section.key];
         const items: SensoryItem[] = sectionData?.items || [];
         const comments: string = sectionData?.comments || '';

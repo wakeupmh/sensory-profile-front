@@ -22,6 +22,11 @@ export interface InstrumentItem {
   id: number;
   quadrant: Quadrant;
   description: string;
+  /**
+   * Orientação opcional exibida abaixo da descrição (ex.: roteiro de sondagem para o
+   * entrevistador). Cada elemento é um parágrafo; o primeiro é destacado.
+   */
+  guidance?: string[];
 }
 
 export interface ClassificationBand {
@@ -70,11 +75,22 @@ export interface Instrument {
   /** Dynamic sections derived from parent instrument scores. */
   dynamicSections?: (parent: { scores_json: Record<string, unknown> }) => InstrumentSection[];
   /**
+   * Reconstrói as seções dinâmicas a partir dos IDs de item já respondidos
+   * (visualização, edição e relatório, onde a avaliação-mãe não é carregada).
+   */
+  sectionsForItemIds?: (itemIds: number[]) => InstrumentSection[];
+  /**
    * Optional per-instrument summary block rendered near the top of the report,
    * before the per-section breakdown. Receives the computed scoreData array and
    * the instrument definition.
    */
-  summaryComponent?: ComponentType<{ scores: unknown; instrument: Instrument; assessmentId?: string }>;
+  summaryComponent?: ComponentType<{
+    scores: unknown;
+    instrument: Instrument;
+    assessmentId?: string;
+    /** Respostas por seção, para calcular os scores no cliente quando a API não os envia. */
+    sections?: Record<string, { items: SensoryItem[] }>;
+  }>;
 }
 
 /** Build the initial SensoryItem[] for a section from its instrument definition. */
@@ -83,5 +99,6 @@ export const toSensoryItems = (items: InstrumentItem[]): SensoryItem[] =>
     id: i.id,
     quadrant: i.quadrant,
     description: i.description,
+    ...(i.guidance ? { guidance: i.guidance } : {}),
     response: null,
   }));

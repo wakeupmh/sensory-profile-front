@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { useTranslation } from 'react-i18next';
 import { FormData } from './types';
 import { parseLocalDate } from '../../utils/date';
 import { useEffect, useState, memo } from 'react';
@@ -14,6 +15,7 @@ interface ChildDataSectionProps {
 }
 
 const ChildDataSection: React.FC<ChildDataSectionProps> = memo(({ formData, updateFormData, disabled }) => {
+  const { t } = useTranslation();
   const [calculatedAge, setCalculatedAge] = useState<number>(0);
 
   useEffect(() => {
@@ -51,7 +53,7 @@ const ChildDataSection: React.FC<ChildDataSectionProps> = memo(({ formData, upda
   return (
     <Box mb="6">
       <GumroadHeading level="title-lg" as="h2" style={{ marginBottom: '12px' }}>
-        Dados da Criança
+        {t('assessmentForm.fields.childData')}
       </GumroadHeading>
 
       <ChildForm
@@ -64,7 +66,7 @@ const ChildDataSection: React.FC<ChildDataSectionProps> = memo(({ formData, upda
       <Box mt="3" style={{ maxWidth: '200px' }}>
         <FastTextField
           name="age"
-          label="Idade:"
+          label={t('assessmentForm.fields.age')}
           type="number"
           initialValue={calculatedAge.toString()}
           disabled={true}
