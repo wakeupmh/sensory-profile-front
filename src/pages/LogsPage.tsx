@@ -9,7 +9,7 @@ import type { CreateLogPayload, DailyLog, LogType } from '../types/logs';
 import { useDomainPage } from '../hooks/useDomainPage';
 import { useDomainResource } from '../hooks/useDomainResource';
 import { useOfflineLogQueue } from '../hooks/useOfflineLogQueue';
-import { queueLog, isNetworkError } from '../services/offlineLogQueue';
+import { isNetworkError } from '../services/offlineLogQueue';
 import { useToast } from '../context/ToastContext';
 import { ChildSelector } from '../components/domain/ChildSelector';
 import { FilterPill } from '../components/domain/FilterPill';
@@ -51,8 +51,10 @@ function formatOccurredAt(iso: string, locale: string): string {
 export default function LogsPage() {
   const { t, i18n } = useTranslation();
   const { children, childrenLoaded, childrenError, reloadChildren, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
-  const { queuedCount, syncing, flush } = useOfflineLogQueue();
   const toast = useToast();
+  const { queuedCount, syncing, flush, enqueue } = useOfflineLogQueue({
+    onRejected: (count) => toast.error(t('p1Logs.offlineRejected', { count })),
+  });
 
   const [filter, setFilter] = useState<FilterType>('all');
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -108,7 +110,7 @@ export default function LogsPage() {
       // na fila offline — precisa do id do registro, que só existe depois
       // de sincronizar.
       if (isNetworkError(err)) {
-        queueLog(payload);
+        enqueue(payload);
         toast.info(
           photo
             ? t('p1Logs.offlinePhoto')

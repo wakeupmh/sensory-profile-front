@@ -78,13 +78,11 @@
     },
     "errors": {
       "load": "Error loading the assessment. Please try again.",
-      "report": "Error generating the report. Please try again.",
       "save": "Error saving the assessment. Please try again."
     },
     "title": {
       "new": "New Assessment",
       "edit": "Edit Assessment",
-      "report": "Assessment Report",
       "view": "View Assessment"
     },
     "loading": "Loading data...",

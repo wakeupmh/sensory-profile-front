@@ -78,13 +78,11 @@
     },
     "errors": {
       "load": "Erro ao carregar avaliação. Por favor, tente novamente.",
-      "report": "Erro ao gerar relatório. Por favor, tente novamente.",
       "save": "Erro ao salvar avaliação. Por favor, tente novamente."
     },
     "title": {
       "new": "Nova Avaliação",
       "edit": "Editar Avaliação",
-      "report": "Relatório de Avaliação",
       "view": "Visualizar Avaliação"
     },
     "loading": "Carregando dados...",
