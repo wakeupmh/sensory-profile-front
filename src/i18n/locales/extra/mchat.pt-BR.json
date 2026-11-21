@@ -198,7 +198,9 @@
       "years": "anos",
       "newChild": "Nova Criança",
       "save": "Salvar"
-    }
+    },
+    "sectionSummary": "{{answered}} de {{total}} respondidas",
+    "sectionScore": "pontuação {{score}}"
   },
   "assessmentReport": {
     "title": "Relatório de Avaliação",

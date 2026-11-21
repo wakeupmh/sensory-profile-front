@@ -198,7 +198,9 @@
       "years": "years",
       "newChild": "New Child",
       "save": "Save"
-    }
+    },
+    "sectionSummary": "{{answered}} of {{total}} answered",
+    "sectionScore": "score {{score}}"
   },
   "assessmentReport": {
     "title": "Assessment Report",
