@@ -26,7 +26,7 @@ import {
   getSectionsForItemIds,
 } from '../instruments';
 import { toSensoryItems } from '../instruments/types';
-import { buildSectionsFromResponses } from '../components/sensory-profile/buildSections';
+import { buildAssessmentSections } from '../components/sensory-profile/buildSections';
 import { colors, spacing, typography } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
@@ -284,25 +284,6 @@ const SensoryProfileForm: React.FC = () => {
         if (responseData.assessment && responseData.responses) {
           const { assessment, responses } = responseData;
           const loadedInstrumentId: string = assessment.instrumentId || DEFAULT_INSTRUMENT_ID;
-          const loadedInstrument = getInstrument(loadedInstrumentId);
-
-          const { sections: builtSections, sectionKeys } = buildSectionsFromResponses(loadedInstrument, responses);
-
-          sectionKeys.forEach((key) => {
-            const scoreField = `${key}RawScore`;
-            if (assessment[scoreField] !== undefined && assessment[scoreField] !== null) {
-              builtSections[key].rawScore = assessment[scoreField];
-            }
-          });
-
-          if (Array.isArray(assessment.sectionComments)) {
-            assessment.sectionComments.forEach((c: { section: string; comments: string }) => {
-              if (builtSections[c.section]) {
-                builtSections[c.section].comments = c.comments || '';
-              }
-            });
-          }
-
           setFormData({
             instrumentId: loadedInstrumentId,
             child: {
@@ -325,7 +306,7 @@ const SensoryProfileForm: React.FC = () => {
               relationship: assessment.caregiverRelationship,
               contact: assessment.caregiverContact,
             },
-            sections: builtSections,
+            sections: buildAssessmentSections(getInstrument(loadedInstrumentId), assessment, responses),
             scoresJson: assessment.scores_json ?? assessment.scoresJson ?? undefined,
             createdAt: assessment.createdAt,
           });
