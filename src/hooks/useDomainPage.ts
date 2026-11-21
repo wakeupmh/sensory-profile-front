@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { childApi, type ChildData } from '../services/api';
 import { useAuthContext } from '../context/AuthContext';
+import { useDomainResource } from './useDomainResource';
 
 /**
  * Chave por usuário, como os rascunhos em Home.tsx (`draft:...:${userId}`).
@@ -35,13 +36,13 @@ function persistChildId(userId: string, childId: string): void {
   }
 }
 
+const NO_CHILDREN: ChildData[] = [];
+
 export function useDomainPage() {
-  const { getToken, isLoaded, session } = useAuthContext();
+  const { getToken, session } = useAuthContext();
   const getTokenRef = useRef(getToken);
   getTokenRef.current = getToken;
 
-  const [children, setChildren] = useState<ChildData[]>([]);
-  const [childrenLoaded, setChildrenLoaded] = useState(false);
   const [searchParams] = useSearchParams();
   const urlChildId = searchParams.get('childId');
 
@@ -78,25 +79,20 @@ export function useDomainPage() {
     }
   }, [urlChildId, setSelectedChildId]);
 
-  const fetchChildren = useCallback(async () => {
+  // Falha que não seja 401 vira `childrenError` com "tentar de novo" — antes
+  // era engolida e a página ficava em branco para sempre.
+  const childrenResource = useDomainResource(async (token) => {
     try {
-      const token = await getTokenRef.current();
-      if (!token) return;
-      const list = await childApi.list(token);
-      setChildren(list);
-      setChildrenLoaded(true);
+      return await childApi.list(token);
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.status === 401) {
         window.location.href = '/sign-in';
       }
+      throw err;
     }
   }, []);
-
-  useEffect(() => {
-    if (isLoaded && session) {
-      fetchChildren();
-    }
-  }, [fetchChildren, isLoaded, session]);
+  const children = childrenResource.data ?? NO_CHILDREN;
+  const childrenLoaded = childrenResource.data !== null;
 
   // A criança selecionada (persistida ou vinda da URL) pode não pertencer
   // mais a esta conta — foi excluída, ou é sobra de outro usuário no mesmo
@@ -112,5 +108,14 @@ export function useDomainPage() {
 
   const effectiveChildId = selectedChildId || (children.length > 0 ? children[0].id : '');
 
-  return { children, childrenLoaded, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef };
+  return {
+    children,
+    childrenLoaded,
+    childrenError: childrenResource.error,
+    reloadChildren: childrenResource.reload,
+    selectedChildId,
+    setSelectedChildId,
+    effectiveChildId,
+    getTokenRef,
+  };
 }
