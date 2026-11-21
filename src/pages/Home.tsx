@@ -450,67 +450,29 @@ const Home = () => {
                     </GumroadText>
                   </Flex>
 
-                  {/* Actions */}
-                  <Flex gap="2" mt="auto" pt="2">
-                    <IconButton
-                      variant="soft"
-                      size="2"
-                      asChild
-                      title={t('dashboard.actions.view')}
-                      aria-label={t('dashboard.actions.viewAssessment')}
-                      style={{
-                        background: colors.canvas,
-                        border: `2px solid ${colors.ink}`,
-                        borderRadius: '10px',
-                        boxShadow: '2px 2px 0px #0A0A1A',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <Link to={`/assessment/${assessment.id}`}>
-                        <EyeOpenIcon />
+                  {/* Ações: o relatório é o que se abre o cartão para ver; excluir fica à parte. */}
+                  <Flex gap="2" mt="auto" pt="2" align="center" wrap="wrap">
+                    <GumroadButton variant="primary" size="sm" asChild>
+                      <Link to={`/assessment/${assessment.id}/report`} style={{ textDecoration: 'none' }}>
+                        <FileTextIcon aria-hidden="true" /> {t('dashboard.actions.report')}
                       </Link>
-                    </IconButton>
-                    <IconButton
-                      variant="soft"
-                      size="2"
-                      asChild
-                      title={t('dashboard.actions.edit')}
-                      aria-label={t('dashboard.actions.editAssessment')}
-                      style={{
-                        background: colors['brand-cyan'],
-                        border: `2px solid ${colors.ink}`,
-                        borderRadius: '10px',
-                        boxShadow: '2px 2px 0px #0A0A1A',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <Link to={`/assessment/${assessment.id}/edit`}>
-                        <Pencil1Icon />
+                    </GumroadButton>
+                    <GumroadButton variant="secondary" size="sm" asChild>
+                      <Link to={`/assessment/${assessment.id}`} style={{ textDecoration: 'none' }}>
+                        <EyeOpenIcon aria-hidden="true" /> {t('dashboard.actions.view')}
                       </Link>
-                    </IconButton>
-                    <IconButton
-                      variant="soft"
-                      size="2"
-                      asChild
-                      title={t('dashboard.actions.report')}
-                      aria-label={t('dashboard.actions.viewReport')}
-                      style={{
-                        background: colors['brand-mint'],
-                        border: `2px solid ${colors.ink}`,
-                        borderRadius: '10px',
-                        boxShadow: '2px 2px 0px #0A0A1A',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <Link to={`/assessment/${assessment.id}/report`}>
-                        <FileTextIcon />
+                    </GumroadButton>
+                    <GumroadButton variant="secondary" size="sm" asChild>
+                      <Link to={`/assessment/${assessment.id}/edit`} style={{ textDecoration: 'none' }}>
+                        <Pencil1Icon aria-hidden="true" /> {t('dashboard.actions.edit')}
                       </Link>
-                    </IconButton>
+                    </GumroadButton>
+                    <Box style={{ marginLeft: 'auto' }}>
                     <AlertDialog.Root>
                       <AlertDialog.Trigger>
                         <IconButton
                           variant="soft"
-                          size="2"
+                          size="3"
                           title={t('dashboard.actions.delete')}
                           aria-label={t('dashboard.actions.deleteAssessment')}
                           style={{
@@ -548,6 +510,7 @@ const Home = () => {
                         </Flex>
                       </AlertDialog.Content>
                     </AlertDialog.Root>
+                    </Box>
                   </Flex>
                 </Flex>
               </GumroadCard>
