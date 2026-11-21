@@ -14,14 +14,11 @@ import GumroadButton from '../design-system/GumroadButton';
 import GumroadHeading, { GumroadText } from '../design-system/GumroadHeading';
 import LoadingSpinner from '../LoadingSpinner';
 import CreateReminderModal from './CreateReminderModal';
+import { formatUtcDay } from '../../utils/date';
 
 interface RemindersWidgetProps {
   childId: string;
   days?: number;
-}
-
-function formatDueAt(iso: string, lang: string): string {
-  return new Date(iso).toLocaleDateString(lang, { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
 const RemindersWidget: React.FC<RemindersWidgetProps> = ({ childId, days = 14 }) => {
@@ -187,7 +184,7 @@ const RemindersWidget: React.FC<RemindersWidgetProps> = ({ childId, days = 14 })
                   </GumroadText>
                   <Flex align="center" gap="2" wrap="wrap">
                     <GumroadText level="caption" as="span" style={{ opacity: 0.65 }}>
-                      {formatDueAt(item.dueAt, i18n.language)}
+                      {formatUtcDay(item.dueAt, i18n.language)}
                     </GumroadText>
                     <span
                       style={{

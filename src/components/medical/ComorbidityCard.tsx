@@ -1,3 +1,4 @@
+import { parseLocalDate } from '../../utils/date';
 import React from 'react';
 import { Flex } from '@radix-ui/themes';
 import { useTranslation } from 'react-i18next';
@@ -16,7 +17,7 @@ interface ComorbidityCardProps {
 }
 
 function formatDate(isoDate: string, lang: string): string {
-  return new Date(isoDate + 'T00:00:00').toLocaleDateString(lang);
+  return parseLocalDate(isoDate).toLocaleDateString(lang);
 }
 
 const iconBtnStyle: React.CSSProperties = {

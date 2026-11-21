@@ -12,6 +12,7 @@ import {
   UpdateIcon,
 } from '@radix-ui/react-icons';
 import { dailyReportApi, logApi } from '../services/api';
+import { todayLocal } from '../utils/date';
 import type { DailyReport, SuggestedLog } from '../types/dailyReports';
 import { LOG_TYPE_LABELS } from '../types/logs';
 import { useDomainPage } from '../hooks/useDomainPage';
@@ -62,11 +63,6 @@ const MAX_POLL_INTERVAL_MS = 60000;
  */
 const POLL_TIMEOUT_MS = 5 * 60 * 1000;
 
-function today(): string {
-  const now = new Date();
-  const offset = now.getTimezoneOffset() * 60000;
-  return new Date(now.getTime() - offset).toISOString().slice(0, 10);
-}
 
 function formatReportDate(date: string, locale: string): string {
   return new Date(`${date}T12:00:00`).toLocaleDateString(locale, {
@@ -197,7 +193,7 @@ export default function DailyReportPage() {
     const token = await getTokenRef.current();
     const { report, uploadUrl } = await dailyReportApi.create(token, {
       childId: effectiveChildId,
-      reportDate: today(),
+      reportDate: todayLocal(),
       mimeType: recording.mimeType,
     });
     await dailyReportApi.uploadAudio(uploadUrl, recording.blob, recording.mimeType);
@@ -341,7 +337,7 @@ export default function DailyReportPage() {
     }
   };
 
-  const todaysReport = reports.find((r) => r.reportDate === today());
+  const todaysReport = reports.find((r) => r.reportDate === todayLocal());
 
   return (
     <Box>
@@ -678,7 +674,7 @@ export default function DailyReportPage() {
         isOpen={recorderOpen}
         onClose={() => setRecorderOpen(false)}
         onFinish={handleFinishRecording}
-        reportDate={today()}
+        reportDate={todayLocal()}
         replaces={todaysReport ?? null}
       />
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { calculateAgeYears, parseLocalDate } from './date';
+import { calculateAgeYears, parseLocalDate, formatUtcDay, todayLocal } from './date';
 
 describe('parseLocalDate', () => {
   it('reads a civil date as local midnight, not UTC midnight', () => {
@@ -28,5 +28,20 @@ describe('calculateAgeYears', () => {
 
   it('handles a birthday later in the year', () => {
     expect(calculateAgeYears('2019-12-31', new Date(2026, 7, 23, 12))).toBe(6);
+  });
+});
+
+describe('formatUtcDay', () => {
+  it('mostra o dia guardado, não o anterior, a oeste de UTC', () => {
+    // O que o modal de lembrete grava para 21/11: meia-noite UTC.
+    expect(formatUtcDay('2026-11-21T00:00:00.000Z', 'pt-BR')).toBe('21/11/2026');
+  });
+});
+
+describe('todayLocal', () => {
+  it('usa o dia local, não o UTC', () => {
+    // 22h em São Paulo já é dia seguinte em UTC.
+    const lateEvening = new Date(2026, 10, 21, 22, 0);
+    expect(todayLocal(lateEvening)).toBe('2026-11-21');
   });
 });

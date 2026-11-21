@@ -1,3 +1,4 @@
+import { parseLocalDate } from '../../utils/date';
 import React, { useState } from 'react';
 import { Flex } from '@radix-ui/themes';
 import { useTranslation } from 'react-i18next';
@@ -20,7 +21,7 @@ interface EducationPlanCardProps {
 }
 
 function formatDate(isoDate: string, lang: string): string {
-  return new Date(isoDate + 'T00:00:00').toLocaleDateString(lang, {
+  return parseLocalDate(isoDate).toLocaleDateString(lang, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
