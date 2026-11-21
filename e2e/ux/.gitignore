@@ -1,0 +1,5 @@
+session.json
+ids.txt
+*.log
+*.png
+shots*/
