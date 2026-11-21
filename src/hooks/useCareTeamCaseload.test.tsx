@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 
 const myChildren = vi.fn();
 vi.mock('../services/api', () => ({ careTeamApi: { myChildren: (...a: unknown[]) => myChildren(...a) } }));
@@ -38,5 +38,15 @@ describe('useCareTeamCaseload', () => {
     myChildren.mockResolvedValueOnce([{ childId: 'c' }]);
     const b = renderHook(() => useCareTeamCaseload());
     await waitFor(() => expect(b.result.current).toBe(true));
+  });
+
+  it('reset depois de aceitar um convite atualiza o hook já montado', async () => {
+    myChildren.mockResolvedValueOnce([]);
+    const nav = renderHook(() => useCareTeamCaseload());
+    await waitFor(() => expect(nav.result.current).toBe(false));
+
+    myChildren.mockResolvedValueOnce([{ childId: 'c' }]);
+    act(() => resetCareTeamCaseloadCache());
+    await waitFor(() => expect(nav.result.current).toBe(true));
   });
 });
