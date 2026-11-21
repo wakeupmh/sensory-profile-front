@@ -71,7 +71,7 @@ export default function MonthlyRecapPage() {
         activeGoals.map(async (goal) => {
           const entries = await goalProgressApi.list(token, goal.id);
           const entriesInMonth = entries.filter((e) => {
-            const ts = new Date(e.occurredAt).getTime();
+            const ts = new Date(e.recordedAt).getTime();
             return ts >= monthStart.getTime() && ts <= monthEnd.getTime();
           }).length;
           return { goal, entriesInMonth };

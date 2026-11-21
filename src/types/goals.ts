@@ -17,12 +17,11 @@ export interface Goal {
   title: string;
   domain: GoalDomain;
   description?: string | null;
-  criteria?: string | null;
-  baseline: number;
-  target: number;
+  masteryCriteria?: string | null;
+  baselineValue: number | null;
+  targetValue: number | null;
   unit?: string | null;
   status: GoalStatus;
-  startDate: string;
   targetDate?: string | null;
   createdAt: string;
   updatedAt: string;
@@ -33,11 +32,10 @@ export interface CreateGoalPayload {
   title: string;
   domain: GoalDomain;
   description?: string | null;
-  criteria?: string | null;
-  baseline: number;
-  target: number;
+  masteryCriteria?: string | null;
+  baselineValue?: number | null;
+  targetValue?: number | null;
   unit?: string | null;
-  startDate: string;
   targetDate?: string | null;
   status?: GoalStatus;
 }
@@ -53,8 +51,8 @@ export interface GoalQueryParams {
 export interface GoalProgressEntry {
   id: string;
   goalId: string;
-  value: number;
-  occurredAt: string;
+  value: number | null;
+  recordedAt: string;
   notes?: string | null;
   therapySessionId?: string | null;
   createdAt: string;
@@ -62,17 +60,19 @@ export interface GoalProgressEntry {
 
 export interface CreateGoalProgressPayload {
   value: number;
-  occurredAt: string;
+  recordedAt: string;
   notes?: string | null;
   therapySessionId?: string | null;
 }
 
 export interface GoalProgressSummary {
-  baseline: number;
-  target: number;
-  lastValue: number | null;
-  delta: number | null;
-  entriesCount: number;
+  goalId: string;
+  baselineValue: number | null;
+  targetValue: number | null;
+  latestValue: number | null;
+  latestRecordedAt: string | null;
+  entryCount: number;
+  deltaFromBaseline: number | null;
 }
 
 export const GOAL_DOMAIN_LABELS: Record<GoalDomain, string> = {

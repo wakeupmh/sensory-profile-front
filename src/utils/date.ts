@@ -19,3 +19,8 @@ export function calculateAgeYears(birthDate: string, now: Date = new Date()): nu
   if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < birth.getDate())) age -= 1;
   return age;
 }
+
+/** Hoje como data civil `YYYY-MM-DD` no fuso do aparelho (não em UTC). */
+export function todayLocal(now: Date = new Date()): string {
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+}

@@ -8,6 +8,7 @@ import { therapyApi } from '../../services/api';
 import { useAuthContext } from '../../context/AuthContext';
 import type { TherapySessionSummary, TherapyType } from '../../types/therapy';
 import type { CreateGoalProgressPayload } from '../../types/goals';
+import { todayLocal } from '../../utils/date';
 
 const THERAPY_TYPE_FALLBACK: Record<TherapyType, string> = {
   aba: 'ABA',
@@ -54,7 +55,7 @@ const GoalProgressForm: React.FC<GoalProgressFormProps> = ({ isOpen, onClose, ch
   const { t, i18n } = useTranslation();
   const { getToken } = useAuthContext();
   const [value, setValue] = useState('');
-  const [occurredAt, setOccurredAt] = useState(new Date().toISOString().slice(0, 10));
+  const [recordedOn, setRecordedOn] = useState(todayLocal);
   const [notes, setNotes] = useState('');
   const [therapySessionId, setTherapySessionId] = useState('');
   const [sessions, setSessions] = useState<TherapySessionSummary[]>([]);
@@ -77,7 +78,7 @@ const GoalProgressForm: React.FC<GoalProgressFormProps> = ({ isOpen, onClose, ch
 
   const reset = () => {
     setValue('');
-    setOccurredAt(new Date().toISOString().slice(0, 10));
+    setRecordedOn(todayLocal());
     setNotes('');
     setTherapySessionId('');
   };
@@ -94,7 +95,8 @@ const GoalProgressForm: React.FC<GoalProgressFormProps> = ({ isOpen, onClose, ch
     try {
       await onSubmit({
         value: Number(value),
-        occurredAt: new Date(occurredAt).toISOString(),
+        // Meio-dia local: o dia escolhido continua o mesmo em qualquer fuso.
+        recordedAt: new Date(`${recordedOn}T12:00:00`).toISOString(),
         notes: notes.trim() || undefined,
         therapySessionId: therapySessionId || undefined,
       });
@@ -123,7 +125,7 @@ const GoalProgressForm: React.FC<GoalProgressFormProps> = ({ isOpen, onClose, ch
             </div>
             <div>
               <label style={labelStyle} htmlFor="goalprog-data">{t('cGoals.progressForm.date')} <span style={{ color: colors.error }} aria-hidden="true">*</span></label>
-              <input id="goalprog-data" type="date" value={occurredAt} onChange={(e) => setOccurredAt(e.target.value)} style={inputStyle} required />
+              <input id="goalprog-data" type="date" value={recordedOn} onChange={(e) => setRecordedOn(e.target.value)} style={inputStyle} required />
             </div>
             {sessions.length > 0 && (
               <div>

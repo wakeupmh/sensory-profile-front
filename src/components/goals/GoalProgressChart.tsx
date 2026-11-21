@@ -6,7 +6,8 @@ import type { GoalProgressEntry } from '../../types/goals';
 interface GoalProgressChartProps {
   entries: GoalProgressEntry[];
   baseline: number;
-  target: number;
+  /** Meta sem alvo numérico: o gráfico mostra só os pontos e a linha de base. */
+  target: number | null;
 }
 
 const WIDTH = 600;
@@ -17,12 +18,15 @@ const PAD_Y = 30;
 const GoalProgressChart: React.FC<GoalProgressChartProps> = ({ entries, baseline, target }) => {
   const { t, i18n } = useTranslation();
   const sorted = useMemo(
-    () => [...entries].sort((a, b) => new Date(a.occurredAt).getTime() - new Date(b.occurredAt).getTime()),
+    () =>
+      entries
+        .filter((e): e is GoalProgressEntry & { value: number } => e.value != null)
+        .sort((a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime()),
     [entries],
   );
 
   const { points, minVal, maxVal, baselineY, targetY } = useMemo(() => {
-    const values = sorted.map((e) => e.value).concat([baseline, target]);
+    const values = sorted.map((e) => e.value).concat(target == null ? [baseline] : [baseline, target]);
     const min = Math.min(...values);
     const max = Math.max(...values);
     const range = max - min || 1;
@@ -38,10 +42,10 @@ const GoalProgressChart: React.FC<GoalProgressChartProps> = ({ entries, baseline
       x: PAD_X + (sorted.length > 1 ? idx * step : usableWidth / 2),
       y: toY(e.value),
       value: e.value,
-      date: e.occurredAt,
+      date: e.recordedAt,
     }));
 
-    return { points: pts, minVal: paddedMin, maxVal: paddedMax, baselineY: toY(baseline), targetY: toY(target) };
+    return { points: pts, minVal: paddedMin, maxVal: paddedMax, baselineY: toY(baseline), targetY: target == null ? null : toY(target) };
   }, [sorted, baseline, target]);
 
   if (sorted.length === 0) {
@@ -55,14 +59,18 @@ const GoalProgressChart: React.FC<GoalProgressChartProps> = ({ entries, baseline
   const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
 
   return (
-    <svg role="img" aria-label={t('cGoals.chartAria', { count: points.length, baseline, target })} width="100%" height={HEIGHT} viewBox={`0 0 ${WIDTH} ${HEIGHT}`} style={{ display: 'block', overflow: 'visible' }}>
+    <svg role="img" aria-label={t('cGoals.chartAria', { count: points.length, baseline, target: target ?? '—' })} width="100%" height={HEIGHT} viewBox={`0 0 ${WIDTH} ${HEIGHT}`} style={{ display: 'block', overflow: 'visible' }}>
       {/* Baseline reference */}
       <line x1={PAD_X} y1={baselineY} x2={WIDTH - PAD_X} y2={baselineY} stroke={colors.ink} strokeOpacity={0.25} strokeDasharray="4 4" strokeWidth={1.5} />
       <text x={WIDTH - PAD_X} y={baselineY - 4} textAnchor="end" fontSize="10" fill={colors.ink} opacity={0.5}>{t('cGoals.chartBaseline')}</text>
 
       {/* Target reference */}
-      <line x1={PAD_X} y1={targetY} x2={WIDTH - PAD_X} y2={targetY} stroke={colors.success} strokeOpacity={0.4} strokeDasharray="4 4" strokeWidth={1.5} />
-      <text x={WIDTH - PAD_X} y={targetY - 4} textAnchor="end" fontSize="10" fill={colors.success}>{t('cGoals.chartTarget')}</text>
+      {targetY != null && (
+        <>
+          <line x1={PAD_X} y1={targetY} x2={WIDTH - PAD_X} y2={targetY} stroke={colors.success} strokeOpacity={0.4} strokeDasharray="4 4" strokeWidth={1.5} />
+          <text x={WIDTH - PAD_X} y={targetY - 4} textAnchor="end" fontSize="10" fill={colors.success}>{t('cGoals.chartTarget')}</text>
+        </>
+      )}
 
       {/* Progress line */}
       <path d={pathD} fill="none" stroke={colors['brand-cyan']} strokeWidth={3} />

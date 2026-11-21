@@ -16,8 +16,9 @@ interface GoalCardProps {
 
 const GoalCard: React.FC<GoalCardProps> = ({ goal, summary }) => {
   const { t } = useTranslation();
-  const current = summary?.lastValue ?? goal.baseline;
-  const delta = summary?.delta ?? 0;
+  const baseline = goal.baselineValue ?? 0;
+  const current = summary?.latestValue ?? baseline;
+  const delta = summary?.deltaFromBaseline ?? 0;
   const isAchieved = goal.status === 'achieved';
 
   return (
@@ -39,10 +40,12 @@ const GoalCard: React.FC<GoalCardProps> = ({ goal, summary }) => {
           </GumroadBadge>
 
           <Box style={{ marginTop: 'auto' }}>
-            <GoalProgressBar baseline={goal.baseline} target={goal.target} current={current} unit={goal.unit} />
+            {goal.targetValue != null && (
+              <GoalProgressBar baseline={baseline} target={goal.targetValue} current={current} unit={goal.unit} />
+            )}
             {summary && (
               <GumroadText level="caption" as="p" style={{ marginTop: '6px', opacity: 0.75 }}>
-                {t('cGoals.sinceStart', { delta: `${delta >= 0 ? '+' : ''}${delta}`, count: summary.entriesCount })}
+                {t('cGoals.sinceStart', { delta: `${delta >= 0 ? '+' : ''}${delta}`, count: summary.entryCount })}
               </GumroadText>
             )}
           </Box>

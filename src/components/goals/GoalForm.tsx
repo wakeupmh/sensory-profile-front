@@ -53,12 +53,11 @@ const GoalForm: React.FC<GoalFormProps> = ({ childId, initialValues = {}, onSubm
   const [title, setTitle] = useState(initialValues.title ?? '');
   const [domain, setDomain] = useState<GoalDomain>(initialValues.domain ?? 'comunicacao');
   const [description, setDescription] = useState(initialValues.description ?? '');
-  const [criteria, setCriteria] = useState(initialValues.criteria ?? '');
-  const [baseline, setBaseline] = useState(initialValues.baseline?.toString() ?? '0');
-  const [target, setTarget] = useState(initialValues.target?.toString() ?? '');
+  const [criteria, setCriteria] = useState(initialValues.masteryCriteria ?? '');
+  const [baseline, setBaseline] = useState(initialValues.baselineValue?.toString() ?? '0');
+  const [target, setTarget] = useState(initialValues.targetValue?.toString() ?? '');
   const [unit, setUnit] = useState(initialValues.unit ?? '');
   const [status, setStatus] = useState<GoalStatus>(initialValues.status ?? 'active');
-  const [startDate, setStartDate] = useState(initialValues.startDate?.slice(0, 10) ?? new Date().toISOString().slice(0, 10));
   const [targetDate, setTargetDate] = useState(initialValues.targetDate?.slice(0, 10) ?? '');
   const [submitting, setSubmitting] = useState(false);
 
@@ -74,12 +73,11 @@ const GoalForm: React.FC<GoalFormProps> = ({ childId, initialValues = {}, onSubm
         title: title.trim(),
         domain,
         description: description.trim() || undefined,
-        criteria: criteria.trim() || undefined,
-        baseline: Number(baseline) || 0,
-        target: Number(target),
+        masteryCriteria: criteria.trim() || undefined,
+        baselineValue: Number(baseline) || 0,
+        targetValue: Number(target),
         unit: unit.trim() || undefined,
         status,
-        startDate,
         targetDate: targetDate || undefined,
       });
     } finally {
@@ -183,16 +181,10 @@ const GoalForm: React.FC<GoalFormProps> = ({ childId, initialValues = {}, onSubm
           </div>
         </Flex>
 
-        <Flex gap="3">
-          <div style={{ flex: 1 }}>
-            <label style={labelStyle} htmlFor="goal-data-de">{t('cGoals.form.startDate')}</label>
-            <input id="goal-data-de" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} style={inputStyle} />
-          </div>
-          <div style={{ flex: 1 }}>
-            <label style={labelStyle} htmlFor="goal-data-alvo">{t('cGoals.form.targetDate')}</label>
-            <input id="goal-data-alvo" type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} style={inputStyle} />
-          </div>
-        </Flex>
+        <div>
+          <label style={labelStyle} htmlFor="goal-data-alvo">{t('cGoals.form.targetDate')}</label>
+          <input id="goal-data-alvo" type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} style={inputStyle} />
+        </div>
 
         <Flex gap="2" mt="2">
           <GumroadButton variant="primary" size="md" type="submit" disabled={isDisabled} loading={submitting || loading}>
