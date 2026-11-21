@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { parseLocalDate } from '../../utils/date';
+import { calculateAgeYears } from '../../utils/date';
 import { Flex, Box } from '@radix-ui/themes';
 import { childApi, ChildData } from '../../services/api';
 import { useAuthContext } from '../../context/AuthContext';
@@ -12,15 +12,6 @@ import ChildForm, { ChildFormValue } from './ChildForm';
 interface ChildPickerProps {
   selectedId: string | null;
   onSelect: (child: ChildData) => void;
-}
-
-function computeAge(birthDate: string): number {
-  const bd = parseLocalDate(birthDate);
-  const today = new Date();
-  let age = today.getFullYear() - bd.getFullYear();
-  const m = today.getMonth() - bd.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < bd.getDate())) age--;
-  return age;
 }
 
 const EMPTY_FORM: ChildFormValue = {
@@ -175,7 +166,7 @@ const ChildPicker: React.FC<ChildPickerProps> = ({ selectedId, onSelect }) => {
       >
         {children.map((child) => {
           const isSelected = child.id === selectedId;
-          const age = child.birthDate ? computeAge(child.birthDate) : null;
+          const age = child.birthDate ? calculateAgeYears(child.birthDate) : null;
 
           return (
             <button
