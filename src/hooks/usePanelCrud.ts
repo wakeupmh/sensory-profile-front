@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import i18n from 'i18next';
 
 type PanelView = 'list' | 'add' | 'edit';
@@ -39,20 +39,28 @@ export function usePanelCrud<
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<PanelView>('list');
 
+  // Só a busca mais recente escreve: reabrir o painel para outra criança com
+  // a busca anterior em voo não mostra a lista da criança anterior.
+  const latestFetch = useRef(0);
   const fetchItems = useCallback(async () => {
     if (!fetchFn) return;
+    const mine = ++latestFetch.current;
     try {
       setError(null);
       const data = await fetchFn();
-      setItems(data);
+      if (mine === latestFetch.current) setItems(data);
     } catch {
-      setError(i18n.t('p1Hooks.loadError'));
+      if (mine === latestFetch.current) setError(i18n.t('p1Hooks.loadError'));
     }
   }, [fetchFn]);
 
   // Reset state when panel closes; fetch when it opens
   useEffect(() => {
     if (!isOpen) {
+      latestFetch.current++;
+      // Fechado, não segura a lista: ao reabrir para outra criança ela não
+      // aparece por um instante (ou para sempre, se a busca falhar).
+      if (fetchFn) setItems([]);
       setView('list');
       setEditingItem(null);
       setDeletingId(null);
