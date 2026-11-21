@@ -78,7 +78,8 @@
     },
     "errors": {
       "load": "Error loading the assessment. Please try again.",
-      "save": "Error saving the assessment. Please try again."
+      "save": "Error saving the assessment. Please try again.",
+      "invalid": "Could not save: {{detail}}"
     },
     "title": {
       "new": "New Assessment",

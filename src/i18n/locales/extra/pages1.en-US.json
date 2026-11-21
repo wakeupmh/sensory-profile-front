@@ -256,7 +256,8 @@
     "create": "Create Anamnese",
     "creating": "Creating...",
     "saveChanges": "Save Changes",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "errInvalid": "Could not save: {{detail}}"
   },
   "p1Goals": {
     "errLoad": "Error loading goals. Please try again.",

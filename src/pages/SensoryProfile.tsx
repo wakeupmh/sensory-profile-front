@@ -13,6 +13,7 @@ import CaregiverDataSection from '../components/sensory-profile/CaregiverDataSec
 import InstructionsSection from '../components/sensory-profile/InstructionsSection';
 import SensoryProcessingSection, { SensorySection } from '../components/sensory-profile/SensoryProcessingSection';
 import InstrumentPicker from '../components/sensory-profile/InstrumentPicker';
+import { apiErrorDetail } from '../utils/apiError';
 import useFormData from '../components/sensory-profile/useFormData';
 import type { ChildData as FormChild } from '../components/sensory-profile/types';
 import AnamneseSelector from '../components/anamnese/AnamneseSelector';
@@ -419,7 +420,8 @@ const SensoryProfileForm: React.FC = () => {
 
       navigate('/dashboard');
     } catch (err) {
-      setError(t('assessmentForm.errors.save'));
+      const detail = apiErrorDetail(err);
+      setError(detail ? t('assessmentForm.errors.invalid', { detail }) : t('assessmentForm.errors.save'));
       console.error(err);
     } finally {
       setSubmitting(false);

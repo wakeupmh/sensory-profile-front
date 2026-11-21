@@ -78,7 +78,8 @@
     },
     "errors": {
       "load": "Erro ao carregar avaliação. Por favor, tente novamente.",
-      "save": "Erro ao salvar avaliação. Por favor, tente novamente."
+      "save": "Erro ao salvar avaliação. Por favor, tente novamente.",
+      "invalid": "Não foi possível salvar: {{detail}}"
     },
     "title": {
       "new": "Nova Avaliação",
