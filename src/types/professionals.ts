@@ -32,13 +32,6 @@ export interface ResourceShare {
   createdAt: string;
 }
 
-export interface AcceptedIdentity {
-  id: string;
-  ownerUserId: string;
-  ownerLabel?: string | null;
-  acceptedAt: string;
-}
-
 /** Item returned by GET /api/shared/anamneses (read-only listing). */
 export interface SharedAnamneseSummary {
   id: string;
