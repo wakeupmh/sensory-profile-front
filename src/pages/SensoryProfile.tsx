@@ -14,6 +14,7 @@ import InstructionsSection from '../components/sensory-profile/InstructionsSecti
 import SensoryProcessingSection, { SensorySection } from '../components/sensory-profile/SensoryProcessingSection';
 import InstrumentPicker from '../components/sensory-profile/InstrumentPicker';
 import useFormData from '../components/sensory-profile/useFormData';
+import type { ChildData as FormChild } from '../components/sensory-profile/types';
 import AnamneseSelector from '../components/anamnese/AnamneseSelector';
 import ProfessionalSharePanel from '../components/sharing/ProfessionalSharePanel';
 import type { Anamnese } from '../components/anamnese/types';
@@ -42,6 +43,22 @@ const PRELUDE_STEP_KEYS = [
 ] as const;
 
 const PRELUDE_COUNT = PRELUDE_STEP_KEYS.length; // 4
+
+/**
+ * A criança como a API a recebe: o id da escolhida liga a avaliação a ela
+ * (sem ele o servidor cadastrava outra criança igual). `age` e
+ * `selectedChildId` são estado do formulário, não da criança.
+ */
+function childPayload(child: FormChild) {
+  return {
+    id: child.selectedChildId || undefined,
+    name: child.name,
+    birthDate: child.birthDate,
+    gender: child.gender || undefined,
+    nationalIdentity: child.nationalIdentity,
+    otherInfo: child.otherInfo,
+  };
+}
 
 const SensoryProfileForm: React.FC = () => {
   const { t } = useTranslation();
@@ -225,11 +242,9 @@ const SensoryProfileForm: React.FC = () => {
     } else if (step === 1) {
       if (!formData.examiner?.name) return fail(t('assessmentForm.validation.examinerName'));
       if (!formData.examiner?.profession) return fail(t('assessmentForm.validation.examinerProfession'));
-      if (!formData.examiner?.contact) return fail(t('assessmentForm.validation.examinerContact'));
     } else if (step === 2) {
       if (!formData.caregiver?.name) return fail(t('assessmentForm.validation.caregiverName'));
       if (!formData.caregiver?.relationship) return fail(t('assessmentForm.validation.caregiverRelationship'));
-      if (!formData.caregiver?.contact) return fail(t('assessmentForm.validation.caregiverContact'));
     } else if (step === 3) {
       // No validation for instructions
     } else {
@@ -337,15 +352,12 @@ const SensoryProfileForm: React.FC = () => {
     if (!formData.child?.name) return fail(t('assessmentForm.validation.childName'));
     if (!formData.child?.birthDate) return fail(t('assessmentForm.validation.childBirthDate'));
     if (!formData.child?.gender) return fail(t('assessmentForm.validation.childGender'));
-    if (!formData.child?.age) return fail(t('assessmentForm.validation.childAge'));
 
     if (!formData.examiner?.name) return fail(t('assessmentForm.validation.examinerName'));
     if (!formData.examiner?.profession) return fail(t('assessmentForm.validation.examinerProfession'));
-    if (!formData.examiner?.contact) return fail(t('assessmentForm.validation.examinerContact'));
 
     if (!formData.caregiver?.name) return fail(t('assessmentForm.validation.caregiverName'));
     if (!formData.caregiver?.relationship) return fail(t('assessmentForm.validation.caregiverRelationship'));
-    if (!formData.caregiver?.contact) return fail(t('assessmentForm.validation.caregiverContact'));
 
     // Todos os itens de todas as seções são obrigatórios (a API rejeita respostas incompletas)
     const unanswered: string[] = [];
@@ -385,7 +397,7 @@ const SensoryProfileForm: React.FC = () => {
 
     return {
       instrumentId: formData.instrumentId,
-      child: formData.child,
+      child: childPayload(formData.child),
       examiner: formData.examiner,
       caregiver: formData.caregiver,
       responses,
