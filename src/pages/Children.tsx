@@ -120,11 +120,14 @@ const Children = () => {
     }
   }, [t]);
 
+  // O id, não o objeto `session`: o Supabase entrega um objeto novo a cada
+  // evento (renovação de token, foco na aba), e cada um recarregava a página.
+  const userId = session?.user?.id;
   useEffect(() => {
-    if (isLoaded && session) {
+    if (isLoaded && userId) {
       fetchChildren();
     }
-  }, [fetchChildren, isLoaded, session]);
+  }, [fetchChildren, isLoaded, userId]);
 
   const handleStartEdit = (child: ChildData) => {
     setEditingId(child.id);

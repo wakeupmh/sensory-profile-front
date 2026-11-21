@@ -87,11 +87,14 @@ const Home = () => {
     }
   }, [t]);
 
+  // O id, não o objeto `session`: o Supabase entrega um objeto novo a cada
+  // evento (renovação de token, foco na aba), e cada um recarregava a página.
+  const userId = session?.user?.id;
   useEffect(() => {
-    if (isLoaded && session) {
+    if (isLoaded && userId) {
       fetchAssessments();
     }
-  }, [fetchAssessments, isLoaded, session]);
+  }, [fetchAssessments, isLoaded, userId]);
 
   const handleDiscardDraft = async (formType: 'sensory_assessment' | 'anamnese') => {
     try {
