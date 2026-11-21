@@ -411,9 +411,6 @@ export const assessmentApi = {
 
   deleteAssessment: (id: string, token: string | null): Promise<void> =>
     requestVoid('delete', token, `/api/assessments/${id}`),
-
-  generateReport: (id: string, token: string | null): Promise<LegacyPayload> =>
-    requestLegacy('get', token, `/api/assessments/${id}/report`),
 };
 
 export const anamneseApi = {
