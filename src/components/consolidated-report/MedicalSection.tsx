@@ -1,3 +1,4 @@
+import { parseLocalDate } from '../../utils/date';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ConsolidatedMedical } from '../../types/consolidatedReport';
@@ -123,7 +124,7 @@ const MedicalSection: React.FC<Props> = ({ data }) => {
                   </span>
                   {a.followUpDate && (
                     <span style={{ fontSize: '0.75rem', opacity: 0.55 }}>
-                      {t('cConsolidated.followUp', { date: new Date(a.followUpDate).toLocaleDateString(i18n.language) })}
+                      {t('cConsolidated.followUp', { date: parseLocalDate(a.followUpDate).toLocaleDateString(i18n.language) })}
                     </span>
                   )}
                 </div>

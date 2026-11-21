@@ -29,7 +29,7 @@ function formatDateTime(iso: string, locale: string): string {
 
 export default function DevelopmentPage() {
   const { t, i18n } = useTranslation();
-  const { children, childrenLoaded, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
+  const { children, childrenLoaded, childrenError, reloadChildren, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
 
   const [milestonesPanelOpen, setMilestonesPanelOpen] = useState(false);
   const [commLogsPanelOpen, setCommLogsPanelOpen] = useState(false);
@@ -81,7 +81,9 @@ export default function DevelopmentPage() {
         <DomainListSkeleton />
       ) : error ? (
         <ErrorState message={error} onRetry={fetchAll} retryLabel={t('p1Common.retry')} />
-      ) : !childrenLoaded && children.length === 0 ? null : children.length === 0 ? (
+      ) : childrenError ? (
+        <ErrorState message={childrenError} onRetry={reloadChildren} />
+      ) : !childrenLoaded ? null : children.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">
             <Box>

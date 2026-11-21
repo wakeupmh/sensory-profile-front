@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useTranslation } from 'react-i18next';
 import { FormData } from './types';
-import { parseLocalDate } from '../../utils/date';
+import { calculateAgeYears } from '../../utils/date';
 import { useEffect, useState, memo } from 'react';
 import { Box } from '@radix-ui/themes';
 import FastTextField from './FastTextField';
@@ -20,16 +20,7 @@ const ChildDataSection: React.FC<ChildDataSectionProps> = memo(({ formData, upda
 
   useEffect(() => {
     if (formData.child?.birthDate) {
-      const birthDate = parseLocalDate(formData.child.birthDate);
-      const today = new Date();
-
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-      }
-
+      const age = calculateAgeYears(formData.child.birthDate);
       setCalculatedAge(age);
 
       if (age !== formData.child.age) {

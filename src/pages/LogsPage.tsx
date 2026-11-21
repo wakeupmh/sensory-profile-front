@@ -50,7 +50,7 @@ function formatOccurredAt(iso: string, locale: string): string {
 
 export default function LogsPage() {
   const { t, i18n } = useTranslation();
-  const { children, childrenLoaded, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
+  const { children, childrenLoaded, childrenError, reloadChildren, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
   const { queuedCount, syncing, flush } = useOfflineLogQueue();
   const toast = useToast();
 
@@ -190,7 +190,9 @@ export default function LogsPage() {
         <LogsListSkeleton />
       ) : error ? (
         <ErrorState message={error} onRetry={fetchLogs} retryLabel={t('p1Common.retry')} />
-      ) : !childrenLoaded && children.length === 0 ? null : children.length === 0 ? (
+      ) : childrenError ? (
+        <ErrorState message={childrenError} onRetry={reloadChildren} />
+      ) : !childrenLoaded ? null : children.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">
             <InfoCircledIcon width={40} height={40} aria-hidden="true" />

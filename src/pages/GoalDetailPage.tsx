@@ -158,10 +158,10 @@ export default function GoalDetailPage() {
               </Flex>
             </Flex>
 
-            {goal.criteria && (
+            {goal.masteryCriteria && (
               <Box style={{ marginBottom: spacing.sm }}>
                 <GumroadText level="caption-uppercase" as="p" style={{ opacity: 0.6, marginBottom: '4px' }}>{t('p1GoalDetail.criteria')}</GumroadText>
-                <GumroadText level="body-sm" as="p">{goal.criteria}</GumroadText>
+                <GumroadText level="body-sm" as="p">{goal.masteryCriteria}</GumroadText>
               </Box>
             )}
             {goal.description && (
@@ -170,17 +170,19 @@ export default function GoalDetailPage() {
               </Box>
             )}
 
-            <GoalProgressBar
-              baseline={goal.baseline}
-              target={goal.target}
-              current={summary?.lastValue ?? goal.baseline}
-              unit={goal.unit}
-              height={28}
-            />
+            {goal.targetValue != null && (
+              <GoalProgressBar
+                baseline={goal.baselineValue ?? 0}
+                target={goal.targetValue}
+                current={summary?.latestValue ?? goal.baselineValue ?? 0}
+                unit={goal.unit}
+                height={28}
+              />
+            )}
             {summary && (
               <GumroadText level="body-sm" as="p" style={{ marginTop: spacing.xs, opacity: 0.75 }}>
-                {t('p1GoalDetail.lastEntry', { value: summary.lastValue ?? '—', unit: goal.unit ? ` ${goal.unit}` : '' })}
-                {summary.delta !== null && t('p1GoalDetail.sinceBaseline', { delta: `${summary.delta >= 0 ? '+' : ''}${summary.delta}` })}
+                {t('p1GoalDetail.lastEntry', { value: summary.latestValue ?? '—', unit: goal.unit ? ` ${goal.unit}` : '' })}
+                {summary.deltaFromBaseline !== null && t('p1GoalDetail.sinceBaseline', { delta: `${summary.deltaFromBaseline >= 0 ? '+' : ''}${summary.deltaFromBaseline}` })}
               </GumroadText>
             )}
           </GumroadCard>
@@ -192,7 +194,7 @@ export default function GoalDetailPage() {
                 <PlusIcon aria-hidden="true" /> {t('p1GoalDetail.logProgress')}
               </GumroadButton>
             </Flex>
-            <GoalProgressChart entries={entries} baseline={goal.baseline} target={goal.target} />
+            <GoalProgressChart entries={entries} baseline={goal.baselineValue ?? 0} target={goal.targetValue} />
           </GumroadCard>
 
           <Box>
@@ -206,16 +208,16 @@ export default function GoalDetailPage() {
             ) : (
               <Flex direction="column" gap="2">
                 {[...entries]
-                  .sort((a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime())
+                  .sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime())
                   .map((entry) => (
                     <GumroadCard key={entry.id} color="white" shadow="sm" padding="md">
                       <Flex justify="between" align="center" gap="3" wrap="wrap">
                         <Box>
                           <GumroadText level="body-sm" as="p" style={{ fontWeight: 600 }}>
-                            {entry.value}{goal.unit ? ` ${goal.unit}` : ''}
+                            {entry.value ?? '—'}{goal.unit ? ` ${goal.unit}` : ''}
                           </GumroadText>
                           <GumroadText level="caption" as="p" style={{ opacity: 0.6 }}>
-                            {formatDate(entry.occurredAt, i18n.language)}
+                            {formatDate(entry.recordedAt, i18n.language)}
                           </GumroadText>
                           {entry.notes && (
                             <GumroadText level="body-sm" as="p" style={{ opacity: 0.75, marginTop: '4px' }}>

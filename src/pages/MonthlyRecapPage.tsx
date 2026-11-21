@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Box, Flex } from '@radix-ui/themes';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeftIcon, ChevronRightIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { logApi, milestoneApi, goalApi, goalProgressApi } from '../services/api';
 import type { DailyLog, LogType } from '../types/logs';
-import { useAuthContext } from '../context/AuthContext';
 import { useDomainPage } from '../hooks/useDomainPage';
+import { useDomainResource } from '../hooks/useDomainResource';
 import { ChildSelector } from '../components/domain/ChildSelector';
 import { ErrorState } from '../components/domain/ErrorState';
 import { colors, spacing, radii } from '../theme/tokens';
@@ -15,7 +15,6 @@ import GumroadHeading, { GumroadText } from '../components/design-system/Gumroad
 import LoadingSpinner from '../components/LoadingSpinner';
 import MoodTrendChart from '../components/recap/MoodTrendChart';
 import type { Goal } from '../types/goals';
-import type { DevelopmentalMilestone } from '../types/development';
 import { getMonthRange, isDateStringInMonth, aggregateLogs, capitalize } from '../utils/monthlyRecap';
 
 interface GoalWithMonthProgress {
@@ -23,17 +22,14 @@ interface GoalWithMonthProgress {
   entriesInMonth: number;
 }
 
+// Identidade estável: `aggregateLogs` é memoizado sobre `logs`.
+const NO_LOGS: DailyLog[] = [];
+
 export default function MonthlyRecapPage() {
   const { t, i18n } = useTranslation();
-  const { isLoaded, session } = useAuthContext();
-  const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
+  const { children, selectedChildId, setSelectedChildId, effectiveChildId } = useDomainPage();
 
   const [monthOffset, setMonthOffset] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [logs, setLogs] = useState<DailyLog[]>([]);
-  const [milestonesAchieved, setMilestonesAchieved] = useState<DevelopmentalMilestone[]>([]);
-  const [goalsProgress, setGoalsProgress] = useState<GoalWithMonthProgress[]>([]);
 
   const { monthStart, monthEnd, year, month, daysInMonth } = useMemo(
     () => getMonthRange(monthOffset),
@@ -44,55 +40,47 @@ export default function MonthlyRecapPage() {
     new Date(year, month, 1).toLocaleDateString(i18n.language, { month: 'long', year: 'numeric' }),
   );
 
-  const fetchRecap = useCallback(async () => {
-    if (!effectiveChildId) {
-      setLogs([]);
-      setMilestonesAchieved([]);
-      setGoalsProgress([]);
-      setLoading(false);
-      return;
-    }
-    try {
-      setLoading(true);
-      setError(null);
-      const token = await getTokenRef.current();
+  // Guarda contra resposta fora de ordem: trocar de criança ou de mês rápido
+  // não deixa a busca anterior, que chega depois, ocupar a tela.
+  const { data, loading, error, reload: fetchRecap } = useDomainResource(
+    async (token) => {
+      const childId = effectiveChildId!;
       const [logsResult, allMilestones, activeGoals] = await Promise.all([
         logApi.getLogs(token, {
-          childId: effectiveChildId,
+          childId,
           from: monthStart.toISOString(),
           to: monthEnd.toISOString(),
           limit: 1000,
         }),
-        milestoneApi.list(token, { childId: effectiveChildId }),
-        goalApi.list(token, { childId: effectiveChildId, status: 'active' }),
+        milestoneApi.list(token, { childId }),
+        goalApi.list(token, { childId, status: 'active' }),
       ]);
 
-      const withProgress = await Promise.all(
+      const goalsProgress: GoalWithMonthProgress[] = await Promise.all(
         activeGoals.map(async (goal) => {
           const entries = await goalProgressApi.list(token, goal.id);
           const entriesInMonth = entries.filter((e) => {
-            const ts = new Date(e.occurredAt).getTime();
+            const ts = new Date(e.recordedAt).getTime();
             return ts >= monthStart.getTime() && ts <= monthEnd.getTime();
           }).length;
           return { goal, entriesInMonth };
         }),
       );
 
-      setLogs(logsResult.data);
-      setMilestonesAchieved(
-        allMilestones.filter((m) => m.achievedDate && isDateStringInMonth(m.achievedDate, year, month)),
-      );
-      setGoalsProgress(withProgress);
-    } catch {
-      setError(t('p2Recap.loadError'));
-    } finally {
-      setLoading(false);
-    }
-  }, [effectiveChildId, monthStart, monthEnd, year, month, getTokenRef, t]);
-
-  useEffect(() => {
-    if (isLoaded && session) fetchRecap();
-  }, [fetchRecap, isLoaded, session]);
+      return {
+        logs: logsResult.data,
+        milestonesAchieved: allMilestones.filter(
+          (m) => m.achievedDate && isDateStringInMonth(m.achievedDate, year, month),
+        ),
+        goalsProgress,
+      };
+    },
+    [effectiveChildId, monthOffset],
+    { errorMessage: t('p2Recap.loadError'), enabled: !!effectiveChildId },
+  );
+  const logs = data?.logs ?? NO_LOGS;
+  const milestonesAchieved = data?.milestonesAchieved ?? [];
+  const goalsProgress = data?.goalsProgress ?? [];
 
   const { countsByType, moodByDay, moodAverage } = useMemo(() => aggregateLogs(logs), [logs]);
 

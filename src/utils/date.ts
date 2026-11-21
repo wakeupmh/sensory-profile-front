@@ -19,3 +19,17 @@ export function calculateAgeYears(birthDate: string, now: Date = new Date()): nu
   if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < birth.getDate())) age -= 1;
   return age;
 }
+
+/** Hoje como data civil `YYYY-MM-DD` no fuso do aparelho (não em UTC). */
+export function todayLocal(now: Date = new Date()): string {
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+}
+
+/**
+ * Dia de calendário guardado como meia-noite UTC (o `dueAt` dos lembretes,
+ * lido assim também pelo .ics). Formatar em hora local mostraria, a oeste de
+ * UTC, o dia anterior.
+ */
+export function formatUtcDay(iso: string, lang: string): string {
+  return new Date(iso).toLocaleDateString(lang, { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
+}

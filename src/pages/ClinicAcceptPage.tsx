@@ -11,6 +11,7 @@ import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadInput from '../components/design-system/GumroadInput';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
 import { colors, spacing } from '../theme/tokens';
+import { resetClinicMembershipCache } from '../hooks/useClinicMembership';
 
 /**
  * Aceitar um convite de clínica. Mesmo formato do convite da equipe de
@@ -43,6 +44,7 @@ const ClinicAcceptPage: React.FC = () => {
       setError(null);
       const authToken = await getToken();
       const accepted = await clinicApi.acceptInvite(authToken, cleaned);
+      resetClinicMembershipCache();
       setSuccess(t(CLINIC_ROLE_LABEL_KEYS[accepted.role]));
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } }).response?.status;

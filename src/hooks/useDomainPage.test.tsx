@@ -172,3 +172,18 @@ describe('useDomainPage — aparelho compartilhado', () => {
     await waitFor(() => expect(result.current.selectedChildId).toBe('carla'));
   });
 });
+
+describe('falha ao carregar a lista de crianças', () => {
+  it('vira erro com "tentar de novo" em vez de página em branco', async () => {
+    list.mockRejectedValueOnce(new Error('rede'));
+    const { result } = renderAt('/logs');
+    await waitFor(() => expect(result.current.childrenError).not.toBeNull());
+    expect(result.current.childrenLoaded).toBe(false);
+
+    list.mockResolvedValueOnce([childFixture('c1', 'Ana')]);
+    await act(async () => result.current.reloadChildren());
+    await waitFor(() => expect(result.current.childrenLoaded).toBe(true));
+    expect(result.current.childrenError).toBeNull();
+    expect(result.current.effectiveChildId).toBe('c1');
+  });
+});

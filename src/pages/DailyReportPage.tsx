@@ -12,9 +12,11 @@ import {
   UpdateIcon,
 } from '@radix-ui/react-icons';
 import { dailyReportApi, logApi } from '../services/api';
+import { todayLocal } from '../utils/date';
 import type { DailyReport, SuggestedLog } from '../types/dailyReports';
 import { LOG_TYPE_LABELS } from '../types/logs';
 import { useDomainPage } from '../hooks/useDomainPage';
+import { useDomainResource } from '../hooks/useDomainResource';
 import { useToast } from '../context/ToastContext';
 import { ChildSelector } from '../components/domain/ChildSelector';
 import { ErrorState } from '../components/domain/ErrorState';
@@ -27,7 +29,6 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import DailyReportRecorder from '../components/logs/DailyReportRecorder';
 import SuggestedLogValuesEditor from '../components/logs/SuggestedLogValuesEditor';
 import type { AudioRecording } from '../hooks/useAudioRecorder';
-import { useAuthContext } from '../context/AuthContext';
 
 /**
  * O backend valida a saída da IA antes de gravar, mas relatos estruturados
@@ -62,11 +63,6 @@ const MAX_POLL_INTERVAL_MS = 60000;
  */
 const POLL_TIMEOUT_MS = 5 * 60 * 1000;
 
-function today(): string {
-  const now = new Date();
-  const offset = now.getTimezoneOffset() * 60000;
-  return new Date(now.getTime() - offset).toISOString().slice(0, 10);
-}
 
 function formatReportDate(date: string, locale: string): string {
   return new Date(`${date}T12:00:00`).toLocaleDateString(locale, {
@@ -78,13 +74,9 @@ function formatReportDate(date: string, locale: string): string {
 
 export default function DailyReportPage() {
   const { t, i18n } = useTranslation();
-  const { isLoaded, session } = useAuthContext();
-  const { children, childrenLoaded, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
+  const { children, childrenLoaded, childrenError, reloadChildren, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
   const toast = useToast();
 
-  const [reports, setReports] = useState<DailyReport[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [recorderOpen, setRecorderOpen] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [savingLog, setSavingLog] = useState<string | null>(null);
@@ -102,27 +94,18 @@ export default function DailyReportPage() {
   const [transcriptDraft, setTranscriptDraft] = useState('');
   const [savingTranscript, setSavingTranscript] = useState(false);
 
-  const fetchReports = useCallback(async () => {
-    if (!effectiveChildId) {
-      setReports([]);
-      setLoading(false);
-      return;
-    }
-    try {
-      setLoading(true);
-      const token = await getTokenRef.current();
-      setReports(await dailyReportApi.list(token, effectiveChildId));
-      setError(null);
-    } catch {
-      setError(t('p1Daily.errLoad'));
-    } finally {
-      setLoading(false);
-    }
-  }, [effectiveChildId, getTokenRef, t]);
-
-  useEffect(() => {
-    if (isLoaded && session) fetchReports();
-  }, [fetchReports, isLoaded, session]);
+  // Guarda contra resposta fora de ordem: trocar de criança com uma busca
+  // lenta em voo não mostra os relatos da anterior sob a nova.
+  const { data, loading, error, reload: fetchReports, setData } = useDomainResource(
+    (token) => dailyReportApi.list(token, effectiveChildId!),
+    [effectiveChildId],
+    { errorMessage: t('p1Daily.errLoad'), enabled: !!effectiveChildId },
+  );
+  const reports = data ?? [];
+  const setReports = useCallback(
+    (update: (previous: DailyReport[]) => DailyReport[]) => setData((previous) => update(previous ?? [])),
+    [setData],
+  );
 
   // Enquanto houver relato transcrevendo, o backend só avança o estado quando
   // é consultado — por isso o polling vive aqui e não numa fila no servidor.
@@ -191,13 +174,13 @@ export default function DailyReportPage() {
       cancelled = true;
       if (timer !== undefined) window.clearTimeout(timer);
     };
-  }, [transcribingKey, getTokenRef]);
+  }, [transcribingKey, getTokenRef, setReports]);
 
   const handleFinishRecording = async (recording: AudioRecording) => {
     const token = await getTokenRef.current();
     const { report, uploadUrl } = await dailyReportApi.create(token, {
       childId: effectiveChildId,
-      reportDate: today(),
+      reportDate: todayLocal(),
       mimeType: recording.mimeType,
     });
     await dailyReportApi.uploadAudio(uploadUrl, recording.blob, recording.mimeType);
@@ -341,7 +324,7 @@ export default function DailyReportPage() {
     }
   };
 
-  const todaysReport = reports.find((r) => r.reportDate === today());
+  const todaysReport = reports.find((r) => r.reportDate === todayLocal());
 
   return (
     <Box>
@@ -362,7 +345,9 @@ export default function DailyReportPage() {
         </GumroadCard>
       ) : error ? (
         <ErrorState message={error} onRetry={fetchReports} retryLabel={t('p1Common.retry')} />
-      ) : !childrenLoaded && children.length === 0 ? null : children.length === 0 ? (
+      ) : childrenError ? (
+        <ErrorState message={childrenError} onRetry={reloadChildren} />
+      ) : !childrenLoaded ? null : children.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">
             <InfoCircledIcon width={40} height={40} aria-hidden="true" />
@@ -678,7 +663,7 @@ export default function DailyReportPage() {
         isOpen={recorderOpen}
         onClose={() => setRecorderOpen(false)}
         onFinish={handleFinishRecording}
-        reportDate={today()}
+        reportDate={todayLocal()}
         replaces={todaysReport ?? null}
       />
 

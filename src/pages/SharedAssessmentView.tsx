@@ -8,8 +8,7 @@ import { useAuthContext } from '../context/AuthContext';
 import { sharedApi } from '../services/api';
 import ReportContent from '../components/sensory-profile/ReportContent';
 import type { FormData } from '../components/sensory-profile/types';
-import { DEFAULT_INSTRUMENT_ID, getInstrument } from '../instruments';
-import { buildSectionsFromResponses } from '../components/sensory-profile/buildSections';
+import { assessmentToFormData } from '../components/sensory-profile/buildSections';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadBadge from '../components/design-system/GumroadBadge';
@@ -45,48 +44,7 @@ const SharedAssessmentView: React.FC = () => {
         const assessment = response.assessment ?? response;
         const responses = response.responses ?? assessment.responses ?? [];
 
-        const instrumentId: string = assessment.instrumentId || DEFAULT_INSTRUMENT_ID;
-        const instrument = getInstrument(instrumentId);
-
-        const { sections, sectionKeys } = buildSectionsFromResponses(instrument, responses);
-
-        sectionKeys.forEach((key) => {
-          const scoreField = `${key}RawScore`;
-          if (assessment[scoreField] !== undefined && assessment[scoreField] !== null) {
-            sections[key].rawScore = assessment[scoreField];
-          }
-        });
-
-        if (Array.isArray(assessment.sectionComments)) {
-          assessment.sectionComments.forEach((c: { section: string; comments: string }) => {
-            if (sections[c.section]) sections[c.section].comments = c.comments || '';
-          });
-        }
-
-        setFormData({
-          instrumentId,
-          child: {
-            name: assessment.childName || '',
-            birthDate: assessment.childBirthDate || '',
-            gender: assessment.childGender || 'male',
-            nationalIdentity: assessment.childNationalIdentity || '',
-            otherInfo: assessment.childOtherInfo || '',
-            age: assessment.childAge || 0,
-          },
-          examiner: {
-            name: assessment.examinerName || '',
-            profession: assessment.examinerProfession || '',
-            contact: assessment.examinerContact || '',
-          },
-          caregiver: {
-            name: assessment.caregiverName || '',
-            relationship: assessment.caregiverRelationship || '',
-            contact: assessment.caregiverContact || '',
-          },
-          sections,
-          scoresJson: assessment.scores_json ?? assessment.scoresJson ?? undefined,
-          createdAt: assessment.createdAt,
-        });
+        setFormData(assessmentToFormData(assessment, responses));
         fetchedRef.current = true;
       } catch (err: any) {
         console.error(err);

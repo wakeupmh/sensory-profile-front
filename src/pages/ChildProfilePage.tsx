@@ -84,18 +84,22 @@ const ChildProfilePage = () => {
   const [editBaseline, setEditBaseline] = useState<ChildFormValue | null>(null);
   const [editSaving, setEditSaving] = useState(false);
 
+  // Só a resposta do pedido mais recente vale: trocar o período rápido não
+  // deixa a resposta antiga, que chega depois, sobrescrever a nova.
+  const latestRequest = useRef(0);
   const fetchProfile = useCallback(async (period: number) => {
     if (!childId) return;
+    const request = ++latestRequest.current;
     try {
       setLoading(true);
       setError(null);
       const token = await getTokenRef.current();
       const data = await childApi.getProfile(childId, token, period);
-      setProfile(data);
+      if (request === latestRequest.current) setProfile(data);
     } catch {
-      setError(t('p1Profile.errLoad'));
+      if (request === latestRequest.current) setError(t('p1Profile.errLoad'));
     } finally {
-      setLoading(false);
+      if (request === latestRequest.current) setLoading(false);
     }
   }, [childId, t]);
 
@@ -431,4 +435,9 @@ const ChildProfilePage = () => {
   );
 };
 
-export default ChildProfilePage;
+// Uma instância por criança: ir de A para B (busca, link) sem desmontar
+// manteria o formulário de A aberto, e salvar gravaria os dados de A em B.
+export default function ChildProfileRoute() {
+  const { childId } = useParams<{ childId: string }>();
+  return <ChildProfilePage key={childId} />;
+}

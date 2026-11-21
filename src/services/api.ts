@@ -6,7 +6,6 @@ import type {
   CreateLogPayload,
   DailyLog,
   LogType,
-  LogAttachment,
   CreateLogAttachmentPayload,
   CreateLogAttachmentResponse,
 } from '../types/logs';
@@ -58,7 +57,6 @@ import type {
   Professional,
   ProfessionalPayload,
   ResourceShare,
-  AcceptedIdentity,
   SharedAnamneseSummary,
   SharedAssessmentSummary,
 } from '../types/professionals';
@@ -411,9 +409,6 @@ export const assessmentApi = {
 
   deleteAssessment: (id: string, token: string | null): Promise<void> =>
     requestVoid('delete', token, `/api/assessments/${id}`),
-
-  generateReport: (id: string, token: string | null): Promise<LegacyPayload> =>
-    requestLegacy('get', token, `/api/assessments/${id}/report`),
 };
 
 export const anamneseApi = {
@@ -529,7 +524,7 @@ export interface PaginatedLogs {
   limit: number;
 }
 
-export interface LogQueryParams {
+interface LogQueryParams {
   childId?: string;
   logType?: LogType;
   from?: string;
@@ -547,7 +542,6 @@ export const logApi = {
   getLog: logResource.get,
   createLog: logResource.create,
   updateLog: logResource.update,
-  deleteLog: logResource.delete,
 
   // Anexos vivem sob o registro, não sob uma rota própria de recurso.
   requestAttachmentUpload: (
@@ -556,9 +550,6 @@ export const logApi = {
     payload: CreateLogAttachmentPayload,
   ): Promise<CreateLogAttachmentResponse> =>
     requestData<CreateLogAttachmentResponse>('post', token, `/api/logs/${logId}/attachments`, payload),
-
-  listAttachments: (token: string | null, logId: string): Promise<LogAttachment[]> =>
-    requestList<LogAttachment>('get', token, `/api/logs/${logId}/attachments`),
 
   deleteAttachment: (token: string | null, logId: string, attachmentId: string): Promise<void> =>
     requestVoid('delete', token, `/api/logs/${logId}/attachments/${attachmentId}`),
@@ -626,7 +617,7 @@ export const dailyReportApi = {
 
 // ─── Terapia ────────────────────────────────────────────────────────
 
-export interface SessionQueryParams {
+interface SessionQueryParams {
   childId?: string;
   therapyType?: TherapyType;
   therapistId?: string;
@@ -642,10 +633,7 @@ const sessionResource = createPagedResourceApi<
 
 export const therapyApi = {
   getSessions: sessionResource.list,
-  getSession: sessionResource.get,
   createSession: sessionResource.create,
-  updateSession: sessionResource.update,
-  deleteSession: sessionResource.delete,
 };
 
 const therapistResource = createResourceApi<Therapist, CreateTherapistPayload, Partial<CreateTherapistPayload>>({
@@ -654,7 +642,6 @@ const therapistResource = createResourceApi<Therapist, CreateTherapistPayload, P
 
 export const therapistApi = {
   list: therapistResource.list,
-  getById: therapistResource.get,
   create: therapistResource.create,
   update: therapistResource.update,
   delete: therapistResource.delete,
@@ -748,9 +735,6 @@ export const professionalApi = {
   // aqui, e só aqui, que a tela consegue mostrá-lo.
   rotateToken: (id: string, token: string | null): Promise<Professional> =>
     requestData<Professional>('post', token, `/api/professionals/${id}/rotate-token`),
-
-  myIdentities: (token: string | null): Promise<AcceptedIdentity[]> =>
-    requestList<AcceptedIdentity>('get', token, '/api/professionals/me/identities'),
 
   acceptInvite: (inviteToken: string, token: string | null): Promise<Professional> =>
     requestData<Professional>('post', token, '/api/professional-invites/accept', { token: inviteToken }),
@@ -864,9 +848,9 @@ export function toUpcomingReminder(raw: RawUpcomingReminderItem): UpcomingRemind
   };
 }
 
-const reminderResource = createResourceApi<
-  Reminder, CreateReminderPayload, UpdateReminderPayload, { childId?: string }
->({ basePath: '/api/reminders' });
+const reminderResource = createResourceApi<Reminder, CreateReminderPayload, UpdateReminderPayload>({
+  basePath: '/api/reminders',
+});
 
 export const reminderApi = {
   // Rota irmã, fora do CRUD: mistura lembretes reais com os derivados de
@@ -878,10 +862,8 @@ export const reminderApi = {
     return raw.map(toUpcomingReminder);
   },
 
-  list: reminderResource.list,
   create: reminderResource.create,
   update: reminderResource.update,
-  delete: reminderResource.delete,
 };
 
 // ─── Reminder e-mail delivery preferences ────────────────────────────
@@ -994,8 +976,8 @@ export class AIRateLimitError extends Error {
 }
 
 function parseRateLimitInfo(headers: Record<string, unknown>): AIRateLimitInfo {
-  const remaining = headers['x-ratelimit-remaining'];
-  const limit = headers['x-ratelimit-limit'];
+  const remaining = headers['ratelimit-remaining'];
+  const limit = headers['ratelimit-limit'];
   const retryAfter = headers['retry-after'];
   return {
     limit: limit ? Number(limit) : 5,

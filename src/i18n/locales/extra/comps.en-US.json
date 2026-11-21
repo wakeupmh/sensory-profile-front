@@ -74,7 +74,6 @@
       "target": "Target",
       "unit": "Unit",
       "unitPh": "E.g. words",
-      "startDate": "Start date",
       "targetDate": "Target date"
     },
     "progressForm": {

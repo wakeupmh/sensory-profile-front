@@ -26,7 +26,7 @@ import {
   getSectionsForItemIds,
 } from '../instruments';
 import { toSensoryItems } from '../instruments/types';
-import { buildSectionsFromResponses } from '../components/sensory-profile/buildSections';
+import { buildAssessmentSections } from '../components/sensory-profile/buildSections';
 import { colors, spacing, typography } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
@@ -84,11 +84,9 @@ const SensoryProfileForm: React.FC = () => {
   const location = useLocation();
   const { getToken } = useAuthContext();
   const fetchedAssessmentRef = useRef(false);
-  const fetchedReportRef = useRef(false);
 
-  const isViewMode = !!id && !location.pathname.includes('/edit') && !location.pathname.includes('/report');
   const isEditMode = !!id && location.pathname.includes('/edit');
-  const isReportMode = !!id && location.pathname.includes('/report');
+  const isViewMode = !!id && !isEditMode;
   const isNewMode = !id;
 
   const instrument = useMemo(() => getInstrument(formData.instrumentId), [formData.instrumentId]);
@@ -271,7 +269,6 @@ const SensoryProfileForm: React.FC = () => {
 
   useEffect(() => {
     fetchedAssessmentRef.current = false;
-    fetchedReportRef.current = false;
     if (!id || isNewMode) return;
 
     const fetchAssessment = async () => {
@@ -287,25 +284,6 @@ const SensoryProfileForm: React.FC = () => {
         if (responseData.assessment && responseData.responses) {
           const { assessment, responses } = responseData;
           const loadedInstrumentId: string = assessment.instrumentId || DEFAULT_INSTRUMENT_ID;
-          const loadedInstrument = getInstrument(loadedInstrumentId);
-
-          const { sections: builtSections, sectionKeys } = buildSectionsFromResponses(loadedInstrument, responses);
-
-          sectionKeys.forEach((key) => {
-            const scoreField = `${key}RawScore`;
-            if (assessment[scoreField] !== undefined && assessment[scoreField] !== null) {
-              builtSections[key].rawScore = assessment[scoreField];
-            }
-          });
-
-          if (Array.isArray(assessment.sectionComments)) {
-            assessment.sectionComments.forEach((c: { section: string; comments: string }) => {
-              if (builtSections[c.section]) {
-                builtSections[c.section].comments = c.comments || '';
-              }
-            });
-          }
-
           setFormData({
             instrumentId: loadedInstrumentId,
             child: {
@@ -328,7 +306,7 @@ const SensoryProfileForm: React.FC = () => {
               relationship: assessment.caregiverRelationship,
               contact: assessment.caregiverContact,
             },
-            sections: builtSections,
+            sections: buildAssessmentSections(getInstrument(loadedInstrumentId), assessment, responses),
             scoresJson: assessment.scores_json ?? assessment.scoresJson ?? undefined,
             createdAt: assessment.createdAt,
           });
@@ -352,33 +330,6 @@ const SensoryProfileForm: React.FC = () => {
 
     fetchAssessment();
   }, [id, isNewMode, setFormData, getToken]);
-
-  useEffect(() => {
-    if (id && isReportMode) {
-      const fetchReport = async () => {
-        if (fetchedReportRef.current) return;
-
-        try {
-          setLoading(true);
-          const token = await getToken();
-          await assessmentApi.generateReport(id, token);
-          setError(null);
-          fetchedReportRef.current = true;
-        } catch (err: any) {
-          if (err.response && err.response.status === 404) {
-            setNotFound(true);
-          } else {
-            setError(tRef.current('assessmentForm.errors.report'));
-          }
-          console.error(err);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchReport();
-    }
-  }, [id, isReportMode, getToken]);
 
   const validateForm = () => {
     setValidationError(null);
@@ -485,7 +436,6 @@ const SensoryProfileForm: React.FC = () => {
   const getTitle = () => {
     if (isNewMode) return t('assessmentForm.title.new');
     if (isEditMode) return t('assessmentForm.title.edit');
-    if (isReportMode) return t('assessmentForm.title.report');
     return t('assessmentForm.title.view');
   };
 
@@ -643,12 +593,12 @@ const SensoryProfileForm: React.FC = () => {
               </Badge>
             </Flex>
             <Flex gap="3" wrap="wrap">
-              {!isNewMode && !isEditMode && !isReportMode && (
+              {!isNewMode && !isEditMode && (
                 <GumroadButton variant="secondary" size="sm" onClick={() => navigate(`/assessment/${id}/edit`)}>
                   {t('assessmentForm.buttons.edit')}
                 </GumroadButton>
               )}
-              {!isNewMode && !isReportMode && (
+              {!isNewMode && (
                 <GumroadButton variant="secondary" size="sm" onClick={() => navigate(`/assessment/${id}/report`)}>
                   {t('assessmentForm.buttons.viewReport')}
                 </GumroadButton>
@@ -709,7 +659,7 @@ const SensoryProfileForm: React.FC = () => {
               </Flex>
             </>
           ) : (
-            /* EDIT / VIEW / REPORT MODE: all sections at once */
+            /* EDIT / VIEW MODE: all sections at once */
             <>
               {isEditMode && (
                 <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
@@ -726,7 +676,7 @@ const SensoryProfileForm: React.FC = () => {
                 <ChildDataSection
                   formData={formData}
                   updateFormData={updateFormData}
-                  disabled={isViewMode || isReportMode}
+                  disabled={isViewMode}
                 />
               </GumroadCard>
 
@@ -734,7 +684,7 @@ const SensoryProfileForm: React.FC = () => {
                 <ExaminerDataSection
                   formData={formData}
                   updateFormData={updateFormData}
-                  disabled={isViewMode || isReportMode}
+                  disabled={isViewMode}
                 />
               </GumroadCard>
 
@@ -742,7 +692,7 @@ const SensoryProfileForm: React.FC = () => {
                 <CaregiverDataSection
                   formData={formData}
                   updateFormData={updateFormData}
-                  disabled={isViewMode || isReportMode}
+                  disabled={isViewMode}
                 />
               </GumroadCard>
 
@@ -756,12 +706,12 @@ const SensoryProfileForm: React.FC = () => {
                   sections={effectiveSections}
                   updateItemResponse={updateItemResponse}
                   updateFormData={updateFormData}
-                  disabled={isViewMode || isReportMode}
+                  disabled={isViewMode}
                 />
               </GumroadCard>
 
               <Flex gap="3" mt="4" justify="end" wrap="wrap">
-                {!isViewMode && !isReportMode && (
+                {!isViewMode && (
                   <>
                     <GumroadButton variant="secondary" size="md" onClick={handleClose}>
                       {t('assessmentForm.buttons.cancel')}
@@ -771,16 +721,14 @@ const SensoryProfileForm: React.FC = () => {
                     </GumroadButton>
                   </>
                 )}
-                {(isViewMode || isReportMode) && (
+                {isViewMode && (
                   <>
                     <GumroadButton variant="secondary" size="md" onClick={handleClose}>
                       {t('assessmentForm.buttons.back')}
                     </GumroadButton>
-                    {isViewMode && (
-                      <GumroadButton variant="primary" size="md" onClick={() => navigate(`/assessment/${id}/edit`)}>
-                        {t('assessmentForm.buttons.edit')}
-                      </GumroadButton>
-                    )}
+                    <GumroadButton variant="primary" size="md" onClick={() => navigate(`/assessment/${id}/edit`)}>
+                      {t('assessmentForm.buttons.edit')}
+                    </GumroadButton>
                   </>
                 )}
               </Flex>
