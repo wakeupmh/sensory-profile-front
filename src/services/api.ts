@@ -994,8 +994,8 @@ export class AIRateLimitError extends Error {
 }
 
 function parseRateLimitInfo(headers: Record<string, unknown>): AIRateLimitInfo {
-  const remaining = headers['x-ratelimit-remaining'];
-  const limit = headers['x-ratelimit-limit'];
+  const remaining = headers['ratelimit-remaining'];
+  const limit = headers['ratelimit-limit'];
   const retryAfter = headers['retry-after'];
   return {
     limit: limit ? Number(limit) : 5,
