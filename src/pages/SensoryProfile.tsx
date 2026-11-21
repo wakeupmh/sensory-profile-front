@@ -138,6 +138,9 @@ const SensoryProfileForm: React.FC = () => {
   const [maxStepReached, setMaxStepReached] = useState(0);
   const draftCheckedRef = useRef(false);
 
+  // Etapa em que um rascunho foi retomado — sem aviso, o formulário abria na
+  // etapa 13 de 13 sem explicar por quê.
+  const [restoredStep, setRestoredStep] = useState<number | null>(null);
   const { loadDraft, clearDraft, saveOnStepChange } = useDraftPersistence({
     formType: 'sensory_assessment',
     formData: formData as Record<string, unknown>,
@@ -161,6 +164,7 @@ const SensoryProfileForm: React.FC = () => {
       if (!draft) return;
       setFormData(draft.payload as any);
       const step = draft.currentStep ?? 0;
+      setRestoredStep(step);
       setCurrentStep(step);
       setMaxStepReached(step);
       const completed = new Set<number>();
@@ -452,20 +456,7 @@ const SensoryProfileForm: React.FC = () => {
       case 0:
         return (
           <>
-            <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
-              <Flex direction="column" gap="4">
-                <InstrumentPicker
-                  value={formData.instrumentId}
-                  onChange={handleInstrumentChange}
-                />
-                <AnamneseSelector
-                  onSelect={(a: Anamnese) => {
-                    updateFormData('child', a.child);
-                    updateFormData('caregiver', a.caregiver);
-                  }}
-                />
-              </Flex>
-            </GumroadCard>
+            {/* Quem é avaliado vem primeiro; o instrumento já vem escolhido pela faixa mais comum. */}
             <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
               <ChildPicker
                 selectedId={formData.child?.selectedChildId ?? null}
@@ -480,6 +471,20 @@ const SensoryProfileForm: React.FC = () => {
                   });
                 }}
               />
+            </GumroadCard>
+            <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+              <Flex direction="column" gap="4">
+                <InstrumentPicker
+                  value={formData.instrumentId}
+                  onChange={handleInstrumentChange}
+                />
+                <AnamneseSelector
+                  onSelect={(a: Anamnese) => {
+                    updateFormData('child', a.child);
+                    updateFormData('caregiver', a.caregiver);
+                  }}
+                />
+              </Flex>
             </GumroadCard>
           </>
         );
@@ -632,6 +637,25 @@ const SensoryProfileForm: React.FC = () => {
           {/* NEW MODE: stepper + one section at a time */}
           {isNewMode ? (
             <>
+              {restoredStep !== null && (
+                <GumroadCard color="cream" shadow="sm" padding="md" style={{ marginBottom: spacing.md }}>
+                  <Flex align="center" justify="between" gap="3" wrap="wrap">
+                    <GumroadText level="body-sm" as="p" style={{ margin: 0 }}>
+                      {t('assessmentForm.draftRestored', { step: restoredStep + 1, total: steps.length })}
+                    </GumroadText>
+                    <GumroadButton
+                      variant="secondary"
+                      size="sm"
+                      onClick={async () => {
+                        await clearDraft();
+                        window.location.reload();
+                      }}
+                    >
+                      {t('assessmentForm.startOver')}
+                    </GumroadButton>
+                  </Flex>
+                </GumroadCard>
+              )}
               <GumroadStepper
                 steps={steps}
                 current={currentStep}

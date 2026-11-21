@@ -200,7 +200,9 @@
       "save": "Salvar"
     },
     "sectionSummary": "{{answered}} de {{total}} respondidas",
-    "sectionScore": "pontuação {{score}}"
+    "sectionScore": "pontuação {{score}}",
+    "draftRestored": "Você continua de onde parou: etapa {{step}} de {{total}}.",
+    "startOver": "Começar do zero"
   },
   "assessmentReport": {
     "title": "Relatório de Avaliação",

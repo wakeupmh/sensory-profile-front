@@ -200,7 +200,9 @@
       "save": "Save"
     },
     "sectionSummary": "{{answered}} of {{total}} answered",
-    "sectionScore": "score {{score}}"
+    "sectionScore": "score {{score}}",
+    "draftRestored": "Picking up where you left off: step {{step}} of {{total}}.",
+    "startOver": "Start over"
   },
   "assessmentReport": {
     "title": "Assessment Report",
