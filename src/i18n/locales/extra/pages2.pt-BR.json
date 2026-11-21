@@ -116,6 +116,12 @@
       "before": "Antes",
       "behavior": "Comportamento",
       "after": "Depois"
+    },
+    "summary": {
+      "wakings_one": "acordou 1 vez",
+      "wakings_other": "acordou {{count}} vezes",
+      "accepted": "comeu: {{list}}",
+      "refused": "recusou: {{list}}"
     }
   },
   "p2Medical": {

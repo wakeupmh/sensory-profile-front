@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Box, Flex } from '@radix-ui/themes';
@@ -10,6 +10,7 @@ import { useDomainPage } from '../hooks/useDomainPage';
 import { useDomainResource } from '../hooks/useDomainResource';
 import { useOfflineLogQueue } from '../hooks/useOfflineLogQueue';
 import { isNetworkError } from '../services/offlineLogQueue';
+import { logSummary } from '../utils/logSummary';
 import { useToast } from '../context/ToastContext';
 import { ChildSelector } from '../components/domain/ChildSelector';
 import { FilterPill } from '../components/domain/FilterPill';
@@ -52,6 +53,7 @@ export default function LogsPage() {
   const { t, i18n } = useTranslation();
   const { children, childrenLoaded, childrenError, reloadChildren, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
   const toast = useToast();
+  const childNames = useMemo(() => new Map(children.map((c) => [c.id, c.name])), [children]);
   const { queuedCount, syncing, flush, enqueue } = useOfflineLogQueue({
     onRejected: (count) => toast.error(t('p1Logs.offlineRejected', { count })),
   });
@@ -240,8 +242,14 @@ export default function LogsPage() {
                     as="p"
                     style={{ opacity: 0.6, fontSize: '12px' }}
                   >
+                    {!selectedChildId && childNames.get(log.childId) ? `${childNames.get(log.childId)} · ` : ''}
                     {formatOccurredAt(log.occurredAt, i18n.language)}
                   </GumroadText>
+                  {logSummary(log, t) && (
+                    <GumroadText level="body-sm" as="p" style={{ fontWeight: 600 }}>
+                      {logSummary(log, t)}
+                    </GumroadText>
+                  )}
                   {log.notes && (
                     <GumroadText
                       level="body-sm"

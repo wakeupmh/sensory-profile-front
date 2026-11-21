@@ -116,6 +116,12 @@
       "before": "Before",
       "behavior": "Behavior",
       "after": "After"
+    },
+    "summary": {
+      "wakings_one": "woke 1 time",
+      "wakings_other": "woke {{count}} times",
+      "accepted": "ate: {{list}}",
+      "refused": "refused: {{list}}"
     }
   },
   "p2Medical": {
