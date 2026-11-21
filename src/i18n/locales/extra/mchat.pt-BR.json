@@ -78,7 +78,8 @@
     },
     "errors": {
       "load": "Erro ao carregar avaliação. Por favor, tente novamente.",
-      "save": "Erro ao salvar avaliação. Por favor, tente novamente."
+      "save": "Erro ao salvar avaliação. Por favor, tente novamente.",
+      "invalid": "Não foi possível salvar: {{detail}}"
     },
     "title": {
       "new": "Nova Avaliação",
@@ -197,7 +198,11 @@
       "years": "anos",
       "newChild": "Nova Criança",
       "save": "Salvar"
-    }
+    },
+    "sectionSummary": "{{answered}} de {{total}} respondidas",
+    "sectionScore": "pontuação {{score}}",
+    "draftRestored": "Você continua de onde parou: etapa {{step}} de {{total}}.",
+    "startOver": "Começar do zero"
   },
   "assessmentReport": {
     "title": "Relatório de Avaliação",

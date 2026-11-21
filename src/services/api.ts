@@ -312,6 +312,17 @@ async function publicRequestData<T>(url: string): Promise<T> {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type LegacyPayload = any;
 
+/**
+ * Uma avaliação com as respostas — o que `/api/assessments/:id` e
+ * `/api/shared/assessments/:id` devolvem dentro do envelope. A avaliação segue
+ * solta (`LegacyPayload`) até a entidade ganhar um tipo no front.
+ */
+export interface AssessmentDetail {
+  assessment: LegacyPayload;
+  responses: Array<{ itemId: number; response: string }>;
+  responseCount: number;
+}
+
 /** Devolve o corpo inteiro, sem abrir o envelope. Ver `LegacyPayload`. */
 function requestLegacy(
   method: HttpMethod,
@@ -398,8 +409,8 @@ export const assessmentApi = {
   getAllAssessments: (token: string | null): Promise<LegacyPayload> =>
     requestLegacy('get', token, '/api/assessments'),
 
-  getAssessmentById: (id: string, token: string | null): Promise<LegacyPayload> =>
-    requestLegacy('get', token, `/api/assessments/${id}`),
+  getAssessmentById: (id: string, token: string | null): Promise<AssessmentDetail> =>
+    requestData<AssessmentDetail>('get', token, `/api/assessments/${id}`),
 
   createAssessment: (assessmentData: unknown, token: string | null): Promise<LegacyPayload> =>
     requestLegacy('post', token, '/api/assessments', assessmentData),
@@ -775,8 +786,8 @@ export const sharedApi = {
   listAssessments: (token: string | null): Promise<SharedAssessmentSummary[]> =>
     requestList<SharedAssessmentSummary>('get', token, '/api/shared/assessments'),
 
-  getAssessment: (id: string, token: string | null): Promise<LegacyPayload> =>
-    requestData<LegacyPayload>('get', token, `/api/shared/assessments/${id}`),
+  getAssessment: (id: string, token: string | null): Promise<AssessmentDetail> =>
+    requestData<AssessmentDetail>('get', token, `/api/shared/assessments/${id}`),
 };
 
 // ─── Behavior (ABC) insights ────────────────────────────────────────

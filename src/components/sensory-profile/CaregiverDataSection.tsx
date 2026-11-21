@@ -64,7 +64,7 @@ const CaregiverDataSection: React.FC<CaregiverDataSectionProps> = memo(({ formDa
           initialValue={formData.caregiver?.contact}
           onValueChange={handleValueChange}
           disabled={disabled}
-          required={true}
+          required={false}
         />
       </Box>
     </Box>

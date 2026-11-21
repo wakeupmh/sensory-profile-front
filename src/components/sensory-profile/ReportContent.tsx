@@ -156,11 +156,14 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
     paddingBottom: "8px",
   };
 
+  // Rótulo em cima do valor: lado a lado, com largura fixa, não cabia no celular.
   const fieldLabelStyle = {
     fontWeight: "bold" as const,
-    width: "180px",
-    display: "inline-block",
+    display: "block",
   };
+
+  // No celular a tabela rola dentro da própria caixa, em vez de alargar a página.
+  const tableScrollStyle = { overflowX: "auto" as const, maxWidth: "100%" };
 
   const tableStyle = {
     width: "100%",
@@ -217,23 +220,23 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
       <div style={sectionStyle} className="avoid-break first-section">
         <h3 style={subHeaderStyle}>{t('assessmentForm.fields.childData')}</h3>
         <div style={sectionContentStyle}>
-          <div style={{ display: "flex", flexDirection: "row", gap: "10px", marginBottom: "5px" }}>
-            <div style={{ flex: 1 }}>
+          <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" as const, gap: "10px", marginBottom: "8px" }}>
+            <div style={{ flex: "1 1 140px", minWidth: 0 }}>
               <span style={fieldLabelStyle}>{t('assessmentReport.name')}</span> {formData.child.name || t('assessmentReport.notInformedM')}
             </div>
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: "1 1 140px", minWidth: 0 }}>
               <span style={fieldLabelStyle}>{t('assessmentForm.fields.age')}</span> {t('assessmentReport.years', { count: formData.child.age || 0 })}
             </div>
           </div>
-          <div style={{ display: "flex", flexDirection: "row", gap: "10px", marginBottom: "5px" }}>
-            <div style={{ flex: 1 }}>
+          <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" as const, gap: "10px", marginBottom: "8px" }}>
+            <div style={{ flex: "1 1 140px", minWidth: 0 }}>
               <span style={fieldLabelStyle}>{t('assessmentForm.fields.birthDate')}</span> {
                 formData.child.birthDate
                   ? dateFmt.format(parseLocalDate(formData.child.birthDate))
                   : t('assessmentReport.notInformedF')
               }
             </div>
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: "1 1 140px", minWidth: 0 }}>
               <span style={fieldLabelStyle}>{t('assessmentForm.fields.gender')}</span> {
                 formData.child.gender === 'male' ? t('assessmentForm.fields.male')
                   : formData.child.gender === 'female' ? t('assessmentForm.fields.female')
@@ -253,11 +256,11 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
       <div style={sectionStyle} className="avoid-break">
         <h3 style={subHeaderStyle}>{t('assessmentForm.fields.examinerData')}</h3>
         <div style={sectionContentStyle}>
-          <div style={{ display: "flex", flexDirection: "row", gap: "10px", marginBottom: "5px" }}>
-            <div style={{ flex: 1 }}>
+          <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" as const, gap: "10px", marginBottom: "8px" }}>
+            <div style={{ flex: "1 1 140px", minWidth: 0 }}>
               <span style={fieldLabelStyle}>{t('assessmentReport.name')}</span> {formData.examiner.name || t('assessmentReport.notInformedM')}
             </div>
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: "1 1 140px", minWidth: 0 }}>
               <span style={fieldLabelStyle}>{t('assessmentReport.profession')}</span> {formData.examiner.profession || t('assessmentReport.notInformedF')}
             </div>
           </div>
@@ -270,11 +273,11 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
       <div style={sectionStyle} className="avoid-break">
         <h3 style={subHeaderStyle}>{t('assessmentForm.fields.caregiverData')}</h3>
         <div style={sectionContentStyle}>
-          <div style={{ display: "flex", flexDirection: "row", gap: "10px", marginBottom: "5px" }}>
-            <div style={{ flex: 1 }}>
+          <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" as const, gap: "10px", marginBottom: "8px" }}>
+            <div style={{ flex: "1 1 140px", minWidth: 0 }}>
               <span style={fieldLabelStyle}>{t('assessmentReport.name')}</span> {formData.caregiver.name || t('assessmentReport.notInformedM')}
             </div>
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: "1 1 140px", minWidth: 0 }}>
               <span style={fieldLabelStyle}>{t('assessmentReport.relationship')}</span> {
                 ['father', 'mother', 'grandparent', 'other_relative', 'sibling', 'other'].includes(formData.caregiver.relationship)
                   ? t(`assessmentReport.relations.${formData.caregiver.relationship}`)
@@ -344,7 +347,7 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
             : t('assessmentReport.scores.banded')}
         </p>
 
-        <table style={tableStyle}>
+        <div style={tableScrollStyle}><table style={tableStyle}>
           <thead>
             <tr>
               <th style={tableHeaderStyle}>{t('assessmentReport.scores.section')}</th>
@@ -361,7 +364,7 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
               </tr>
             ))}
           </tbody>
-        </table>
+        </table></div>
       </div>
       )}
 
@@ -391,7 +394,7 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
                 {sectionIndex > 0 && <div className="page-break"></div>}
                 <div className="sensory-section" style={{ marginBottom: "30px", pageBreakInside: "avoid" as const }}>
                   <h4 style={{ fontSize: "16px", marginBottom: "10px", color: "#444" }}>{section.title}</h4>
-                  <table style={tableStyle}>
+                  <div style={tableScrollStyle}><table style={tableStyle}>
                     <thead>
                       <tr>
                         <th style={tableHeaderStyle}>{t('assessmentForm.item')}</th>
@@ -418,7 +421,7 @@ const ReportContent: React.FC<ReportContentProps> = ({ formData, assessmentId })
                         );
                       })}
                     </tbody>
-                  </table>
+                  </table></div>
                 </div>
               </React.Fragment>
             );

@@ -1,3 +1,4 @@
+import { MOOD_EMOJI } from '../../utils/logSummary';
 import React, { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flex, Box } from '@radix-ui/themes';
@@ -5,13 +6,7 @@ import { colors, shadows, radii, fonts, spacing } from '../../theme/tokens';
 import GumroadButton from '../design-system/GumroadButton';
 import type { MoodData } from '../../types/logs';
 
-const MOOD_LEVELS: { value: 1|2|3|4|5; emoji: string }[] = [
-  { value: 1, emoji: '😣' },
-  { value: 2, emoji: '😟' },
-  { value: 3, emoji: '😐' },
-  { value: 4, emoji: '🙂' },
-  { value: 5, emoji: '😊' },
-];
+const MOOD_LEVELS = ([1, 2, 3, 4, 5] as const).map((value) => ({ value, emoji: MOOD_EMOJI[value] }));
 
 const MOOD_TAGS = ['calmo', 'agitado', 'feliz', 'triste', 'ansioso', 'frustrado'];
 

@@ -256,7 +256,8 @@
     "create": "Criar Anamnese",
     "creating": "Criando...",
     "saveChanges": "Salvar Alterações",
-    "saving": "Salvando..."
+    "saving": "Salvando...",
+    "errInvalid": "Não foi possível salvar: {{detail}}"
   },
   "p1Goals": {
     "errLoad": "Erro ao carregar metas. Por favor, tente novamente.",

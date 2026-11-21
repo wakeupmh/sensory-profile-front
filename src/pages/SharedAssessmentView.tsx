@@ -38,12 +38,7 @@ const SharedAssessmentView: React.FC = () => {
         setLoading(true);
         setError(null);
         const token = await getToken();
-        const response = await sharedApi.getAssessment(id, token);
-
-        // The backend may return either `{ assessment, responses }` or a flatter shape.
-        const assessment = response.assessment ?? response;
-        const responses = response.responses ?? assessment.responses ?? [];
-
+        const { assessment, responses } = await sharedApi.getAssessment(id, token);
         setFormData(assessmentToFormData(assessment, responses));
         fetchedRef.current = true;
       } catch (err: any) {

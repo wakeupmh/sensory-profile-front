@@ -23,6 +23,7 @@ const SensorySection = memo(({
   sectionKey,
   items,
   comments,
+  rawScore,
   scale,
   allowedValues,
   updateItemResponse,
@@ -33,6 +34,7 @@ const SensorySection = memo(({
   sectionKey: string;
   items: SensoryItem[];
   comments: string;
+  rawScore?: number;
   scale?: ResponseScale;
   allowedValues?: string[];
   updateItemResponse: (section: string, itemId: number, response: FrequencyResponse) => void;
@@ -41,11 +43,23 @@ const SensorySection = memo(({
 }) => {
   const { t } = useTranslation();
   const textareaId = `comments-${sectionKey}`;
+  const answered = items.filter((item) => item.response).length;
   return (
-    <Box mb="6">
-      <GumroadHeading level="title-lg" as="h3" style={{ marginBottom: '12px' }}>
-        {title}
-      </GumroadHeading>
+    // Só leitura: cada seção começa fechada, com o resumo na linha do título —
+    // as 86 perguntas abertas davam ~50 telas de rolagem no celular.
+    <Box mb="6" asChild>
+      <details open={!disabled}>
+      <summary style={{ cursor: 'pointer', listStyle: disabled ? undefined : 'none', marginBottom: '12px' }}>
+        <GumroadHeading level="title-lg" as="h3" style={{ display: 'inline' }}>
+          {title}
+        </GumroadHeading>
+        {disabled && (
+          <span style={{ display: 'block', fontSize: '14px', opacity: 0.75, marginTop: '4px' }}>
+            {t('assessmentForm.sectionSummary', { answered, total: items.length })}
+            {rawScore != null ? ` · ${t('assessmentForm.sectionScore', { score: rawScore })}` : ''}
+          </span>
+        )}
+      </summary>
       <SensoryItemsTable
         items={items}
         scale={scale}
@@ -77,6 +91,7 @@ const SensorySection = memo(({
           }}
         />
       </Box>
+      </details>
     </Box>
   );
 });
@@ -112,6 +127,7 @@ const SensoryProcessingSection: React.FC<SensoryProcessingSectionProps> = memo((
             sectionKey={section.key}
             items={items}
             comments={comments}
+            rawScore={sectionData?.rawScore}
             scale={instrument.scale}
             allowedValues={section.allowedValues}
             updateItemResponse={updateItemResponse}

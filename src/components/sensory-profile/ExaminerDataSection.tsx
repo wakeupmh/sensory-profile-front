@@ -55,7 +55,7 @@ const ExaminerDataSection: React.FC<ExaminerDataSectionProps> = memo(({ formData
           initialValue={formData.examiner?.contact}
           onValueChange={handleValueChange}
           disabled={disabled}
-          required={true}
+          required={false}
         />
       </Box>
     </Box>

@@ -13,7 +13,9 @@ import CaregiverDataSection from '../components/sensory-profile/CaregiverDataSec
 import InstructionsSection from '../components/sensory-profile/InstructionsSection';
 import SensoryProcessingSection, { SensorySection } from '../components/sensory-profile/SensoryProcessingSection';
 import InstrumentPicker from '../components/sensory-profile/InstrumentPicker';
+import { apiErrorDetail } from '../utils/apiError';
 import useFormData from '../components/sensory-profile/useFormData';
+import type { ChildData as FormChild } from '../components/sensory-profile/types';
 import AnamneseSelector from '../components/anamnese/AnamneseSelector';
 import ProfessionalSharePanel from '../components/sharing/ProfessionalSharePanel';
 import type { Anamnese } from '../components/anamnese/types';
@@ -42,6 +44,22 @@ const PRELUDE_STEP_KEYS = [
 ] as const;
 
 const PRELUDE_COUNT = PRELUDE_STEP_KEYS.length; // 4
+
+/**
+ * A criança como a API a recebe: o id da escolhida liga a avaliação a ela
+ * (sem ele o servidor cadastrava outra criança igual). `age` e
+ * `selectedChildId` são estado do formulário, não da criança.
+ */
+function childPayload(child: FormChild) {
+  return {
+    id: child.selectedChildId || undefined,
+    name: child.name,
+    birthDate: child.birthDate,
+    gender: child.gender || undefined,
+    nationalIdentity: child.nationalIdentity,
+    otherInfo: child.otherInfo,
+  };
+}
 
 const SensoryProfileForm: React.FC = () => {
   const { t } = useTranslation();
@@ -120,6 +138,9 @@ const SensoryProfileForm: React.FC = () => {
   const [maxStepReached, setMaxStepReached] = useState(0);
   const draftCheckedRef = useRef(false);
 
+  // Etapa em que um rascunho foi retomado — sem aviso, o formulário abria na
+  // etapa 13 de 13 sem explicar por quê.
+  const [restoredStep, setRestoredStep] = useState<number | null>(null);
   const { loadDraft, clearDraft, saveOnStepChange } = useDraftPersistence({
     formType: 'sensory_assessment',
     formData: formData as Record<string, unknown>,
@@ -143,6 +164,7 @@ const SensoryProfileForm: React.FC = () => {
       if (!draft) return;
       setFormData(draft.payload as any);
       const step = draft.currentStep ?? 0;
+      setRestoredStep(step);
       setCurrentStep(step);
       setMaxStepReached(step);
       const completed = new Set<number>();
@@ -165,8 +187,7 @@ const SensoryProfileForm: React.FC = () => {
     const fetchParent = async () => {
       try {
         const token = await getToken();
-        const response = await assessmentApi.getAssessmentById(parentId, token);
-        const assessment = response.data?.assessment ?? response.assessment ?? response;
+        const { assessment } = await assessmentApi.getAssessmentById(parentId, token);
         setParentData({ scores_json: assessment.scores_json ?? assessment.scoresJson ?? {} });
       } catch (err) {
         console.error('Error fetching parent assessment:', err);
@@ -225,11 +246,9 @@ const SensoryProfileForm: React.FC = () => {
     } else if (step === 1) {
       if (!formData.examiner?.name) return fail(t('assessmentForm.validation.examinerName'));
       if (!formData.examiner?.profession) return fail(t('assessmentForm.validation.examinerProfession'));
-      if (!formData.examiner?.contact) return fail(t('assessmentForm.validation.examinerContact'));
     } else if (step === 2) {
       if (!formData.caregiver?.name) return fail(t('assessmentForm.validation.caregiverName'));
       if (!formData.caregiver?.relationship) return fail(t('assessmentForm.validation.caregiverRelationship'));
-      if (!formData.caregiver?.contact) return fail(t('assessmentForm.validation.caregiverContact'));
     } else if (step === 3) {
       // No validation for instructions
     } else {
@@ -278,41 +297,36 @@ const SensoryProfileForm: React.FC = () => {
         setLoading(true);
         setNotFound(false);
         const token = await getToken();
-        const response = await assessmentApi.getAssessmentById(id, token);
-        const responseData = response.data || response;
-
-        if (responseData.assessment && responseData.responses) {
-          const { assessment, responses } = responseData;
-          const loadedInstrumentId: string = assessment.instrumentId || DEFAULT_INSTRUMENT_ID;
-          setFormData({
-            instrumentId: loadedInstrumentId,
-            child: {
-              name: assessment.childName,
-              birthDate: assessment.childBirthDate
-                ? new Date(assessment.childBirthDate).toISOString().split('T')[0]
-                : '',
-              gender: assessment.childGender,
-              nationalIdentity: assessment.childNationalIdentity || '',
-              otherInfo: assessment.childOtherInfo || '',
-              age: assessment.childAge,
-            },
-            examiner: {
-              name: assessment.examinerName,
-              profession: assessment.examinerProfession,
-              contact: assessment.examinerContact,
-            },
-            caregiver: {
-              name: assessment.caregiverName,
-              relationship: assessment.caregiverRelationship,
-              contact: assessment.caregiverContact,
-            },
-            sections: buildAssessmentSections(getInstrument(loadedInstrumentId), assessment, responses),
-            scoresJson: assessment.scores_json ?? assessment.scoresJson ?? undefined,
-            createdAt: assessment.createdAt,
-          });
-        } else {
-          setFormData((prev) => ({ ...prev, ...responseData, instrumentId: responseData.instrumentId || DEFAULT_INSTRUMENT_ID }));
-        }
+        const { assessment, responses } = await assessmentApi.getAssessmentById(id, token);
+        const loadedInstrumentId: string = assessment.instrumentId || DEFAULT_INSTRUMENT_ID;
+        setFormData({
+          instrumentId: loadedInstrumentId,
+          child: {
+            // Editar e salvar mantém a avaliação na mesma criança.
+            selectedChildId: assessment.childId,
+            name: assessment.childName ?? '',
+            birthDate: assessment.childBirthDate
+              ? new Date(assessment.childBirthDate).toISOString().split('T')[0]
+              : '',
+            gender: assessment.childGender,
+            nationalIdentity: assessment.childNationalIdentity || '',
+            otherInfo: assessment.childOtherInfo || '',
+            age: assessment.childAge,
+          },
+          examiner: {
+            name: assessment.examinerName ?? '',
+            profession: assessment.examinerProfession ?? '',
+            contact: assessment.examinerContact ?? '',
+          },
+          caregiver: {
+            name: assessment.caregiverName ?? '',
+            relationship: assessment.caregiverRelationship ?? '',
+            contact: assessment.caregiverContact ?? '',
+          },
+          sections: buildAssessmentSections(getInstrument(loadedInstrumentId), assessment, responses),
+          scoresJson: assessment.scores_json ?? assessment.scoresJson ?? undefined,
+          createdAt: assessment.createdAt,
+        });
 
         setError(null);
         fetchedAssessmentRef.current = true;
@@ -337,15 +351,12 @@ const SensoryProfileForm: React.FC = () => {
     if (!formData.child?.name) return fail(t('assessmentForm.validation.childName'));
     if (!formData.child?.birthDate) return fail(t('assessmentForm.validation.childBirthDate'));
     if (!formData.child?.gender) return fail(t('assessmentForm.validation.childGender'));
-    if (!formData.child?.age) return fail(t('assessmentForm.validation.childAge'));
 
     if (!formData.examiner?.name) return fail(t('assessmentForm.validation.examinerName'));
     if (!formData.examiner?.profession) return fail(t('assessmentForm.validation.examinerProfession'));
-    if (!formData.examiner?.contact) return fail(t('assessmentForm.validation.examinerContact'));
 
     if (!formData.caregiver?.name) return fail(t('assessmentForm.validation.caregiverName'));
     if (!formData.caregiver?.relationship) return fail(t('assessmentForm.validation.caregiverRelationship'));
-    if (!formData.caregiver?.contact) return fail(t('assessmentForm.validation.caregiverContact'));
 
     // Todos os itens de todas as seções são obrigatórios (a API rejeita respostas incompletas)
     const unanswered: string[] = [];
@@ -385,7 +396,7 @@ const SensoryProfileForm: React.FC = () => {
 
     return {
       instrumentId: formData.instrumentId,
-      child: formData.child,
+      child: childPayload(formData.child),
       examiner: formData.examiner,
       caregiver: formData.caregiver,
       responses,
@@ -413,7 +424,8 @@ const SensoryProfileForm: React.FC = () => {
 
       navigate('/dashboard');
     } catch (err) {
-      setError(t('assessmentForm.errors.save'));
+      const detail = apiErrorDetail(err);
+      setError(detail ? t('assessmentForm.errors.invalid', { detail }) : t('assessmentForm.errors.save'));
       console.error(err);
     } finally {
       setSubmitting(false);
@@ -444,20 +456,7 @@ const SensoryProfileForm: React.FC = () => {
       case 0:
         return (
           <>
-            <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
-              <Flex direction="column" gap="4">
-                <InstrumentPicker
-                  value={formData.instrumentId}
-                  onChange={handleInstrumentChange}
-                />
-                <AnamneseSelector
-                  onSelect={(a: Anamnese) => {
-                    updateFormData('child', a.child);
-                    updateFormData('caregiver', a.caregiver);
-                  }}
-                />
-              </Flex>
-            </GumroadCard>
+            {/* Quem é avaliado vem primeiro; o instrumento já vem escolhido pela faixa mais comum. */}
             <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
               <ChildPicker
                 selectedId={formData.child?.selectedChildId ?? null}
@@ -472,6 +471,20 @@ const SensoryProfileForm: React.FC = () => {
                   });
                 }}
               />
+            </GumroadCard>
+            <GumroadCard color="white" shadow="md" padding="lg" style={{ marginBottom: spacing.lg }}>
+              <Flex direction="column" gap="4">
+                <InstrumentPicker
+                  value={formData.instrumentId}
+                  onChange={handleInstrumentChange}
+                />
+                <AnamneseSelector
+                  onSelect={(a: Anamnese) => {
+                    updateFormData('child', a.child);
+                    updateFormData('caregiver', a.caregiver);
+                  }}
+                />
+              </Flex>
             </GumroadCard>
           </>
         );
@@ -624,6 +637,25 @@ const SensoryProfileForm: React.FC = () => {
           {/* NEW MODE: stepper + one section at a time */}
           {isNewMode ? (
             <>
+              {restoredStep !== null && (
+                <GumroadCard color="cream" shadow="sm" padding="md" style={{ marginBottom: spacing.md }}>
+                  <Flex align="center" justify="between" gap="3" wrap="wrap">
+                    <GumroadText level="body-sm" as="p" style={{ margin: 0 }}>
+                      {t('assessmentForm.draftRestored', { step: restoredStep + 1, total: steps.length })}
+                    </GumroadText>
+                    <GumroadButton
+                      variant="secondary"
+                      size="sm"
+                      onClick={async () => {
+                        await clearDraft();
+                        window.location.reload();
+                      }}
+                    >
+                      {t('assessmentForm.startOver')}
+                    </GumroadButton>
+                  </Flex>
+                </GumroadCard>
+              )}
               <GumroadStepper
                 steps={steps}
                 current={currentStep}

@@ -1,0 +1,18 @@
+import fs from 'node:fs'; import { createRequire } from 'node:module';
+const { chromium } = createRequire(import.meta.url)('playwright');
+const s = JSON.parse(fs.readFileSync(new URL('session.json', import.meta.url)));
+await fetch('http://localhost:3000/api/drafts/sensory_assessment', { method: 'DELETE', headers: { Authorization: `Bearer ${s.access_token}` } });
+const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, locale: 'pt-BR' });
+await ctx.addInitScript((x) => localStorage.setItem('sb-127-auth-token', JSON.stringify(x)), s);
+const p = await ctx.newPage(); await p.goto('http://localhost:5173/assessment/new', { waitUntil: 'networkidle' });
+await p.getByText('Léo Souza', { exact: true }).first().click();
+await p.getByRole('button', { name: /^Próximo/ }).click();
+const inputs = await p.locator('input[type="text"]:visible, input:not([type]):visible').all();
+await inputs[0].fill('Dra. Júlia Lima'); await inputs[1].fill('Terapeuta ocupacional');
+await p.getByRole('button', { name: /^Próximo/ }).click(); await p.waitForTimeout(800);
+const p2 = await ctx.newPage(); await p2.goto('http://localhost:5173/assessment/new', { waitUntil: 'networkidle' });
+console.log('notice:', JSON.stringify(await p2.getByText(/continua de onde parou/).allTextContents()));
+await p2.screenshot({ path: new URL('draft-notice.png', import.meta.url).pathname });
+await p2.getByRole('button', { name: 'Começar do zero' }).click(); await p2.waitForLoadState('networkidle'); await p2.waitForTimeout(500);
+console.log('after start over:', JSON.stringify(await p2.getByText(/Etapa \d+ de \d+/).first().textContent()));
+await b.close();

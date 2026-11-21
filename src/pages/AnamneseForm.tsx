@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { apiErrorDetail } from '../utils/apiError';
 import * as React from 'react';
 import { useState, FormEvent, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
@@ -202,7 +203,8 @@ const AnamneseForm: React.FC = () => {
 
       navigate('/anamneses');
     } catch (err) {
-      setSaveError(t('p1AnamneseForm.errSave'));
+      const detail = apiErrorDetail(err);
+      setSaveError(detail ? t('p1AnamneseForm.errInvalid', { detail }) : t('p1AnamneseForm.errSave'));
       console.error(err);
     } finally {
       setSubmitting(false);
