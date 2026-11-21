@@ -152,6 +152,8 @@
     "errLoad": "Error loading logs. Please try again.",
     "photoFail": "Log saved, but the photo could not be attached. Try again from the log.",
     "offlinePhoto": "No connection — log saved on this device (the photo was not attached; add it after reconnecting)",
+    "offlineRejected_one": "1 log saved offline was rejected by the server and discarded",
+    "offlineRejected_other": "{{count}} logs saved offline were rejected by the server and discarded",
     "offline": "No connection — log saved on this device and will be sent when you reconnect",
     "removePhotoFail": "Could not remove the photo. Please try again.",
     "title": "Daily Logs",

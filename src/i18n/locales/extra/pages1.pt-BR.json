@@ -152,6 +152,8 @@
     "errLoad": "Erro ao carregar registros. Por favor, tente novamente.",
     "photoFail": "Registro salvo, mas não foi possível anexar a foto. Tente novamente pelo registro.",
     "offlinePhoto": "Sem conexão — registro salvo no aparelho (a foto não foi anexada; adicione-a depois de reconectar)",
+    "offlineRejected_one": "1 registro salvo offline foi recusado pelo servidor e descartado",
+    "offlineRejected_other": "{{count}} registros salvos offline foram recusados pelo servidor e descartados",
     "offline": "Sem conexão — registro salvo no aparelho e será enviado ao reconectar",
     "removePhotoFail": "Não foi possível remover a foto. Tente novamente.",
     "title": "Registros Diários",

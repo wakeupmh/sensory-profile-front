@@ -1,6 +1,16 @@
 import type { CreateLogPayload } from '../types/logs';
 
-export interface QueuedLog {
+/**
+ * O contexto em que o registro foi feito: só é reenviado nesse mesmo contexto.
+ * Enviado por outra conta, ou fora do modo cuidador, o servidor o recusa (a
+ * criança não é de quem chama) — e a fila travava para sempre nesse registro.
+ */
+export interface QueueOwner {
+  userId: string;
+  delegateChildId: string | null;
+}
+
+export interface QueuedLog extends Partial<QueueOwner> {
   id: string;
   payload: CreateLogPayload;
   queuedAt: string;
@@ -31,11 +41,12 @@ export function getQueuedLogs(): QueuedLog[] {
   return read();
 }
 
-export function queueLog(payload: CreateLogPayload): QueuedLog {
+export function queueLog(payload: CreateLogPayload, owner?: QueueOwner): QueuedLog {
   const entry: QueuedLog = {
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
     payload,
     queuedAt: new Date().toISOString(),
+    ...owner,
   };
   write([...read(), entry]);
   return entry;
@@ -61,4 +72,19 @@ export function isNetworkError(err: unknown): boolean {
   if (typeof err !== 'object' || err === null) return false;
   const e = err as { request?: unknown; response?: unknown };
   return !!e.request && !e.response;
+}
+
+/** Registros gravados antes de existir o dono valem para quem estiver logado. */
+export function belongsTo(entry: QueuedLog, owner: QueueOwner): boolean {
+  return (entry.userId ?? owner.userId) === owner.userId
+    && (entry.delegateChildId ?? null) === owner.delegateChildId;
+}
+
+/**
+ * O servidor respondeu e recusou de vez (400, 403, 404, 409, 422...): reenviar
+ * não muda a resposta. 401, 408 e 429 passam com o tempo, como os 5xx.
+ */
+export function isPermanentRejection(err: unknown): boolean {
+  const status = (err as { response?: { status?: number } } | null)?.response?.status;
+  return status !== undefined && status >= 400 && status < 500 && ![401, 408, 429].includes(status);
 }
