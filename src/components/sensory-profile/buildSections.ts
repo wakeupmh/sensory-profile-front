@@ -74,7 +74,7 @@ export function assessmentToFormData(assessment: RawAssessment, responses: unkno
     child: {
       name: assessment.childName || '',
       birthDate: assessment.childBirthDate || '',
-      gender: assessment.childGender || 'male',
+      gender: assessment.childGender ?? '', // ausente fica "Não informado" no relatório, nunca "Masculino"
       nationalIdentity: assessment.childNationalIdentity || '',
       otherInfo: assessment.childOtherInfo || '',
       age: assessment.childAge || 0,

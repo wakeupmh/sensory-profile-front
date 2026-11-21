@@ -10,7 +10,6 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import NotFound from '../components/NotFound';
 import { useAuthContext } from '../context/AuthContext';
 import { assessmentApi } from '../services/api';
-import { DEFAULT_INSTRUMENT_ID } from '../instruments';
 import { assessmentToFormData } from '../components/sensory-profile/buildSections';
 
 import GumroadCard from '../components/design-system/GumroadCard';
@@ -39,17 +38,9 @@ const ReportPage: React.FC = () => {
       try {
         setLoading(true);
         const token = await getToken();
-        const response = await assessmentApi.getAssessmentById(id, token);
+        const { assessment, responses } = await assessmentApi.getAssessmentById(id, token);
         if (cancelled) return;
-
-        if (response.assessment && response.responses) {
-          setFormData(assessmentToFormData(response.assessment, response.responses));
-        } else {
-          setFormData({
-            instrumentId: response.instrumentId || DEFAULT_INSTRUMENT_ID,
-            ...response,
-          });
-        }
+        setFormData(assessmentToFormData(assessment, responses));
       } catch (err: any) {
         if (cancelled) return;
         console.error('Error fetching assessment:', err);

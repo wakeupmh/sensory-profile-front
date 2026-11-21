@@ -182,8 +182,7 @@ const SensoryProfileForm: React.FC = () => {
     const fetchParent = async () => {
       try {
         const token = await getToken();
-        const response = await assessmentApi.getAssessmentById(parentId, token);
-        const assessment = response.data?.assessment ?? response.assessment ?? response;
+        const { assessment } = await assessmentApi.getAssessmentById(parentId, token);
         setParentData({ scores_json: assessment.scores_json ?? assessment.scoresJson ?? {} });
       } catch (err) {
         console.error('Error fetching parent assessment:', err);
@@ -293,41 +292,36 @@ const SensoryProfileForm: React.FC = () => {
         setLoading(true);
         setNotFound(false);
         const token = await getToken();
-        const response = await assessmentApi.getAssessmentById(id, token);
-        const responseData = response.data || response;
-
-        if (responseData.assessment && responseData.responses) {
-          const { assessment, responses } = responseData;
-          const loadedInstrumentId: string = assessment.instrumentId || DEFAULT_INSTRUMENT_ID;
-          setFormData({
-            instrumentId: loadedInstrumentId,
-            child: {
-              name: assessment.childName,
-              birthDate: assessment.childBirthDate
-                ? new Date(assessment.childBirthDate).toISOString().split('T')[0]
-                : '',
-              gender: assessment.childGender,
-              nationalIdentity: assessment.childNationalIdentity || '',
-              otherInfo: assessment.childOtherInfo || '',
-              age: assessment.childAge,
-            },
-            examiner: {
-              name: assessment.examinerName,
-              profession: assessment.examinerProfession,
-              contact: assessment.examinerContact,
-            },
-            caregiver: {
-              name: assessment.caregiverName,
-              relationship: assessment.caregiverRelationship,
-              contact: assessment.caregiverContact,
-            },
-            sections: buildAssessmentSections(getInstrument(loadedInstrumentId), assessment, responses),
-            scoresJson: assessment.scores_json ?? assessment.scoresJson ?? undefined,
-            createdAt: assessment.createdAt,
-          });
-        } else {
-          setFormData((prev) => ({ ...prev, ...responseData, instrumentId: responseData.instrumentId || DEFAULT_INSTRUMENT_ID }));
-        }
+        const { assessment, responses } = await assessmentApi.getAssessmentById(id, token);
+        const loadedInstrumentId: string = assessment.instrumentId || DEFAULT_INSTRUMENT_ID;
+        setFormData({
+          instrumentId: loadedInstrumentId,
+          child: {
+            // Editar e salvar mantém a avaliação na mesma criança.
+            selectedChildId: assessment.childId,
+            name: assessment.childName ?? '',
+            birthDate: assessment.childBirthDate
+              ? new Date(assessment.childBirthDate).toISOString().split('T')[0]
+              : '',
+            gender: assessment.childGender,
+            nationalIdentity: assessment.childNationalIdentity || '',
+            otherInfo: assessment.childOtherInfo || '',
+            age: assessment.childAge,
+          },
+          examiner: {
+            name: assessment.examinerName ?? '',
+            profession: assessment.examinerProfession ?? '',
+            contact: assessment.examinerContact ?? '',
+          },
+          caregiver: {
+            name: assessment.caregiverName ?? '',
+            relationship: assessment.caregiverRelationship ?? '',
+            contact: assessment.caregiverContact ?? '',
+          },
+          sections: buildAssessmentSections(getInstrument(loadedInstrumentId), assessment, responses),
+          scoresJson: assessment.scores_json ?? assessment.scoresJson ?? undefined,
+          createdAt: assessment.createdAt,
+        });
 
         setError(null);
         fetchedAssessmentRef.current = true;
