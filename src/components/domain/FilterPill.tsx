@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { colors, fonts } from '../../theme/tokens';
+import { colors, fonts, tapTargetStyle } from '../../theme/tokens';
 
 interface FilterPillProps {
   active: boolean;
@@ -8,11 +8,9 @@ interface FilterPillProps {
 }
 
 export const FilterPill = memo(({ active, label, onClick }: FilterPillProps) => (
-  <button
-    type="button"
-    aria-pressed={active}
-    onClick={onClick}
-    style={{
+  <button type="button" aria-pressed={active} onClick={onClick} style={tapTargetStyle}>
+    <span
+      style={{
       padding: '4px 14px',
       borderRadius: '9999px',
       border: `2px solid ${colors.ink}`,
@@ -25,8 +23,9 @@ export const FilterPill = memo(({ active, label, onClick }: FilterPillProps) => 
       fontFamily: fonts.display,
       whiteSpace: 'nowrap',
     }}
-  >
-    {label}
+    >
+      {label}
+    </span>
   </button>
 ));
 

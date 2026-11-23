@@ -71,7 +71,8 @@
     "export": "Export my data",
     "timeline": "Timeline",
     "notFound": "Child not found.",
-    "toChildren": "View my children"
+    "toChildren": "View my children",
+    "moreOptions": "More options"
   },
   "p1Common": {
     "logType": {

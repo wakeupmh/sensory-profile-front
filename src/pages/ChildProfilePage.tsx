@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Box, Flex } from '@radix-ui/themes';
+import { Box, DropdownMenu, Flex } from '@radix-ui/themes';
 import {
   ArrowLeftIcon,
   Pencil1Icon,
@@ -12,11 +12,12 @@ import {
   ActivityLogIcon,
   DownloadIcon,
   IdCardIcon,
+  DotsHorizontalIcon,
 } from '@radix-ui/react-icons';
 import { childApi, dataExportApi } from '../services/api';
 import { useAuthContext } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { colors, spacing } from '../theme/tokens';
+import { colors, spacing, tapTargetStyle } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
@@ -191,46 +192,35 @@ const ChildProfilePage = () => {
               </Box>
               {!isEditing && (
                 <Flex gap="2" wrap="wrap">
-                  <GumroadButton variant="secondary" size="sm" asChild>
-                    <Link to={`/children/${childId}/share`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                      <Share1Icon aria-hidden="true" />
-                      {t('p1Profile.share')}
-                    </Link>
-                  </GumroadButton>
-                  <GumroadButton variant="secondary" size="sm" asChild>
-                    <Link to={`/children/${childId}/caregivers`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                      <GroupIcon aria-hidden="true" />
-                      {t('p1Profile.caregivers')}
-                    </Link>
-                  </GumroadButton>
-                  <GumroadButton variant="secondary" size="sm" asChild>
-                    <Link to={`/children/${childId}/care-team`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                      <BadgeIcon aria-hidden="true" />
-                      {t('careTeam.manage.childLinkButton')}
-                    </Link>
-                  </GumroadButton>
-                  <GumroadButton variant="secondary" size="sm" asChild>
-                    <Link to={`/children/${childId}/team-notes`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                      <ChatBubbleIcon aria-hidden="true" />
-                      {t('p1Profile.teamNotes')}
-                    </Link>
-                  </GumroadButton>
-                  <GumroadButton variant="secondary" size="sm" asChild>
-                    <Link to={`/children/${childId}/access-log`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                      <ActivityLogIcon aria-hidden="true" />
-                      {t('p1Profile.accessLog')}
-                    </Link>
-                  </GumroadButton>
-                  <GumroadButton variant="secondary" size="sm" asChild>
-                    <Link to={`/children/${childId}/ficha`} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                      <IdCardIcon aria-hidden="true" />
-                      {t('p1Profile.ficha')}
-                    </Link>
-                  </GumroadButton>
-                  <GumroadButton variant="secondary" size="sm" onClick={handleStartEdit}>
+                  <GumroadButton variant="secondary" size="md" onClick={handleStartEdit}>
                     <Pencil1Icon aria-hidden="true" />
                     {t('p1Profile.edit')}
                   </GumroadButton>
+                  <DropdownMenu.Root>
+                    <DropdownMenu.Trigger>
+                      <GumroadButton variant="secondary" size="md">
+                        <DotsHorizontalIcon aria-hidden="true" />
+                        {t('p1Profile.moreOptions')}
+                      </GumroadButton>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Content align="end">
+                      {[
+                        { to: 'share', icon: <Share1Icon aria-hidden="true" />, label: t('p1Profile.share') },
+                        { to: 'caregivers', icon: <GroupIcon aria-hidden="true" />, label: t('p1Profile.caregivers') },
+                        { to: 'care-team', icon: <BadgeIcon aria-hidden="true" />, label: t('careTeam.manage.childLinkButton') },
+                        { to: 'team-notes', icon: <ChatBubbleIcon aria-hidden="true" />, label: t('p1Profile.teamNotes') },
+                        { to: 'access-log', icon: <ActivityLogIcon aria-hidden="true" />, label: t('p1Profile.accessLog') },
+                        { to: 'ficha', icon: <IdCardIcon aria-hidden="true" />, label: t('p1Profile.ficha') },
+                      ].map((item) => (
+                        <DropdownMenu.Item key={item.to} asChild style={{ minHeight: 44, gap: 8, fontSize: 15 }}>
+                          <Link to={`/children/${childId}/${item.to}`}>
+                            {item.icon}
+                            {item.label}
+                          </Link>
+                        </DropdownMenu.Item>
+                      ))}
+                    </DropdownMenu.Content>
+                  </DropdownMenu.Root>
                 </Flex>
               )}
             </Flex>
@@ -293,20 +283,23 @@ const ChildProfilePage = () => {
                   type="button"
                   aria-pressed={periodDays === days}
                   onClick={() => handlePeriodChange(days)}
-                  style={{
-                    padding: '6px 16px',
-                    border: `2px solid ${colors.ink}`,
-                    borderRadius: '9999px',
-                    cursor: 'pointer',
-                    fontFamily: 'Inter, sans-serif',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    backgroundColor: periodDays === days ? colors.ink : 'transparent',
-                    color: periodDays === days ? '#FFFEF5' : colors.ink,
-                    transition: 'background-color 0.12s ease',
-                  }}
+                  style={tapTargetStyle}
                 >
-                  {t('p1Profile.days', { count: days })}
+                  <span
+                    style={{
+                      padding: '6px 16px',
+                      border: `2px solid ${colors.ink}`,
+                      borderRadius: '9999px',
+                      fontFamily: 'Inter, sans-serif',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      backgroundColor: periodDays === days ? colors.ink : 'transparent',
+                      color: periodDays === days ? '#FFFEF5' : colors.ink,
+                      transition: 'background-color 0.12s ease',
+                    }}
+                  >
+                    {t('p1Profile.days', { count: days })}
+                  </span>
                 </button>
               ))}
             </Flex>

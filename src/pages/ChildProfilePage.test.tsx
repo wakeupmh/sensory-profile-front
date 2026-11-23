@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes, Link } from 'react-router-dom';
+import { Theme } from '@radix-ui/themes';
 import '../i18n';
 import ChildProfilePage from './ChildProfilePage';
 
@@ -24,15 +25,24 @@ vi.mock('../services/api', () => ({
   dataExportApi: {},
 }));
 
+// O posicionamento do menu (Radix Popper) observa o tamanho do gatilho; o jsdom não tem ResizeObserver.
+globalThis.ResizeObserver ??= class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
 describe('ChildProfilePage', () => {
   it('ir para outra criança com o formulário aberto não leva o formulário junto', async () => {
     render(
+      <Theme>
       <MemoryRouter initialEntries={['/children/a']}>
         <Link to="/children/b">ir para B</Link>
         <Routes>
           <Route path="/children/:childId" element={<ChildProfilePage />} />
         </Routes>
-      </MemoryRouter>,
+      </MemoryRouter>
+      </Theme>,
     );
 
     await screen.findByRole('heading', { name: 'Ana' });
@@ -43,5 +53,35 @@ describe('ChildProfilePage', () => {
 
     await screen.findByRole('heading', { name: 'Bia' });
     expect(screen.queryByDisplayValue('Ana')).not.toBeInTheDocument();
+  });
+
+  it('keeps Editar on screen and puts the other actions in one menu of 44px items', async () => {
+    const user = userEvent.setup();
+    render(
+      <Theme>
+      <MemoryRouter initialEntries={['/children/a']}>
+        <Routes>
+          <Route path="/children/:childId" element={<ChildProfilePage />} />
+        </Routes>
+      </MemoryRouter>
+      </Theme>,
+    );
+    await screen.findByRole('heading', { name: 'Ana' });
+    expect(screen.getByRole('button', { name: 'Editar' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Compartilhar' })).not.toBeInTheDocument();
+
+    screen.getByRole('button', { name: 'Mais opções' }).focus();
+    await user.keyboard('{Enter}');
+
+    const items = await screen.findAllByRole('menuitem');
+    expect(items.map((item) => [item.textContent, item.getAttribute('href')])).toEqual([
+      ['Compartilhar', '/children/a/share'],
+      ['Cuidadores', '/children/a/caregivers'],
+      ['Equipe de cuidado', '/children/a/care-team'],
+      ['Notas da equipe', '/children/a/team-notes'],
+      ['Histórico de acesso', '/children/a/access-log'],
+      ['Ficha da criança', '/children/a/ficha'],
+    ]);
+    for (const item of items) expect(item.style.minHeight).toBe('44px');
   });
 });

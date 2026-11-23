@@ -71,7 +71,8 @@
     "export": "Exportar meus dados",
     "timeline": "Linha do Tempo",
     "notFound": "Criança não encontrada.",
-    "toChildren": "Ver minhas crianças"
+    "toChildren": "Ver minhas crianças",
+    "moreOptions": "Mais opções"
   },
   "p1Common": {
     "logType": {
