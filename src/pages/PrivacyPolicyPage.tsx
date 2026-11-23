@@ -154,6 +154,15 @@ export default function PrivacyPolicyPage() {
             seu navegador. Recebe dados técnicos de acesso, como endereço IP e navegador.
           </P>
           <P>
+            <strong>Google Fonts</strong> — fontes tipográficas do site: o navegador as baixa dos
+            servidores do Google, que recebem dados técnicos de acesso, como endereço IP e navegador.
+          </P>
+          <P>
+            <strong>Sentry</strong> — monitoramento de erros, quando ativado: recebe a descrição
+            técnica de falhas do app (tipo de erro, tela e navegador), sem nome, e-mail, conteúdo
+            de formulários ou dados das crianças.
+          </P>
+          <P>
             Você também pode optar por compartilhar dados diretamente com terceiros de sua escolha
             através das funcionalidades do próprio app — por exemplo, gerar um link de relatório
             para um médico, ou convidar um profissional ou cuidador adicional para acessar os dados

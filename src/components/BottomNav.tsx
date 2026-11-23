@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useAuthContext } from '../context/AuthContext';
+import { useSignOut } from '../hooks/useSignOut';
 import { Box } from '@radix-ui/themes';
 import { ExitIcon, DotsHorizontalIcon, Cross2Icon, MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { colors, zIndex, typography, shadows } from '../theme/tokens';
@@ -15,8 +16,7 @@ import type { NavItem } from './navConfig';
 const BottomNav: React.FC = () => {
   const { t } = useTranslation();
   const location = useLocation();
-  const navigate = useNavigate();
-  const { signOut, session } = useAuthContext();
+  const { session } = useAuthContext();
   const hasCareTeamCaseload = useCareTeamCaseload();
   const belongsToClinic = useClinicMembership();
   const [moreOpen, setMoreOpen] = useState(false);
@@ -26,7 +26,7 @@ const BottomNav: React.FC = () => {
 
   const moreGroups = buildMoreGroups({ careTeam: hasCareTeamCaseload, clinics: belongsToClinic });
 
-  const handleSignOut = () => signOut().then(() => navigate('/sign-in', { replace: true }));
+  const handleSignOut = useSignOut();
 
   const tabStyle = (active: boolean): React.CSSProperties => ({
     display: 'flex',

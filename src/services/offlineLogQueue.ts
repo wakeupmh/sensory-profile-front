@@ -98,3 +98,8 @@ export function clearLogQueue(): void {
   }
   notify();
 }
+
+/** Registros desta conta que ainda não chegaram ao servidor. */
+export function countQueuedFor(userId: string): number {
+  return read().filter((entry) => (entry.userId ?? userId) === userId).length;
+}

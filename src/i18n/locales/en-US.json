@@ -27,7 +27,9 @@
     "close": "Close",
     "mainNavLabel": "Main navigation",
     "bottomNavLabel": "Bottom navigation",
-    "clinics": "Clinics"
+    "clinics": "Clinics",
+    "signOutPending_one": "1 log made offline hasn't been sent yet. Signing out now deletes it from this device. Sign out anyway?",
+    "signOutPending_other": "{{count}} logs made offline haven't been sent yet. Signing out now deletes them from this device. Sign out anyway?"
   },
   "settings": {
     "title": "Settings",

@@ -27,7 +27,9 @@
     "close": "Fechar",
     "mainNavLabel": "Navegação principal",
     "bottomNavLabel": "Navegação inferior",
-    "clinics": "Clínicas"
+    "clinics": "Clínicas",
+    "signOutPending_one": "1 registro feito sem internet ainda não foi enviado. Se sair agora, ele será apagado deste aparelho. Sair mesmo assim?",
+    "signOutPending_other": "{{count}} registros feitos sem internet ainda não foram enviados. Se sair agora, eles serão apagados deste aparelho. Sair mesmo assim?"
   },
   "settings": {
     "title": "Configurações",
