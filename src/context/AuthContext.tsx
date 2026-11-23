@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { clearHealthDataFromDevice } from '../services/deviceData';
 
 interface AuthContextValue {
   session: Session | null;
@@ -27,7 +28,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (isMounted) setIsLoaded(true);
       });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      // Sessão encerrada por outra aba ou por expiração também limpa o aparelho.
+      if (event === 'SIGNED_OUT') clearHealthDataFromDevice();
       if (isMounted) setSession(session);
     });
 
@@ -43,7 +46,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return data.session?.access_token ?? null;
   }, []);
 
-  const signOut = useCallback(() => supabase.auth.signOut().then(() => undefined), []);
+  // LGPD: ao sair, nada de saúde da criança fica no aparelho, mesmo se o
+  // servidor de autenticação estiver fora do ar.
+  const signOut = useCallback(async () => {
+    try {
+      await supabase.auth.signOut();
+    } finally {
+      clearHealthDataFromDevice();
+    }
+  }, []);
 
   const value = useMemo(() => ({ session, isLoaded, getToken, signOut }), [session, isLoaded, getToken, signOut]);
 
