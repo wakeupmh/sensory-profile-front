@@ -8,12 +8,7 @@ export default defineConfig({
     drop: ['console', 'debugger'],
   },
   plugins: [
-    react({
-      // Configuração do SWC para melhorar o desempenho
-      plugins: [
-        ['@swc/plugin-emotion', {}],
-      ],
-    }),
+    react(),
     VitePWA({
       // injectManifest (em vez do generateSW padrão) porque o service worker
       // agora também lida com notificações push (self.addEventListener em
