@@ -1,11 +1,12 @@
-import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import * as ToastPrimitive from '@radix-ui/react-toast';
-import { CheckCircledIcon, CrossCircledIcon, InfoCircledIcon, Cross2Icon } from '@radix-ui/react-icons';
+import React, { Suspense, createContext, lazy, useCallback, useContext, useMemo, useRef, useState } from 'react';
 
-type ToastKind = 'success' | 'error' | 'info';
+// A parte visual (Radix Toast e ícones) só baixa no primeiro toast: nenhuma
+// página pública mostra um, e ela pesava no primeiro carregamento de "/".
+const ToastRegion = lazy(() => import('../components/ToastRegion'));
 
-interface ToastItem {
+export type ToastKind = 'success' | 'error' | 'info';
+
+export interface ToastItem {
   id: number;
   kind: ToastKind;
   title: string;
@@ -27,12 +28,6 @@ export function useToast(): ToastApi {
   return api;
 }
 
-const KIND_ICONS: Record<ToastKind, React.ReactNode> = {
-  success: <CheckCircledIcon width={20} height={20} aria-hidden="true" />,
-  error: <CrossCircledIcon width={20} height={20} aria-hidden="true" />,
-  info: <InfoCircledIcon width={20} height={20} aria-hidden="true" />,
-};
-
 /**
  * Sistema de toasts do app, sobre o @radix-ui/react-toast: região aria-live,
  * pausa no hover/foco, dispensa por swipe e atalho F8 vêm do primitivo.
@@ -40,14 +35,17 @@ const KIND_ICONS: Record<ToastKind, React.ReactNode> = {
  * usam "background".
  */
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { t } = useTranslation();
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  // Uma vez montada, a região fica: o Viewport precisa existir para a saída
+  // animada do último toast.
+  const [regionMounted, setRegionMounted] = useState(false);
   const idRef = useRef(0);
 
   const push = useCallback((kind: ToastKind, title: string, description?: string) => {
     idRef.current += 1;
     const id = idRef.current;
     setToasts((prev) => [...prev, { id, kind, title, description }]);
+    setRegionMounted(true);
   }, []);
 
   const api = useMemo<ToastApi>(
@@ -65,34 +63,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   return (
     <ToastContext.Provider value={api}>
-      <ToastPrimitive.Provider swipeDirection="right" duration={5000}>
-        {children}
-        {toasts.map((toast) => (
-          <ToastPrimitive.Root
-            key={toast.id}
-            className="toast-root"
-            data-kind={toast.kind}
-            type={toast.kind === 'error' ? 'foreground' : 'background'}
-            onOpenChange={(open) => {
-              if (!open) remove(toast.id);
-            }}
-          >
-            {KIND_ICONS[toast.kind]}
-            <div className="toast-copy">
-              <ToastPrimitive.Title className="toast-title">{toast.title}</ToastPrimitive.Title>
-              {toast.description && (
-                <ToastPrimitive.Description className="toast-description">
-                  {toast.description}
-                </ToastPrimitive.Description>
-              )}
-            </div>
-            <ToastPrimitive.Close className="toast-close" aria-label={t('navExtra.toast.close')}>
-              <Cross2Icon width={14} height={14} aria-hidden="true" />
-            </ToastPrimitive.Close>
-          </ToastPrimitive.Root>
-        ))}
-        <ToastPrimitive.Viewport className="toast-viewport" label={t('navExtra.toast.region')} />
-      </ToastPrimitive.Provider>
+      {children}
+      {regionMounted && (
+        <Suspense fallback={null}>
+          <ToastRegion toasts={toasts} onDismiss={remove} />
+        </Suspense>
+      )}
     </ToastContext.Provider>
   );
 };

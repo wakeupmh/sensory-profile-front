@@ -79,16 +79,9 @@ export default defineConfig({
           if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/') || id.includes('node_modules/react-router-dom')) {
             return 'react-vendor';
           }
-          if (id.includes('node_modules/@radix-ui/themes') || id.includes('node_modules/@radix-ui/react-icons')) {
-            return 'radix-ui';
-          }
-          // Dependências que praticamente nunca mudam, mas que estavam
-          // misturadas ao código do app no chunk de entrada: qualquer deploy
-          // trocava o hash das três e o usuário rebaixava tudo de novo,
-          // mesmo quando só uma tela mudou.
-          if (id.includes('node_modules/@supabase/')) {
-            return 'supabase';
-          }
+          // @radix-ui/themes e @supabase/* ficam fora daqui de propósito: num
+          // chunk único, a landing baixava os componentes de todas as telas e
+          // o @supabase/auth-ui do login. Soltos, cada tela leva só o que usa.
           if (id.includes('node_modules/i18next') || id.includes('node_modules/react-i18next')) {
             return 'i18n';
           }

@@ -1,7 +1,5 @@
 import { Box, Flex, Text } from '@radix-ui/themes';
 import { useTranslation } from 'react-i18next';
-import { keyframes } from '@emotion/react';
-import styled from '@emotion/styled';
 import { colors } from '../theme/tokens';
 
 interface LoadingSpinnerProps {
@@ -10,28 +8,8 @@ interface LoadingSpinnerProps {
   text?: string;
 }
 
-const spin = keyframes`
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-`;
-
-const SpinnerContainer = styled(Box)<{ size: string; color: string }>`
-  width: ${props =>
-    props.size === 'small' ? '24px' :
-    props.size === 'large' ? '48px' : '36px'
-  };
-  height: ${props =>
-    props.size === 'small' ? '24px' :
-    props.size === 'large' ? '48px' : '36px'
-  };
-  border: ${props =>
-    props.size === 'small' ? '3px' :
-    props.size === 'large' ? '5px' : '4px'
-  } solid rgba(0, 0, 0, 0.1);
-  border-radius: 50%;
-  border-top-color: ${props => props.color};
-  animation: ${spin} 1s ease-in-out infinite;
-`;
+// Diâmetro e espessura da borda por tamanho; a rotação usa @keyframes spin do index.css.
+const dimensions = { small: [24, 3], medium: [36, 4], large: [48, 5] } as const;
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = 'medium',
@@ -41,7 +19,17 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   const { t } = useTranslation();
   return (
     <Flex direction="column" align="center" justify="center" gap="3" role="status">
-      <SpinnerContainer size={size} color={color} aria-hidden="true" />
+      <Box
+        aria-hidden="true"
+        style={{
+          width: dimensions[size][0],
+          height: dimensions[size][0],
+          border: `${dimensions[size][1]}px solid rgba(0, 0, 0, 0.1)`,
+          borderTopColor: color,
+          borderRadius: '50%',
+          animation: 'spin 1s ease-in-out infinite',
+        }}
+      />
       {text ? (
         <Text size="2" color="gray">
           {text}

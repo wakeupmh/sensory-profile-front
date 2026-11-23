@@ -7,12 +7,7 @@ import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
 import { useAuthContext } from '../context/AuthContext';
-import {
-  FileTextIcon,
-  ClipboardIcon,
-  FileIcon,
-  StarIcon,
-} from '@radix-ui/react-icons';
+import { FileTextIcon, ClipboardIcon, FileIcon, StarIcon } from '../components/publicIcons';
 
 // Alvo de toque das duas mensuras: WCAG 2.2 SC 2.5.8 pede >=24x24px CSS.
 // O texto (13px/caption) sozinho renderiza ~19px de altura — o padding

@@ -378,5 +378,38 @@
     "loadError": "Não foi possível verificar seu consentimento. Confira sua conexão e tente de novo.",
     "saveError": "Não foi possível salvar sua resposta. Confira sua conexão e tente de novo.",
     "retry": "Tentar de novo"
+  },
+  "p2Boundary": {
+    "title": "Algo deu errado",
+    "message": "Ocorreu um erro inesperado. Por favor, tente recarregar a página ou voltar para a página inicial.",
+    "reload": "Recarregar Página",
+    "home": "Voltar para Início"
+  },
+  "p2Common": {
+    "loading": "Carregando…"
+  },
+  "navExtra": {
+    "toast": {
+      "close": "Fechar notificação",
+      "region": "Notificações"
+    }
+  },
+  "p2SignIn": {
+    "appName": "Perfil Sensorial",
+    "signInLoading": "Entrando...",
+    "signUpLoading": "Criando conta...",
+    "signUpConfirmation": "Verifique seu e-mail para o link de confirmação",
+    "forgotLoading": "Enviando instruções...",
+    "forgotConfirmation": "Verifique seu e-mail para o link de redefinição de senha",
+    "updatePassword": {
+      "password": "Nova senha",
+      "placeholder": "Sua nova senha",
+      "button": "Atualizar senha",
+      "loading": "Atualizando senha...",
+      "confirmation": "Sua senha foi atualizada"
+    },
+    "privacy": "Política de privacidade",
+    "terms": "Termos de uso",
+    "backHome": "Voltar ao início"
   }
 }

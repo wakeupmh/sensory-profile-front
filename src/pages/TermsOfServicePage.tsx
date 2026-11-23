@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Box, Flex } from '@radix-ui/themes';
-import { ArrowLeftIcon } from '@radix-ui/react-icons';
+import { ArrowLeftIcon } from '../components/publicIcons';
 import { colors, spacing, typography } from '../theme/tokens';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
 

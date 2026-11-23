@@ -378,5 +378,38 @@
     "loadError": "We couldn't check your consent. Check your connection and try again.",
     "saveError": "We couldn't save your answer. Check your connection and try again.",
     "retry": "Try again"
+  },
+  "p2Boundary": {
+    "title": "Something went wrong",
+    "message": "An unexpected error occurred. Please try reloading the page or going back to the home page.",
+    "reload": "Reload Page",
+    "home": "Back to Home"
+  },
+  "p2Common": {
+    "loading": "Loading…"
+  },
+  "navExtra": {
+    "toast": {
+      "close": "Dismiss notification",
+      "region": "Notifications"
+    }
+  },
+  "p2SignIn": {
+    "appName": "Sensory Profile",
+    "signInLoading": "Signing in...",
+    "signUpLoading": "Creating account...",
+    "signUpConfirmation": "Check your email for the confirmation link",
+    "forgotLoading": "Sending instructions...",
+    "forgotConfirmation": "Check your email for the password reset link",
+    "updatePassword": {
+      "password": "New password",
+      "placeholder": "Your new password",
+      "button": "Update password",
+      "loading": "Updating password...",
+      "confirmation": "Your password has been updated"
+    },
+    "privacy": "Privacy policy",
+    "terms": "Terms of service",
+    "backHome": "Back to home"
   }
 }
