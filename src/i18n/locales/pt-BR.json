@@ -363,5 +363,20 @@
   },
   "common": {
     "select": "Selecione"
+  },
+  "consent": {
+    "title": "Antes de começar",
+    "updated": "Atualizamos a forma como cuidamos dos dados. Leia e confirme de novo para continuar.",
+    "whatWeStore": "Este app guarda informações de saúde sobre a criança: avaliações, registros do dia a dia, consultas, medicamentos, terapias e documentos.",
+    "whyWeStore": "Esses dados servem só para você registrar o acompanhamento da criança e compartilhar com as pessoas que você escolher, como cuidadores e profissionais. Você pode exportar ou apagar tudo quando quiser, em Configurações.",
+    "readMore": "Para saber mais, leia:",
+    "privacyLink": "Política de Privacidade",
+    "termsLink": "Termos de Uso",
+    "checkbox": "Sou o responsável legal pela criança e autorizo o tratamento dos dados de saúde dela conforme a Política de Privacidade",
+    "accept": "Concordar e continuar",
+    "signOut": "Sair",
+    "loadError": "Não foi possível verificar seu consentimento. Confira sua conexão e tente de novo.",
+    "saveError": "Não foi possível salvar sua resposta. Confira sua conexão e tente de novo.",
+    "retry": "Tentar de novo"
   }
 }

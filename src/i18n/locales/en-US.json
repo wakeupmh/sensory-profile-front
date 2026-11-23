@@ -363,5 +363,20 @@
   },
   "common": {
     "select": "Select"
+  },
+  "consent": {
+    "title": "Before you start",
+    "updated": "We have changed how we handle data. Please read and confirm again to continue.",
+    "whatWeStore": "This app stores health information about the child: assessments, daily logs, appointments, medications, therapies and documents.",
+    "whyWeStore": "This data is used only so you can record the child's care and share it with the people you choose, such as caregivers and professionals. You can export or delete everything at any time in Settings.",
+    "readMore": "To learn more, read:",
+    "privacyLink": "Privacy Policy",
+    "termsLink": "Terms of Use",
+    "checkbox": "I am the child's legal guardian and I authorize the processing of the child's health data under the Privacy Policy",
+    "accept": "Agree and continue",
+    "signOut": "Sign out",
+    "loadError": "We couldn't check your consent. Check your connection and try again.",
+    "saveError": "We couldn't save your answer. Check your connection and try again.",
+    "retry": "Try again"
   }
 }

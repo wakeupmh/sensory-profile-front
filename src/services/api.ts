@@ -1215,11 +1215,24 @@ export const searchApi = {
     requestData<SearchResults>('get', token, '/api/search', undefined, { params: { q: query }, signal }),
 };
 
+/** LGPD Art. 11/14: a versão do termo em vigor e a que esta conta aceitou. */
+export interface ConsentStatus {
+  currentVersion: string;
+  acceptedVersion: string | null;
+  acceptedAt: string | null;
+}
+
 // Account-wide equivalents (LGPD Art. 18): everything the account owns —
 // every child, not just one — plus anamneses, professionals and drafts,
 // which aren't linked to a specific child. Never resolves through
 // delegated caregiver access on the backend, regardless of headers sent.
 export const accountApi = {
+  getConsent: (token: string | null): Promise<ConsentStatus> =>
+    requestData<ConsentStatus>('get', token, '/api/account/consent'),
+
+  acceptConsent: (token: string | null, version: string): Promise<ConsentStatus> =>
+    requestData<ConsentStatus>('post', token, '/api/account/consent', { version }),
+
   exportAll: (token: string | null): Promise<DataExportResponse> =>
     requestData<DataExportResponse>('get', token, '/api/account/export'),
 

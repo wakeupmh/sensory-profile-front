@@ -52,6 +52,7 @@ const InviteAcceptPage = lazy(() => import('./pages/InviteAcceptPage'));
 const SharedRecordsList = lazy(() => import('./pages/SharedRecordsList'));
 const SharedAnamneseView = lazy(() => import('./pages/SharedAnamneseView'));
 const SharedAssessmentView = lazy(() => import('./pages/SharedAssessmentView'));
+const ConsentGate = lazy(() => import('./components/ConsentGate'));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
 const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage'));
 
@@ -61,7 +62,7 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 
   if (!isLoaded) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}><LoadingSpinner /></div>;
   if (!session) return <Navigate to="/sign-in" state={{ from: location }} replace />;
-  return <>{children}</>;
+  return <ConsentGate>{children}</ConsentGate>;
 }
 
 const RouteFallback = () => (
