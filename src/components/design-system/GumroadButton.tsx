@@ -5,7 +5,9 @@ import { colors, shadows, radii, typography } from '../../theme/tokens';
 type ButtonVariant = 'primary' | 'secondary' | 'on-color' | 'danger' | 'ghost';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
-interface GumroadButtonProps {
+// Os demais atributos de <button> passam direto: é o que deixa o botão servir
+// de gatilho para primitivos do Radix (asChild injeta aria-expanded, onPointerDown...).
+interface GumroadButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'color' | 'children' | 'type' | 'onClick' | 'style' | 'disabled' | 'className'> {
   children: React.ReactNode;
   variant?: ButtonVariant;
   size?: ButtonSize;
@@ -56,7 +58,7 @@ const variantMap: Record<ButtonVariant, React.CSSProperties> = {
 };
 
 const GumroadButton = React.forwardRef<HTMLButtonElement, GumroadButtonProps>(
-  ({ children, variant = 'primary', size = 'md', onClick, disabled, type = 'button', style, className, asChild, loading, 'aria-pressed': ariaPressed, 'aria-label': ariaLabel }, ref) => {
+  ({ children, variant = 'primary', size = 'md', onClick, disabled, type = 'button', style, className, asChild, loading, 'aria-pressed': ariaPressed, 'aria-label': ariaLabel, ...rest }, ref) => {
     const isDisabled = disabled || loading;
     const baseStyle: React.CSSProperties = {
       ...variantMap[variant],
@@ -79,6 +81,7 @@ const GumroadButton = React.forwardRef<HTMLButtonElement, GumroadButtonProps>(
 
     return (
       <Button
+        {...rest}
         ref={ref}
         type={type}
         onClick={onClick}

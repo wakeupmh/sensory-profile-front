@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
 import { Box, Flex } from '@radix-ui/themes';
-import { ArrowLeftIcon } from '@radix-ui/react-icons';
+import { ArrowLeftIcon } from '../components/publicIcons';
 import { colors, spacing, typography } from '../theme/tokens';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
 
-const LAST_UPDATED = '9 de julho de 2026';
+const LAST_UPDATED = '23 de novembro de 2026';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -144,6 +144,23 @@ export default function PrivacyPolicyPage() {
             conforme a região da AWS configurada para esta aplicação — o que constitui uma
             transferência internacional de dados (Art. 33 da LGPD), amparada pelas cláusulas
             contratuais padrão da AWS.
+          </P>
+          <P>
+            <strong>Render</strong> — servidor da aplicação: hospeda a API que recebe e processa os
+            dados que você registra no app.
+          </P>
+          <P>
+            <strong>Vercel</strong> — hospedagem do site: entrega as páginas e os arquivos do app ao
+            seu navegador. Recebe dados técnicos de acesso, como endereço IP e navegador.
+          </P>
+          <P>
+            <strong>Google Fonts</strong> — fontes tipográficas do site: o navegador as baixa dos
+            servidores do Google, que recebem dados técnicos de acesso, como endereço IP e navegador.
+          </P>
+          <P>
+            <strong>Sentry</strong> — monitoramento de erros, quando ativado: recebe a descrição
+            técnica de falhas do app (tipo de erro, tela e navegador), sem nome, e-mail, conteúdo
+            de formulários ou dados das crianças.
           </P>
           <P>
             Você também pode optar por compartilhar dados diretamente com terceiros de sua escolha

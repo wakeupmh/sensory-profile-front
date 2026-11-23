@@ -22,7 +22,7 @@ import GumroadButton from '../components/design-system/GumroadButton';
 import GumroadBadge from '../components/design-system/GumroadBadge';
 import GumroadHeading, { GumroadText } from '../components/design-system/GumroadHeading';
 import { DashboardSkeleton } from '../components/skeletons/PageSkeletons';
-import { NoChildrenPrompt } from '../components/domain/NoChildrenPrompt';
+import { NoChildrenPage } from '../components/domain/NoChildrenPrompt';
 
 interface Assessment {
   id: string;
@@ -141,6 +141,17 @@ const Home = () => {
   }, [assessments, instrumentFilter]);
 
   const visibleAssessments = isList ? filteredAssessments : filteredAssessments.slice(0, RECENT_LIMIT);
+
+  // Sem criança não há avaliação a fazer: o único passo é cadastrar uma.
+  if (!loading && !error && children.length === 0) {
+    return (
+      <NoChildrenPage
+        title={isList ? t('dashboard.title') : t('nav.dashboard')}
+        subtitle={isList ? t('dashboard.subtitle') : t('home.subtitle')}
+        description={t('home.noChildrenDescription')}
+      />
+    );
+  }
 
   return (
     <Box>
@@ -364,8 +375,6 @@ const Home = () => {
             </GumroadButton>
           </Flex>
         </GumroadCard>
-      ) : children.length === 0 ? (
-        <NoChildrenPrompt description={t('home.noChildrenDescription')} />
       ) : assessments.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">

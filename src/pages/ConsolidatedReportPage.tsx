@@ -6,7 +6,7 @@ import { ArrowLeftIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { consolidatedReportApi } from '../services/api';
 import type { ConsolidatedSummary } from '../types/consolidatedReport';
 import { useAuthContext } from '../context/AuthContext';
-import { colors, fonts, shadows, spacing } from '../theme/tokens';
+import { colors, fonts, shadows, spacing, tapTargetStyle } from '../theme/tokens';
 import LoadingSpinner from '../components/LoadingSpinner';
 import GumroadCard from '../components/design-system/GumroadCard';
 import GumroadButton from '../components/design-system/GumroadButton';
@@ -100,20 +100,23 @@ const ConsolidatedReportPage = () => {
             type="button"
             aria-pressed={periodDays === days}
             onClick={() => handlePeriodChange(days)}
-            style={{
-              background: periodDays === days ? colors.ink : colors.canvas,
-              color: periodDays === days ? colors.canvas : colors.ink,
-              border: `2px solid ${colors.ink}`,
-              borderRadius: '9999px',
-              padding: '4px 14px',
-              fontSize: '0.82rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              boxShadow: periodDays === days ? 'none' : shadows.input,
-              fontFamily: fonts.display,
-            }}
+            style={tapTargetStyle}
           >
-            {t('p1Consolidated.days', { count: days })}
+            <span
+              style={{
+                background: periodDays === days ? colors.ink : colors.canvas,
+                color: periodDays === days ? colors.canvas : colors.ink,
+                border: `2px solid ${colors.ink}`,
+                borderRadius: '9999px',
+                padding: '4px 14px',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                boxShadow: periodDays === days ? 'none' : shadows.input,
+                fontFamily: fonts.display,
+              }}
+            >
+              {t('p1Consolidated.days', { count: days })}
+            </span>
           </button>
         ))}
       </div>

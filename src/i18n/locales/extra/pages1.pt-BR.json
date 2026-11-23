@@ -71,7 +71,8 @@
     "export": "Exportar meus dados",
     "timeline": "Linha do Tempo",
     "notFound": "Criança não encontrada.",
-    "toChildren": "Ver minhas crianças"
+    "toChildren": "Ver minhas crianças",
+    "moreOptions": "Mais opções"
   },
   "p1Common": {
     "logType": {
@@ -89,7 +90,6 @@
     "edit": "Editar",
     "loading": "Carregando...",
     "all": "Todos",
-    "toChildren": "Ir para Minhas Crianças",
     "removePhoto": "Remover foto",
     "goalDomain": {
       "comunicacao": "Comunicação",
@@ -144,8 +144,7 @@
       "relatorio": "Relatório escolar",
       "outro": "Outro"
     },
-    "manage": "Gerenciar",
-    "noChildTitle": "Cadastre uma criança para começar"
+    "manage": "Gerenciar"
   },
   "p1Logs": {
     "all": "Todos",
@@ -165,8 +164,6 @@
     "emptyTitle": "Nenhum registro encontrado",
     "emptyBody": "Registre comportamentos, humor, sono e alimentação",
     "logNow": "Registrar agora",
-    "noChildTitle": "Cadastre uma criança para começar",
-    "noChildBody": "Os registros diários ficam vinculados a uma criança.",
     "photoAlt": "Foto do registro",
     "newLog": "Novo registro"
   },
@@ -191,8 +188,6 @@
     "title": "Relato do Dia",
     "subtitle": "Conte em voz alta como foi o dia — nós transcrevemos e organizamos",
     "loadingReports": "Carregando relatos...",
-    "noChildTitle": "Cadastre uma criança para começar",
-    "noChildBody": "O relato do dia fica vinculado a uma criança.",
     "emptyTitle": "Nenhum relato ainda",
     "emptyBody": "Grave um áudio de dois minutos contando como foi o dia. É mais rápido que digitar.",
     "recordToday": "Gravar o relato de hoje",
@@ -267,8 +262,6 @@
     "domain": "Domínio:",
     "status": "Status:",
     "all": "Todos",
-    "noChildTitle": "Cadastre uma criança para começar",
-    "noChildBody": "As metas terapêuticas ficam vinculadas a uma criança.",
     "emptyTitle": "Nenhuma meta cadastrada",
     "emptyBody": "Crie a primeira meta terapêutica para acompanhar o progresso",
     "createFirst": "Criar primeira meta"
@@ -425,8 +418,7 @@
     "subtitle": "Marcos do desenvolvimento e registros de comunicação",
     "milestones": "Marcos do Desenvolvimento",
     "commLogs": "Registros de Comunicação",
-    "empty": "Nenhum registro",
-    "noChildBody": "Marcos e registros de comunicação ficam vinculados a uma criança."
+    "empty": "Nenhum registro"
   },
   "p1Education": {
     "title": "Educação",
@@ -435,8 +427,7 @@
     "plans": "Planos Educacionais",
     "comms": "Comunicações com a Escola",
     "noPlans": "Nenhum plano cadastrado",
-    "noComms": "Nenhuma comunicação registrada",
-    "noChildBody": "Planos educacionais e comunicações com a escola ficam vinculados a uma criança."
+    "noComms": "Nenhuma comunicação registrada"
   },
   "p1Documents": {
     "errLoad": "Erro ao carregar documentos. Por favor, tente novamente.",
@@ -448,7 +439,6 @@
     "subtitle": "Exames, laudos, fotos e vídeos da criança",
     "expiring_one": "{{count}} documento vencido ou vencendo em breve",
     "expiring_other": "{{count}} documentos vencidos ou vencendo em breve",
-    "noChildBody": "Os documentos ficam vinculados a uma criança.",
     "selectChild": "Selecione uma criança para ver os documentos",
     "empty": "Nenhum documento enviado ainda",
     "deleteTitle": "Excluir documento",

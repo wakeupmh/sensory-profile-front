@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AlertDialog, Box, Flex } from '@radix-ui/themes';
 import {
@@ -19,6 +18,7 @@ import { useDomainPage } from '../hooks/useDomainPage';
 import { useDomainResource } from '../hooks/useDomainResource';
 import { useToast } from '../context/ToastContext';
 import { ChildSelector } from '../components/domain/ChildSelector';
+import { NoChildrenPage } from '../components/domain/NoChildrenPrompt';
 import { ErrorState } from '../components/domain/ErrorState';
 import { colors, spacing, shadows, radii, fonts } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
@@ -326,6 +326,10 @@ export default function DailyReportPage() {
 
   const todaysReport = reports.find((r) => r.reportDate === todayLocal());
 
+
+  if (childrenLoaded && !childrenError && children.length === 0) {
+    return <NoChildrenPage title={t('p1Daily.title')} subtitle={t('p1Daily.subtitle')} />;
+  }
   return (
     <Box>
       <Box mb="6">
@@ -347,24 +351,7 @@ export default function DailyReportPage() {
         <ErrorState message={error} onRetry={fetchReports} retryLabel={t('p1Common.retry')} />
       ) : childrenError ? (
         <ErrorState message={childrenError} onRetry={reloadChildren} />
-      ) : !childrenLoaded ? null : children.length === 0 ? (
-        <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
-          <Flex direction="column" align="center" gap="4">
-            <InfoCircledIcon width={40} height={40} aria-hidden="true" />
-            <Box>
-              <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
-                {t('p1Daily.noChildTitle')}
-              </GumroadHeading>
-              <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-                {t('p1Daily.noChildBody')}
-              </GumroadText>
-            </Box>
-            <GumroadButton variant="primary" size="md" asChild>
-              <Link to="/children" style={{ textDecoration: 'none' }}>{t('p1Common.toChildren')}</Link>
-            </GumroadButton>
-          </Flex>
-        </GumroadCard>
-      ) : reports.length === 0 ? (
+      ) : !childrenLoaded ? null : reports.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">
             <InfoCircledIcon width={40} height={40} aria-hidden="true" />

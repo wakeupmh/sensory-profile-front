@@ -11,6 +11,9 @@ async function call(method, path, body) {
 const day = (d, h = 12) => { const x = new Date(); x.setDate(x.getDate() - d); x.setHours(h, 0, 0, 0); return x.toISOString(); };
 const scale = ['quase nunca', 'ocasionalmente', 'metade do tempo', 'frequentemente', 'quase sempre'];
 
+// The seeded parent has already agreed to the health-data terms; the first-run checks use a new user.
+const { currentVersion } = await call('GET', '/api/account/consent');
+await call('POST', '/api/account/consent', { version: currentVersion });
 const ana = await call('POST', '/api/children', { name: 'Ana Souza', birthDate: '2019-05-10', gender: 'female' });
 const leo = await call('POST', '/api/children', { name: 'Léo Souza', birthDate: '2022-02-03', gender: 'male' });
 await call('POST', '/api/assessments', {

@@ -224,8 +224,7 @@
     }
   },
   "p2Common": {
-    "allChildren": "Todas as crianças",
-    "loading": "Carregando…"
+    "allChildren": "Todas as crianças"
   },
   "p2Therapy": {
     "types": {
@@ -347,24 +346,6 @@
       "confirm": "Excluir permanentemente",
       "error": "Não foi possível excluir a conta agora. Tente novamente."
     }
-  },
-  "p2SignIn": {
-    "appName": "Perfil Sensorial",
-    "signInLoading": "Entrando...",
-    "signUpLoading": "Criando conta...",
-    "signUpConfirmation": "Verifique seu e-mail para o link de confirmação",
-    "forgotLoading": "Enviando instruções...",
-    "forgotConfirmation": "Verifique seu e-mail para o link de redefinição de senha",
-    "updatePassword": {
-      "password": "Nova senha",
-      "placeholder": "Sua nova senha",
-      "button": "Atualizar senha",
-      "loading": "Atualizando senha...",
-      "confirmation": "Sua senha foi atualizada"
-    },
-    "privacy": "Política de privacidade",
-    "terms": "Termos de uso",
-    "backHome": "Voltar ao início"
   },
   "p2Sharing": {
     "token": {
@@ -493,12 +474,6 @@
       "cancel": "Cancelar",
       "saveError": "Não foi possível salvar o lembrete. Tente novamente."
     }
-  },
-  "p2Boundary": {
-    "title": "Algo deu errado",
-    "message": "Ocorreu um erro inesperado. Por favor, tente recarregar a página ou voltar para a página inicial.",
-    "reload": "Recarregar Página",
-    "home": "Voltar para Início"
   },
   "p2Team": {
     "back": "Voltar",

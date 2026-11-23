@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthContext } from '../context/AuthContext';
+import { useSignOut } from '../hooks/useSignOut';
 import { Box, Flex } from '@radix-ui/themes';
 import { ExitIcon, ChevronDownIcon, MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { colors, typography, zIndex, shadows } from '../theme/tokens';
@@ -17,7 +18,7 @@ const Menu: React.FC = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
-  const { signOut, session } = useAuthContext();
+  const { session } = useAuthContext();
   const hasCareTeamCaseload = useCareTeamCaseload();
   const belongsToClinic = useClinicMembership();
   const [moreOpen, setMoreOpen] = useState(false);
@@ -26,7 +27,7 @@ const Menu: React.FC = () => {
   const moreButtonRef = useRef<HTMLButtonElement>(null);
   const moreGroups = buildMoreGroups({ careTeam: hasCareTeamCaseload, clinics: belongsToClinic });
 
-  const handleSignOut = () => signOut().then(() => navigate('/sign-in', { replace: true }));
+  const handleSignOut = useSignOut();
 
   const isActive = (item: NavItem) => isNavItemActive(location.pathname, item);
 

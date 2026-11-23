@@ -25,4 +25,22 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // O que entra no primeiro carregamento ("/", login, páginas legais). O
+    // pacote de ícones é um módulo único (~95KB com os ícones do app todo) e
+    // o cliente do Supabase só deve baixar via lib/loadSupabase.
+    files: [
+      'src/main.tsx', 'src/App.tsx', 'src/i18n/index.ts', 'src/context/*.tsx',
+      'src/components/ErrorBoundary.tsx', 'src/components/LoadingSpinner.tsx',
+      'src/components/design-system/Gumroad{Button,Card,Heading}.tsx',
+      'src/pages/{LandingPage,PrivacyPolicyPage,TermsOfServicePage,SignIn}.tsx',
+    ],
+    ignores: ['**/*.test.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        paths: [{ name: '@radix-ui/react-icons', message: 'Use src/components/publicIcons.tsx on first-load code.' }],
+        patterns: [{ regex: 'lib/supabase$', message: 'Load the client with loadSupabase() from lib/loadSupabase.' }],
+      }],
+    },
+  },
 )

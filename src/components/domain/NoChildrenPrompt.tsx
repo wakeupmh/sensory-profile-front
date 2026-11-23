@@ -36,3 +36,24 @@ export function NoChildrenPrompt({ description }: NoChildrenPromptProps) {
 }
 
 export default NoChildrenPrompt;
+
+/**
+ * Página de área sem nenhuma criança: só o título e o convite para cadastrar.
+ * Filtros, seletor, botões de criar e listas vazias não têm o que mostrar
+ * antes disso e só confundem quem acabou de chegar.
+ */
+export function NoChildrenPage({ title, subtitle, description }: { title: string; subtitle: string; description?: string }) {
+  return (
+    <Box>
+      <Box mb="6">
+        <GumroadHeading level="display-sm" as="h1" style={{ marginBottom: spacing.xs }}>
+          {title}
+        </GumroadHeading>
+        <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
+          {subtitle}
+        </GumroadText>
+      </Box>
+      <NoChildrenPrompt description={description} />
+    </Box>
+  );
+}

@@ -1,9 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
-import { supabase } from '../lib/supabase';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { loadSupabase } from '../lib/loadSupabase';
+import LoadingSpinner from '../components/LoadingSpinner';
 import { useAuthContext } from '../context/AuthContext';
 import { Box, Flex } from '@radix-ui/themes';
 import { colors, radii, typography } from '../theme/tokens';
@@ -15,6 +17,15 @@ export default function SignIn() {
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as { from?: Location })?.from?.pathname ?? '/dashboard';
+  const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    void loadSupabase().then((client) => active && setSupabase(client));
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (session) navigate(from, { replace: true });
@@ -49,7 +60,7 @@ export default function SignIn() {
             {t('auth.tagline')}
           </div>
         </div>
-        <Auth
+        {!supabase ? <LoadingSpinner /> : <Auth
           supabaseClient={supabase}
           appearance={{
             theme: ThemeSupa,
@@ -143,7 +154,7 @@ export default function SignIn() {
               },
             },
           }}
-        />
+        />}
         <Flex justify="center" gap="4" wrap="wrap" mt="4" style={{ fontSize: '13px', fontFamily: typography['body-sm'].font }}>
           <Link to="/" style={{ color: colors.ink }}>{t('p2SignIn.backHome')}</Link>
           <Link to="/privacidade" style={{ color: colors.ink }}>{t('p2SignIn.privacy')}</Link>

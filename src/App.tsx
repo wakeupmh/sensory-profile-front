@@ -1,57 +1,66 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { ReactNode, Suspense, lazy } from "react";
 import LoadingSpinner from './components/LoadingSpinner';
-import Layout from './components/Layout';
 import LandingPage from './pages/LandingPage';
 import NotFound from './components/NotFound';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useAuthContext } from './context/AuthContext';
+import { loadSupabase } from './lib/loadSupabase';
+import { loadAppStrings } from './i18n';
 
 // SignIn puxa @supabase/auth-ui-react (~5MB não empacotado) só para si —
 // nenhum visitante de "/" deveria pagar esse custo antes de clicar em
 // "Entrar". Todas as demais páginas ficam atrás de login (ou só chegam via
 // link compartilhado) e também são carregadas sob demanda.
-const SignIn = lazy(() => import('./pages/SignIn'));
-const Home = lazy(() => import('./pages/Home'));
-const SensoryProfileForm = lazy(() => import('./pages/SensoryProfile'));
-const ReportPage = lazy(() => import('./pages/ReportPage'));
-const AnamneseList = lazy(() => import('./pages/AnamneseList'));
-const AnamneseForm = lazy(() => import('./pages/AnamneseForm'));
-const AnamneseSharedView = lazy(() => import('./pages/AnamneseSharedView'));
-const Children = lazy(() => import('./pages/Children'));
-const ChildProfilePage = lazy(() => import('./pages/ChildProfilePage'));
-const LogsPage = lazy(() => import('./pages/LogsPage'));
-const DailyReportPage = lazy(() => import('./pages/DailyReportPage'));
-const TherapyPage = lazy(() => import('./pages/TherapyPage'));
-const MedicalPage = lazy(() => import('./pages/MedicalPage'));
-const DevelopmentPage = lazy(() => import('./pages/DevelopmentPage'));
-const EducationPage = lazy(() => import('./pages/EducationPage'));
-const GoalsPage = lazy(() => import('./pages/GoalsPage'));
-const GoalDetailPage = lazy(() => import('./pages/GoalDetailPage'));
-const DocumentsPage = lazy(() => import('./pages/DocumentsPage'));
-const MonthlyRecapPage = lazy(() => import('./pages/MonthlyRecapPage'));
-const FichaCriancaPage = lazy(() => import('./pages/FichaCriancaPage'));
-const SettingsPage = lazy(() => import('./pages/SettingsPage'));
-const ShareChildPage = lazy(() => import('./pages/ShareChildPage'));
-const CaregiversPage = lazy(() => import('./pages/CaregiversPage'));
-const CaregiverInviteAcceptPage = lazy(() => import('./pages/CaregiverInviteAcceptPage'));
-const CareTeamPage = lazy(() => import('./pages/CareTeamPage'));
-const CareTeamChildrenPage = lazy(() => import('./pages/CareTeamChildrenPage'));
-const CareTeamAcceptPage = lazy(() => import('./pages/CareTeamAcceptPage'));
-const ClinicsPage = lazy(() => import('./pages/ClinicsPage'));
-const ClinicAcceptPage = lazy(() => import('./pages/ClinicAcceptPage'));
-const SharedChildrenList = lazy(() => import('./pages/SharedChildrenList'));
-const SharedChildDetailPage = lazy(() => import('./pages/SharedChildDetailPage'));
-const TeamNotesPage = lazy(() => import('./pages/TeamNotesPage'));
-const AccessLogPage = lazy(() => import('./pages/AccessLogPage'));
-const ConsolidatedReportPage = lazy(() => import('./pages/ConsolidatedReportPage'));
-const ConsolidatedReportSharedView = lazy(() => import('./pages/ConsolidatedReportSharedView'));
-const ProfessionalsList = lazy(() => import('./pages/ProfessionalsList'));
-const ProfessionalForm = lazy(() => import('./pages/ProfessionalForm'));
-const InviteAcceptPage = lazy(() => import('./pages/InviteAcceptPage'));
-const SharedRecordsList = lazy(() => import('./pages/SharedRecordsList'));
-const SharedAnamneseView = lazy(() => import('./pages/SharedAnamneseView'));
-const SharedAssessmentView = lazy(() => import('./pages/SharedAssessmentView'));
+//
+// Fora da landing, toda tela é sob demanda. As telas internas baixam junto
+// (em paralelo, sem esperar uma pela outra) os textos que só elas usam; login
+// e páginas legais usam só os arquivos principais. O login já puxa o cliente
+// do Supabase.
+const page = <T,>(load: () => Promise<T>) => () => Promise.all([load(), loadAppStrings()]).then(([m]) => m);
+const SignIn = lazy(() => Promise.all([import('./pages/SignIn'), loadSupabase()]).then(([m]) => m));
+const Layout = lazy(page(() => import('./components/Layout')));
+const Home = lazy(page(() => import('./pages/Home')));
+const SensoryProfileForm = lazy(page(() => import('./pages/SensoryProfile')));
+const ReportPage = lazy(page(() => import('./pages/ReportPage')));
+const AnamneseList = lazy(page(() => import('./pages/AnamneseList')));
+const AnamneseForm = lazy(page(() => import('./pages/AnamneseForm')));
+const AnamneseSharedView = lazy(page(() => import('./pages/AnamneseSharedView')));
+const Children = lazy(page(() => import('./pages/Children')));
+const ChildProfilePage = lazy(page(() => import('./pages/ChildProfilePage')));
+const LogsPage = lazy(page(() => import('./pages/LogsPage')));
+const DailyReportPage = lazy(page(() => import('./pages/DailyReportPage')));
+const TherapyPage = lazy(page(() => import('./pages/TherapyPage')));
+const MedicalPage = lazy(page(() => import('./pages/MedicalPage')));
+const DevelopmentPage = lazy(page(() => import('./pages/DevelopmentPage')));
+const EducationPage = lazy(page(() => import('./pages/EducationPage')));
+const GoalsPage = lazy(page(() => import('./pages/GoalsPage')));
+const GoalDetailPage = lazy(page(() => import('./pages/GoalDetailPage')));
+const DocumentsPage = lazy(page(() => import('./pages/DocumentsPage')));
+const MonthlyRecapPage = lazy(page(() => import('./pages/MonthlyRecapPage')));
+const FichaCriancaPage = lazy(page(() => import('./pages/FichaCriancaPage')));
+const SettingsPage = lazy(page(() => import('./pages/SettingsPage')));
+const ShareChildPage = lazy(page(() => import('./pages/ShareChildPage')));
+const CaregiversPage = lazy(page(() => import('./pages/CaregiversPage')));
+const CaregiverInviteAcceptPage = lazy(page(() => import('./pages/CaregiverInviteAcceptPage')));
+const CareTeamPage = lazy(page(() => import('./pages/CareTeamPage')));
+const CareTeamChildrenPage = lazy(page(() => import('./pages/CareTeamChildrenPage')));
+const CareTeamAcceptPage = lazy(page(() => import('./pages/CareTeamAcceptPage')));
+const ClinicsPage = lazy(page(() => import('./pages/ClinicsPage')));
+const ClinicAcceptPage = lazy(page(() => import('./pages/ClinicAcceptPage')));
+const SharedChildrenList = lazy(page(() => import('./pages/SharedChildrenList')));
+const SharedChildDetailPage = lazy(page(() => import('./pages/SharedChildDetailPage')));
+const TeamNotesPage = lazy(page(() => import('./pages/TeamNotesPage')));
+const AccessLogPage = lazy(page(() => import('./pages/AccessLogPage')));
+const ConsolidatedReportPage = lazy(page(() => import('./pages/ConsolidatedReportPage')));
+const ConsolidatedReportSharedView = lazy(page(() => import('./pages/ConsolidatedReportSharedView')));
+const ProfessionalsList = lazy(page(() => import('./pages/ProfessionalsList')));
+const ProfessionalForm = lazy(page(() => import('./pages/ProfessionalForm')));
+const InviteAcceptPage = lazy(page(() => import('./pages/InviteAcceptPage')));
+const SharedRecordsList = lazy(page(() => import('./pages/SharedRecordsList')));
+const SharedAnamneseView = lazy(page(() => import('./pages/SharedAnamneseView')));
+const SharedAssessmentView = lazy(page(() => import('./pages/SharedAssessmentView')));
+const ConsentGate = lazy(page(() => import('./components/ConsentGate')));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
 const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage'));
 
@@ -61,7 +70,7 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 
   if (!isLoaded) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}><LoadingSpinner /></div>;
   if (!session) return <Navigate to="/sign-in" state={{ from: location }} replace />;
-  return <>{children}</>;
+  return <ConsentGate>{children}</ConsentGate>;
 }
 
 const RouteFallback = () => (

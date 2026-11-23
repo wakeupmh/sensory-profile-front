@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Box, Flex, AlertDialog } from '@radix-ui/themes';
 import { ExclamationTriangleIcon, InfoCircledIcon } from '@radix-ui/react-icons';
@@ -10,6 +9,7 @@ import { useToast } from '../context/ToastContext';
 import { useDomainPage } from '../hooks/useDomainPage';
 import { useDomainResource } from '../hooks/useDomainResource';
 import { ChildSelector } from '../components/domain/ChildSelector';
+import { NoChildrenPage } from '../components/domain/NoChildrenPrompt';
 import { ErrorState } from '../components/domain/ErrorState';
 import { colors, spacing } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
@@ -88,6 +88,10 @@ export default function DocumentsPage() {
     [documents],
   );
 
+
+  if (childrenLoaded && !childrenError && children.length === 0) {
+    return <NoChildrenPage title={t('p1Documents.title')} subtitle={t('p1Documents.subtitle')} />;
+  }
   return (
     <Box>
       <Flex justify="between" align={{ initial: 'start', sm: 'center' }} mb="6" gap="4" direction={{ initial: 'column', sm: 'row' }}>
@@ -116,23 +120,7 @@ export default function DocumentsPage() {
 
       {childrenError ? (
         <ErrorState message={childrenError} onRetry={reloadChildren} />
-      ) : !childrenLoaded ? null : children.length === 0 ? (
-        <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
-          <Flex direction="column" align="center" gap="4">
-            <Box>
-              <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
-                {t('p1Common.noChildTitle')}
-              </GumroadHeading>
-              <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-                {t('p1Documents.noChildBody')}
-              </GumroadText>
-            </Box>
-            <GumroadButton variant="primary" size="md" asChild>
-              <Link to="/children" style={{ textDecoration: 'none' }}>{t('p1Common.toChildren')}</Link>
-            </GumroadButton>
-          </Flex>
-        </GumroadCard>
-      ) : !effectiveChildId ? (
+      ) : !childrenLoaded ? null : !effectiveChildId ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <GumroadText level="body-md" as="p" style={{ opacity: 0.7 }}>
             {t('p1Documents.selectChild')}

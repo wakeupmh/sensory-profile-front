@@ -27,7 +27,9 @@
     "close": "Fechar",
     "mainNavLabel": "Navegação principal",
     "bottomNavLabel": "Navegação inferior",
-    "clinics": "Clínicas"
+    "clinics": "Clínicas",
+    "signOutPending_one": "1 registro feito sem internet ainda não foi enviado. Se sair agora, ele será apagado deste aparelho. Sair mesmo assim?",
+    "signOutPending_other": "{{count}} registros feitos sem internet ainda não foram enviados. Se sair agora, eles serão apagados deste aparelho. Sair mesmo assim?"
   },
   "settings": {
     "title": "Configurações",
@@ -363,5 +365,53 @@
   },
   "common": {
     "select": "Selecione"
+  },
+  "consent": {
+    "title": "Antes de começar",
+    "updated": "Atualizamos a forma como cuidamos dos dados. Leia e confirme de novo para continuar.",
+    "whatWeStore": "Este app guarda informações de saúde sobre a criança: avaliações, registros do dia a dia, consultas, medicamentos, terapias e documentos.",
+    "whyWeStore": "Esses dados servem só para você registrar o acompanhamento da criança e compartilhar com as pessoas que você escolher, como cuidadores e profissionais. Você pode exportar ou apagar tudo quando quiser, em Configurações.",
+    "readMore": "Para saber mais, leia:",
+    "privacyLink": "Política de Privacidade",
+    "termsLink": "Termos de Uso",
+    "checkbox": "Sou o responsável legal pela criança e autorizo o tratamento dos dados de saúde dela conforme a Política de Privacidade",
+    "accept": "Concordar e continuar",
+    "signOut": "Sair",
+    "loadError": "Não foi possível verificar seu consentimento. Confira sua conexão e tente de novo.",
+    "saveError": "Não foi possível salvar sua resposta. Confira sua conexão e tente de novo.",
+    "retry": "Tentar de novo"
+  },
+  "p2Boundary": {
+    "title": "Algo deu errado",
+    "message": "Ocorreu um erro inesperado. Por favor, tente recarregar a página ou voltar para a página inicial.",
+    "reload": "Recarregar Página",
+    "home": "Voltar para Início"
+  },
+  "p2Common": {
+    "loading": "Carregando…"
+  },
+  "navExtra": {
+    "toast": {
+      "close": "Fechar notificação",
+      "region": "Notificações"
+    }
+  },
+  "p2SignIn": {
+    "appName": "Perfil Sensorial",
+    "signInLoading": "Entrando...",
+    "signUpLoading": "Criando conta...",
+    "signUpConfirmation": "Verifique seu e-mail para o link de confirmação",
+    "forgotLoading": "Enviando instruções...",
+    "forgotConfirmation": "Verifique seu e-mail para o link de redefinição de senha",
+    "updatePassword": {
+      "password": "Nova senha",
+      "placeholder": "Sua nova senha",
+      "button": "Atualizar senha",
+      "loading": "Atualizando senha...",
+      "confirmation": "Sua senha foi atualizada"
+    },
+    "privacy": "Política de privacidade",
+    "terms": "Termos de uso",
+    "backHome": "Voltar ao início"
   }
 }

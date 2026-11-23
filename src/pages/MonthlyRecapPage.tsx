@@ -7,6 +7,7 @@ import type { DailyLog, LogType } from '../types/logs';
 import { useDomainPage } from '../hooks/useDomainPage';
 import { useDomainResource } from '../hooks/useDomainResource';
 import { ChildSelector } from '../components/domain/ChildSelector';
+import { NoChildrenPage } from '../components/domain/NoChildrenPrompt';
 import { ErrorState } from '../components/domain/ErrorState';
 import { colors, spacing, radii } from '../theme/tokens';
 import GumroadCard from '../components/design-system/GumroadCard';
@@ -27,7 +28,7 @@ const NO_LOGS: DailyLog[] = [];
 
 export default function MonthlyRecapPage() {
   const { t, i18n } = useTranslation();
-  const { children, selectedChildId, setSelectedChildId, effectiveChildId } = useDomainPage();
+  const { children, childrenLoaded, childrenError, selectedChildId, setSelectedChildId, effectiveChildId } = useDomainPage();
 
   const [monthOffset, setMonthOffset] = useState(0);
 
@@ -88,6 +89,10 @@ export default function MonthlyRecapPage() {
   const goalsWithProgress = goalsProgress.filter((g) => g.entriesInMonth > 0);
   const hasAnyActivity = totalLogs > 0 || milestonesAchieved.length > 0 || goalsProgress.length > 0;
 
+
+  if (childrenLoaded && !childrenError && children.length === 0) {
+    return <NoChildrenPage title={t('p2Recap.title')} subtitle={t('p2Recap.subtitle')} />;
+  }
   return (
     <Box style={{ maxWidth: '720px', margin: '0 auto' }}>
       <Box mb="6">

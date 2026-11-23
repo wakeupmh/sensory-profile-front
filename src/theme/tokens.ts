@@ -138,3 +138,16 @@ export function applyTypography(
     ...extra,
   };
 }
+
+// Botão de 44px de altura (alvo de toque confortável no celular) e
+// transparente, para envolver um controle visualmente menor (pílulas de
+// filtro) sem mudar o desenho dele.
+export const tapTargetStyle = {
+  minHeight: '44px',
+  padding: 0,
+  border: 'none',
+  background: 'none',
+  display: 'inline-flex',
+  alignItems: 'center',
+  cursor: 'pointer',
+} as const;

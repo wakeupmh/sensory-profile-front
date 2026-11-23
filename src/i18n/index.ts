@@ -6,28 +6,29 @@ import enUS from './locales/en-US.json';
 
 // Traduções extras por área do app (locales/extra/<área>.<idioma>.json),
 // mescladas por cima dos arquivos principais. Cada área usa chaves de topo
-// próprias, então os arquivos não colidem.
+// próprias, então os arquivos não colidem. Só as telas internas as usam, então
+// elas baixam sob demanda (loadAppStrings) e "/", login e páginas legais abrem
+// só com os arquivos principais. O que aparece antes de qualquer tela interna
+// (ErrorBoundary, LoadingSpinner, toasts) tem de estar nos arquivos principais.
 type Dict = Record<string, unknown>;
-const extras = import.meta.glob<Dict>('./locales/extra/*.json', { eager: true, import: 'default' });
+const extras = import.meta.glob<Dict>('./locales/extra/*.json', { import: 'default' });
+const loaded = new Map<string, Promise<void>>();
 
-function deepMerge(target: Dict, source: Dict): Dict {
-  for (const [key, value] of Object.entries(source)) {
-    const current = target[key];
-    if (value && typeof value === 'object' && !Array.isArray(value) && current && typeof current === 'object') {
-      deepMerge(current as Dict, value as Dict);
-    } else {
-      target[key] = value;
-    }
+function loadExtras(lang: string): Promise<void> {
+  let done = loaded.get(lang);
+  if (!done) {
+    const files = Object.entries(extras).filter(([path]) => path.endsWith(`.${lang}.json`));
+    done = Promise.all(files.map(([, load]) => load())).then((dicts) => {
+      for (const dict of dicts) i18n.addResourceBundle(lang, 'translation', dict, true, true);
+    });
+    loaded.set(lang, done);
   }
-  return target;
+  return done;
 }
 
-function withExtras(base: Dict, lang: string): Dict {
-  const merged = structuredClone(base);
-  for (const [path, dict] of Object.entries(extras)) {
-    if (path.endsWith(`.${lang}.json`)) deepMerge(merged, dict);
-  }
-  return merged;
+/** Textos das telas internas no idioma atual (e no de reserva, pt-BR). */
+export function loadAppStrings(langs: readonly string[] = [i18n.resolvedLanguage ?? 'pt-BR', 'pt-BR']): Promise<void> {
+  return Promise.all([...new Set(langs)].map(loadExtras)).then(() => undefined);
 }
 
 export const SUPPORTED_LANGUAGES = ['pt-BR', 'en-US'] as const;
@@ -38,12 +39,14 @@ i18n
   .use(initReactI18next)
   .init({
     resources: {
-      'pt-BR': { translation: withExtras(ptBR, 'pt-BR') },
-      'en-US': { translation: withExtras(enUS, 'en-US') },
+      'pt-BR': { translation: ptBR },
+      'en-US': { translation: enUS },
     },
     fallbackLng: 'pt-BR',
     supportedLngs: SUPPORTED_LANGUAGES,
     interpolation: { escapeValue: false },
+    // Re-renderiza quando loadAppStrings acrescenta textos.
+    react: { bindI18nStore: 'added' },
     detection: {
       order: ['localStorage', 'navigator'],
       caches: ['localStorage'],
@@ -55,6 +58,8 @@ i18n
 // tela e para o navegador escolher a ortografia/tradução corretas.
 i18n.on('languageChanged', (lng) => {
   document.documentElement.lang = lng;
+  // Trocar de idioma dentro do app traz os textos do novo idioma.
+  if (loaded.size > 0) void loadAppStrings([lng]);
 });
 document.documentElement.lang = i18n.language;
 

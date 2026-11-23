@@ -71,7 +71,8 @@
     "export": "Export my data",
     "timeline": "Timeline",
     "notFound": "Child not found.",
-    "toChildren": "View my children"
+    "toChildren": "View my children",
+    "moreOptions": "More options"
   },
   "p1Common": {
     "logType": {
@@ -89,7 +90,6 @@
     "edit": "Edit",
     "loading": "Loading...",
     "all": "All",
-    "toChildren": "Go to My Children",
     "removePhoto": "Remove photo",
     "goalDomain": {
       "comunicacao": "Communication",
@@ -144,8 +144,7 @@
       "relatorio": "School report",
       "outro": "Other"
     },
-    "manage": "Manage",
-    "noChildTitle": "Add a child to get started"
+    "manage": "Manage"
   },
   "p1Logs": {
     "all": "All",
@@ -165,8 +164,6 @@
     "emptyTitle": "No logs found",
     "emptyBody": "Log behavior, mood, sleep and meals",
     "logNow": "Log now",
-    "noChildTitle": "Add a child to get started",
-    "noChildBody": "Daily logs are linked to a child.",
     "photoAlt": "Log photo",
     "newLog": "New log"
   },
@@ -191,8 +188,6 @@
     "title": "Daily Report",
     "subtitle": "Tell us how the day went out loud — we transcribe and organize it",
     "loadingReports": "Loading reports...",
-    "noChildTitle": "Add a child to get started",
-    "noChildBody": "The daily report is linked to a child.",
     "emptyTitle": "No reports yet",
     "emptyBody": "Record a two-minute audio telling how the day went. It is faster than typing.",
     "recordToday": "Record today's report",
@@ -267,8 +262,6 @@
     "domain": "Domain:",
     "status": "Status:",
     "all": "All",
-    "noChildTitle": "Add a child to get started",
-    "noChildBody": "Therapy goals are linked to a child.",
     "emptyTitle": "No goals yet",
     "emptyBody": "Create the first therapy goal to track progress",
     "createFirst": "Create first goal"
@@ -425,8 +418,7 @@
     "subtitle": "Developmental milestones and communication logs",
     "milestones": "Developmental Milestones",
     "commLogs": "Communication Logs",
-    "empty": "No entries",
-    "noChildBody": "Milestones and communication logs are linked to a child."
+    "empty": "No entries"
   },
   "p1Education": {
     "title": "Education",
@@ -435,8 +427,7 @@
     "plans": "Education Plans",
     "comms": "School Communications",
     "noPlans": "No plans yet",
-    "noComms": "No communications recorded",
-    "noChildBody": "Education plans and school communications are linked to a child."
+    "noComms": "No communications recorded"
   },
   "p1Documents": {
     "errLoad": "Error loading documents. Please try again.",
@@ -448,7 +439,6 @@
     "subtitle": "Exams, reports, photos and videos of the child",
     "expiring_one": "{{count}} document expired or expiring soon",
     "expiring_other": "{{count}} documents expired or expiring soon",
-    "noChildBody": "Documents are linked to a child.",
     "selectChild": "Select a child to see the documents",
     "empty": "No documents uploaded yet",
     "deleteTitle": "Delete document",

@@ -88,3 +88,18 @@ export function isPermanentRejection(err: unknown): boolean {
   const status = (err as { response?: { status?: number } } | null)?.response?.status;
   return status !== undefined && status >= 400 && status < 500 && ![401, 408, 429].includes(status);
 }
+
+/** Apaga a fila inteira (ao sair da conta: registros de saúde não ficam no aparelho). */
+export function clearLogQueue(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // armazenamento indisponível: não há o que apagar
+  }
+  notify();
+}
+
+/** Registros desta conta que ainda não chegaram ao servidor. */
+export function countQueuedFor(userId: string): number {
+  return read().filter((entry) => (entry.userId ?? userId) === userId).length;
+}

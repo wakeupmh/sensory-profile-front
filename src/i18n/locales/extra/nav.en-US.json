@@ -7,10 +7,6 @@
       "health": "Health and therapies",
       "sharing": "Sharing",
       "account": "Account"
-    },
-    "toast": {
-      "close": "Dismiss notification",
-      "region": "Notifications"
     }
   },
   "home": {
