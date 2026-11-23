@@ -19,6 +19,12 @@ const token = await new SignJWT({ email: user.email, role: 'authenticated' })
   .setIssuer(`${BASE}/auth/v1`).setIssuedAt().setExpirationTime(exp).sign(privateKey);
 const session = { access_token: token, refresh_token: 'ux-refresh', token_type: 'bearer', expires_in: 43200, expires_at: exp, user };
 fs.writeFileSync(path.join(here, 'session.json'), JSON.stringify(session));
+// A second user with no data and no consent yet, for the first-run checks.
+const newUser = { ...user, id: '22222222-2222-4222-8222-222222222222', email: 'novo.usuario@example.com', user_metadata: { full_name: 'Pai Novo' } };
+const newUserToken = await new SignJWT({ email: newUser.email, role: 'authenticated' })
+  .setProtectedHeader({ alg: 'ES256', kid: 'ux' }).setSubject(newUser.id).setAudience('authenticated')
+  .setIssuer(`${BASE}/auth/v1`).setIssuedAt().setExpirationTime(exp).sign(privateKey);
+fs.writeFileSync(path.join(here, 'session-new-user.json'), JSON.stringify({ ...session, access_token: newUserToken, user: newUser }));
 
 http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');

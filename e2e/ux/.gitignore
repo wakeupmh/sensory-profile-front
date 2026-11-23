@@ -3,3 +3,4 @@ ids.txt
 *.log
 *.png
 shots*/
+session-new-user.json
