@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Box, Flex } from '@radix-ui/themes';
 import { milestoneApi, communicationLogApi } from '../services/api';
 import { useDomainPage } from '../hooks/useDomainPage';
 import { useDomainResource } from '../hooks/useDomainResource';
 import { ChildSelector } from '../components/domain/ChildSelector';
+import { NoChildrenPage } from '../components/domain/NoChildrenPrompt';
 import { ErrorState } from '../components/domain/ErrorState';
 import { previewItemStyle, emptyStyle } from '../components/domain/previewStyles';
 import { colors, spacing } from '../theme/tokens';
@@ -49,6 +49,10 @@ export default function DevelopmentPage() {
   const milestones = data?.milestones ?? [];
   const commLogs = data?.commLogs ?? [];
 
+
+  if (childrenLoaded && !childrenError && children.length === 0) {
+    return <NoChildrenPage title={t('p1Development.title')} subtitle={t('p1Development.subtitle')} />;
+  }
   return (
     <Box>
       {/* Header */}
@@ -83,23 +87,7 @@ export default function DevelopmentPage() {
         <ErrorState message={error} onRetry={fetchAll} retryLabel={t('p1Common.retry')} />
       ) : childrenError ? (
         <ErrorState message={childrenError} onRetry={reloadChildren} />
-      ) : !childrenLoaded ? null : children.length === 0 ? (
-        <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
-          <Flex direction="column" align="center" gap="4">
-            <Box>
-              <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
-                {t('p1Common.noChildTitle')}
-              </GumroadHeading>
-              <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-                {t('p1Development.noChildBody')}
-              </GumroadText>
-            </Box>
-            <GumroadButton variant="primary" size="md" asChild>
-              <Link to="/children" style={{ textDecoration: 'none' }}>{t('p1Common.toChildren')}</Link>
-            </GumroadButton>
-          </Flex>
-        </GumroadCard>
-      ) : (
+      ) : !childrenLoaded ? null : (
         <Flex direction="column" gap="4">
           {/* Marcos do Desenvolvimento */}
           <GumroadCard color="cream" shadow="md" padding="lg">

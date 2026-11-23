@@ -15,6 +15,7 @@ import type {
 import { useDomainPage } from '../hooks/useDomainPage';
 import { useDomainResource } from '../hooks/useDomainResource';
 import { ChildSelector } from '../components/domain/ChildSelector';
+import { NoChildrenPage } from '../components/domain/NoChildrenPrompt';
 import { FilterPill } from '../components/domain/FilterPill';
 import { ErrorState } from '../components/domain/ErrorState';
 import { colors, spacing, shadows } from '../theme/tokens';
@@ -52,7 +53,7 @@ function formatOccurredAt(iso: string, lang: string): string {
 
 export default function TherapyPage() {
   const { t, i18n } = useTranslation();
-  const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
+  const { children, childrenLoaded, childrenError, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
 
   const [filter, setFilter] = useState<FilterType>('all');
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -112,6 +113,10 @@ export default function TherapyPage() {
     return therapists.find((th) => th.id === therapistId)?.name ?? null;
   }
 
+
+  if (childrenLoaded && !childrenError && children.length === 0) {
+    return <NoChildrenPage title={t('p2Therapy.page.title')} subtitle={t('p2Therapy.page.subtitle')} />;
+  }
   return (
     <Box>
       <Flex

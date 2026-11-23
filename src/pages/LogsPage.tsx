@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Box, Flex } from '@radix-ui/themes';
 import { InfoCircledIcon, PlusIcon, UpdateIcon } from '@radix-ui/react-icons';
@@ -13,6 +12,7 @@ import { isNetworkError } from '../services/offlineLogQueue';
 import { logSummary } from '../utils/logSummary';
 import { useToast } from '../context/ToastContext';
 import { ChildSelector } from '../components/domain/ChildSelector';
+import { NoChildrenPage } from '../components/domain/NoChildrenPrompt';
 import { FilterPill } from '../components/domain/FilterPill';
 import { ErrorState } from '../components/domain/ErrorState';
 import { colors, spacing, shadows } from '../theme/tokens';
@@ -140,6 +140,10 @@ export default function LogsPage() {
     }
   };
 
+
+  if (childrenLoaded && !childrenError && children.length === 0) {
+    return <NoChildrenPage title={t('p1Logs.title')} subtitle={t('p1Logs.subtitle')} />;
+  }
   return (
     <Box>
       <Flex
@@ -196,24 +200,7 @@ export default function LogsPage() {
         <ErrorState message={error} onRetry={fetchLogs} retryLabel={t('p1Common.retry')} />
       ) : childrenError ? (
         <ErrorState message={childrenError} onRetry={reloadChildren} />
-      ) : !childrenLoaded ? null : children.length === 0 ? (
-        <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
-          <Flex direction="column" align="center" gap="4">
-            <InfoCircledIcon width={40} height={40} aria-hidden="true" />
-            <Box>
-              <GumroadHeading level="title-md" as="h3" style={{ marginBottom: spacing.xs }}>
-                {t('p1Logs.noChildTitle')}
-              </GumroadHeading>
-              <GumroadText level="body-sm" as="p" style={{ opacity: 0.7 }}>
-                {t('p1Logs.noChildBody')}
-              </GumroadText>
-            </Box>
-            <GumroadButton variant="primary" size="md" asChild>
-              <Link to="/children" style={{ textDecoration: 'none' }}>{t('p1Common.toChildren')}</Link>
-            </GumroadButton>
-          </Flex>
-        </GumroadCard>
-      ) : logs.length === 0 ? (
+      ) : !childrenLoaded ? null : logs.length === 0 ? (
         <GumroadCard color="cream" shadow="md" padding="xl" style={{ textAlign: 'center' }}>
           <Flex direction="column" align="center" gap="4">
             <InfoCircledIcon width={40} height={40} aria-hidden="true" />

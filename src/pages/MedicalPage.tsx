@@ -13,6 +13,7 @@ import type {
 import { useDomainPage } from '../hooks/useDomainPage';
 import { useDomainResource } from '../hooks/useDomainResource';
 import { ChildSelector } from '../components/domain/ChildSelector';
+import { NoChildrenPage } from '../components/domain/NoChildrenPrompt';
 import { ErrorState } from '../components/domain/ErrorState';
 import { previewItemStyle, emptyStyle } from '../components/domain/previewStyles';
 import { colors, spacing } from '../theme/tokens';
@@ -35,7 +36,7 @@ function formatDate(iso: string, lang: string): string {
 
 export default function MedicalPage() {
   const { t, i18n } = useTranslation();
-  const { children, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
+  const { children, childrenLoaded, childrenError, selectedChildId, setSelectedChildId, effectiveChildId, getTokenRef } = useDomainPage();
 
   const [medsPanelOpen, setMedsPanelOpen] = useState(false);
   const [comorbidityPanelOpen, setComorbidityPanelOpen] = useState(false);
@@ -163,6 +164,10 @@ export default function MedicalPage() {
 
   const activeMeds = medications.filter((m) => m.active);
 
+
+  if (childrenLoaded && !childrenError && children.length === 0) {
+    return <NoChildrenPage title={t('p2Medical.page.title')} subtitle={t('p2Medical.page.subtitle')} />;
+  }
   return (
     <Box>
       {/* Header */}
