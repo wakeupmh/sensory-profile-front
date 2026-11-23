@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Flex } from '@radix-ui/themes';
 import i18n from '../i18n';
+import { reportError } from '../lib/errorTracking';
 
 import GumroadCard from './design-system/GumroadCard';
 import GumroadButton from './design-system/GumroadButton';
@@ -26,6 +27,7 @@ class ErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
+    reportError(error, errorInfo.componentStack);
   }
 
   handleReset = () => {
